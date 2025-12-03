@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Spin } from "antd";
-import { useAuth } from "@/contexts/AuthContext";
+import { account } from "@/lib/appwrite";
 import { getCompanyInfo } from "@/lib/companyService";
 import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
 
@@ -14,40 +14,57 @@ import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
  */
 export default function AuthCallbackPage() {
     const router = useRouter();
-    const { user, loading } = useAuth();
+    const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        const checkOnboarding = async () => {
-            if (loading) return;
-
-            if (!user) {
-                router.push("/login");
-                return;
-            }
-
-            // Clear cached data from previous session (important for OAuth)
-            useClientStore.getState().clearCache();
-            useProductStore.getState().clearCache();
-            useInvoiceStore.getState().clearCache();
-
+        const handleOAuthCallback = async () => {
             try {
-                const companyInfo = await getCompanyInfo();
-                if (companyInfo?.name) {
-                    // Existing user with company info - go to dashboard
-                    router.push("/dashboard");
-                } else {
-                    // New user or no company info - go to onboarding
+                // Give Appwrite a moment to process the OAuth callback
+                await new Promise((resolve) => setTimeout(resolve, 500));
+
+                // Check if we have a valid session directly with Appwrite
+                const user = await account.get();
+
+                if (!user) {
+                    console.log("No user found after OAuth, redirecting to login");
+                    router.push("/login");
+                    return;
+                }
+
+                console.log("OAuth user found:", user.$id);
+
+                // Clear cached data from previous session (important for OAuth)
+                useClientStore.getState().clearCache();
+                useProductStore.getState().clearCache();
+                useInvoiceStore.getState().clearCache();
+
+                // Check if user has company info set up
+                try {
+                    const companyInfo = await getCompanyInfo();
+                    if (companyInfo?.name) {
+                        // Existing user with company info - go to dashboard
+                        console.log("Company info found, going to dashboard");
+                        router.push("/dashboard");
+                    } else {
+                        // New user or no company info - go to onboarding
+                        console.log("No company info, going to onboarding");
+                        router.push("/onboarding");
+                    }
+                } catch (error) {
+                    console.error("Error checking company info:", error);
+                    // Default to onboarding on error
                     router.push("/onboarding");
                 }
             } catch (error) {
-                console.error("Error checking company info:", error);
-                // Default to onboarding on error
-                router.push("/onboarding");
+                console.error("OAuth callback error:", error);
+                router.push("/login");
+            } finally {
+                setChecking(false);
             }
         };
 
-        checkOnboarding();
-    }, [user, loading, router]);
+        handleOAuthCallback();
+    }, [router]);
 
     return (
         <div
