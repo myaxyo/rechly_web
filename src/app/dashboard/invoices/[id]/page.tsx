@@ -305,7 +305,7 @@ export default function InvoiceDetailPage() {
                 <Divider />
 
                 <div style={{ textAlign: "right" }}>
-                    <Space orientation="vertical" align="end" size={8}>
+                    <Space direction="vertical" align="end" size={8}>
                         <div>
                             <Text type="secondary">Zwischensumme: </Text>
                             <Text

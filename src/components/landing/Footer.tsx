@@ -81,7 +81,7 @@ export default function Footer() {
                         >
                             {t("footer.product")}
                         </Text>
-                        <Space orientation="vertical" size={8}>
+                        <Space direction="vertical" size={8}>
                             <a
                                 onClick={() => router.push("/features")}
                                 style={linkStyle}
@@ -114,7 +114,7 @@ export default function Footer() {
                         >
                             {t("footer.legal")}
                         </Text>
-                        <Space orientation="vertical" size={8}>
+                        <Space direction="vertical" size={8}>
                             <a
                                 onClick={() => router.push("/impressum")}
                                 style={linkStyle}

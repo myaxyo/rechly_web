@@ -299,7 +299,7 @@ export default function Home() {
                     {t("about.description")}
                 </Paragraph>
 
-                <Space orientation="vertical" size={12}>
+                <Space direction="vertical" size={12}>
                     {aboutPoints.map((point, i) => (
                         <div
                             key={i}

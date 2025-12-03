@@ -19,6 +19,7 @@ import {
     GoogleOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 
 const { Title, Text } = Typography;
@@ -26,6 +27,7 @@ const { Title, Text } = Typography;
 export default function RegisterPage() {
     const router = useRouter();
     const { register, googleLogin } = useAuth();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
 
     const onFinish = async (values: {
@@ -36,13 +38,13 @@ export default function RegisterPage() {
         setLoading(true);
         try {
             await register(values.email, values.password, values.name);
-            message.success("Registrierung erfolgreich!");
+            message.success(t("auth.registerSuccess"));
             router.push("/onboarding");
         } catch (error: unknown) {
             const errorMessage =
                 error instanceof Error
                     ? error.message
-                    : "Registrierung fehlgeschlagen";
+                    : t("auth.registerFailed");
             message.error(errorMessage);
         } finally {
             setLoading(false);
@@ -72,9 +74,9 @@ export default function RegisterPage() {
                         level={2}
                         style={{ marginBottom: 8, color: "#1976d2" }}
                     >
-                        Konto erstellen
+                        {t("auth.createAccount")}
                     </Title>
-                    <Text type="secondary">Starten Sie mit Rechly</Text>
+                    <Text type="secondary">{t("auth.startWithRechly")}</Text>
                 </div>
 
                 <Form
@@ -86,12 +88,12 @@ export default function RegisterPage() {
                     <Form.Item
                         name="name"
                         rules={[
-                            { required: true, message: "Bitte Name eingeben" },
+                            { required: true, message: t("auth.nameRequired") },
                         ]}
                     >
                         <Input
                             prefix={<UserOutlined />}
-                            placeholder="Vollständiger Name"
+                            placeholder={t("auth.fullName")}
                         />
                     </Form.Item>
 
@@ -100,15 +102,18 @@ export default function RegisterPage() {
                         rules={[
                             {
                                 required: true,
-                                message: "Bitte E-Mail eingeben",
+                                message: t("auth.emailRequired"),
                             },
                             {
                                 type: "email",
-                                message: "Ungültige E-Mail-Adresse",
+                                message: t("auth.emailInvalid"),
                             },
                         ]}
                     >
-                        <Input prefix={<MailOutlined />} placeholder="E-Mail" />
+                        <Input
+                            prefix={<MailOutlined />}
+                            placeholder={t("auth.email")}
+                        />
                     </Form.Item>
 
                     <Form.Item
@@ -116,14 +121,14 @@ export default function RegisterPage() {
                         rules={[
                             {
                                 required: true,
-                                message: "Bitte Passwort eingeben",
+                                message: t("auth.passwordRequired"),
                             },
-                            { min: 8, message: "Mindestens 8 Zeichen" },
+                            { min: 8, message: t("auth.passwordMin") },
                         ]}
                     >
                         <Input.Password
                             prefix={<LockOutlined />}
-                            placeholder="Passwort"
+                            placeholder={t("auth.password")}
                         />
                     </Form.Item>
 
@@ -133,7 +138,7 @@ export default function RegisterPage() {
                         rules={[
                             {
                                 required: true,
-                                message: "Bitte Passwort bestätigen",
+                                message: t("auth.confirmPasswordRequired"),
                             },
                             ({ getFieldValue }) => ({
                                 validator(_, value) {
@@ -144,9 +149,7 @@ export default function RegisterPage() {
                                         return Promise.resolve();
                                     }
                                     return Promise.reject(
-                                        new Error(
-                                            "Die Passwörter stimmen nicht überein"
-                                        )
+                                        new Error(t("auth.passwordMismatch"))
                                     );
                                 },
                             }),
@@ -154,7 +157,7 @@ export default function RegisterPage() {
                     >
                         <Input.Password
                             prefix={<LockOutlined />}
-                            placeholder="Passwort bestätigen"
+                            placeholder={t("auth.confirmPassword")}
                         />
                     </Form.Item>
 
@@ -165,15 +168,15 @@ export default function RegisterPage() {
                             block
                             loading={loading}
                         >
-                            Registrieren
+                            {t("auth.register")}
                         </Button>
                     </Form.Item>
                 </Form>
 
-                <Divider>oder</Divider>
+                <Divider>{t("auth.or")}</Divider>
 
                 <Space
-                    orientation="vertical"
+                    direction="vertical"
                     style={{ width: "100%" }}
                     size="middle"
                 >
@@ -183,15 +186,15 @@ export default function RegisterPage() {
                         size="large"
                         onClick={googleLogin}
                     >
-                        Mit Google registrieren
+                        {t("auth.registerWithGoogle")}
                     </Button>
                 </Space>
 
                 <div style={{ textAlign: "center", marginTop: 24 }}>
                     <Text type="secondary">
-                        Bereits ein Konto?{" "}
+                        {t("auth.hasAccount")}{" "}
                         <Link href="/login" style={{ color: "#1976d2" }}>
-                            Jetzt anmelden
+                            {t("auth.signInNow")}
                         </Link>
                     </Text>
                 </div>

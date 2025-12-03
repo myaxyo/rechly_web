@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             useClientStore.getState().clearCache();
             useProductStore.getState().clearCache();
             useInvoiceStore.getState().clearCache();
-            
+
             await loginWithEmail(email, password);
             const currentUser = await getCurrentUser();
             setUser(currentUser);
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             useClientStore.getState().clearCache();
             useProductStore.getState().clearCache();
             useInvoiceStore.getState().clearCache();
-            
+
             await createAnonymousSession();
             const currentUser = await getCurrentUser();
             setUser(currentUser);

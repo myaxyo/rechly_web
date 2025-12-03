@@ -421,7 +421,7 @@ export default function InvoiceCreatePage() {
                         <Divider />
 
                         <div style={{ textAlign: "right" }}>
-                            <Space orientation="vertical" align="end">
+                            <Space direction="vertical" align="end">
                                 <Text>
                                     Zwischensumme:{" "}
                                     <Text strong>
@@ -506,7 +506,7 @@ export default function InvoiceCreatePage() {
 
                         <Card size="small" style={{ background: "#f5f5f5" }}>
                             <Space
-                                orientation="vertical"
+                                direction="vertical"
                                 style={{ width: "100%" }}
                             >
                                 <div>

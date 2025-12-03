@@ -24,6 +24,7 @@ import {
     ArrowRightOutlined,
 } from "@ant-design/icons";
 import { useInvoiceStore, useClientStore, useProductStore } from "@/store";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { getCompanyInfo } from "@/lib/companyService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
@@ -31,24 +32,25 @@ import type { UserCompany } from "@/types";
 
 const { Title, Text } = Typography;
 
-const statusColors: Record<string, string> = {
-    draft: "default",
-    sent: "processing",
-    paid: "success",
-    cancelled: "error",
-};
-
-const statusLabels: Record<string, string> = {
-    draft: "Entwurf",
-    sent: "Versendet",
-    paid: "Bezahlt",
-    cancelled: "Storniert",
-};
-
 export default function DashboardPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [company, setCompany] = useState<UserCompany | null>(null);
     const [companyLoading, setCompanyLoading] = useState(true);
+
+    const statusColors: Record<string, string> = {
+        draft: "default",
+        sent: "processing",
+        paid: "success",
+        cancelled: "error",
+    };
+
+    const statusLabels: Record<string, string> = {
+        draft: t("status.draft"),
+        sent: t("status.sent"),
+        paid: t("status.paid"),
+        cancelled: t("status.cancelled"),
+    };
 
     // Zustand stores
     const {
@@ -114,12 +116,10 @@ export default function DashboardPage() {
             <div style={{ marginBottom: 24 }}>
                 <Title level={3} style={{ marginBottom: 4 }}>
                     {company
-                        ? `Willkommen, ${company.name}`
-                        : "Willkommen bei Rechly"}
+                        ? `${t("dashboard.welcome")}, ${company.name}`
+                        : t("dashboard.welcomeDefault")}
                 </Title>
-                <Text type="secondary">
-                    Hier ist Ihre Geschäftsübersicht auf einen Blick
-                </Text>
+                <Text type="secondary">{t("dashboard.overview")}</Text>
             </div>
 
             {/* Statistics Cards */}
@@ -130,7 +130,7 @@ export default function DashboardPage() {
                         onClick={() => router.push("/dashboard/invoices")}
                     >
                         <Statistic
-                            title="Rechnungen"
+                            title={t("dashboard.invoices")}
                             value={stats?.total ?? 0}
                             prefix={
                                 <FileTextOutlined
@@ -146,7 +146,7 @@ export default function DashboardPage() {
                         onClick={() => router.push("/dashboard/clients")}
                     >
                         <Statistic
-                            title="Kunden"
+                            title={t("dashboard.clients")}
                             value={clients.length}
                             prefix={
                                 <UserOutlined style={{ color: "#52c41a" }} />
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                         onClick={() => router.push("/dashboard/products")}
                     >
                         <Statistic
-                            title="Produkte"
+                            title={t("dashboard.products")}
                             value={products.length}
                             prefix={
                                 <ShoppingOutlined
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                 <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
-                            title="Bezahlt"
+                            title={t("dashboard.paid")}
                             value={stats?.paidAmount ?? 0}
                             precision={2}
                             prefix={
@@ -189,11 +189,11 @@ export default function DashboardPage() {
             {/* Revenue Summary */}
             <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
                 <Col xs={24} lg={12}>
-                    <Card title="Umsatzübersicht">
+                    <Card title={t("dashboard.revenueOverview")}>
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Statistic
-                                    title="Offene Beträge"
+                                    title={t("dashboard.openAmounts")}
                                     value={stats?.unpaidAmount ?? 0}
                                     precision={2}
                                     suffix="€"
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                             </Col>
                             <Col span={12}>
                                 <Statistic
-                                    title="Gesamt bezahlt"
+                                    title={t("dashboard.totalPaid")}
                                     value={stats?.paidAmount ?? 0}
                                     precision={2}
                                     suffix="€"
@@ -214,17 +214,18 @@ export default function DashboardPage() {
                             <Row gutter={8}>
                                 <Col>
                                     <Tag color="default">
-                                        {stats?.draft ?? 0} Entwürfe
+                                        {stats?.draft ?? 0}{" "}
+                                        {t("dashboard.drafts")}
                                     </Tag>
                                 </Col>
                                 <Col>
                                     <Tag color="processing">
-                                        {stats?.sent ?? 0} Versendet
+                                        {stats?.sent ?? 0} {t("dashboard.sent")}
                                     </Tag>
                                 </Col>
                                 <Col>
                                     <Tag color="success">
-                                        {stats?.paid ?? 0} Bezahlt
+                                        {stats?.paid ?? 0} {t("dashboard.paid")}
                                     </Tag>
                                 </Col>
                             </Row>
@@ -233,7 +234,7 @@ export default function DashboardPage() {
                 </Col>
                 <Col xs={24} lg={12}>
                     <Card
-                        title="Schnellaktionen"
+                        title={t("dashboard.quickActions")}
                         extra={
                             <Button
                                 type="primary"
@@ -242,7 +243,7 @@ export default function DashboardPage() {
                                     router.push("/dashboard/invoices/create")
                                 }
                             >
-                                Neue Rechnung
+                                {t("dashboard.newInvoice")}
                             </Button>
                         }
                     >
@@ -255,7 +256,7 @@ export default function DashboardPage() {
                                         router.push("/dashboard/clients")
                                     }
                                 >
-                                    Kunden verwalten
+                                    {t("dashboard.manageClients")}
                                 </Button>
                             </Col>
                             <Col span={12}>
@@ -266,7 +267,7 @@ export default function DashboardPage() {
                                         router.push("/dashboard/products")
                                     }
                                 >
-                                    Produkte verwalten
+                                    {t("dashboard.manageProducts")}
                                 </Button>
                             </Col>
                             <Col span={12}>
@@ -277,7 +278,7 @@ export default function DashboardPage() {
                                         router.push("/dashboard/invoices")
                                     }
                                 >
-                                    Alle Rechnungen
+                                    {t("dashboard.allInvoices")}
                                 </Button>
                             </Col>
                             <Col span={12}>
@@ -287,7 +288,7 @@ export default function DashboardPage() {
                                         router.push("/dashboard/settings")
                                     }
                                 >
-                                    Einstellungen
+                                    {t("dashboard.settings")}
                                 </Button>
                             </Col>
                         </Row>
@@ -297,20 +298,20 @@ export default function DashboardPage() {
 
             {/* Recent Invoices */}
             <Card
-                title="Letzte Rechnungen"
+                title={t("dashboard.recentInvoices")}
                 style={{ marginTop: 16 }}
                 extra={
                     <Button
                         type="link"
                         onClick={() => router.push("/dashboard/invoices")}
                     >
-                        Alle anzeigen <ArrowRightOutlined />
+                        {t("dashboard.showAll")} <ArrowRightOutlined />
                     </Button>
                 }
             >
                 {recentInvoices.length === 0 ? (
                     <Empty
-                        description="Keine Rechnungen vorhanden"
+                        description={t("dashboard.noInvoices")}
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                     >
                         <Button
@@ -319,11 +320,11 @@ export default function DashboardPage() {
                                 router.push("/dashboard/invoices/create")
                             }
                         >
-                            Erste Rechnung erstellen
+                            {t("dashboard.createFirst")}
                         </Button>
                     </Empty>
                 ) : (
-                    <Space orientation="vertical" style={{ width: "100%" }}>
+                    <Space direction="vertical" style={{ width: "100%" }}>
                         {recentInvoices.map((invoice) => (
                             <div
                                 key={invoice.id}
@@ -351,7 +352,9 @@ export default function DashboardPage() {
                                         <br />
                                         <Text type="secondary">
                                             {invoice.client?.name ||
-                                                "Unbekannter Kunde"}{" "}
+                                                t(
+                                                    "dashboard.unknownClient"
+                                                )}{" "}
                                             •{" "}
                                             {formatDateGerman(
                                                 invoice.issue_date

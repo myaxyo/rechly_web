@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
     Form,
@@ -12,6 +12,7 @@ import {
     message,
     Space,
     Modal,
+    Spin,
 } from "antd";
 import {
     MailOutlined,
@@ -21,14 +22,16 @@ import {
     WarningOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 
 const { Title, Text } = Typography;
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { login, googleLogin, loginAnonymously } = useAuth();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [guestLoading, setGuestLoading] = useState(false);
     const [guestModalVisible, setGuestModalVisible] = useState(false);
@@ -40,29 +43,27 @@ export default function LoginPage() {
             try {
                 const error = JSON.parse(decodeURIComponent(errorParam));
                 if (error.type === "user_already_exists") {
-                    message.info(
-                        "Ein Konto mit dieser E-Mail existiert bereits. Bitte melden Sie sich an."
-                    );
+                    message.info(t("auth.accountExists"));
                 } else {
-                    message.error(error.message || "Anmeldung fehlgeschlagen");
+                    message.error(error.message || t("auth.loginFailed"));
                 }
             } catch {
-                message.error("Anmeldung fehlgeschlagen");
+                message.error(t("auth.loginFailed"));
             }
             // Clear the error from URL
             router.replace("/login");
         }
-    }, [searchParams, router]);
+    }, [searchParams, router, t]);
 
     const onFinish = async (values: { email: string; password: string }) => {
         setLoading(true);
         try {
             await login(values.email, values.password);
-            message.success("Erfolgreich angemeldet!");
+            message.success(t("auth.loginSuccess"));
             router.push("/dashboard");
         } catch (error: unknown) {
             const errorMessage =
-                error instanceof Error ? error.message : "Login fehlgeschlagen";
+                error instanceof Error ? error.message : t("auth.loginFailed");
             message.error(errorMessage);
         } finally {
             setLoading(false);
@@ -73,13 +74,11 @@ export default function LoginPage() {
         setGuestLoading(true);
         try {
             await loginAnonymously();
-            message.success("Als Gast angemeldet!");
+            message.success(t("auth.guestSuccess"));
             router.push("/dashboard");
         } catch (error: unknown) {
             const errorMessage =
-                error instanceof Error
-                    ? error.message
-                    : "Gastanmeldung fehlgeschlagen";
+                error instanceof Error ? error.message : t("auth.guestFailed");
             message.error(errorMessage);
         } finally {
             setGuestLoading(false);
@@ -116,9 +115,7 @@ export default function LoginPage() {
                     >
                         Rechly
                     </Title>
-                    <Text type="secondary">
-                        Professionelle Rechnungsverwaltung
-                    </Text>
+                    <Text type="secondary">{t("auth.subtitle")}</Text>
                 </div>
 
                 <Form
@@ -132,15 +129,18 @@ export default function LoginPage() {
                         rules={[
                             {
                                 required: true,
-                                message: "Bitte E-Mail eingeben",
+                                message: t("auth.emailRequired"),
                             },
                             {
                                 type: "email",
-                                message: "Ungültige E-Mail-Adresse",
+                                message: t("auth.emailInvalid"),
                             },
                         ]}
                     >
-                        <Input prefix={<MailOutlined />} placeholder="E-Mail" />
+                        <Input
+                            prefix={<MailOutlined />}
+                            placeholder={t("auth.email")}
+                        />
                     </Form.Item>
 
                     <Form.Item
@@ -148,13 +148,13 @@ export default function LoginPage() {
                         rules={[
                             {
                                 required: true,
-                                message: "Bitte Passwort eingeben",
+                                message: t("auth.passwordRequired"),
                             },
                         ]}
                     >
                         <Input.Password
                             prefix={<LockOutlined />}
-                            placeholder="Passwort"
+                            placeholder={t("auth.password")}
                         />
                     </Form.Item>
 
@@ -165,15 +165,15 @@ export default function LoginPage() {
                             block
                             loading={loading}
                         >
-                            Anmelden
+                            {t("auth.login")}
                         </Button>
                     </Form.Item>
                 </Form>
 
-                <Divider>oder</Divider>
+                <Divider>{t("auth.or")}</Divider>
 
                 <Space
-                    orientation="vertical"
+                    direction="vertical"
                     style={{ width: "100%" }}
                     size="middle"
                 >
@@ -183,7 +183,7 @@ export default function LoginPage() {
                         size="large"
                         onClick={googleLogin}
                     >
-                        Mit Google anmelden
+                        {t("auth.withGoogle")}
                     </Button>
 
                     <Button
@@ -193,15 +193,15 @@ export default function LoginPage() {
                         onClick={showGuestWarning}
                         loading={guestLoading}
                     >
-                        Als Gast fortfahren
+                        {t("auth.asGuest")}
                     </Button>
                 </Space>
 
                 <div style={{ textAlign: "center", marginTop: 24 }}>
                     <Text type="secondary">
-                        Noch kein Konto?{" "}
+                        {t("auth.noAccount")}{" "}
                         <Link href="/register" style={{ color: "#1976d2" }}>
-                            Jetzt registrieren
+                            {t("auth.signUpNow")}
                         </Link>
                     </Text>
                 </div>
@@ -213,14 +213,14 @@ export default function LoginPage() {
                         <WarningOutlined
                             style={{ color: "#faad14", marginRight: 8 }}
                         />
-                        Warnung: Gastzugang
+                        {t("guest.warningTitle")}
                     </span>
                 }
                 open={guestModalVisible}
                 onOk={handleGuestLogin}
                 onCancel={() => setGuestModalVisible(false)}
-                okText="Verstanden, fortfahren"
-                cancelText="Abbrechen"
+                okText={t("guest.continue")}
+                cancelText={t("guest.cancel")}
                 okButtonProps={{ loading: guestLoading, danger: true }}
             >
                 <div style={{ padding: "16px 0" }}>
@@ -232,25 +232,47 @@ export default function LoginPage() {
                             marginBottom: 12,
                         }}
                     >
-                        Deine Daten werden gelöscht, wenn du den Tab schließt!
+                        {t("guest.warningMain")}
                     </Text>
                     <Text style={{ color: "#666" }}>
-                        Als Gast kannst du Rechly ausprobieren, aber:
+                        {t("guest.warningIntro")}
                     </Text>
                     <ul style={{ marginTop: 8, color: "#666" }}>
-                        <li>Alle Rechnungen und Kundendaten gehen verloren</li>
-                        <li>Du kannst deine Daten nicht wiederherstellen</li>
-                        <li>Du kannst später nicht auf dein Konto zugreifen</li>
+                        <li>{t("guest.warningPoint1")}</li>
+                        <li>{t("guest.warningPoint2")}</li>
+                        <li>{t("guest.warningPoint3")}</li>
                     </ul>
                     <Text
                         type="secondary"
                         style={{ display: "block", marginTop: 12 }}
                     >
-                        Für dauerhafte Nutzung empfehlen wir die Registrierung
-                        mit E-Mail oder Google.
+                        {t("guest.warningNote")}
                     </Text>
                 </div>
             </Modal>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense
+            fallback={
+                <div
+                    style={{
+                        minHeight: "100vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background:
+                            "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
+                    }}
+                >
+                    <Spin size="large" />
+                </div>
+            }
+        >
+            <LoginForm />
+        </Suspense>
     );
 }

@@ -191,7 +191,7 @@ export default function SettingsPage() {
                                     />
                                 </div>
                             )}
-                            <Space orientation="vertical">
+                            <Space direction="vertical">
                                 <Upload
                                     beforeUpload={handleLogoUpload}
                                     showUploadList={false}
@@ -380,7 +380,7 @@ export default function SettingsPage() {
                 <div>
                     <Card>
                         <Title level={5}>Kontoinformationen</Title>
-                        <Space orientation="vertical" style={{ width: "100%" }}>
+                        <Space direction="vertical" style={{ width: "100%" }}>
                             <div>
                                 <Text type="secondary">E-Mail:</Text>
                                 <br />

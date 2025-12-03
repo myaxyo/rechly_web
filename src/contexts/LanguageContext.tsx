@@ -77,6 +77,87 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Legal pages
         "legal.backToHome": "Zurück zur Startseite",
+
+        // Auth pages
+        "auth.login": "Anmelden",
+        "auth.register": "Registrieren",
+        "auth.logout": "Abmelden",
+        "auth.email": "E-Mail",
+        "auth.password": "Passwort",
+        "auth.confirmPassword": "Passwort bestätigen",
+        "auth.fullName": "Vollständiger Name",
+        "auth.loginSuccess": "Erfolgreich angemeldet!",
+        "auth.loginFailed": "Anmeldung fehlgeschlagen",
+        "auth.registerSuccess": "Registrierung erfolgreich!",
+        "auth.registerFailed": "Registrierung fehlgeschlagen",
+        "auth.guestSuccess": "Als Gast angemeldet!",
+        "auth.guestFailed": "Gastanmeldung fehlgeschlagen",
+        "auth.subtitle": "Professionelle Rechnungsverwaltung",
+        "auth.createAccount": "Konto erstellen",
+        "auth.startWithRechly": "Starten Sie mit Rechly",
+        "auth.or": "oder",
+        "auth.withGoogle": "Mit Google anmelden",
+        "auth.registerWithGoogle": "Mit Google registrieren",
+        "auth.asGuest": "Als Gast fortfahren",
+        "auth.noAccount": "Noch kein Konto?",
+        "auth.hasAccount": "Bereits ein Konto?",
+        "auth.signUpNow": "Jetzt registrieren",
+        "auth.signInNow": "Jetzt anmelden",
+        "auth.emailRequired": "Bitte E-Mail eingeben",
+        "auth.emailInvalid": "Ungültige E-Mail-Adresse",
+        "auth.passwordRequired": "Bitte Passwort eingeben",
+        "auth.passwordMin": "Mindestens 8 Zeichen",
+        "auth.confirmPasswordRequired": "Bitte Passwort bestätigen",
+        "auth.passwordMismatch": "Die Passwörter stimmen nicht überein",
+        "auth.nameRequired": "Bitte Name eingeben",
+        "auth.accountExists":
+            "Ein Konto mit dieser E-Mail existiert bereits. Bitte melden Sie sich an.",
+
+        // Guest warning
+        "guest.warningTitle": "Warnung: Gastzugang",
+        "guest.warningMain":
+            "Deine Daten werden gelöscht, wenn du den Tab schließt!",
+        "guest.warningIntro": "Als Gast kannst du Rechly ausprobieren, aber:",
+        "guest.warningPoint1": "Alle Rechnungen und Kundendaten gehen verloren",
+        "guest.warningPoint2": "Du kannst deine Daten nicht wiederherstellen",
+        "guest.warningPoint3":
+            "Du kannst später nicht auf dein Konto zugreifen",
+        "guest.warningNote":
+            "Für dauerhafte Nutzung empfehlen wir die Registrierung mit E-Mail oder Google.",
+        "guest.continue": "Verstanden, fortfahren",
+        "guest.cancel": "Abbrechen",
+
+        // Dashboard
+        "dashboard.welcome": "Willkommen",
+        "dashboard.welcomeDefault": "Willkommen bei Rechly",
+        "dashboard.overview":
+            "Hier ist Ihre Geschäftsübersicht auf einen Blick",
+        "dashboard.invoices": "Rechnungen",
+        "dashboard.clients": "Kunden",
+        "dashboard.products": "Produkte",
+        "dashboard.paid": "Bezahlt",
+        "dashboard.revenueOverview": "Umsatzübersicht",
+        "dashboard.openAmounts": "Offene Beträge",
+        "dashboard.totalPaid": "Gesamt bezahlt",
+        "dashboard.drafts": "Entwürfe",
+        "dashboard.sent": "Versendet",
+        "dashboard.quickActions": "Schnellaktionen",
+        "dashboard.newInvoice": "Neue Rechnung",
+        "dashboard.manageClients": "Kunden verwalten",
+        "dashboard.manageProducts": "Produkte verwalten",
+        "dashboard.allInvoices": "Alle Rechnungen",
+        "dashboard.settings": "Einstellungen",
+        "dashboard.recentInvoices": "Letzte Rechnungen",
+        "dashboard.showAll": "Alle anzeigen",
+        "dashboard.noInvoices": "Keine Rechnungen vorhanden",
+        "dashboard.createFirst": "Erste Rechnung erstellen",
+        "dashboard.unknownClient": "Unbekannter Kunde",
+
+        // Status
+        "status.draft": "Entwurf",
+        "status.sent": "Versendet",
+        "status.paid": "Bezahlt",
+        "status.cancelled": "Storniert",
     },
     en: {
         // Navigation
@@ -139,6 +220,85 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Legal pages
         "legal.backToHome": "Back to Home",
+
+        // Auth pages
+        "auth.login": "Sign In",
+        "auth.register": "Sign Up",
+        "auth.logout": "Sign Out",
+        "auth.email": "Email",
+        "auth.password": "Password",
+        "auth.confirmPassword": "Confirm Password",
+        "auth.fullName": "Full Name",
+        "auth.loginSuccess": "Successfully signed in!",
+        "auth.loginFailed": "Sign in failed",
+        "auth.registerSuccess": "Registration successful!",
+        "auth.registerFailed": "Registration failed",
+        "auth.guestSuccess": "Signed in as guest!",
+        "auth.guestFailed": "Guest sign in failed",
+        "auth.subtitle": "Professional Invoice Management",
+        "auth.createAccount": "Create Account",
+        "auth.startWithRechly": "Get started with Rechly",
+        "auth.or": "or",
+        "auth.withGoogle": "Sign in with Google",
+        "auth.registerWithGoogle": "Sign up with Google",
+        "auth.asGuest": "Continue as Guest",
+        "auth.noAccount": "Don't have an account?",
+        "auth.hasAccount": "Already have an account?",
+        "auth.signUpNow": "Sign up now",
+        "auth.signInNow": "Sign in now",
+        "auth.emailRequired": "Please enter your email",
+        "auth.emailInvalid": "Invalid email address",
+        "auth.passwordRequired": "Please enter your password",
+        "auth.passwordMin": "At least 8 characters",
+        "auth.confirmPasswordRequired": "Please confirm your password",
+        "auth.passwordMismatch": "Passwords do not match",
+        "auth.nameRequired": "Please enter your name",
+        "auth.accountExists":
+            "An account with this email already exists. Please sign in.",
+
+        // Guest warning
+        "guest.warningTitle": "Warning: Guest Access",
+        "guest.warningMain":
+            "Your data will be deleted when you close the tab!",
+        "guest.warningIntro": "As a guest you can try Rechly, but:",
+        "guest.warningPoint1": "All invoices and client data will be lost",
+        "guest.warningPoint2": "You cannot recover your data",
+        "guest.warningPoint3": "You cannot access your account later",
+        "guest.warningNote":
+            "For permanent use, we recommend signing up with email or Google.",
+        "guest.continue": "I understand, continue",
+        "guest.cancel": "Cancel",
+
+        // Dashboard
+        "dashboard.welcome": "Welcome",
+        "dashboard.welcomeDefault": "Welcome to Rechly",
+        "dashboard.overview": "Here's your business overview at a glance",
+        "dashboard.invoices": "Invoices",
+        "dashboard.clients": "Clients",
+        "dashboard.products": "Products",
+        "dashboard.paid": "Paid",
+        "dashboard.revenueOverview": "Revenue Overview",
+        "dashboard.openAmounts": "Open Amounts",
+        "dashboard.totalPaid": "Total Paid",
+        "dashboard.drafts": "Drafts",
+        "dashboard.sent": "Sent",
+        "dashboard.quickActions": "Quick Actions",
+        "dashboard.newInvoice": "New Invoice",
+        "dashboard.manageClients": "Manage Clients",
+        "dashboard.manageProducts": "Manage Products",
+        "dashboard.allInvoices": "All Invoices",
+        "dashboard.settings": "Settings",
+        "dashboard.recentInvoices": "Recent Invoices",
+        "dashboard.showAll": "Show all",
+        "dashboard.noInvoices": "No invoices yet",
+        "dashboard.createFirst": "Create your first invoice",
+        "dashboard.unknownClient": "Unknown Client",
+
+        // Status
+        "status.draft": "Draft",
+        "status.sent": "Sent",
+        "status.paid": "Paid",
+        "status.cancelled": "Cancelled",
     },
 };
 
