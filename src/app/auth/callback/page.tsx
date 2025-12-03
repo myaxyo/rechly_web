@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Spin } from "antd";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCompanyInfo } from "@/lib/companyService";
+import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
 
 /**
  * OAuth Callback Handler
@@ -23,6 +24,11 @@ export default function AuthCallbackPage() {
                 router.push("/login");
                 return;
             }
+
+            // Clear cached data from previous session (important for OAuth)
+            useClientStore.getState().clearCache();
+            useProductStore.getState().clearCache();
+            useInvoiceStore.getState().clearCache();
 
             try {
                 const companyInfo = await getCompanyInfo();

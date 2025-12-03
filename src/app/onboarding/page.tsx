@@ -186,7 +186,8 @@ export default function OnboardingPage() {
                 bank_name: values.bank_name,
                 bank_iban: values.iban,
                 bank_bic: values.bic,
-                payment_terms_default: "Zahlbar innerhalb von 14 Tagen ohne Abzug.",
+                payment_terms_default:
+                    "Zahlbar innerhalb von 14 Tagen ohne Abzug.",
             });
             setCurrentStep(2);
         } catch (error) {

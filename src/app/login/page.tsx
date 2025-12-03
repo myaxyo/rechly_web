@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     Form,
     Input,
@@ -27,10 +27,32 @@ const { Title, Text } = Typography;
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { login, googleLogin, loginAnonymously } = useAuth();
     const [loading, setLoading] = useState(false);
     const [guestLoading, setGuestLoading] = useState(false);
     const [guestModalVisible, setGuestModalVisible] = useState(false);
+
+    // Handle OAuth errors from URL
+    useEffect(() => {
+        const errorParam = searchParams.get("error");
+        if (errorParam) {
+            try {
+                const error = JSON.parse(decodeURIComponent(errorParam));
+                if (error.type === "user_already_exists") {
+                    message.info(
+                        "Ein Konto mit dieser E-Mail existiert bereits. Bitte melden Sie sich an."
+                    );
+                } else {
+                    message.error(error.message || "Anmeldung fehlgeschlagen");
+                }
+            } catch {
+                message.error("Anmeldung fehlgeschlagen");
+            }
+            // Clear the error from URL
+            router.replace("/login");
+        }
+    }, [searchParams, router]);
 
     const onFinish = async (values: { email: string; password: string }) => {
         setLoading(true);
