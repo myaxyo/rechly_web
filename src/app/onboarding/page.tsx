@@ -141,7 +141,7 @@ export default function OnboardingPage() {
     const checkExistingCompany = async () => {
         try {
             const companyInfo = await getCompanyInfo();
-            if (companyInfo?.company_name) {
+            if (companyInfo?.name) {
                 // Already has company info, redirect to dashboard
                 router.push("/dashboard");
                 return;
