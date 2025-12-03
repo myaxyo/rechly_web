@@ -53,6 +53,7 @@ const mapDocumentToInvoice = (doc: Record<string, unknown>): Invoice => ({
 
 /**
  * Get all invoices with client info
+ * Filters by userId attribute in Appwrite schema
  */
 export const getAllInvoices = async (): Promise<InvoiceWithClient[]> => {
     try {
@@ -62,37 +63,16 @@ export const getAllInvoices = async (): Promise<InvoiceWithClient[]> => {
             return [];
         }
 
-        // Build query - try to filter by userId if the field exists in Appwrite schema
-        const baseQueries = [Query.orderDesc("$createdAt"), Query.limit(1000)];
-
-        let response;
-        try {
-            // Try with userId filter first (if attribute exists in Appwrite)
-            response = await databases.listDocuments(
-                DATABASE_ID,
-                COLLECTIONS.INVOICES,
-                [Query.equal("userId", userId), ...baseQueries]
-            );
-        } catch (error: unknown) {
-            // If userId attribute doesn't exist, fall back to no filter
-            if (
-                error &&
-                typeof error === "object" &&
-                "code" in error &&
-                error.code === 400
-            ) {
-                console.log(
-                    "userId attribute not found in invoices schema, relying on document permissions"
-                );
-                response = await databases.listDocuments(
-                    DATABASE_ID,
-                    COLLECTIONS.INVOICES,
-                    baseQueries
-                );
-            } else {
-                throw error;
-            }
-        }
+        // Query with userId filter for data isolation
+        const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.INVOICES,
+            [
+                Query.equal("userId", userId),
+                Query.orderDesc("$createdAt"),
+                Query.limit(1000),
+            ]
+        );
 
         const invoices: InvoiceWithClient[] = [];
 
@@ -207,6 +187,7 @@ export const createInvoice = async (data: InvoiceFormData): Promise<string> => {
             COLLECTIONS.INVOICES,
             invoiceId,
             {
+                userId: userId,
                 clientId: data.client_id,
                 invoiceNumber: data.invoice_number,
                 issueDate: data.issue_date,
@@ -237,6 +218,7 @@ export const createInvoice = async (data: InvoiceFormData): Promise<string> => {
                 COLLECTIONS.INVOICE_ITEMS,
                 generateId(),
                 {
+                    userId: userId,
                     invoiceId: invoiceId,
                     productId: item.product_id || null,
                     description: item.description,

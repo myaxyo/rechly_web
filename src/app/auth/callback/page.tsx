@@ -1,39 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Spin } from "antd";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Spin, Typography } from "antd";
 import { account } from "@/lib/appwrite";
 import { getCompanyInfo } from "@/lib/companyService";
 import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
 
+const { Text } = Typography;
+
 /**
- * OAuth Callback Handler
- * Checks if new user needs onboarding (company info setup)
- * Redirects to onboarding for new users, dashboard for existing users
+ * OAuth Callback Handler Content
  */
-export default function AuthCallbackPage() {
+function CallbackContent() {
     const router = useRouter();
-    const [checking, setChecking] = useState(true);
+    const searchParams = useSearchParams();
+    const [status, setStatus] = useState("Processing OAuth callback...");
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const handleOAuthCallback = async () => {
             try {
-                // Give Appwrite a moment to process the OAuth callback
-                await new Promise((resolve) => setTimeout(resolve, 500));
-
-                // Check if we have a valid session directly with Appwrite
-                const user = await account.get();
-
-                if (!user) {
-                    console.log("No user found after OAuth, redirecting to login");
-                    router.push("/login");
+                // Log all URL params for debugging
+                const allParams = Object.fromEntries(searchParams.entries());
+                console.log("OAuth callback URL params:", allParams);
+                
+                // Check for error in URL params
+                const errorParam = searchParams.get("error");
+                if (errorParam) {
+                    console.error("OAuth error from URL:", errorParam);
+                    setError(`OAuth error: ${errorParam}`);
+                    setTimeout(() => router.push("/login"), 3000);
                     return;
                 }
 
-                console.log("OAuth user found:", user.$id);
+                setStatus("Checking session...");
+                
+                // Give Appwrite a moment to process the OAuth callback
+                await new Promise((resolve) => setTimeout(resolve, 1000));
 
-                // Clear cached data from previous session (important for OAuth)
+                // Check if we have a valid session directly with Appwrite
+                let user;
+                try {
+                    user = await account.get();
+                    console.log("Session check result:", user);
+                } catch (sessionError) {
+                    console.error("Session check failed:", sessionError);
+                    setError("No valid session found. Please try logging in again.");
+                    setTimeout(() => router.push("/login"), 3000);
+                    return;
+                }
+
+                if (!user) {
+                    console.log("No user found after OAuth");
+                    setError("No user found. Please try logging in again.");
+                    setTimeout(() => router.push("/login"), 3000);
+                    return;
+                }
+
+                console.log("OAuth user found:", user.$id, user.email);
+                setStatus(`Welcome ${user.name || user.email}! Checking setup...`);
+
+                // Clear cached data from previous session
                 useClientStore.getState().clearCache();
                 useProductStore.getState().clearCache();
                 useInvoiceStore.getState().clearCache();
@@ -42,41 +70,71 @@ export default function AuthCallbackPage() {
                 try {
                     const companyInfo = await getCompanyInfo();
                     if (companyInfo?.name) {
-                        // Existing user with company info - go to dashboard
-                        console.log("Company info found, going to dashboard");
+                        setStatus("Redirecting to dashboard...");
                         router.push("/dashboard");
                     } else {
-                        // New user or no company info - go to onboarding
-                        console.log("No company info, going to onboarding");
+                        setStatus("Redirecting to setup...");
                         router.push("/onboarding");
                     }
-                } catch (error) {
-                    console.error("Error checking company info:", error);
-                    // Default to onboarding on error
+                } catch (companyError) {
+                    console.error("Error checking company info:", companyError);
+                    setStatus("Redirecting to setup...");
                     router.push("/onboarding");
                 }
             } catch (error) {
                 console.error("OAuth callback error:", error);
-                router.push("/login");
-            } finally {
-                setChecking(false);
+                setError("An error occurred. Redirecting to login...");
+                setTimeout(() => router.push("/login"), 3000);
             }
         };
 
         handleOAuthCallback();
-    }, [router]);
+    }, [router, searchParams]);
 
     return (
         <div
             style={{
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
                 height: "100vh",
                 background: "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
+                gap: 16,
             }}
         >
             <Spin size="large" />
+            <Text style={{ color: "white", fontSize: 16 }}>
+                {error || status}
+            </Text>
         </div>
+    );
+}
+
+/**
+ * OAuth Callback Handler
+ * Wrapped in Suspense for useSearchParams
+ */
+export default function AuthCallbackPage() {
+    return (
+        <Suspense
+            fallback={
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100vh",
+                        background: "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
+                    }}
+                >
+                    <Spin size="large" />
+                </div>
+            }
+        >
+            <CallbackContent />
+        </Suspense>
+    );
+}
     );
 }

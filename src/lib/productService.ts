@@ -17,6 +17,7 @@ import type { Product, ProductFormData } from "@/types";
 
 /**
  * Get all products for the current user
+ * Filters by userId attribute in Appwrite schema
  */
 export const getAllProducts = async (): Promise<Product[]> => {
     try {
@@ -26,39 +27,17 @@ export const getAllProducts = async (): Promise<Product[]> => {
             return [];
         }
 
-        // Build query - try to filter by userId if the field exists in Appwrite schema
-        const queries = [Query.orderDesc("$createdAt"), Query.limit(1000)];
-
-        // Try with userId filter first (if attribute exists in Appwrite)
-        try {
-            queries.unshift(Query.equal("userId", userId));
-            const response = await databases.listDocuments(
-                DATABASE_ID,
-                COLLECTIONS.PRODUCTS,
-                queries
-            );
-            return mapDocumentsToProducts(response.documents);
-        } catch (error: unknown) {
-            // If userId attribute doesn't exist, fall back to no filter
-            // Appwrite will still filter by document permissions if Document Security is enabled
-            if (
-                error &&
-                typeof error === "object" &&
-                "code" in error &&
-                error.code === 400
-            ) {
-                console.log(
-                    "userId attribute not found in products schema, relying on document permissions"
-                );
-                const response = await databases.listDocuments(
-                    DATABASE_ID,
-                    COLLECTIONS.PRODUCTS,
-                    [Query.orderDesc("$createdAt"), Query.limit(1000)]
-                );
-                return mapDocumentsToProducts(response.documents);
-            }
-            throw error;
-        }
+        // Query with userId filter for data isolation
+        const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.PRODUCTS,
+            [
+                Query.equal("userId", userId),
+                Query.orderDesc("$createdAt"),
+                Query.limit(1000),
+            ]
+        );
+        return mapDocumentsToProducts(response.documents);
     } catch (error) {
         console.error("Error fetching products:", error);
         throw error;
@@ -124,8 +103,9 @@ export const createProduct = async (
 
         const productId = generateId();
 
-        // Prepare document data
+        // Prepare document data with userId for Appwrite schema
         const docData: Record<string, unknown> = {
+            userId: userId,
             name: data.name,
             description: data.description || null,
             price: data.price,

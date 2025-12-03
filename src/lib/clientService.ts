@@ -42,6 +42,7 @@ const mapDocumentsToClients = (
 
 /**
  * Get all clients for the current user
+ * Filters by userId attribute in Appwrite schema
  */
 export const getAllClients = async (): Promise<Client[]> => {
     try {
@@ -51,39 +52,17 @@ export const getAllClients = async (): Promise<Client[]> => {
             return [];
         }
 
-        // Build query - try to filter by userId if the field exists in Appwrite schema
-        const queries = [Query.orderDesc("$createdAt"), Query.limit(1000)];
-
-        // Try with userId filter first (if attribute exists in Appwrite)
-        try {
-            queries.unshift(Query.equal("userId", userId));
-            const response = await databases.listDocuments(
-                DATABASE_ID,
-                COLLECTIONS.CLIENTS,
-                queries
-            );
-            return mapDocumentsToClients(response.documents);
-        } catch (error: unknown) {
-            // If userId attribute doesn't exist, fall back to no filter
-            // Appwrite will still filter by document permissions if Document Security is enabled
-            if (
-                error &&
-                typeof error === "object" &&
-                "code" in error &&
-                error.code === 400
-            ) {
-                console.log(
-                    "userId attribute not found in clients schema, relying on document permissions"
-                );
-                const response = await databases.listDocuments(
-                    DATABASE_ID,
-                    COLLECTIONS.CLIENTS,
-                    [Query.orderDesc("$createdAt"), Query.limit(1000)]
-                );
-                return mapDocumentsToClients(response.documents);
-            }
-            throw error;
-        }
+        // Query with userId filter for data isolation
+        const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.CLIENTS,
+            [
+                Query.equal("userId", userId),
+                Query.orderDesc("$createdAt"),
+                Query.limit(1000),
+            ]
+        );
+        return mapDocumentsToClients(response.documents);
     } catch (error) {
         console.error("Error fetching clients:", error);
         throw error;
@@ -141,6 +120,7 @@ export const createClient = async (data: ClientFormData): Promise<Client> => {
             COLLECTIONS.CLIENTS,
             clientId,
             {
+                userId: userId,
                 name: data.name,
                 contactPerson: data.contact_person || null,
                 addressLine1: data.address_line1,

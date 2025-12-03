@@ -38,8 +38,15 @@ function LoginForm() {
 
     // Handle OAuth errors from URL
     useEffect(() => {
+        // Log all URL params for debugging
+        const allParams = Object.fromEntries(searchParams.entries());
+        if (Object.keys(allParams).length > 0) {
+            console.log("Login page URL params:", allParams);
+        }
+
         const errorParam = searchParams.get("error");
         if (errorParam) {
+            console.log("OAuth error param:", errorParam);
             try {
                 const error = JSON.parse(decodeURIComponent(errorParam));
                 if (error.type === "user_already_exists") {
@@ -48,7 +55,8 @@ function LoginForm() {
                     message.error(error.message || t("auth.loginFailed"));
                 }
             } catch {
-                message.error(t("auth.loginFailed"));
+                // If it's not JSON, show the raw error
+                message.error(errorParam || t("auth.loginFailed"));
             }
             // Clear the error from URL
             router.replace("/login");

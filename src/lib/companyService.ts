@@ -17,6 +17,7 @@ import type { UserCompany } from "@/types";
 
 /**
  * Get company info for current user
+ * Uses document-level permissions in Appwrite (no userId attribute needed)
  */
 export const getCompanyInfo = async (): Promise<UserCompany | null> => {
     try {
@@ -26,34 +27,13 @@ export const getCompanyInfo = async (): Promise<UserCompany | null> => {
             return null;
         }
 
-        // Try to filter by userId if the field exists in Appwrite schema
-        let response;
-        try {
-            response = await databases.listDocuments(
-                DATABASE_ID,
-                COLLECTIONS.USER_COMPANY,
-                [Query.equal("userId", userId), Query.limit(1)]
-            );
-        } catch (error: unknown) {
-            // If userId attribute doesn't exist, fall back to no filter
-            if (
-                error &&
-                typeof error === "object" &&
-                "code" in error &&
-                error.code === 400
-            ) {
-                console.log(
-                    "userId attribute not found in user_company schema, relying on document permissions"
-                );
-                response = await databases.listDocuments(
-                    DATABASE_ID,
-                    COLLECTIONS.USER_COMPANY,
-                    [Query.limit(1)]
-                );
-            } else {
-                throw error;
-            }
-        }
+        // Query without userId filter - Appwrite filters by document permissions
+        // Each user should only have access to their own company document
+        const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.USER_COMPANY,
+            [Query.limit(1)]
+        );
 
         if (response.documents.length === 0) {
             return null;
