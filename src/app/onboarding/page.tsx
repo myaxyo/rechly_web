@@ -173,19 +173,20 @@ export default function OnboardingPage() {
         try {
             const values = form.getFieldsValue();
             await saveCompanyInfo({
-                company_name: values.company_name,
-                owner_name: values.owner_name,
-                street: values.street,
+                name: values.company_name,
+                managing_directors: values.owner_name,
+                address_line1: values.street,
                 postal_code: values.postal_code,
                 city: values.city,
                 country: values.country || "Deutschland",
                 email: values.email,
                 phone: values.phone,
-                tax_id: values.tax_id,
+                tax_number: values.tax_id,
                 vat_id: values.vat_id,
                 bank_name: values.bank_name,
-                iban: values.iban,
-                bic: values.bic,
+                bank_iban: values.iban,
+                bank_bic: values.bic,
+                payment_terms_default: "Zahlbar innerhalb von 14 Tagen ohne Abzug.",
             });
             setCurrentStep(2);
         } catch (error) {
