@@ -1,0 +1,145 @@
+// Database entity types - Shared with mobile app
+
+export interface UserCompany {
+    id?: string;
+    name: string;
+    legal_form?: string;
+    address_line1: string;
+    address_line2?: string;
+    postal_code: string;
+    city: string;
+    country: string;
+    vat_id?: string;
+    tax_number?: string;
+    commercial_register_number?: string;
+    registry_court?: string;
+    managing_directors?: string;
+    bank_name?: string;
+    bank_iban: string;
+    bank_bic?: string;
+    payment_terms_default: string;
+    email: string;
+    phone?: string;
+    website?: string;
+    logo_base64?: string;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface Client {
+    id?: string;
+    name: string;
+    contact_person?: string;
+    address_line1: string;
+    address_line2?: string;
+    postal_code: string;
+    city: string;
+    country: string;
+    email?: string;
+    phone?: string;
+    vat_id?: string;
+    tax_number?: string;
+    leitweg_id?: string;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface Product {
+    id?: string;
+    name: string;
+    description?: string;
+    price: number;
+    tax_rate_percent: number;
+    unit_of_measure: string;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface Invoice {
+    id?: string;
+    client_id: string;
+    invoice_number: string;
+    issue_date: string; // YYYY-MM-DD
+    due_date?: string; // YYYY-MM-DD
+    subtotal: number;
+    total_vat: number;
+    total_gross: number;
+    status: "draft" | "sent" | "paid" | "cancelled";
+    notes?: string;
+    purchase_order_ref?: string;
+    delivery_date?: string;
+    payment_terms?: string;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface InvoiceItem {
+    id?: string;
+    invoice_id: string;
+    product_id?: string;
+    description: string;
+    quantity: number;
+    unit_of_measure: string;
+    price: number;
+    tax_rate_percent: number;
+    discount_percent: number;
+    subtotal: number;
+    tax_amount: number;
+    total: number;
+}
+
+// Extended types with joined data
+export interface InvoiceWithClient extends Invoice {
+    client?: Client;
+}
+
+export interface InvoiceWithDetails extends Invoice {
+    client?: Client;
+    items: InvoiceItem[];
+}
+
+// Form input types
+export interface ClientFormData {
+    name: string;
+    contact_person?: string;
+    address_line1: string;
+    address_line2?: string;
+    postal_code: string;
+    city: string;
+    country: string;
+    email?: string;
+    phone?: string;
+    vat_id?: string;
+    tax_number?: string;
+    leitweg_id?: string;
+}
+
+export interface ProductFormData {
+    name: string;
+    description?: string;
+    price: number;
+    tax_rate_percent: number;
+    unit_of_measure: string;
+}
+
+export interface InvoiceItemFormData {
+    product_id?: string;
+    description: string;
+    quantity: number;
+    unit_of_measure: string;
+    price: number;
+    tax_rate_percent: number;
+    discount_percent: number;
+}
+
+export interface InvoiceFormData {
+    client_id: string;
+    invoice_number: string;
+    issue_date: string;
+    due_date?: string;
+    notes?: string;
+    purchase_order_ref?: string;
+    delivery_date?: string;
+    payment_terms?: string;
+    items: InvoiceItemFormData[];
+}

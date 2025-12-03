@@ -1,0 +1,167 @@
+"use client";
+
+import { Typography, Space, Divider } from "antd";
+import { GithubOutlined, HeartOutlined } from "@ant-design/icons";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const { Text, Title } = Typography;
+
+export default function Footer() {
+    const router = useRouter();
+    const { t } = useLanguage();
+
+    const linkStyle = {
+        color: "#64748b",
+        cursor: "pointer",
+        fontSize: 14,
+        transition: "color 0.2s",
+    };
+
+    return (
+        <footer
+            style={{
+                background: "#fafafa",
+                borderTop: "1px solid #f0f0f0",
+                padding: "48px 24px 32px",
+            }}
+        >
+            <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                            "repeat(auto-fit, minmax(180px, 1fr))",
+                        gap: 32,
+                        marginBottom: 32,
+                    }}
+                >
+                    {/* Brand */}
+                    <div>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                marginBottom: 12,
+                            }}
+                        >
+                            <Image
+                                src="/logo.png"
+                                alt="Rechly"
+                                width={24}
+                                height={24}
+                                style={{ borderRadius: 4 }}
+                            />
+                            <Title
+                                level={5}
+                                style={{ margin: 0, fontWeight: 600 }}
+                            >
+                                Rechly
+                            </Title>
+                        </div>
+                        <Text style={{ color: "#64748b", fontSize: 14 }}>
+                            {t("footer.tagline")}
+                        </Text>
+                    </div>
+
+                    {/* Product */}
+                    <div>
+                        <Text
+                            strong
+                            style={{
+                                display: "block",
+                                marginBottom: 12,
+                                fontSize: 13,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
+                                color: "#374151",
+                            }}
+                        >
+                            {t("footer.product")}
+                        </Text>
+                        <Space orientation="vertical" size={8}>
+                            <a
+                                onClick={() => router.push("/features")}
+                                style={linkStyle}
+                            >
+                                {t("nav.features")}
+                            </a>
+                            <a
+                                href="https://github.com/myaxyo/rechly"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={linkStyle}
+                            >
+                                GitHub
+                            </a>
+                        </Space>
+                    </div>
+
+                    {/* Legal */}
+                    <div>
+                        <Text
+                            strong
+                            style={{
+                                display: "block",
+                                marginBottom: 12,
+                                fontSize: 13,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
+                                color: "#374151",
+                            }}
+                        >
+                            {t("footer.legal")}
+                        </Text>
+                        <Space orientation="vertical" size={8}>
+                            <a
+                                onClick={() => router.push("/impressum")}
+                                style={linkStyle}
+                            >
+                                {t("footer.impressum")}
+                            </a>
+                            <a
+                                onClick={() => router.push("/datenschutz")}
+                                style={linkStyle}
+                            >
+                                {t("footer.privacy")}
+                            </a>
+                            <a
+                                onClick={() => router.push("/agb")}
+                                style={linkStyle}
+                            >
+                                {t("footer.terms")}
+                            </a>
+                        </Space>
+                    </div>
+                </div>
+
+                <Divider style={{ margin: "24px 0", borderColor: "#e5e7eb" }} />
+
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: 16,
+                    }}
+                >
+                    <Text style={{ color: "#9ca3af", fontSize: 13 }}>
+                        <HeartOutlined style={{ marginRight: 6 }} />
+                        {t("footer.madeBy")}
+                    </Text>
+                    <a
+                        href="https://github.com/myaxyo/rechly"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#9ca3af" }}
+                    >
+                        <GithubOutlined style={{ fontSize: 18 }} />
+                    </a>
+                </div>
+            </div>
+        </footer>
+    );
+}
