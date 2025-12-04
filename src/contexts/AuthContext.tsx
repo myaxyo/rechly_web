@@ -79,7 +79,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const checkAuth = async () => {
         try {
-            const currentUser = await getCurrentUser();
+            // First try to get user from client-side Appwrite SDK
+            let currentUser = await getCurrentUser();
+
+            // If no client-side session, check for SSR session
+            if (!currentUser) {
+                try {
+                    const response = await fetch("/api/auth/user");
+                    if (response.ok) {
+                        currentUser = await response.json();
+                        console.log("Found SSR session:", currentUser?.$id);
+                    }
+                } catch (ssrError) {
+                    console.log("No SSR session found");
+                }
+            }
+
             setUser(currentUser);
             // Check if user is anonymous (no email means anonymous)
             setIsAnonymous(!currentUser?.email);
@@ -121,7 +136,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = async () => {
         setLoading(true);
         try {
+            // Logout from client-side Appwrite
             await appwriteLogout();
+
+            // Also clear SSR session cookie
+            try {
+                await fetch("/api/auth/logout", { method: "POST" });
+            } catch {
+                // Ignore SSR logout errors
+            }
+
             setUser(null);
             setIsAnonymous(false);
             sessionStorage.removeItem("guestSession");

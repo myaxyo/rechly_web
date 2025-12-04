@@ -5,12 +5,33 @@ import {
 } from "@/lib/appwrite-server";
 
 /**
+ * Get the actual origin (handles proxies/load balancers)
+ */
+function getOrigin(request: NextRequest): string {
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    const host = request.headers.get("host");
+
+    if (forwardedHost) {
+        return `${forwardedProto}://${forwardedHost}`;
+    } else if (host && !host.includes("localhost")) {
+        return `https://${host}`;
+    } else if (process.env.NEXT_PUBLIC_APP_URL) {
+        return process.env.NEXT_PUBLIC_APP_URL;
+    }
+    return request.nextUrl.origin;
+}
+
+/**
  * GET /api/auth/callback
  * Handles OAuth callback - receives userId and secret from Appwrite
  * Creates session cookie and redirects to appropriate page
  */
 export async function GET(request: NextRequest) {
     try {
+        const origin = getOrigin(request);
+        console.log("OAuth callback origin:", origin);
+
         const { searchParams } = request.nextUrl;
         const userId = searchParams.get("userId");
         const secret = searchParams.get("secret");
@@ -26,10 +47,7 @@ export async function GET(request: NextRequest) {
         if (error) {
             console.error("OAuth error from provider:", error);
             return NextResponse.redirect(
-                new URL(
-                    `/login?error=${encodeURIComponent(error)}`,
-                    request.url
-                )
+                `${origin}/login?error=${encodeURIComponent(error)}`
             );
         }
 
@@ -37,7 +55,7 @@ export async function GET(request: NextRequest) {
         if (!userId || !secret) {
             console.error("Missing userId or secret in callback");
             return NextResponse.redirect(
-                new URL("/login?error=missing_params", request.url)
+                `${origin}/login?error=missing_params`
             );
         }
 
@@ -55,19 +73,16 @@ export async function GET(request: NextRequest) {
             console.log("User authenticated:", user.$id);
 
             // Redirect to the client-side callback to check onboarding status
-            return NextResponse.redirect(
-                new URL("/auth/callback?from=ssr", request.url)
-            );
+            return NextResponse.redirect(`${origin}/auth/callback?from=ssr`);
         } catch (sessionError) {
             console.error("Session verification error:", sessionError);
-            return NextResponse.redirect(
-                new URL("/auth/callback?from=ssr", request.url)
-            );
+            return NextResponse.redirect(`${origin}/auth/callback?from=ssr`);
         }
     } catch (error) {
         console.error("OAuth callback error:", error);
+        const origin = getOrigin(request);
         return NextResponse.redirect(
-            new URL("/login?error=session_creation_failed", request.url)
+            `${origin}/login?error=session_creation_failed`
         );
     }
 }
