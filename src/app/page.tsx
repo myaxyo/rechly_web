@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Typography, Space, Card } from "antd";
+import { Button, Typography, Space, Card, Collapse } from "antd";
 import {
     FileTextOutlined,
     TeamOutlined,
@@ -11,18 +11,163 @@ import {
     GithubOutlined,
     CheckOutlined,
     ArrowRightOutlined,
+    QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import Script from "next/script";
 
 const { Title, Text, Paragraph } = Typography;
+
+// JSON-LD Structured Data for SEO
+const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "SoftwareApplication",
+            name: "Rechly",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web, Android",
+            offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "EUR",
+            },
+            description:
+                "Kostenlose Rechnungssoftware für Freelancer und Selbstständige. Erstelle professionelle Rechnungen online.",
+            url: "https://rechly.de",
+            author: {
+                "@type": "Organization",
+                name: "Rechly",
+            },
+            aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                ratingCount: "50",
+            },
+        },
+        {
+            "@type": "Organization",
+            name: "Rechly",
+            url: "https://rechly.de",
+            logo: "https://rechly.de/favicon/favicon.svg",
+            description:
+                "Open-Source Rechnungssoftware für Deutschland. DSGVO-konform, kostenlos, einfach.",
+            sameAs: ["https://github.com/myaxyo/rechly"],
+        },
+        {
+            "@type": "WebSite",
+            name: "Rechly - Kostenlose Rechnungssoftware",
+            url: "https://rechly.de",
+            potentialAction: {
+                "@type": "SearchAction",
+                target: "https://rechly.de/search?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+            },
+        },
+        {
+            "@type": "FAQPage",
+            mainEntity: [
+                {
+                    "@type": "Question",
+                    name: "Ist Rechly wirklich kostenlos?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Ja, Rechly ist zu 100% kostenlos. Es gibt keine versteckten Kosten, keine Premium-Pläne und keine Werbung. Als Open-Source-Projekt bleibt Rechly für immer kostenlos.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "Ist Rechly DSGVO-konform?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Ja, Rechly ist vollständig DSGVO-konform. Alle Daten werden auf deutschen Servern (Frankfurt) gespeichert und verarbeitet. Es werden keine Tracking-Cookies verwendet.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "Kann ich mit Rechly GoBD-konforme Rechnungen erstellen?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Ja, alle mit Rechly erstellten Rechnungen enthalten alle gesetzlich erforderlichen Pflichtangaben für deutsche Rechnungen, einschließlich Steuernummer, fortlaufende Rechnungsnummer und ordnungsgemäße Steuerauszeichnung.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "Für wen ist Rechly geeignet?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Rechly ist ideal für Freelancer, Selbstständige, Kleinunternehmer und kleine Unternehmen, die eine einfache und kostenlose Lösung zum Erstellen von Rechnungen suchen.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "Gibt es eine mobile App?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Ja, Rechly bietet eine native Android-App. Eine iOS-App ist in Entwicklung. Deine Daten werden automatisch zwischen Web und App synchronisiert.",
+                    },
+                },
+            ],
+        },
+    ],
+};
+
+// FAQ Data for display
+const faqData = {
+    de: [
+        {
+            question: "Ist Rechly wirklich kostenlos?",
+            answer: "Ja, Rechly ist zu 100% kostenlos. Es gibt keine versteckten Kosten, keine Premium-Pläne und keine Werbung. Als Open-Source-Projekt bleibt Rechly für immer kostenlos.",
+        },
+        {
+            question: "Ist Rechly DSGVO-konform?",
+            answer: "Ja, Rechly ist vollständig DSGVO-konform. Alle Daten werden auf deutschen Servern (Frankfurt) gespeichert und verarbeitet. Es werden keine Tracking-Cookies verwendet.",
+        },
+        {
+            question:
+                "Kann ich mit Rechly rechtskonforme Rechnungen erstellen?",
+            answer: "Ja, alle mit Rechly erstellten Rechnungen enthalten alle gesetzlich erforderlichen Pflichtangaben für deutsche Rechnungen, einschließlich Steuernummer, fortlaufende Rechnungsnummer und ordnungsgemäße Steuerauszeichnung.",
+        },
+        {
+            question: "Für wen ist Rechly geeignet?",
+            answer: "Rechly ist ideal für Freelancer, Selbstständige, Kleinunternehmer und kleine Unternehmen, die eine einfache und kostenlose Lösung zum Erstellen von Rechnungen suchen.",
+        },
+        {
+            question: "Gibt es eine mobile App?",
+            answer: "Ja, Rechly bietet eine native Android-App. Eine iOS-App ist in Entwicklung. Deine Daten werden automatisch zwischen Web und App synchronisiert.",
+        },
+    ],
+    en: [
+        {
+            question: "Is Rechly really free?",
+            answer: "Yes, Rechly is 100% free. There are no hidden costs, no premium plans, and no ads. As an open-source project, Rechly will remain free forever.",
+        },
+        {
+            question: "Is Rechly GDPR compliant?",
+            answer: "Yes, Rechly is fully GDPR compliant. All data is stored and processed on German servers (Frankfurt). No tracking cookies are used.",
+        },
+        {
+            question: "Can I create legally compliant invoices with Rechly?",
+            answer: "Yes, all invoices created with Rechly contain all legally required information for German invoices, including tax number, sequential invoice number, and proper tax labeling.",
+        },
+        {
+            question: "Who is Rechly suitable for?",
+            answer: "Rechly is ideal for freelancers, self-employed individuals, small business owners, and small companies looking for a simple and free invoicing solution.",
+        },
+        {
+            question: "Is there a mobile app?",
+            answer: "Yes, Rechly offers a native Android app. An iOS app is in development. Your data is automatically synced between web and app.",
+        },
+    ],
+};
 
 export default function Home() {
     const router = useRouter();
     const { user, loading } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [showContent, setShowContent] = useState(false);
 
     useEffect(() => {
@@ -101,9 +246,18 @@ export default function Home() {
 
     return (
         <div style={{ minHeight: "100vh", background: "#fff" }}>
+            {/* JSON-LD Structured Data for SEO */}
+            <Script
+                id="structured-data"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(structuredData),
+                }}
+            />
+
             <Navbar />
 
-            {/* Hero Section */}
+            {/* Hero Section - Main H1 for SEO */}
             <section
                 style={{
                     paddingTop: 140,
@@ -114,6 +268,7 @@ export default function Home() {
                     maxWidth: 700,
                     margin: "0 auto",
                 }}
+                aria-label="Rechnungssoftware für Freelancer"
             >
                 <div
                     style={{
@@ -135,7 +290,8 @@ export default function Home() {
                     </Text>
                 </div>
 
-                <Title
+                {/* SEO-optimized H1 with target keywords */}
+                <h1
                     style={{
                         fontSize: 48,
                         fontWeight: 700,
@@ -144,14 +300,18 @@ export default function Home() {
                         color: "#111",
                     }}
                 >
-                    {t("hero.title")}
+                    {language === "de"
+                        ? "Rechnung erstellen online –"
+                        : t("hero.title")}
                     <br />
                     <span style={{ color: "#1890ff" }}>
-                        {t("hero.titleHighlight")}
+                        {language === "de"
+                            ? "kostenlos & einfach"
+                            : t("hero.titleHighlight")}
                     </span>
-                </Title>
+                </h1>
 
-                <Paragraph
+                <p
                     style={{
                         fontSize: 18,
                         color: "#64748b",
@@ -159,8 +319,10 @@ export default function Home() {
                         lineHeight: 1.7,
                     }}
                 >
-                    {t("hero.subtitle")}
-                </Paragraph>
+                    {language === "de"
+                        ? "Rechly ist das kostenlose Rechnungsprogramm für Freelancer und Selbstständige. Erstelle professionelle Rechnungen in Sekunden – DSGVO-konform, Open Source, ohne versteckte Kosten."
+                        : t("hero.subtitle")}
+                </p>
 
                 <Space size="middle" wrap style={{ justifyContent: "center" }}>
                     <Button
@@ -174,6 +336,7 @@ export default function Home() {
                             borderRadius: 8,
                             fontWeight: 500,
                         }}
+                        aria-label="Jetzt kostenlos Rechnung erstellen"
                     >
                         {t("hero.cta")}
                         <ArrowRightOutlined />
@@ -183,6 +346,7 @@ export default function Home() {
                         icon={<GithubOutlined />}
                         href="https://github.com/myaxyo/rechly"
                         target="_blank"
+                        rel="noopener noreferrer"
                         style={{
                             height: 48,
                             paddingInline: 24,
@@ -195,25 +359,28 @@ export default function Home() {
                 </Space>
             </section>
 
-            {/* Features Section */}
+            {/* Features Section - H2 for SEO */}
             <section
                 style={{
                     padding: "60px 24px 80px",
                     background: "#fafafa",
                 }}
+                aria-label="Funktionen der Rechnungssoftware"
             >
                 <div style={{ maxWidth: 900, margin: "0 auto" }}>
-                    <Title
-                        level={2}
+                    <h2
                         style={{
                             textAlign: "center",
                             marginBottom: 48,
                             fontWeight: 600,
                             color: "#111",
+                            fontSize: 28,
                         }}
                     >
-                        {t("features.title")}
-                    </Title>
+                        {language === "de"
+                            ? "Dein kostenloses Rechnungsprogramm"
+                            : t("features.title")}
+                    </h2>
 
                     <div
                         style={{
@@ -235,12 +402,15 @@ export default function Home() {
                                 <div style={{ marginBottom: 16 }}>
                                     {feature.icon}
                                 </div>
-                                <Title
-                                    level={5}
-                                    style={{ marginBottom: 8, fontWeight: 600 }}
+                                <h3
+                                    style={{
+                                        marginBottom: 8,
+                                        fontWeight: 600,
+                                        fontSize: 16,
+                                    }}
                                 >
                                     {feature.title}
-                                </Title>
+                                </h3>
                                 <Text
                                     style={{ color: "#64748b", fontSize: 14 }}
                                 >
@@ -259,6 +429,7 @@ export default function Home() {
                     maxWidth: 700,
                     margin: "0 auto",
                 }}
+                aria-label="Über das Open-Source Rechnungsprogramm"
             >
                 <div
                     style={{
@@ -281,14 +452,20 @@ export default function Home() {
                     </Text>
                 </div>
 
-                <Title
-                    level={2}
-                    style={{ marginBottom: 16, fontWeight: 600, color: "#111" }}
+                <h2
+                    style={{
+                        marginBottom: 16,
+                        fontWeight: 600,
+                        color: "#111",
+                        fontSize: 28,
+                    }}
                 >
-                    {t("about.title")}
-                </Title>
+                    {language === "de"
+                        ? "Open Source Rechnungssoftware"
+                        : t("about.title")}
+                </h2>
 
-                <Paragraph
+                <p
                     style={{
                         fontSize: 16,
                         color: "#64748b",
@@ -297,7 +474,7 @@ export default function Home() {
                     }}
                 >
                     {t("about.description")}
-                </Paragraph>
+                </p>
 
                 <Space direction="vertical" size={12}>
                     {aboutPoints.map((point, i) => (
@@ -320,26 +497,96 @@ export default function Home() {
                 </Space>
             </section>
 
+            {/* FAQ Section for SEO */}
+            <section
+                style={{
+                    padding: "60px 24px 80px",
+                    background: "#fafafa",
+                }}
+                aria-label="Häufige Fragen zur Rechnungssoftware"
+            >
+                <div style={{ maxWidth: 700, margin: "0 auto" }}>
+                    <h2
+                        style={{
+                            textAlign: "center",
+                            marginBottom: 12,
+                            fontWeight: 600,
+                            color: "#111",
+                            fontSize: 28,
+                        }}
+                    >
+                        {language === "de"
+                            ? "Häufige Fragen zum Rechnungsprogramm"
+                            : "Frequently Asked Questions"}
+                    </h2>
+                    <p
+                        style={{
+                            textAlign: "center",
+                            color: "#64748b",
+                            marginBottom: 32,
+                            fontSize: 16,
+                        }}
+                    >
+                        {language === "de"
+                            ? "Alles was du über unsere kostenlose Rechnungssoftware wissen musst"
+                            : "Everything you need to know about our free invoicing software"}
+                    </p>
+
+                    <Collapse
+                        accordion
+                        style={{
+                            background: "#fff",
+                            borderRadius: 12,
+                            border: "1px solid #e5e7eb",
+                        }}
+                        expandIconPosition="end"
+                        items={faqData[language].map((faq, i) => ({
+                            key: i.toString(),
+                            label: (
+                                <span
+                                    style={{ fontWeight: 500, color: "#111" }}
+                                >
+                                    {faq.question}
+                                </span>
+                            ),
+                            children: (
+                                <p
+                                    style={{
+                                        color: "#64748b",
+                                        lineHeight: 1.7,
+                                        margin: 0,
+                                    }}
+                                >
+                                    {faq.answer}
+                                </p>
+                            ),
+                        }))}
+                    />
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section
                 style={{
                     padding: "64px 24px",
-                    background: "#f8fafc",
+                    background: "#fff",
                     textAlign: "center",
                 }}
             >
                 <div style={{ maxWidth: 500, margin: "0 auto" }}>
-                    <Title
-                        level={3}
+                    <h2
                         style={{
                             marginBottom: 12,
                             fontWeight: 600,
                             color: "#111",
+                            fontSize: 24,
                         }}
                     >
-                        {t("cta.title")}
-                    </Title>
-                    <Paragraph
+                        {language === "de"
+                            ? "Jetzt Rechnung erstellen"
+                            : t("cta.title")}
+                    </h2>
+                    <p
                         style={{
                             color: "#64748b",
                             marginBottom: 24,
@@ -347,7 +594,7 @@ export default function Home() {
                         }}
                     >
                         {t("cta.subtitle")}
-                    </Paragraph>
+                    </p>
                     <Button
                         type="primary"
                         size="large"
@@ -359,6 +606,7 @@ export default function Home() {
                             borderRadius: 8,
                             fontWeight: 500,
                         }}
+                        aria-label="Kostenlos registrieren und Rechnung erstellen"
                     >
                         {t("cta.button")}
                     </Button>

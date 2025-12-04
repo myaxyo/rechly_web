@@ -305,16 +305,18 @@ const translations: Record<Language, Record<string, string>> = {
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
+    // Default to German for SEO - German is the primary target market
     const [language, setLanguageState] = useState<Language>("de");
 
     useEffect(() => {
+        // Check for user's previously stored preference
         const stored = localStorage.getItem("language") as Language | null;
         if (stored && (stored === "de" || stored === "en")) {
             setLanguageState(stored);
-        } else {
-            const browserLang = navigator.language.toLowerCase();
-            setLanguageState(browserLang.startsWith("de") ? "de" : "en");
         }
+        // Note: We intentionally default to German and don't auto-detect browser language
+        // This ensures German content is served by default for SEO purposes
+        // Users can manually switch to English if needed
     }, []);
 
     const setLanguage = (lang: Language) => {
