@@ -11,6 +11,8 @@ import {
     Spin,
     theme,
     Alert,
+    Select,
+    Drawer,
 } from "antd";
 import {
     DashboardOutlined,
@@ -22,39 +24,13 @@ import {
     MenuUnfoldOutlined,
     LogoutOutlined,
     WarningOutlined,
+    GlobalOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 
 const { Header, Sider, Content } = Layout;
-
-const menuItems = [
-    {
-        key: "/dashboard",
-        icon: <DashboardOutlined />,
-        label: "Dashboard",
-    },
-    {
-        key: "/dashboard/invoices",
-        icon: <FileTextOutlined />,
-        label: "Rechnungen",
-    },
-    {
-        key: "/dashboard/clients",
-        icon: <UserOutlined />,
-        label: "Kunden",
-    },
-    {
-        key: "/dashboard/products",
-        icon: <ShoppingOutlined />,
-        label: "Produkte",
-    },
-    {
-        key: "/dashboard/settings",
-        icon: <SettingOutlined />,
-        label: "Einstellungen",
-    },
-];
 
 export default function DashboardLayout({
     children,
@@ -64,11 +40,42 @@ export default function DashboardLayout({
     const router = useRouter();
     const pathname = usePathname();
     const { user, loading, logout, isAnonymous } = useAuth();
+    const { language, setLanguage, t } = useLanguage();
     const [collapsed, setCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
+
+    // Menu items with translations
+    const menuItems = [
+        {
+            key: "/dashboard",
+            icon: <DashboardOutlined />,
+            label: t("dashboard.home"),
+        },
+        {
+            key: "/dashboard/invoices",
+            icon: <FileTextOutlined />,
+            label: t("dashboard.invoices"),
+        },
+        {
+            key: "/dashboard/clients",
+            icon: <UserOutlined />,
+            label: t("dashboard.clients"),
+        },
+        {
+            key: "/dashboard/products",
+            icon: <ShoppingOutlined />,
+            label: t("dashboard.products"),
+        },
+        {
+            key: "/dashboard/settings",
+            icon: <SettingOutlined />,
+            label: t("dashboard.settings"),
+        },
+    ];
 
     useEffect(() => {
         const checkMobile = () => {
@@ -93,10 +100,15 @@ export default function DashboardLayout({
         router.push("/login");
     };
 
+    const handleMobileNavigation = (key: string) => {
+        setMobileMenuOpen(false);
+        router.push(key);
+    };
+
     const userMenuItems = [
         {
             key: "profile",
-            label: user?.email || "Gast",
+            label: user?.email || (language === "de" ? "Gast" : "Guest"),
             disabled: true,
         },
         {
@@ -105,7 +117,7 @@ export default function DashboardLayout({
         {
             key: "logout",
             icon: <LogoutOutlined />,
-            label: "Abmelden",
+            label: t("auth.logout"),
             onClick: handleLogout,
         },
     ];
@@ -131,58 +143,120 @@ export default function DashboardLayout({
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
-            <Sider
-                trigger={null}
-                collapsible
-                collapsed={collapsed}
-                breakpoint="lg"
-                collapsedWidth={isMobile ? 0 : 80}
-                style={{
-                    overflow: "auto",
-                    height: "100vh",
-                    position: "fixed",
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    zIndex: 100,
-                }}
-            >
-                <div
+            {/* Desktop Sider - hidden on mobile */}
+            {!isMobile && (
+                <Sider
+                    trigger={null}
+                    collapsible
+                    collapsed={collapsed}
+                    breakpoint="lg"
+                    collapsedWidth={80}
                     style={{
-                        height: 64,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderBottom: "1px solid rgba(255,255,255,0.1)",
+                        overflow: "auto",
+                        height: "100vh",
+                        position: "fixed",
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        zIndex: 100,
                     }}
                 >
-                    <span
+                    <div
                         style={{
-                            color: "#fff",
-                            fontSize: collapsed ? 18 : 24,
-                            fontWeight: "bold",
+                            height: 64,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderBottom: "1px solid rgba(255,255,255,0.1)",
                         }}
                     >
-                        {collapsed ? "R" : "Rechly"}
+                        <span
+                            style={{
+                                color: "#fff",
+                                fontSize: collapsed ? 18 : 24,
+                                fontWeight: "bold",
+                            }}
+                        >
+                            {collapsed ? "R" : "Rechly"}
+                        </span>
+                    </div>
+                    <Menu
+                        theme="dark"
+                        mode="inline"
+                        selectedKeys={[pathname]}
+                        items={menuItems}
+                        onClick={({ key }) => router.push(key)}
+                    />
+                </Sider>
+            )}
+
+            {/* Mobile Drawer Menu */}
+            <Drawer
+                title={
+                    <span style={{ fontWeight: "bold", fontSize: 20 }}>
+                        Rechly
                     </span>
-                </div>
+                }
+                placement="left"
+                onClose={() => setMobileMenuOpen(false)}
+                open={mobileMenuOpen}
+                width={280}
+                styles={{
+                    body: { padding: 0 },
+                }}
+            >
                 <Menu
-                    theme="dark"
                     mode="inline"
                     selectedKeys={[pathname]}
                     items={menuItems}
-                    onClick={({ key }) => router.push(key)}
+                    onClick={({ key }) => handleMobileNavigation(key)}
+                    style={{ border: "none" }}
                 />
-            </Sider>
+                <div
+                    style={{
+                        padding: "16px 24px",
+                        borderTop: "1px solid #f0f0f0",
+                        marginTop: 16,
+                    }}
+                >
+                    <div
+                        style={{
+                            marginBottom: 16,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                        }}
+                    >
+                        <GlobalOutlined style={{ color: "#666" }} />
+                        <Select
+                            value={language}
+                            onChange={setLanguage}
+                            style={{ flex: 1 }}
+                            options={[
+                                { value: "de", label: "🇩🇪 Deutsch" },
+                                { value: "en", label: "🇬🇧 English" },
+                            ]}
+                        />
+                    </div>
+                    <Button
+                        block
+                        icon={<LogoutOutlined />}
+                        onClick={handleLogout}
+                    >
+                        {t("auth.logout")}
+                    </Button>
+                </div>
+            </Drawer>
+
             <Layout
                 style={{
-                    marginLeft: collapsed ? (isMobile ? 0 : 80) : 200,
+                    marginLeft: isMobile ? 0 : collapsed ? 80 : 200,
                     transition: "margin-left 0.2s",
                 }}
             >
                 <Header
                     style={{
-                        padding: "0 24px",
+                        padding: isMobile ? "0 12px" : "0 24px",
                         background: colorBgContainer,
                         display: "flex",
                         alignItems: "center",
@@ -191,62 +265,120 @@ export default function DashboardLayout({
                         top: 0,
                         zIndex: 99,
                         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                        gap: 8,
                     }}
                 >
-                    <Button
-                        type="text"
-                        icon={
-                            collapsed ? (
-                                <MenuUnfoldOutlined />
-                            ) : (
-                                <MenuFoldOutlined />
-                            )
-                        }
-                        onClick={() => setCollapsed(!collapsed)}
-                        style={{ fontSize: 16 }}
-                    />
-                    <Dropdown
-                        menu={{ items: userMenuItems }}
-                        placement="bottomRight"
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                        }}
                     >
-                        <Avatar
-                            style={{
-                                backgroundColor: "#1976d2",
-                                cursor: "pointer",
-                            }}
-                            icon={<UserOutlined />}
+                        <Button
+                            type="text"
+                            icon={
+                                isMobile ? (
+                                    <MenuUnfoldOutlined />
+                                ) : collapsed ? (
+                                    <MenuUnfoldOutlined />
+                                ) : (
+                                    <MenuFoldOutlined />
+                                )
+                            }
+                            onClick={() =>
+                                isMobile
+                                    ? setMobileMenuOpen(true)
+                                    : setCollapsed(!collapsed)
+                            }
+                            style={{ fontSize: 16 }}
                         />
-                    </Dropdown>
+                        {isMobile && (
+                            <span
+                                style={{
+                                    fontWeight: 600,
+                                    fontSize: 16,
+                                    color: "#111",
+                                }}
+                            >
+                                Rechly
+                            </span>
+                        )}
+                    </div>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                        }}
+                    >
+                        {/* Language selector - desktop only in header */}
+                        {!isMobile && (
+                            <Select
+                                value={language}
+                                onChange={setLanguage}
+                                variant="borderless"
+                                style={{ width: 80 }}
+                                suffixIcon={<GlobalOutlined />}
+                                options={[
+                                    { value: "de", label: "DE" },
+                                    { value: "en", label: "EN" },
+                                ]}
+                            />
+                        )}
+                        <Dropdown
+                            menu={{ items: userMenuItems }}
+                            placement="bottomRight"
+                        >
+                            <Avatar
+                                style={{
+                                    backgroundColor: "#1976d2",
+                                    cursor: "pointer",
+                                }}
+                                icon={<UserOutlined />}
+                            />
+                        </Dropdown>
+                    </div>
                 </Header>
                 {isAnonymous && (
                     <Alert
-                        message="Gastmodus aktiv"
+                        message={
+                            language === "de"
+                                ? "Gastmodus aktiv"
+                                : "Guest mode active"
+                        }
                         description={
                             <span>
-                                Deine Daten werden gelöscht, wenn du den Tab
-                                schließt.{" "}
+                                {language === "de"
+                                    ? "Deine Daten werden gelöscht, wenn du den Tab schließt. "
+                                    : "Your data will be deleted when you close the tab. "}
                                 <Link
                                     href="/register"
                                     style={{ fontWeight: 500 }}
                                 >
-                                    Jetzt registrieren
+                                    {language === "de"
+                                        ? "Jetzt registrieren"
+                                        : "Register now"}
                                 </Link>
-                                , um deine Daten zu speichern.
+                                {language === "de"
+                                    ? ", um deine Daten zu speichern."
+                                    : " to save your data."}
                             </span>
                         }
                         type="warning"
                         showIcon
                         icon={<WarningOutlined />}
                         style={{
-                            margin: "16px 24px 0 24px",
+                            margin: isMobile ? "12px 12px 0" : "16px 24px 0",
                             borderRadius: 8,
                         }}
                     />
                 )}
                 <Content
                     style={{
-                        margin: 24,
-                        padding: 24,
+                        margin: isMobile ? 12 : 24,
+                        padding: isMobile ? 16 : 24,
                         background: colorBgContainer,
                         borderRadius: borderRadiusLG,
                         minHeight: isAnonymous

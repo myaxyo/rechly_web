@@ -128,6 +128,7 @@ const translations: Record<Language, Record<string, string>> = {
         "guest.cancel": "Abbrechen",
 
         // Dashboard
+        "dashboard.home": "Dashboard",
         "dashboard.welcome": "Willkommen",
         "dashboard.welcomeDefault": "Willkommen bei Rechly",
         "dashboard.overview":
@@ -293,6 +294,13 @@ const translations: Record<Language, Record<string, string>> = {
         "dashboard.noInvoices": "No invoices yet",
         "dashboard.createFirst": "Create your first invoice",
         "dashboard.unknownClient": "Unknown Client",
+
+        // Dashboard navigation
+        "dashboard.home": "Dashboard",
+        "dashboard.guestWarning": "Guest Mode: Data is temporary only",
+        "dashboard.guestWarningDesc":
+            "Log in to save your data permanently!",
+        "dashboard.registerNow": "Register now",
 
         // Status
         "status.draft": "Draft",
