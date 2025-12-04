@@ -22,35 +22,37 @@ import {
     DeleteOutlined,
 } from "@ant-design/icons";
 import { useProductStore } from "@/store";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/currencyUtils";
 import type { Product, ProductFormData } from "@/types";
 
 const { Title } = Typography;
 
-const unitOptions = [
-    { value: "Stück", label: "Stück" },
-    { value: "Stunde", label: "Stunde" },
-    { value: "Tag", label: "Tag" },
-    { value: "Monat", label: "Monat" },
-    { value: "Pauschal", label: "Pauschal" },
-    { value: "kg", label: "kg" },
-    { value: "m", label: "m" },
-    { value: "m²", label: "m²" },
-    { value: "Liter", label: "Liter" },
-];
-
-const taxRateOptions = [
-    { value: 19, label: "19% (Standard)" },
-    { value: 7, label: "7% (Ermäßigt)" },
-    { value: 0, label: "0% (Steuerfrei)" },
-];
-
 export default function ProductsPage() {
+    const { t } = useLanguage();
     const [searchText, setSearchText] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [form] = Form.useForm();
     const [submitting, setSubmitting] = useState(false);
+
+    const unitOptions = [
+        { value: "Stück", label: t("products.unit.piece") },
+        { value: "Stunde", label: t("products.unit.hour") },
+        { value: "Tag", label: t("products.unit.day") },
+        { value: "Monat", label: t("products.unit.month") },
+        { value: "Pauschal", label: t("products.unit.flatRate") },
+        { value: "kg", label: t("products.unit.kg") },
+        { value: "m", label: t("products.unit.m") },
+        { value: "m²", label: t("products.unit.sqm") },
+        { value: "Liter", label: t("products.unit.liter") },
+    ];
+
+    const taxRateOptions = [
+        { value: 19, label: t("products.vat.standard") },
+        { value: 7, label: t("products.vat.reduced") },
+        { value: 0, label: t("products.vat.exempt") },
+    ];
 
     // Zustand store
     const {
@@ -96,15 +98,15 @@ export default function ProductsPage() {
         try {
             if (editingProduct) {
                 await editProduct(editingProduct.id!, values);
-                message.success("Produkt aktualisiert");
+                message.success(t("products.updated"));
             } else {
                 await addProduct(values);
-                message.success("Produkt erstellt");
+                message.success(t("products.created"));
             }
             setModalOpen(false);
         } catch (error) {
             console.error("Error saving product:", error);
-            message.error("Fehler beim Speichern");
+            message.error(t("products.saveError"));
         } finally {
             setSubmitting(false);
         }
@@ -113,29 +115,29 @@ export default function ProductsPage() {
     const handleDelete = async (id: string) => {
         try {
             await removeProduct(id);
-            message.success("Produkt gelöscht");
+            message.success(t("products.deleted"));
         } catch (error) {
             console.error("Error deleting product:", error);
-            message.error("Fehler beim Löschen");
+            message.error(t("products.deleteError"));
         }
     };
 
     const columns: TableProps<Product>["columns"] = [
         {
-            title: "Name",
+            title: t("products.name"),
             dataIndex: "name",
             key: "name",
             sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
-            title: "Beschreibung",
+            title: t("products.description"),
             dataIndex: "description",
             key: "description",
             responsive: ["md"],
             ellipsis: true,
         },
         {
-            title: "Preis",
+            title: t("products.price"),
             dataIndex: "price",
             key: "price",
             render: (price) => formatCurrency(price),
@@ -143,20 +145,20 @@ export default function ProductsPage() {
             align: "right",
         },
         {
-            title: "MwSt.",
+            title: t("products.vat"),
             dataIndex: "tax_rate_percent",
             key: "tax_rate_percent",
             render: (rate) => `${rate}%`,
             responsive: ["sm"],
         },
         {
-            title: "Einheit",
+            title: t("products.unit"),
             dataIndex: "unit_of_measure",
             key: "unit_of_measure",
             responsive: ["lg"],
         },
         {
-            title: "Aktionen",
+            title: t("products.actions"),
             key: "actions",
             width: 120,
             render: (_, record) => (
@@ -167,11 +169,11 @@ export default function ProductsPage() {
                         onClick={() => openEditModal(record)}
                     />
                     <Popconfirm
-                        title="Produkt löschen?"
-                        description="Diese Aktion kann nicht rückgängig gemacht werden."
+                        title={t("products.deleteConfirm")}
+                        description={t("products.deleteDesc")}
                         onConfirm={() => handleDelete(record.id!)}
-                        okText="Löschen"
-                        cancelText="Abbrechen"
+                        okText={t("products.delete")}
+                        cancelText={t("products.cancel")}
                     >
                         <Button type="text" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
@@ -182,7 +184,7 @@ export default function ProductsPage() {
 
     return (
         <div>
-            <Title level={4}>Produkte & Dienstleistungen</Title>
+            <Title level={4}>{t("products.title")}</Title>
 
             {/* Toolbar */}
             <div
@@ -195,7 +197,7 @@ export default function ProductsPage() {
                 }}
             >
                 <Input
-                    placeholder="Suchen..."
+                    placeholder={t("products.search")}
                     prefix={<SearchOutlined />}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
@@ -207,7 +209,7 @@ export default function ProductsPage() {
                     icon={<PlusOutlined />}
                     onClick={openCreateModal}
                 >
-                    Neues Produkt
+                    {t("products.new")}
                 </Button>
             </div>
 
@@ -221,13 +223,20 @@ export default function ProductsPage() {
                     pageSize: 10,
                     showSizeChanger: true,
                     showTotal: (total, range) =>
-                        `${range[0]}-${range[1]} von ${total} Produkten`,
+                        t("products.pagination")
+                            .replace("{0}", String(range[0]))
+                            .replace("{1}", String(range[1]))
+                            .replace("{2}", String(total)),
                 }}
             />
 
             {/* Create/Edit Modal */}
             <Modal
-                title={editingProduct ? "Produkt bearbeiten" : "Neues Produkt"}
+                title={
+                    editingProduct
+                        ? t("products.editTitle")
+                        : t("products.newTitle")
+                }
                 open={modalOpen}
                 onCancel={() => setModalOpen(false)}
                 footer={null}
@@ -241,15 +250,20 @@ export default function ProductsPage() {
                 >
                     <Form.Item
                         name="name"
-                        label="Name"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("products.name")}
+                        rules={[
+                            { required: true, message: t("products.required") },
+                        ]}
                     >
-                        <Input placeholder="Produktname" />
+                        <Input placeholder={t("products.productName")} />
                     </Form.Item>
 
-                    <Form.Item name="description" label="Beschreibung">
+                    <Form.Item
+                        name="description"
+                        label={t("products.description")}
+                    >
                         <Input.TextArea
-                            placeholder="Beschreibung des Produkts oder der Dienstleistung"
+                            placeholder={t("products.descPlaceholder")}
                             rows={3}
                         />
                     </Form.Item>
@@ -257,8 +271,13 @@ export default function ProductsPage() {
                     <Space style={{ width: "100%" }}>
                         <Form.Item
                             name="price"
-                            label="Preis (€)"
-                            rules={[{ required: true, message: "Pflichtfeld" }]}
+                            label={t("products.priceLabel")}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t("products.required"),
+                                },
+                            ]}
                             style={{ flex: 1 }}
                         >
                             <InputNumber
@@ -284,8 +303,13 @@ export default function ProductsPage() {
 
                         <Form.Item
                             name="tax_rate_percent"
-                            label="MwSt.-Satz"
-                            rules={[{ required: true, message: "Pflichtfeld" }]}
+                            label={t("products.vatRate")}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t("products.required"),
+                                },
+                            ]}
                             style={{ width: 160 }}
                         >
                             <Select options={taxRateOptions} />
@@ -294,8 +318,10 @@ export default function ProductsPage() {
 
                     <Form.Item
                         name="unit_of_measure"
-                        label="Einheit"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("products.unit")}
+                        rules={[
+                            { required: true, message: t("products.required") },
+                        ]}
                     >
                         <Select options={unitOptions} />
                     </Form.Item>
@@ -303,14 +329,16 @@ export default function ProductsPage() {
                     <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
                         <Space>
                             <Button onClick={() => setModalOpen(false)}>
-                                Abbrechen
+                                {t("products.cancel")}
                             </Button>
                             <Button
                                 type="primary"
                                 htmlType="submit"
                                 loading={submitting}
                             >
-                                {editingProduct ? "Speichern" : "Erstellen"}
+                                {editingProduct
+                                    ? t("products.save")
+                                    : t("products.create")}
                             </Button>
                         </Space>
                     </Form.Item>

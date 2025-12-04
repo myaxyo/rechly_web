@@ -21,12 +21,14 @@ import {
     DeleteOutlined,
 } from "@ant-design/icons";
 import { useClientStore } from "@/store";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Client, ClientFormData } from "@/types";
 
 const { Title } = Typography;
 
 export default function ClientsPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [searchText, setSearchText] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -73,15 +75,15 @@ export default function ClientsPage() {
         try {
             if (editingClient) {
                 await editClient(editingClient.id!, values);
-                message.success("Kunde aktualisiert");
+                message.success(t("clients.updated"));
             } else {
                 await addClient(values);
-                message.success("Kunde erstellt");
+                message.success(t("clients.created"));
             }
             setModalOpen(false);
         } catch (error) {
             console.error("Error saving client:", error);
-            message.error("Fehler beim Speichern");
+            message.error(t("clients.saveError"));
         } finally {
             setSubmitting(false);
         }
@@ -90,46 +92,46 @@ export default function ClientsPage() {
     const handleDelete = async (id: string) => {
         try {
             await removeClient(id);
-            message.success("Kunde gelöscht");
+            message.success(t("clients.deleted"));
         } catch (error) {
             console.error("Error deleting client:", error);
-            message.error("Fehler beim Löschen");
+            message.error(t("clients.deleteError"));
         }
     };
 
     const columns: TableProps<Client>["columns"] = [
         {
-            title: "Name",
+            title: t("clients.name"),
             dataIndex: "name",
             key: "name",
             sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
-            title: "Kontaktperson",
+            title: t("clients.contactPerson"),
             dataIndex: "contact_person",
             key: "contact_person",
             responsive: ["md"],
         },
         {
-            title: "Stadt",
+            title: t("clients.city"),
             dataIndex: "city",
             key: "city",
             responsive: ["sm"],
         },
         {
-            title: "E-Mail",
+            title: t("clients.email"),
             dataIndex: "email",
             key: "email",
             responsive: ["lg"],
         },
         {
-            title: "Telefon",
+            title: t("clients.phone"),
             dataIndex: "phone",
             key: "phone",
             responsive: ["xl"],
         },
         {
-            title: "Aktionen",
+            title: t("clients.actions"),
             key: "actions",
             width: 120,
             render: (_, record) => (
@@ -143,15 +145,15 @@ export default function ClientsPage() {
                         }}
                     />
                     <Popconfirm
-                        title="Kunde löschen?"
-                        description="Diese Aktion kann nicht rückgängig gemacht werden."
+                        title={t("clients.deleteConfirm")}
+                        description={t("clients.deleteDesc")}
                         onConfirm={(e) => {
                             e?.stopPropagation();
                             handleDelete(record.id!);
                         }}
                         onCancel={(e) => e?.stopPropagation()}
-                        okText="Löschen"
-                        cancelText="Abbrechen"
+                        okText={t("clients.delete")}
+                        cancelText={t("clients.cancel")}
                     >
                         <Button
                             type="text"
@@ -167,7 +169,7 @@ export default function ClientsPage() {
 
     return (
         <div>
-            <Title level={4}>Kunden</Title>
+            <Title level={4}>{t("clients.title")}</Title>
 
             {/* Toolbar */}
             <div
@@ -180,7 +182,7 @@ export default function ClientsPage() {
                 }}
             >
                 <Input
-                    placeholder="Suchen..."
+                    placeholder={t("clients.search")}
                     prefix={<SearchOutlined />}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
@@ -192,7 +194,7 @@ export default function ClientsPage() {
                     icon={<PlusOutlined />}
                     onClick={openCreateModal}
                 >
-                    Neuer Kunde
+                    {t("clients.new")}
                 </Button>
             </div>
 
@@ -206,13 +208,20 @@ export default function ClientsPage() {
                     pageSize: 10,
                     showSizeChanger: true,
                     showTotal: (total, range) =>
-                        `${range[0]}-${range[1]} von ${total} Kunden`,
+                        t("clients.pagination")
+                            .replace("{0}", String(range[0]))
+                            .replace("{1}", String(range[1]))
+                            .replace("{2}", String(total)),
                 }}
             />
 
             {/* Create/Edit Modal */}
             <Modal
-                title={editingClient ? "Kunde bearbeiten" : "Neuer Kunde"}
+                title={
+                    editingClient
+                        ? t("clients.editTitle")
+                        : t("clients.newTitle")
+                }
                 open={modalOpen}
                 onCancel={() => setModalOpen(false)}
                 footer={null}
@@ -226,67 +235,87 @@ export default function ClientsPage() {
                 >
                     <Form.Item
                         name="name"
-                        label="Firmenname"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("clients.companyName")}
+                        rules={[
+                            { required: true, message: t("clients.required") },
+                        ]}
                     >
-                        <Input placeholder="Firmenname" />
+                        <Input placeholder={t("clients.companyName")} />
                     </Form.Item>
 
-                    <Form.Item name="contact_person" label="Kontaktperson">
-                        <Input placeholder="Ansprechpartner" />
+                    <Form.Item
+                        name="contact_person"
+                        label={t("clients.contactPerson")}
+                    >
+                        <Input placeholder={t("clients.contactPerson")} />
                     </Form.Item>
 
                     <Form.Item
                         name="address_line1"
-                        label="Adresse"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("clients.address")}
+                        rules={[
+                            { required: true, message: t("clients.required") },
+                        ]}
                     >
-                        <Input placeholder="Straße und Hausnummer" />
+                        <Input placeholder={t("clients.streetNumber")} />
                     </Form.Item>
 
-                    <Form.Item name="address_line2" label="Adresszusatz">
-                        <Input placeholder="Zusätzliche Adressangaben" />
+                    <Form.Item
+                        name="address_line2"
+                        label={t("clients.addressExtra")}
+                    >
+                        <Input placeholder={t("clients.addressExtra")} />
                     </Form.Item>
 
                     <Space style={{ width: "100%" }}>
                         <Form.Item
                             name="postal_code"
-                            label="PLZ"
-                            rules={[{ required: true, message: "Pflichtfeld" }]}
+                            label={t("clients.postalCode")}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t("clients.required"),
+                                },
+                            ]}
                             style={{ width: 120 }}
                         >
-                            <Input placeholder="PLZ" />
+                            <Input placeholder={t("clients.postalCode")} />
                         </Form.Item>
 
                         <Form.Item
                             name="city"
-                            label="Stadt"
-                            rules={[{ required: true, message: "Pflichtfeld" }]}
+                            label={t("clients.city")}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t("clients.required"),
+                                },
+                            ]}
                             style={{ flex: 1 }}
                         >
-                            <Input placeholder="Stadt" />
+                            <Input placeholder={t("clients.city")} />
                         </Form.Item>
                     </Space>
 
-                    <Form.Item name="country" label="Land">
-                        <Input placeholder="Land" />
+                    <Form.Item name="country" label={t("clients.country")}>
+                        <Input placeholder={t("clients.country")} />
                     </Form.Item>
 
                     <Space style={{ width: "100%" }}>
                         <Form.Item
                             name="email"
-                            label="E-Mail"
+                            label={t("clients.email")}
                             style={{ flex: 1 }}
                         >
                             <Input
-                                placeholder="email@beispiel.de"
+                                placeholder="email@example.com"
                                 type="email"
                             />
                         </Form.Item>
 
                         <Form.Item
                             name="phone"
-                            label="Telefon"
+                            label={t("clients.phone")}
                             style={{ flex: 1 }}
                         >
                             <Input placeholder="+49 123 456789" />
@@ -296,7 +325,7 @@ export default function ClientsPage() {
                     <Space style={{ width: "100%" }}>
                         <Form.Item
                             name="vat_id"
-                            label="USt-IdNr."
+                            label={t("clients.vatId")}
                             style={{ flex: 1 }}
                         >
                             <Input placeholder="DE123456789" />
@@ -304,28 +333,30 @@ export default function ClientsPage() {
 
                         <Form.Item
                             name="tax_number"
-                            label="Steuernummer"
+                            label={t("clients.taxNumber")}
                             style={{ flex: 1 }}
                         >
                             <Input placeholder="12/345/67890" />
                         </Form.Item>
                     </Space>
 
-                    <Form.Item name="leitweg_id" label="Leitweg-ID">
-                        <Input placeholder="Leitweg-ID für E-Rechnung" />
+                    <Form.Item name="leitweg_id" label={t("clients.leitwegId")}>
+                        <Input placeholder={t("clients.leitwegPlaceholder")} />
                     </Form.Item>
 
                     <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
                         <Space>
                             <Button onClick={() => setModalOpen(false)}>
-                                Abbrechen
+                                {t("clients.cancel")}
                             </Button>
                             <Button
                                 type="primary"
                                 htmlType="submit"
                                 loading={submitting}
                             >
-                                {editingClient ? "Speichern" : "Erstellen"}
+                                {editingClient
+                                    ? t("clients.save")
+                                    : t("clients.create")}
                             </Button>
                         </Space>
                     </Form.Item>

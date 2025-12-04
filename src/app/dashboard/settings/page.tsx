@@ -28,12 +28,14 @@ import {
 import type { UploadProps } from "antd";
 import { getCompanyInfo, saveCompanyInfo } from "@/lib/companyService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { UserCompany } from "@/types";
 
 const { Title, Text } = Typography;
 
 export default function SettingsPage() {
     const { user, logout, deleteAccount } = useAuth();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -70,10 +72,10 @@ export default function SettingsPage() {
                 ...values,
                 logo_base64: logoPreview || undefined,
             });
-            message.success("Einstellungen gespeichert");
+            message.success(t("settings.saved"));
         } catch (error) {
             console.error("Error saving settings:", error);
-            message.error("Fehler beim Speichern");
+            message.error(t("settings.saveError"));
         } finally {
             setSaving(false);
         }
@@ -82,13 +84,13 @@ export default function SettingsPage() {
     const handleLogoUpload: UploadProps["beforeUpload"] = (file) => {
         const isImage = file.type.startsWith("image/");
         if (!isImage) {
-            message.error("Nur Bilddateien sind erlaubt");
+            message.error(t("settings.imageOnly"));
             return false;
         }
 
         const isLt2M = file.size / 1024 / 1024 < 2;
         if (!isLt2M) {
-            message.error("Bild muss kleiner als 2MB sein");
+            message.error(t("settings.imageTooLarge"));
             return false;
         }
 
@@ -112,29 +114,28 @@ export default function SettingsPage() {
 
     const handleDeleteAccount = () => {
         Modal.confirm({
-            title: "Konto löschen",
+            title: t("settings.deleteAccountTitle"),
             icon: <ExclamationCircleOutlined />,
             content: (
                 <div>
-                    <p>Sind Sie sicher, dass Sie Ihr Konto löschen möchten?</p>
+                    <p>{t("settings.deleteAccountConfirm")}</p>
                     <p style={{ color: "#ff4d4f", fontWeight: 500 }}>
-                        Diese Aktion kann nicht rückgängig gemacht werden. Alle
-                        Ihre Daten werden unwiderruflich gelöscht.
+                        {t("settings.deleteAccountWarning")}
                     </p>
                 </div>
             ),
-            okText: "Ja, Konto löschen",
+            okText: t("settings.deleteAccountButton"),
             okType: "danger",
-            cancelText: "Abbrechen",
+            cancelText: t("settings.deleteAccountCancel"),
             onOk: async () => {
                 setDeleting(true);
                 try {
                     await deleteAccount();
-                    message.success("Ihr Konto wurde gelöscht");
+                    message.success(t("settings.accountDeleted"));
                     window.location.href = "/";
                 } catch (error) {
                     console.error("Error deleting account:", error);
-                    message.error("Fehler beim Löschen des Kontos");
+                    message.error(t("settings.deleteError"));
                 } finally {
                     setDeleting(false);
                 }
@@ -147,7 +148,7 @@ export default function SettingsPage() {
             key: "company",
             label: (
                 <span>
-                    <BankOutlined /> Unternehmen
+                    <BankOutlined /> {t("settings.company")}
                 </span>
             ),
             children: (
@@ -198,7 +199,7 @@ export default function SettingsPage() {
                                     accept="image/*"
                                 >
                                     <Button icon={<UploadOutlined />}>
-                                        Logo hochladen
+                                        {t("settings.uploadLogo")}
                                     </Button>
                                 </Upload>
                                 {logoPreview && (
@@ -207,7 +208,7 @@ export default function SettingsPage() {
                                         icon={<DeleteOutlined />}
                                         onClick={handleRemoveLogo}
                                     >
-                                        Entfernen
+                                        {t("settings.removeLogo")}
                                     </Button>
                                 )}
                             </Space>
@@ -217,35 +218,49 @@ export default function SettingsPage() {
                     {/* Company Name */}
                     <Form.Item
                         name="name"
-                        label="Firmenname"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("settings.companyName")}
+                        rules={[
+                            { required: true, message: t("settings.required") },
+                        ]}
                     >
-                        <Input placeholder="Meine Firma GmbH" />
+                        <Input placeholder={t("settings.companyName")} />
                     </Form.Item>
 
-                    <Form.Item name="legal_form" label="Rechtsform">
-                        <Input placeholder="GmbH, UG, Einzelunternehmen, etc." />
+                    <Form.Item name="legal_form" label={t("settings.legalForm")}>
+                        <Input
+                            placeholder={t("settings.legalFormPlaceholder")}
+                        />
                     </Form.Item>
 
-                    <Divider>Adresse</Divider>
+                    <Divider>{t("settings.address")}</Divider>
 
                     <Form.Item
                         name="address_line1"
-                        label="Adresse"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("settings.address")}
+                        rules={[
+                            { required: true, message: t("settings.required") },
+                        ]}
                     >
-                        <Input placeholder="Straße und Hausnummer" />
+                        <Input placeholder={t("settings.streetNumber")} />
                     </Form.Item>
 
-                    <Form.Item name="address_line2" label="Adresszusatz">
-                        <Input placeholder="Gebäude, Etage, etc." />
+                    <Form.Item
+                        name="address_line2"
+                        label={t("settings.addressExtra")}
+                    >
+                        <Input placeholder={t("settings.addressExtra")} />
                     </Form.Item>
 
                     <Space style={{ width: "100%" }}>
                         <Form.Item
                             name="postal_code"
-                            label="PLZ"
-                            rules={[{ required: true, message: "Pflichtfeld" }]}
+                            label={t("settings.postalCode")}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t("settings.required"),
+                                },
+                            ]}
                             style={{ width: 120 }}
                         >
                             <Input placeholder="12345" />
@@ -253,45 +268,53 @@ export default function SettingsPage() {
 
                         <Form.Item
                             name="city"
-                            label="Stadt"
-                            rules={[{ required: true, message: "Pflichtfeld" }]}
+                            label={t("settings.city")}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t("settings.required"),
+                                },
+                            ]}
                             style={{ flex: 1 }}
                         >
-                            <Input placeholder="Berlin" />
+                            <Input placeholder={t("settings.city")} />
                         </Form.Item>
                     </Space>
 
-                    <Form.Item name="country" label="Land">
-                        <Input placeholder="Deutschland" />
+                    <Form.Item name="country" label={t("settings.country")}>
+                        <Input placeholder={t("settings.country")} />
                     </Form.Item>
 
-                    <Divider>Kontakt</Divider>
+                    <Divider>{t("settings.contact")}</Divider>
 
                     <Form.Item
                         name="email"
-                        label="E-Mail"
+                        label={t("settings.email")}
                         rules={[
-                            { required: true, message: "Pflichtfeld" },
-                            { type: "email", message: "Ungültige E-Mail" },
+                            { required: true, message: t("settings.required") },
+                            {
+                                type: "email",
+                                message: t("settings.invalidEmail"),
+                            },
                         ]}
                     >
-                        <Input placeholder="info@firma.de" />
+                        <Input placeholder="info@company.com" />
                     </Form.Item>
 
-                    <Form.Item name="phone" label="Telefon">
+                    <Form.Item name="phone" label={t("settings.phone")}>
                         <Input placeholder="+49 30 123456" />
                     </Form.Item>
 
-                    <Form.Item name="website" label="Website">
-                        <Input placeholder="https://www.firma.de" />
+                    <Form.Item name="website" label={t("settings.website")}>
+                        <Input placeholder="https://www.company.com" />
                     </Form.Item>
 
-                    <Divider>Steuerinformationen</Divider>
+                    <Divider>{t("settings.taxInfo")}</Divider>
 
                     <Space style={{ width: "100%" }}>
                         <Form.Item
                             name="vat_id"
-                            label="USt-IdNr."
+                            label={t("settings.vatId")}
                             style={{ flex: 1 }}
                         >
                             <Input placeholder="DE123456789" />
@@ -299,7 +322,7 @@ export default function SettingsPage() {
 
                         <Form.Item
                             name="tax_number"
-                            label="Steuernummer"
+                            label={t("settings.taxNumber")}
                             style={{ flex: 1 }}
                         >
                             <Input placeholder="12/345/67890" />
@@ -308,49 +331,56 @@ export default function SettingsPage() {
 
                     <Form.Item
                         name="commercial_register_number"
-                        label="Handelsregisternummer"
+                        label={t("settings.commercialRegister")}
                     >
                         <Input placeholder="HRB 12345" />
                     </Form.Item>
 
-                    <Form.Item name="registry_court" label="Registergericht">
-                        <Input placeholder="Amtsgericht Berlin-Charlottenburg" />
+                    <Form.Item
+                        name="registry_court"
+                        label={t("settings.registryCourt")}
+                    >
+                        <Input placeholder={t("settings.registryCourt")} />
                     </Form.Item>
 
                     <Form.Item
                         name="managing_directors"
-                        label="Geschäftsführer"
+                        label={t("settings.managingDirectors")}
                     >
-                        <Input placeholder="Max Mustermann" />
+                        <Input placeholder={t("settings.managingDirectors")} />
                     </Form.Item>
 
-                    <Divider>Bankverbindung</Divider>
+                    <Divider>{t("settings.bankDetails")}</Divider>
 
-                    <Form.Item name="bank_name" label="Bank">
-                        <Input placeholder="Deutsche Bank" />
+                    <Form.Item name="bank_name" label={t("settings.bankName")}>
+                        <Input placeholder={t("settings.bankName")} />
                     </Form.Item>
 
                     <Form.Item
                         name="bank_iban"
-                        label="IBAN"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("settings.iban")}
+                        rules={[
+                            { required: true, message: t("settings.required") },
+                        ]}
                     >
                         <Input placeholder="DE89 3704 0044 0532 0130 00" />
                     </Form.Item>
 
-                    <Form.Item name="bank_bic" label="BIC">
+                    <Form.Item name="bank_bic" label={t("settings.bic")}>
                         <Input placeholder="COBADEFFXXX" />
                     </Form.Item>
 
-                    <Divider>Rechnungseinstellungen</Divider>
+                    <Divider>{t("settings.invoiceSettings")}</Divider>
 
                     <Form.Item
                         name="payment_terms_default"
-                        label="Standard-Zahlungsbedingungen"
-                        rules={[{ required: true, message: "Pflichtfeld" }]}
+                        label={t("settings.paymentTerms")}
+                        rules={[
+                            { required: true, message: t("settings.required") },
+                        ]}
                     >
                         <Input.TextArea
-                            placeholder="Zahlbar innerhalb von 14 Tagen ohne Abzug."
+                            placeholder={t("settings.paymentTermsPlaceholder")}
                             rows={2}
                         />
                     </Form.Item>
@@ -363,7 +393,7 @@ export default function SettingsPage() {
                             loading={saving}
                             size="large"
                         >
-                            Speichern
+                            {t("settings.save")}
                         </Button>
                     </Form.Item>
                 </Form>
@@ -373,21 +403,27 @@ export default function SettingsPage() {
             key: "account",
             label: (
                 <span>
-                    <UserOutlined /> Konto
+                    <UserOutlined /> {t("settings.account")}
                 </span>
             ),
             children: (
                 <div>
                     <Card>
-                        <Title level={5}>Kontoinformationen</Title>
+                        <Title level={5}>{t("settings.accountInfo")}</Title>
                         <Space direction="vertical" style={{ width: "100%" }}>
                             <div>
-                                <Text type="secondary">E-Mail:</Text>
+                                <Text type="secondary">
+                                    {t("settings.accountEmail")}
+                                </Text>
                                 <br />
-                                <Text strong>{user?.email || "Gast"}</Text>
+                                <Text strong>
+                                    {user?.email || t("settings.guest")}
+                                </Text>
                             </div>
                             <div>
-                                <Text type="secondary">Konto-ID:</Text>
+                                <Text type="secondary">
+                                    {t("settings.accountId")}
+                                </Text>
                                 <br />
                                 <Text code>{user?.$id}</Text>
                             </div>
@@ -395,14 +431,11 @@ export default function SettingsPage() {
                     </Card>
 
                     <Card style={{ marginTop: 16 }}>
-                        <Title level={5}>Abmelden</Title>
-                        <Text type="secondary">
-                            Sie werden von Ihrem Konto abgemeldet und zur
-                            Anmeldeseite weitergeleitet.
-                        </Text>
+                        <Title level={5}>{t("settings.logout")}</Title>
+                        <Text type="secondary">{t("settings.logoutDesc")}</Text>
                         <div style={{ marginTop: 16 }}>
                             <Button danger onClick={handleLogout}>
-                                Abmelden
+                                {t("settings.logout")}
                             </Button>
                         </div>
                     </Card>
@@ -414,13 +447,10 @@ export default function SettingsPage() {
                         }}
                     >
                         <Title level={5} style={{ color: "#ff4d4f" }}>
-                            Konto löschen
+                            {t("settings.deleteAccount")}
                         </Title>
                         <Text type="secondary">
-                            Wenn Sie Ihr Konto löschen, werden alle Ihre Daten
-                            unwiderruflich entfernt. Dies umfasst alle
-                            Rechnungen, Kunden, Produkte und
-                            Unternehmenseinstellungen.
+                            {t("settings.deleteAccountWarning")}
                         </Text>
                         <div style={{ marginTop: 16 }}>
                             <Button
@@ -430,7 +460,7 @@ export default function SettingsPage() {
                                 loading={deleting}
                                 icon={<DeleteOutlined />}
                             >
-                                Konto löschen
+                                {t("settings.deleteAccount")}
                             </Button>
                         </div>
                     </Card>
@@ -441,7 +471,7 @@ export default function SettingsPage() {
 
     return (
         <div>
-            <Title level={4}>Einstellungen</Title>
+            <Title level={4}>{t("settings.title")}</Title>
             <Tabs items={tabItems} />
         </div>
     );

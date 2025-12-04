@@ -29,6 +29,7 @@ import {
     SendOutlined,
 } from "@ant-design/icons";
 import { useInvoiceStore } from "@/store";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
 import type { InvoiceWithClient, Invoice } from "@/types";
@@ -40,16 +41,17 @@ const statusColors: Record<string, string> = {
     cancelled: "error",
 };
 
-const statusLabels: Record<string, string> = {
-    draft: "Entwurf",
-    sent: "Versendet",
-    paid: "Bezahlt",
-    cancelled: "Storniert",
-};
-
 export default function InvoicesPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [searchText, setSearchText] = useState("");
+
+    const statusLabels: Record<string, string> = {
+        draft: t("status.draft"),
+        sent: t("status.sent"),
+        paid: t("status.paid"),
+        cancelled: t("status.cancelled"),
+    };
 
     // Zustand store
     const {
@@ -80,18 +82,18 @@ export default function InvoicesPage() {
 
     const handleDelete = (id: string) => {
         Modal.confirm({
-            title: "Rechnung löschen?",
-            content: "Diese Aktion kann nicht rückgängig gemacht werden.",
-            okText: "Löschen",
+            title: t("invoices.deleteConfirm"),
+            content: t("invoices.deleteDesc"),
+            okText: t("invoices.delete"),
             okType: "danger",
-            cancelText: "Abbrechen",
+            cancelText: t("invoices.cancel"),
             onOk: async () => {
                 try {
                     await removeInvoice(id);
-                    message.success("Rechnung gelöscht");
+                    message.success(t("invoices.deleted"));
                 } catch (error) {
                     console.error("Error deleting invoice:", error);
-                    message.error("Fehler beim Löschen");
+                    message.error(t("invoices.deleteError"));
                 }
             },
         });
@@ -103,10 +105,10 @@ export default function InvoicesPage() {
     ) => {
         try {
             await updateStatus(id, status);
-            message.success("Status aktualisiert");
+            message.success(t("invoices.statusUpdated"));
         } catch (error) {
             console.error("Error updating status:", error);
-            message.error("Fehler beim Aktualisieren");
+            message.error(t("invoices.updateError"));
         }
     };
 
@@ -114,19 +116,19 @@ export default function InvoicesPage() {
         {
             key: "view",
             icon: <EyeOutlined />,
-            label: "Anzeigen",
+            label: t("invoices.view"),
             onClick: () => router.push(`/dashboard/invoices/${record.id}`),
         },
         {
             key: "edit",
             icon: <EditOutlined />,
-            label: "Bearbeiten",
+            label: t("invoices.edit"),
             onClick: () => router.push(`/dashboard/invoices/${record.id}/edit`),
         },
         {
             key: "pdf",
             icon: <FilePdfOutlined />,
-            label: "PDF herunterladen",
+            label: t("invoices.downloadPdf"),
             onClick: () => router.push(`/dashboard/invoices/${record.id}/pdf`),
         },
         { type: "divider" },
@@ -135,7 +137,7 @@ export default function InvoicesPage() {
                   {
                       key: "send",
                       icon: <SendOutlined />,
-                      label: "Als versendet markieren",
+                      label: t("invoices.markSent"),
                       onClick: () => handleStatusChange(record.id!, "sent"),
                   },
               ]
@@ -145,7 +147,7 @@ export default function InvoicesPage() {
                   {
                       key: "paid",
                       icon: <CheckCircleOutlined />,
-                      label: "Als bezahlt markieren",
+                      label: t("invoices.markPaid"),
                       onClick: () => handleStatusChange(record.id!, "paid"),
                   },
               ]
@@ -154,7 +156,7 @@ export default function InvoicesPage() {
         {
             key: "delete",
             icon: <DeleteOutlined />,
-            label: "Löschen",
+            label: t("invoices.delete"),
             danger: true,
             onClick: () => handleDelete(record.id!),
         },
@@ -162,19 +164,19 @@ export default function InvoicesPage() {
 
     const columns: TableProps<InvoiceWithClient>["columns"] = [
         {
-            title: "Rechnungsnr.",
+            title: t("invoices.number"),
             dataIndex: "invoice_number",
             key: "invoice_number",
             sorter: (a, b) => a.invoice_number.localeCompare(b.invoice_number),
         },
         {
-            title: "Kunde",
+            title: t("invoices.client"),
             dataIndex: ["client", "name"],
             key: "client",
             render: (_, record) => record.client?.name || "—",
         },
         {
-            title: "Datum",
+            title: t("invoices.date"),
             dataIndex: "issue_date",
             key: "issue_date",
             render: (date) => formatDateGerman(date),
@@ -183,7 +185,7 @@ export default function InvoicesPage() {
                 new Date(b.issue_date).getTime(),
         },
         {
-            title: "Betrag",
+            title: t("invoices.amount"),
             dataIndex: "total_gross",
             key: "total_gross",
             render: (amount) => formatCurrency(amount),
@@ -191,17 +193,17 @@ export default function InvoicesPage() {
             align: "right",
         },
         {
-            title: "Status",
+            title: t("invoices.status"),
             dataIndex: "status",
             key: "status",
             render: (status) => (
                 <Tag color={statusColors[status]}>{statusLabels[status]}</Tag>
             ),
             filters: [
-                { text: "Entwurf", value: "draft" },
-                { text: "Versendet", value: "sent" },
-                { text: "Bezahlt", value: "paid" },
-                { text: "Storniert", value: "cancelled" },
+                { text: t("status.draft"), value: "draft" },
+                { text: t("status.sent"), value: "sent" },
+                { text: t("status.paid"), value: "paid" },
+                { text: t("status.cancelled"), value: "cancelled" },
             ],
             onFilter: (value, record) => record.status === value,
         },
@@ -226,13 +228,16 @@ export default function InvoicesPage() {
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
                 <Col xs={12} sm={6}>
                     <Card size="small">
-                        <Statistic title="Gesamt" value={stats?.total ?? 0} />
+                        <Statistic
+                            title={t("invoices.total")}
+                            value={stats?.total ?? 0}
+                        />
                     </Card>
                 </Col>
                 <Col xs={12} sm={6}>
                     <Card size="small">
                         <Statistic
-                            title="Offen"
+                            title={t("invoices.open")}
                             value={stats?.unpaidAmount ?? 0}
                             precision={2}
                             suffix="€"
@@ -243,7 +248,7 @@ export default function InvoicesPage() {
                 <Col xs={12} sm={6}>
                     <Card size="small">
                         <Statistic
-                            title="Bezahlt"
+                            title={t("status.paid")}
                             value={stats?.paidAmount ?? 0}
                             precision={2}
                             suffix="€"
@@ -253,7 +258,10 @@ export default function InvoicesPage() {
                 </Col>
                 <Col xs={12} sm={6}>
                     <Card size="small">
-                        <Statistic title="Entwürfe" value={stats?.draft ?? 0} />
+                        <Statistic
+                            title={t("dashboard.drafts")}
+                            value={stats?.draft ?? 0}
+                        />
                     </Card>
                 </Col>
             </Row>
@@ -269,7 +277,7 @@ export default function InvoicesPage() {
                 }}
             >
                 <Input
-                    placeholder="Suchen..."
+                    placeholder={t("invoices.search")}
                     prefix={<SearchOutlined />}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
@@ -281,7 +289,7 @@ export default function InvoicesPage() {
                     icon={<PlusOutlined />}
                     onClick={() => router.push("/dashboard/invoices/create")}
                 >
-                    Neue Rechnung
+                    {t("invoices.new")}
                 </Button>
             </div>
 
@@ -295,7 +303,10 @@ export default function InvoicesPage() {
                     pageSize: 10,
                     showSizeChanger: true,
                     showTotal: (total, range) =>
-                        `${range[0]}-${range[1]} von ${total} Rechnungen`,
+                        t("invoices.pagination")
+                            .replace("{0}", String(range[0]))
+                            .replace("{1}", String(range[1]))
+                            .replace("{2}", String(total)),
                 }}
                 onRow={(record) => ({
                     onClick: () =>
