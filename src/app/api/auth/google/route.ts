@@ -8,7 +8,26 @@ import { getGoogleOAuthURL } from "@/lib/appwrite-server";
  */
 export async function GET(request: NextRequest) {
     try {
-        const origin = request.nextUrl.origin;
+        // Get the origin from various sources (handle proxies/load balancers)
+        const forwardedHost = request.headers.get("x-forwarded-host");
+        const forwardedProto =
+            request.headers.get("x-forwarded-proto") || "https";
+        const host = request.headers.get("host");
+
+        // Determine the actual origin
+        let origin: string;
+        if (forwardedHost) {
+            origin = `${forwardedProto}://${forwardedHost}`;
+        } else if (host && !host.includes("localhost")) {
+            origin = `https://${host}`;
+        } else if (process.env.NEXT_PUBLIC_APP_URL) {
+            origin = process.env.NEXT_PUBLIC_APP_URL;
+        } else {
+            origin = request.nextUrl.origin;
+        }
+
+        console.log("OAuth origin detection:", { forwardedHost, host, origin });
+
         const successUrl = `${origin}/api/auth/callback`;
         const failureUrl = `${origin}/login?error=oauth_failed`;
 
