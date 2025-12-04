@@ -189,7 +189,7 @@ function LoginForm() {
                         icon={<GoogleOutlined />}
                         block
                         size="large"
-                        onClick={googleLogin}
+                        href="/api/auth/google"
                     >
                         {t("auth.withGoogle")}
                     </Button>

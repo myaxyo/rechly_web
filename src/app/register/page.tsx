@@ -184,7 +184,7 @@ export default function RegisterPage() {
                         icon={<GoogleOutlined />}
                         block
                         size="large"
-                        onClick={googleLogin}
+                        href="/api/auth/google"
                     >
                         {t("auth.registerWithGoogle")}
                     </Button>

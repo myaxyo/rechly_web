@@ -11,6 +11,7 @@ const { Text } = Typography;
 
 /**
  * OAuth Callback Handler Content
+ * Handles both client-side OAuth (old flow) and SSR OAuth (new flow)
  */
 function CallbackContent() {
     const router = useRouter();
@@ -24,7 +25,7 @@ function CallbackContent() {
                 // Log all URL params for debugging
                 const allParams = Object.fromEntries(searchParams.entries());
                 console.log("OAuth callback URL params:", allParams);
-                
+
                 // Check for error in URL params
                 const errorParam = searchParams.get("error");
                 if (errorParam) {
@@ -34,19 +35,41 @@ function CallbackContent() {
                     return;
                 }
 
-                setStatus("Checking session...");
-                
-                // Give Appwrite a moment to process the OAuth callback
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+                // Check if this is from SSR flow
+                const fromSSR = searchParams.get("from") === "ssr";
+                console.log(
+                    "OAuth flow type:",
+                    fromSSR ? "SSR" : "Client-side"
+                );
 
-                // Check if we have a valid session directly with Appwrite
+                setStatus("Checking session...");
+
+                // For SSR flow, the session is already set via cookie
+                // For client-side flow, give Appwrite a moment to process
+                if (!fromSSR) {
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                }
+
+                // Check if we have a valid session
+                // For SSR flow, we check via API route that reads the cookie
                 let user;
                 try {
-                    user = await account.get();
+                    if (fromSSR) {
+                        // For SSR, check session via API
+                        const response = await fetch("/api/auth/user");
+                        if (response.ok) {
+                            user = await response.json();
+                        }
+                    } else {
+                        // For client-side, use Appwrite SDK directly
+                        user = await account.get();
+                    }
                     console.log("Session check result:", user);
                 } catch (sessionError) {
                     console.error("Session check failed:", sessionError);
-                    setError("No valid session found. Please try logging in again.");
+                    setError(
+                        "No valid session found. Please try logging in again."
+                    );
                     setTimeout(() => router.push("/login"), 3000);
                     return;
                 }
@@ -59,7 +82,9 @@ function CallbackContent() {
                 }
 
                 console.log("OAuth user found:", user.$id, user.email);
-                setStatus(`Welcome ${user.name || user.email}! Checking setup...`);
+                setStatus(
+                    `Welcome ${user.name || user.email}! Checking setup...`
+                );
 
                 // Clear cached data from previous session
                 useClientStore.getState().clearCache();
@@ -125,7 +150,8 @@ export default function AuthCallbackPage() {
                         justifyContent: "center",
                         alignItems: "center",
                         height: "100vh",
-                        background: "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
+                        background:
+                            "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
                     }}
                 >
                     <Spin size="large" />
