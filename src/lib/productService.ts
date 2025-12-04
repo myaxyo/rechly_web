@@ -1,43 +1,25 @@
-import { Query } from "appwrite";
-import {
-    databases,
-    DATABASE_ID,
-    COLLECTIONS,
-    generateId,
-    getCurrentUserId,
-    getUserPermissions,
-} from "./appwrite";
 import type { Product, ProductFormData } from "@/types";
 
 /**
- * Product Service - CRUD operations for Appwrite
- * Uses camelCase field names to match Appwrite schema
- * Filters by userId for data isolation between users
+ * Product Service - CRUD operations via API routes
+ * All Appwrite calls are proxied through server-side API routes
+ * to work with SSR authentication
  */
 
 /**
  * Get all products for the current user
- * Filters by userId attribute in Appwrite schema
  */
 export const getAllProducts = async (): Promise<Product[]> => {
     try {
-        const userId = await getCurrentUserId();
-        if (!userId) {
-            console.log("No user logged in, returning empty products");
-            return [];
+        const res = await fetch("/api/products");
+        if (!res.ok) {
+            if (res.status === 401) {
+                console.log("Not authenticated, returning empty products");
+                return [];
+            }
+            throw new Error("Failed to fetch products");
         }
-
-        // Query with userId filter for data isolation
-        const response = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTIONS.PRODUCTS,
-            [
-                Query.equal("userId", userId),
-                Query.orderDesc("$createdAt"),
-                Query.limit(1000),
-            ]
-        );
-        return mapDocumentsToProducts(response.documents);
+        return res.json();
     } catch (error) {
         console.error("Error fetching products:", error);
         throw error;
@@ -45,44 +27,16 @@ export const getAllProducts = async (): Promise<Product[]> => {
 };
 
 /**
- * Map Appwrite documents to Product type
- */
-const mapDocumentsToProducts = (
-    documents: Array<Record<string, unknown>>
-): Product[] => {
-    return documents.map((doc) => ({
-        id: doc.$id as string,
-        name: doc.name as string,
-        description: (doc.description as string | null) ?? undefined,
-        price: doc.price as number,
-        tax_rate_percent: (doc.taxRatePercent as number) ?? 19,
-        unit_of_measure: (doc.unitOfMeasure as string) || "Stück",
-        created_at: new Date(doc.$createdAt as string).getTime(),
-        updated_at: new Date(doc.$updatedAt as string).getTime(),
-    }));
-};
-
-/**
  * Get product by ID
  */
 export const getProductById = async (id: string): Promise<Product | null> => {
     try {
-        const doc = await databases.getDocument(
-            DATABASE_ID,
-            COLLECTIONS.PRODUCTS,
-            id
-        );
-
-        return {
-            id: doc.$id,
-            name: doc.name,
-            description: doc.description,
-            price: doc.price,
-            tax_rate_percent: doc.taxRatePercent ?? 19,
-            unit_of_measure: doc.unitOfMeasure || "Stück",
-            created_at: new Date(doc.$createdAt).getTime(),
-            updated_at: new Date(doc.$updatedAt).getTime(),
-        };
+        const res = await fetch(`/api/products/${id}`);
+        if (res.status === 404) return null;
+        if (!res.ok) {
+            throw new Error("Failed to fetch product");
+        }
+        return res.json();
     } catch (error) {
         console.error("Error fetching product:", error);
         return null;
@@ -90,48 +44,24 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 };
 
 /**
- * Create new product with user-specific permissions
+ * Create new product
  */
 export const createProduct = async (
     data: ProductFormData
 ): Promise<Product> => {
     try {
-        const userId = await getCurrentUserId();
-        if (!userId) {
-            throw new Error("Must be logged in to create products");
+        const res = await fetch("/api/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || "Failed to create product");
         }
 
-        const productId = generateId();
-
-        // Prepare document data with userId for Appwrite schema
-        const docData: Record<string, unknown> = {
-            userId: userId,
-            name: data.name,
-            description: data.description || null,
-            price: data.price,
-            taxRatePercent: data.tax_rate_percent,
-            unitOfMeasure: data.unit_of_measure,
-        };
-
-        // Create with user-specific permissions for Document Security
-        const doc = await databases.createDocument(
-            DATABASE_ID,
-            COLLECTIONS.PRODUCTS,
-            productId,
-            docData,
-            getUserPermissions(userId)
-        );
-
-        return {
-            id: doc.$id,
-            name: doc.name,
-            description: doc.description,
-            price: doc.price,
-            tax_rate_percent: doc.taxRatePercent,
-            unit_of_measure: doc.unitOfMeasure,
-            created_at: new Date(doc.$createdAt).getTime(),
-            updated_at: new Date(doc.$updatedAt).getTime(),
-        };
+        return res.json();
     } catch (error) {
         console.error("Error creating product:", error);
         throw error;
@@ -146,34 +76,18 @@ export const updateProduct = async (
     data: Partial<ProductFormData>
 ): Promise<Product> => {
     try {
-        const updateData: Record<string, unknown> = {};
+        const res = await fetch(`/api/products/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
 
-        if (data.name !== undefined) updateData.name = data.name;
-        if (data.description !== undefined)
-            updateData.description = data.description || null;
-        if (data.price !== undefined) updateData.price = data.price;
-        if (data.tax_rate_percent !== undefined)
-            updateData.taxRatePercent = data.tax_rate_percent;
-        if (data.unit_of_measure !== undefined)
-            updateData.unitOfMeasure = data.unit_of_measure;
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || "Failed to update product");
+        }
 
-        const doc = await databases.updateDocument(
-            DATABASE_ID,
-            COLLECTIONS.PRODUCTS,
-            id,
-            updateData
-        );
-
-        return {
-            id: doc.$id,
-            name: doc.name,
-            description: doc.description,
-            price: doc.price,
-            tax_rate_percent: doc.taxRatePercent,
-            unit_of_measure: doc.unitOfMeasure,
-            created_at: new Date(doc.$createdAt).getTime(),
-            updated_at: new Date(doc.$updatedAt).getTime(),
-        };
+        return res.json();
     } catch (error) {
         console.error("Error updating product:", error);
         throw error;
@@ -185,7 +99,14 @@ export const updateProduct = async (
  */
 export const deleteProduct = async (id: string): Promise<void> => {
     try {
-        await databases.deleteDocument(DATABASE_ID, COLLECTIONS.PRODUCTS, id);
+        const res = await fetch(`/api/products/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || "Failed to delete product");
+        }
     } catch (error) {
         console.error("Error deleting product:", error);
         throw error;

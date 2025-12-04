@@ -1,12 +1,5 @@
 import { create } from "zustand";
 import type { Product, ProductFormData } from "@/types";
-import {
-    getAllProducts as fetchAllProducts,
-    getProductById as fetchProductById,
-    createProduct as apiCreateProduct,
-    updateProduct as apiUpdateProduct,
-    deleteProduct as apiDeleteProduct,
-} from "@/lib/productService";
 
 interface ProductStore {
     products: Product[];
@@ -27,6 +20,65 @@ interface ProductStore {
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// API helper functions that use server-side routes
+const apiGetProducts = async (): Promise<Product[]> => {
+    const res = await fetch("/api/products");
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to fetch products");
+    }
+    return res.json();
+};
+
+const apiGetProduct = async (id: string): Promise<Product | null> => {
+    const res = await fetch(`/api/products/${id}`);
+    if (res.status === 404) return null;
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to fetch product");
+    }
+    return res.json();
+};
+
+const apiCreateProduct = async (data: ProductFormData): Promise<Product> => {
+    const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create product");
+    }
+    return res.json();
+};
+
+const apiUpdateProduct = async (
+    id: string,
+    data: Partial<ProductFormData>
+): Promise<Product> => {
+    const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update product");
+    }
+    return res.json();
+};
+
+const apiDeleteProduct = async (id: string): Promise<void> => {
+    const res = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to delete product");
+    }
+};
 
 export const useProductStore = create<ProductStore>((set, get) => ({
     products: [],
@@ -51,7 +103,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
         set({ loading: true, error: null });
         try {
-            const products = await fetchAllProducts();
+            const products = await apiGetProducts();
             set({ products, loading: false, lastFetched: Date.now() });
         } catch (error) {
             set({
@@ -71,7 +123,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         if (cached) return cached;
 
         // Fetch from API if not in cache
-        return await fetchProductById(id);
+        return await apiGetProduct(id);
     },
 
     addProduct: async (data: ProductFormData) => {

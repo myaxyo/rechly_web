@@ -1,93 +1,42 @@
-import { Query } from "appwrite";
-import {
-    databases,
-    DATABASE_ID,
-    COLLECTIONS,
-    generateId,
-    getCurrentUserId,
-    getUserPermissions,
-} from "./appwrite";
 import type {
-    Invoice,
-    InvoiceItem,
     InvoiceWithClient,
     InvoiceWithDetails,
     InvoiceFormData,
 } from "@/types";
-import { getClientById } from "./clientService";
-import {
-    calculateInvoiceTotals,
-    calculateLineItemTotals,
-} from "./currencyUtils";
 
 /**
- * Invoice Service - CRUD operations for Appwrite
- * Uses camelCase field names to match Appwrite schema
- * Filters by userId for data isolation between users
+ * Invoice Service - CRUD operations via API routes
+ * All Appwrite calls are proxied through server-side API routes
+ * to work with SSR authentication
  */
 
 /**
- * Map Appwrite document to Invoice base
+ * Invoice statistics type
  */
-const mapDocumentToInvoice = (doc: Record<string, unknown>): Invoice => ({
-    id: doc.$id as string,
-    client_id: doc.clientId as string,
-    invoice_number: doc.invoiceNumber as string,
-    issue_date: doc.issueDate as string,
-    due_date: (doc.dueDate as string | null) ?? undefined,
-    subtotal: (doc.subtotal as number) ?? 0,
-    total_vat: (doc.totalVat as number) ?? 0,
-    total_gross: (doc.totalGross as number) ?? 0,
-    status: ((doc.status as string) || "draft") as
-        | "draft"
-        | "sent"
-        | "paid"
-        | "cancelled",
-    notes: (doc.notes as string | null) ?? undefined,
-    purchase_order_ref: (doc.purchaseOrderRef as string | null) ?? undefined,
-    delivery_date: (doc.deliveryDate as string | null) ?? undefined,
-    payment_terms: (doc.paymentTerms as string | null) ?? undefined,
-    created_at: new Date(doc.$createdAt as string).getTime(),
-    updated_at: new Date(doc.$updatedAt as string).getTime(),
-});
+export interface InvoiceStats {
+    total: number;
+    draft: number;
+    sent: number;
+    paid: number;
+    cancelled: number;
+    paidAmount: number;
+    unpaidAmount: number;
+}
 
 /**
  * Get all invoices with client info
- * Filters by userId attribute in Appwrite schema
  */
 export const getAllInvoices = async (): Promise<InvoiceWithClient[]> => {
     try {
-        const userId = await getCurrentUserId();
-        if (!userId) {
-            console.log("No user logged in, returning empty invoices");
-            return [];
+        const res = await fetch("/api/invoices");
+        if (!res.ok) {
+            if (res.status === 401) {
+                console.log("Not authenticated, returning empty invoices");
+                return [];
+            }
+            throw new Error("Failed to fetch invoices");
         }
-
-        // Query with userId filter for data isolation
-        const response = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTIONS.INVOICES,
-            [
-                Query.equal("userId", userId),
-                Query.orderDesc("$createdAt"),
-                Query.limit(1000),
-            ]
-        );
-
-        const invoices: InvoiceWithClient[] = [];
-
-        for (const doc of response.documents) {
-            const client = doc.clientId
-                ? await getClientById(doc.clientId as string)
-                : undefined;
-
-            invoices.push({
-                ...mapDocumentToInvoice(doc),
-                client: client || undefined,
-            });
-        }
-
-        return invoices;
+        return res.json();
     } catch (error) {
         console.error("Error fetching invoices:", error);
         throw error;
@@ -95,63 +44,18 @@ export const getAllInvoices = async (): Promise<InvoiceWithClient[]> => {
 };
 
 /**
- * Get invoice by ID with all details
+ * Get invoice by ID with all details (items, client)
  */
 export const getInvoiceById = async (
     id: string
 ): Promise<InvoiceWithDetails | null> => {
     try {
-        const doc = await databases.getDocument(
-            DATABASE_ID,
-            COLLECTIONS.INVOICES,
-            id
-        );
-
-        const client = doc.clientId
-            ? await getClientById(doc.clientId)
-            : undefined;
-
-        // Get invoice items
-        const itemsResponse = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTIONS.INVOICE_ITEMS,
-            [Query.equal("invoiceId", id), Query.limit(100)]
-        );
-
-        const items: InvoiceItem[] = itemsResponse.documents.map((item) => ({
-            id: item.$id,
-            invoice_id: item.invoiceId,
-            product_id: item.productId,
-            description: item.description,
-            quantity: item.quantity,
-            unit_of_measure: item.unitOfMeasure || "Stück",
-            price: item.price,
-            tax_rate_percent: item.taxRatePercent ?? 19,
-            discount_percent: item.discountPercent ?? 0,
-            subtotal: item.subtotal ?? 0,
-            tax_amount: item.taxAmount ?? 0,
-            total: item.total ?? 0,
-        }));
-
-        return {
-            id: doc.$id,
-            client_id: doc.clientId,
-            invoice_number: doc.invoiceNumber,
-            issue_date: doc.issueDate,
-            due_date: doc.dueDate,
-            subtotal: doc.subtotal ?? 0,
-            total_vat: doc.totalVat ?? 0,
-            total_gross: doc.totalGross ?? 0,
-            status: doc.status || "draft",
-            notes: doc.notes,
-            purchase_order_ref: doc.purchaseOrderRef,
-            delivery_date: doc.deliveryDate,
-            payment_terms: doc.paymentTerms,
-            created_at: new Date(doc.$createdAt).getTime(),
-            updated_at: new Date(doc.$updatedAt).getTime(),
-            client: client || undefined,
-            items,
-        };
+        const res = await fetch(`/api/invoices/${id}`);
+        if (res.status === 404) return null;
+        if (!res.ok) {
+            throw new Error("Failed to fetch invoice");
+        }
+        return res.json();
     } catch (error) {
         console.error("Error fetching invoice:", error);
         return null;
@@ -163,79 +67,19 @@ export const getInvoiceById = async (
  */
 export const createInvoice = async (data: InvoiceFormData): Promise<string> => {
     try {
-        const userId = await getCurrentUserId();
-        if (!userId) {
-            throw new Error("Must be logged in to create invoices");
+        const res = await fetch("/api/invoices", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || "Failed to create invoice");
         }
 
-        const invoiceId = generateId();
-        const permissions = getUserPermissions(userId);
-
-        // Calculate totals
-        const totals = calculateInvoiceTotals(
-            data.items.map((item) => ({
-                quantity: item.quantity,
-                price: item.price,
-                tax_rate_percent: item.tax_rate_percent,
-                discount_percent: item.discount_percent || 0,
-            }))
-        );
-
-        // Create invoice document with user permissions
-        await databases.createDocument(
-            DATABASE_ID,
-            COLLECTIONS.INVOICES,
-            invoiceId,
-            {
-                userId: userId,
-                clientId: data.client_id,
-                invoiceNumber: data.invoice_number,
-                issueDate: data.issue_date,
-                dueDate: data.due_date || null,
-                subtotal: totals.netAfterDiscount,
-                totalVat: totals.totalVAT,
-                totalGross: totals.totalGross,
-                status: "draft",
-                notes: data.notes || null,
-                purchaseOrderRef: data.purchase_order_ref || null,
-                deliveryDate: data.delivery_date || null,
-                paymentTerms: data.payment_terms || null,
-            },
-            permissions
-        );
-
-        // Create invoice items
-        for (const item of data.items) {
-            const itemCalc = calculateLineItemTotals(
-                item.quantity,
-                item.price,
-                item.tax_rate_percent,
-                item.discount_percent || 0
-            );
-
-            await databases.createDocument(
-                DATABASE_ID,
-                COLLECTIONS.INVOICE_ITEMS,
-                generateId(),
-                {
-                    userId: userId,
-                    invoiceId: invoiceId,
-                    productId: item.product_id || null,
-                    description: item.description,
-                    quantity: item.quantity,
-                    unitOfMeasure: item.unit_of_measure,
-                    price: item.price,
-                    taxRatePercent: item.tax_rate_percent,
-                    discountPercent: item.discount_percent || 0,
-                    subtotal: itemCalc.subtotal,
-                    taxAmount: itemCalc.taxAmount,
-                    total: itemCalc.total,
-                },
-                permissions
-            );
-        }
-
-        return invoiceId;
+        const result = await res.json();
+        return result.id;
     } catch (error) {
         console.error("Error creating invoice:", error);
         throw error;
@@ -250,9 +94,16 @@ export const updateInvoiceStatus = async (
     status: string
 ): Promise<void> => {
     try {
-        await databases.updateDocument(DATABASE_ID, COLLECTIONS.INVOICES, id, {
-            status,
+        const res = await fetch(`/api/invoices/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
         });
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || "Failed to update invoice status");
+        }
     } catch (error) {
         console.error("Error updating invoice status:", error);
         throw error;
@@ -264,23 +115,14 @@ export const updateInvoiceStatus = async (
  */
 export const deleteInvoice = async (id: string): Promise<void> => {
     try {
-        // First delete all invoice items
-        const itemsResponse = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTIONS.INVOICE_ITEMS,
-            [Query.equal("invoiceId", id)]
-        );
+        const res = await fetch(`/api/invoices/${id}`, {
+            method: "DELETE",
+        });
 
-        for (const item of itemsResponse.documents) {
-            await databases.deleteDocument(
-                DATABASE_ID,
-                COLLECTIONS.INVOICE_ITEMS,
-                item.$id
-            );
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || "Failed to delete invoice");
         }
-
-        // Then delete the invoice
-        await databases.deleteDocument(DATABASE_ID, COLLECTIONS.INVOICES, id);
     } catch (error) {
         console.error("Error deleting invoice:", error);
         throw error;
@@ -290,51 +132,21 @@ export const deleteInvoice = async (id: string): Promise<void> => {
 /**
  * Get invoice statistics
  */
-export interface InvoiceStats {
-    total: number;
-    draft: number;
-    sent: number;
-    paid: number;
-    cancelled: number;
-    paidAmount: number;
-    unpaidAmount: number;
-}
-
 export const getInvoiceStats = async (): Promise<InvoiceStats> => {
     try {
-        const invoices = await getAllInvoices();
-
-        const stats: InvoiceStats = {
-            total: invoices.length,
-            draft: 0,
-            sent: 0,
-            paid: 0,
-            cancelled: 0,
-            paidAmount: 0,
-            unpaidAmount: 0,
-        };
-
-        for (const invoice of invoices) {
-            switch (invoice.status) {
-                case "draft":
-                    stats.draft++;
-                    stats.unpaidAmount += invoice.total_gross;
-                    break;
-                case "sent":
-                    stats.sent++;
-                    stats.unpaidAmount += invoice.total_gross;
-                    break;
-                case "paid":
-                    stats.paid++;
-                    stats.paidAmount += invoice.total_gross;
-                    break;
-                case "cancelled":
-                    stats.cancelled++;
-                    break;
-            }
+        const res = await fetch("/api/invoices/stats");
+        if (!res.ok) {
+            return {
+                total: 0,
+                draft: 0,
+                sent: 0,
+                paid: 0,
+                cancelled: 0,
+                paidAmount: 0,
+                unpaidAmount: 0,
+            };
         }
-
-        return stats;
+        return res.json();
     } catch (error) {
         console.error("Error getting invoice stats:", error);
         return {

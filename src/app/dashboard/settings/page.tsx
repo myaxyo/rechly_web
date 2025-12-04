@@ -226,7 +226,10 @@ export default function SettingsPage() {
                         <Input placeholder={t("settings.companyName")} />
                     </Form.Item>
 
-                    <Form.Item name="legal_form" label={t("settings.legalForm")}>
+                    <Form.Item
+                        name="legal_form"
+                        label={t("settings.legalForm")}
+                    >
                         <Input
                             placeholder={t("settings.legalFormPlaceholder")}
                         />

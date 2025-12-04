@@ -14,6 +14,17 @@ const APPWRITE_PROJECT_ID =
     process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "692d4bf1002b21c4b2b7";
 const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY || "";
 
+// Database configuration - Must match client-side appwrite.ts
+export const DATABASE_ID = "rechly-db";
+
+export const COLLECTIONS = {
+    CLIENTS: "clients",
+    PRODUCTS: "products",
+    INVOICES: "invoices",
+    INVOICE_ITEMS: "invoice_items",
+    COMPANY_INFO: "user_company",
+} as const;
+
 // Cookie name for session storage
 export const SESSION_COOKIE_NAME = "appwrite-session";
 

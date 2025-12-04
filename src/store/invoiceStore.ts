@@ -4,15 +4,17 @@ import type {
     InvoiceWithDetails,
     InvoiceFormData,
 } from "@/types";
-import {
-    getAllInvoices as fetchAllInvoices,
-    getInvoiceById as fetchInvoiceById,
-    createInvoice as apiCreateInvoice,
-    updateInvoiceStatus as apiUpdateInvoiceStatus,
-    deleteInvoice as apiDeleteInvoice,
-    getInvoiceStats as fetchInvoiceStats,
-    type InvoiceStats,
-} from "@/lib/invoiceService";
+
+// Invoice stats type
+export interface InvoiceStats {
+    total: number;
+    draft: number;
+    sent: number;
+    paid: number;
+    cancelled: number;
+    paidAmount: number;
+    unpaidAmount: number;
+}
 
 interface InvoiceStore {
     invoices: InvoiceWithClient[];
@@ -32,6 +34,76 @@ interface InvoiceStore {
 }
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// API helper functions that use server-side routes
+const apiGetInvoices = async (): Promise<InvoiceWithClient[]> => {
+    const res = await fetch("/api/invoices");
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to fetch invoices");
+    }
+    return res.json();
+};
+
+const apiGetInvoice = async (
+    id: string
+): Promise<InvoiceWithDetails | null> => {
+    const res = await fetch(`/api/invoices/${id}`);
+    if (res.status === 404) return null;
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to fetch invoice");
+    }
+    return res.json();
+};
+
+const apiCreateInvoice = async (data: InvoiceFormData): Promise<string> => {
+    const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create invoice");
+    }
+    const result = await res.json();
+    return result.id;
+};
+
+const apiUpdateInvoiceStatus = async (
+    id: string,
+    status: string
+): Promise<void> => {
+    const res = await fetch(`/api/invoices/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update invoice");
+    }
+};
+
+const apiDeleteInvoice = async (id: string): Promise<void> => {
+    const res = await fetch(`/api/invoices/${id}`, {
+        method: "DELETE",
+    });
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to delete invoice");
+    }
+};
+
+const apiGetInvoiceStats = async (): Promise<InvoiceStats> => {
+    const res = await fetch("/api/invoices/stats");
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to fetch invoice stats");
+    }
+    return res.json();
+};
 
 export const useInvoiceStore = create<InvoiceStore>((set, get) => ({
     invoices: [],
@@ -57,7 +129,7 @@ export const useInvoiceStore = create<InvoiceStore>((set, get) => ({
 
         set({ loading: true, error: null });
         try {
-            const invoices = await fetchAllInvoices();
+            const invoices = await apiGetInvoices();
             set({ invoices, loading: false, lastFetched: Date.now() });
         } catch (error) {
             set({
@@ -84,7 +156,7 @@ export const useInvoiceStore = create<InvoiceStore>((set, get) => ({
         }
 
         try {
-            const newStats = await fetchInvoiceStats();
+            const newStats = await apiGetInvoiceStats();
             set({ stats: newStats });
         } catch (error) {
             console.error("Failed to fetch invoice stats:", error);
@@ -93,7 +165,7 @@ export const useInvoiceStore = create<InvoiceStore>((set, get) => ({
 
     getInvoice: async (id: string) => {
         // Always fetch fresh details since it includes items
-        return await fetchInvoiceById(id);
+        return await apiGetInvoice(id);
     },
 
     addInvoice: async (data: InvoiceFormData) => {
