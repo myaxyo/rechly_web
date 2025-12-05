@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Spin, Typography } from "antd";
-import { account } from "@/lib/appwrite";
 import { getCompanyInfo } from "@/lib/companyService";
 import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
 
@@ -50,19 +49,13 @@ function CallbackContent() {
                     await new Promise((resolve) => setTimeout(resolve, 1000));
                 }
 
-                // Check if we have a valid session
-                // For SSR flow, we check via API route that reads the cookie
+                // Check if we have a valid session via SSR API route
                 let user;
                 try {
-                    if (fromSSR) {
-                        // For SSR, check session via API
-                        const response = await fetch("/api/auth/user");
-                        if (response.ok) {
-                            user = await response.json();
-                        }
-                    } else {
-                        // For client-side, use Appwrite SDK directly
-                        user = await account.get();
+                    // Always use SSR session check first (works for both flows)
+                    const response = await fetch("/api/auth/user");
+                    if (response.ok) {
+                        user = await response.json();
                     }
                     console.log("Session check result:", user);
                 } catch (sessionError) {
