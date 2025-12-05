@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Query } from "node-appwrite";
 import {
     createSessionClient,
+    createAdminClient,
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
@@ -9,7 +10,8 @@ import {
 // GET invoice stats
 export async function GET() {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();

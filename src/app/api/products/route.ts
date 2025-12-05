@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Query } from "node-appwrite";
+import { Query, Permission, Role } from "node-appwrite";
 import {
     createSessionClient,
+    createAdminClient,
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
@@ -9,7 +10,8 @@ import {
 // GET all products
 export async function GET() {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -52,7 +54,8 @@ export async function GET() {
 // POST create new product
 export async function POST(request: NextRequest) {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { ID } = await import("node-appwrite");
 
-        // Create document with userId
+        // Create document with userId and permissions
         const doc = await databases.createDocument(
             DATABASE_ID,
             COLLECTIONS.PRODUCTS,
@@ -78,7 +81,12 @@ export async function POST(request: NextRequest) {
                 price: body.price,
                 taxRatePercent: body.tax_rate_percent,
                 unitOfMeasure: body.unit_of_measure || "Stück",
-            }
+            },
+            [
+                Permission.read(Role.user(user.$id)),
+                Permission.update(Role.user(user.$id)),
+                Permission.delete(Role.user(user.$id)),
+            ]
         );
 
         const product = {

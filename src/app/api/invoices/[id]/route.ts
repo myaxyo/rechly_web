@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Query } from "node-appwrite";
 import {
     createSessionClient,
+    createAdminClient,
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
@@ -13,7 +14,8 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -121,7 +123,8 @@ export async function PUT(
 ) {
     try {
         const { id } = await params;
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -156,7 +159,8 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();

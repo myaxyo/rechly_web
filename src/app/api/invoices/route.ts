@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Query, ID } from "node-appwrite";
+import { Query, ID, Permission, Role } from "node-appwrite";
 import {
     createSessionClient,
+    createAdminClient,
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
@@ -13,7 +14,8 @@ import {
 // GET all invoices with client info
 export async function GET() {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -98,7 +100,8 @@ export async function GET() {
 // POST create new invoice with items
 export async function POST(request: NextRequest) {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -129,7 +132,7 @@ export async function POST(request: NextRequest) {
             )
         );
 
-        // Create invoice document
+        // Create invoice document with permissions
         await databases.createDocument(
             DATABASE_ID,
             COLLECTIONS.INVOICES,
@@ -148,7 +151,12 @@ export async function POST(request: NextRequest) {
                 purchaseOrderRef: body.purchase_order_ref || null,
                 deliveryDate: body.delivery_date || null,
                 paymentTerms: body.payment_terms || null,
-            }
+            },
+            [
+                Permission.read(Role.user(user.$id)),
+                Permission.update(Role.user(user.$id)),
+                Permission.delete(Role.user(user.$id)),
+            ]
         );
 
         // Create invoice items
@@ -177,7 +185,12 @@ export async function POST(request: NextRequest) {
                     subtotal: itemCalc.subtotal,
                     taxAmount: itemCalc.taxAmount,
                     total: itemCalc.total,
-                }
+                },
+                [
+                    Permission.read(Role.user(user.$id)),
+                    Permission.update(Role.user(user.$id)),
+                    Permission.delete(Role.user(user.$id)),
+                ]
             );
         }
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Query } from "node-appwrite";
+import { Query, Permission, Role } from "node-appwrite";
 import {
     createSessionClient,
+    createAdminClient,
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
@@ -9,7 +10,8 @@ import {
 // GET all clients
 export async function GET() {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -59,7 +61,8 @@ export async function GET() {
 // POST create new client
 export async function POST(request: NextRequest) {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { ID } = await import("node-appwrite");
 
-        // Create document with userId
+        // Create document with userId and user permissions
         const doc = await databases.createDocument(
             DATABASE_ID,
             COLLECTIONS.CLIENTS,
@@ -92,7 +95,12 @@ export async function POST(request: NextRequest) {
                 vatId: body.vat_id || null,
                 taxNumber: body.tax_number || null,
                 leitwegId: body.leitweg_id || null,
-            }
+            },
+            [
+                Permission.read(Role.user(user.$id)),
+                Permission.update(Role.user(user.$id)),
+                Permission.delete(Role.user(user.$id)),
+            ]
         );
 
         const client = {

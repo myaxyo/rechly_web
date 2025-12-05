@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Query } from "node-appwrite";
+import { Query, Permission, Role } from "node-appwrite";
 import {
     createSessionClient,
+    createAdminClient,
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
@@ -9,7 +10,8 @@ import {
 // GET company info
 export async function GET() {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -72,7 +74,8 @@ export async function GET() {
 // POST create or update company info
 export async function POST(request: NextRequest) {
     try {
-        const { account, databases } = await createSessionClient();
+        const { account } = await createSessionClient();
+        const { databases } = await createAdminClient();
 
         // Get current user
         const user = await account.get();
@@ -127,12 +130,17 @@ export async function POST(request: NextRequest) {
                 data
             );
         } else {
-            // Create new
+            // Create new with permissions
             doc = await databases.createDocument(
                 DATABASE_ID,
                 COLLECTIONS.COMPANY_INFO,
                 ID.unique(),
-                data
+                data,
+                [
+                    Permission.read(Role.user(user.$id)),
+                    Permission.update(Role.user(user.$id)),
+                    Permission.delete(Role.user(user.$id)),
+                ]
             );
         }
 
