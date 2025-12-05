@@ -34,6 +34,10 @@ export const SESSION_COOKIE_NAME = "appwrite-session";
  * IMPORTANT: Never share this client between requests
  */
 export async function createAdminClient() {
+    if (!APPWRITE_API_KEY) {
+        throw new Error("APPWRITE_API_KEY is not configured");
+    }
+
     const client = new Client()
         .setEndpoint(APPWRITE_ENDPOINT)
         .setProject(APPWRITE_PROJECT_ID)
