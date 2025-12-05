@@ -84,7 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (response.ok) {
                 const currentUser = await response.json();
                 if (currentUser) {
-                    console.log("Found SSR session:", currentUser.$id);
                     setUser(currentUser);
                     setIsAnonymous(!currentUser.email);
                 } else {
@@ -92,7 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setIsAnonymous(false);
                 }
             } else {
-                console.log("No active session");
                 setUser(null);
                 setIsAnonymous(false);
             }
