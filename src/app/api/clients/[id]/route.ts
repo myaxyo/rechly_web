@@ -55,6 +55,8 @@ export async function GET(
             vat_id: doc.vatId ?? undefined,
             tax_number: doc.taxNumber ?? undefined,
             leitweg_id: doc.leitwegId ?? undefined,
+            registration_date: doc.registrationDate ?? undefined,
+            status: doc.status || "active",
             created_at: new Date(doc.$createdAt).getTime(),
             updated_at: new Date(doc.$updatedAt).getTime(),
         };
@@ -118,6 +120,8 @@ export async function PUT(
                 vatId: body.vat_id || null,
                 taxNumber: body.tax_number || null,
                 leitwegId: body.leitweg_id || null,
+                registrationDate: body.registration_date || null,
+                status: body.status || "active",
             }
         );
 
@@ -135,6 +139,8 @@ export async function PUT(
             vat_id: doc.vatId ?? undefined,
             tax_number: doc.taxNumber ?? undefined,
             leitweg_id: doc.leitwegId ?? undefined,
+            registration_date: doc.registrationDate ?? undefined,
+            status: doc.status || "active",
             created_at: new Date(doc.$createdAt).getTime(),
             updated_at: new Date(doc.$updatedAt).getTime(),
         };
