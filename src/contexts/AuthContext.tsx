@@ -110,9 +110,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             useProductStore.getState().clearCache();
             useInvoiceStore.getState().clearCache();
 
-            await loginWithEmail(email, password);
-            const currentUser = await getCurrentUser();
-            setUser(currentUser);
+            // Use SSR login API to set HTTP-only session cookie
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Login failed");
+            }
+
+            // Fetch user from SSR session
+            const userResponse = await fetch("/api/auth/user");
+            if (userResponse.ok) {
+                const currentUser = await userResponse.json();
+                setUser(currentUser);
+            }
         } finally {
             setLoading(false);
         }
@@ -121,9 +136,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = async (email: string, password: string, name: string) => {
         setLoading(true);
         try {
-            await registerWithEmail(email, password, name);
-            const currentUser = await getCurrentUser();
-            setUser(currentUser);
+            // Use SSR register API to set HTTP-only session cookie
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, name }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Registration failed");
+            }
+
+            // Fetch user from SSR session
+            const userResponse = await fetch("/api/auth/user");
+            if (userResponse.ok) {
+                const currentUser = await userResponse.json();
+                setUser(currentUser);
+            }
         } finally {
             setLoading(false);
         }
