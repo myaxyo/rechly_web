@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
         const { account } = await createAdminClient();
 
         // Create email session
-        const session = await account.createEmailPasswordSession(email, password);
+        const session = await account.createEmailPasswordSession(
+            email,
+            password
+        );
 
         // Set session cookie
         const response = NextResponse.json({ success: true });
@@ -30,10 +33,8 @@ export async function POST(request: NextRequest) {
         return response;
     } catch (error) {
         console.error("Login error:", error);
-        const errorMessage = error instanceof Error ? error.message : "Login failed";
-        return NextResponse.json(
-            { error: errorMessage },
-            { status: 401 }
-        );
+        const errorMessage =
+            error instanceof Error ? error.message : "Login failed";
+        return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
 }

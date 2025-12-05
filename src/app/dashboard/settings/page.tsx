@@ -15,6 +15,8 @@ import {
     Tabs,
     Switch,
     Modal,
+    Row,
+    Col,
 } from "antd";
 import {
     SaveOutlined,
@@ -254,35 +256,37 @@ export default function SettingsPage() {
                         <Input placeholder={t("settings.addressExtra")} />
                     </Form.Item>
 
-                    <Space style={{ width: "100%" }}>
-                        <Form.Item
-                            name="postal_code"
-                            label={t("settings.postalCode")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("settings.required"),
-                                },
-                            ]}
-                            style={{ width: 120 }}
-                        >
-                            <Input placeholder="12345" />
-                        </Form.Item>
+                    <Row gutter={[12, 0]}>
+                        <Col xs={24} sm={8}>
+                            <Form.Item
+                                name="postal_code"
+                                label={t("settings.postalCode")}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("settings.required"),
+                                    },
+                                ]}
+                            >
+                                <Input placeholder="12345" />
+                            </Form.Item>
+                        </Col>
 
-                        <Form.Item
-                            name="city"
-                            label={t("settings.city")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("settings.required"),
-                                },
-                            ]}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder={t("settings.city")} />
-                        </Form.Item>
-                    </Space>
+                        <Col xs={24} sm={16}>
+                            <Form.Item
+                                name="city"
+                                label={t("settings.city")}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("settings.required"),
+                                    },
+                                ]}
+                            >
+                                <Input placeholder={t("settings.city")} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
                     <Form.Item name="country" label={t("settings.country")}>
                         <Input placeholder={t("settings.country")} />
@@ -314,23 +318,25 @@ export default function SettingsPage() {
 
                     <Divider>{t("settings.taxInfo")}</Divider>
 
-                    <Space style={{ width: "100%" }}>
-                        <Form.Item
-                            name="vat_id"
-                            label={t("settings.vatId")}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder="DE123456789" />
-                        </Form.Item>
+                    <Row gutter={[12, 0]}>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="vat_id"
+                                label={t("settings.vatId")}
+                            >
+                                <Input placeholder="DE123456789" />
+                            </Form.Item>
+                        </Col>
 
-                        <Form.Item
-                            name="tax_number"
-                            label={t("settings.taxNumber")}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder="12/345/67890" />
-                        </Form.Item>
-                    </Space>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="tax_number"
+                                label={t("settings.taxNumber")}
+                            >
+                                <Input placeholder="12/345/67890" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
                     <Form.Item
                         name="commercial_register_number"

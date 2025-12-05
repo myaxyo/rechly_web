@@ -100,3 +100,144 @@ body {
     display: none !important;
   }
 }
+
+/* Mobile input zoom prevention - ensure minimum 16px font size */
+@media screen and (max-width: 768px) {
+  /* Ant Design form inputs */
+  .ant-input,
+  .ant-input-number-input,
+  .ant-select-selection-search-input,
+  .ant-picker-input > input,
+  .ant-input-textarea textarea,
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Ant Design Select displayed value */
+  .ant-select-selection-item {
+    font-size: 16px !important;
+  }
+
+  /* Ensure touch targets are adequate */
+  .ant-btn {
+    min-height: 44px;
+  }
+
+  .ant-input,
+  .ant-select-selector,
+  .ant-picker {
+    min-height: 44px !important;
+  }
+
+  /* Make form items stack vertically on mobile */
+  .ant-space {
+    flex-wrap: wrap !important;
+  }
+
+  .ant-space > .ant-space-item {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Allow some horizontal space items to be side by side */
+  .ant-space.ant-space-horizontal > .ant-space-item {
+    flex: 1 1 calc(50% - 8px) !important;
+  }
+
+  /* Modal improvements for mobile */
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px !important;
+  }
+
+  .ant-modal-content {
+    padding: 16px !important;
+  }
+
+  /* Table responsive */
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .ant-table {
+    min-width: 500px;
+  }
+
+  /* Card improvements */
+  .ant-card {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-card-body {
+    padding: 16px !important;
+  }
+
+  /* Form layout improvements */
+  .ant-form-item {
+    margin-bottom: 16px !important;
+  }
+
+  /* Typography adjustments */
+  .ant-typography h1,
+  .ant-typography h2,
+  .ant-typography h3,
+  h1, h2, h3 {
+    font-size: clamp(1.25rem, 5vw, 2rem) !important;
+  }
+
+  .ant-typography h4,
+  h4 {
+    font-size: clamp(1.1rem, 4vw, 1.5rem) !important;
+  }
+
+  /* Statistic component on mobile */
+  .ant-statistic-title {
+    font-size: 13px !important;
+  }
+
+  .ant-statistic-content {
+    font-size: 18px !important;
+  }
+
+  /* Steps on mobile */
+  .ant-steps {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .ant-steps-item-title {
+    font-size: 13px !important;
+  }
+
+  /* Tag adjustments */
+  .ant-tag {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+  }
+
+  /* Flex adjustments for recent invoices */
+  .ant-flex {
+    gap: 8px !important;
+  }
+
+  /* Search input */
+  .ant-input-affix-wrapper {
+    width: 100% !important;
+  }
+
+  /* Toolbar flex wrap */
+  div[style*="flex-wrap: wrap"] {
+    gap: 12px;
+  }
+
+  /* Divider margin reduction */
+  .ant-divider {
+    margin: 12px 0 !important;
+  }
+}

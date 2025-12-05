@@ -248,7 +248,7 @@ export default function DashboardPage() {
                         }
                     >
                         <Row gutter={[8, 8]}>
-                            <Col span={12}>
+                            <Col xs={12}>
                                 <Button
                                     block
                                     icon={<UserOutlined />}
@@ -259,7 +259,7 @@ export default function DashboardPage() {
                                     {t("dashboard.manageClients")}
                                 </Button>
                             </Col>
-                            <Col span={12}>
+                            <Col xs={12}>
                                 <Button
                                     block
                                     icon={<ShoppingOutlined />}
@@ -270,7 +270,7 @@ export default function DashboardPage() {
                                     {t("dashboard.manageProducts")}
                                 </Button>
                             </Col>
-                            <Col span={12}>
+                            <Col xs={12}>
                                 <Button
                                     block
                                     icon={<FileTextOutlined />}
@@ -281,7 +281,7 @@ export default function DashboardPage() {
                                     {t("dashboard.allInvoices")}
                                 </Button>
                             </Col>
-                            <Col span={12}>
+                            <Col xs={12}>
                                 <Button
                                     block
                                     onClick={() =>

@@ -19,7 +19,10 @@ export async function POST(request: NextRequest) {
         await account.create(ID.unique(), email, password, name);
 
         // Create session for the new user
-        const session = await account.createEmailPasswordSession(email, password);
+        const session = await account.createEmailPasswordSession(
+            email,
+            password
+        );
 
         // Set session cookie
         const response = NextResponse.json({ success: true });
@@ -34,10 +37,8 @@ export async function POST(request: NextRequest) {
         return response;
     } catch (error) {
         console.error("Registration error:", error);
-        const errorMessage = error instanceof Error ? error.message : "Registration failed";
-        return NextResponse.json(
-            { error: errorMessage },
-            { status: 400 }
-        );
+        const errorMessage =
+            error instanceof Error ? error.message : "Registration failed";
+        return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 }

@@ -267,31 +267,28 @@ export default function InvoicesPage() {
             </Row>
 
             {/* Toolbar */}
-            <div
-                style={{
-                    marginBottom: 16,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: 8,
-                }}
-            >
-                <Input
-                    placeholder={t("invoices.search")}
-                    prefix={<SearchOutlined />}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    style={{ width: 300 }}
-                    allowClear
-                />
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => router.push("/dashboard/invoices/create")}
-                >
-                    {t("invoices.new")}
-                </Button>
-            </div>
+            <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+                <Col xs={24} sm={16} md={12}>
+                    <Input
+                        placeholder={t("invoices.search")}
+                        prefix={<SearchOutlined />}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: "100%" }}
+                        allowClear
+                    />
+                </Col>
+                <Col xs={24} sm={8} md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => router.push("/dashboard/invoices/create")}
+                        style={{ width: "100%", maxWidth: 200 }}
+                    >
+                        {t("invoices.new")}
+                    </Button>
+                </Col>
+            </Row>
 
             {/* Table */}
             <Table

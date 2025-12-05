@@ -12,6 +12,8 @@ import {
     message,
     Popconfirm,
     Typography,
+    Row,
+    Col,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -172,31 +174,28 @@ export default function ClientsPage() {
             <Title level={4}>{t("clients.title")}</Title>
 
             {/* Toolbar */}
-            <div
-                style={{
-                    marginBottom: 16,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: 8,
-                }}
-            >
-                <Input
-                    placeholder={t("clients.search")}
-                    prefix={<SearchOutlined />}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    style={{ width: 300 }}
-                    allowClear
-                />
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={openCreateModal}
-                >
-                    {t("clients.new")}
-                </Button>
-            </div>
+            <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+                <Col xs={24} sm={16} md={12}>
+                    <Input
+                        placeholder={t("clients.search")}
+                        prefix={<SearchOutlined />}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: "100%" }}
+                        allowClear
+                    />
+                </Col>
+                <Col xs={24} sm={8} md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={openCreateModal}
+                        style={{ width: "100%", maxWidth: 200 }}
+                    >
+                        {t("clients.new")}
+                    </Button>
+                </Col>
+            </Row>
 
             {/* Table */}
             <Table
@@ -267,78 +266,75 @@ export default function ClientsPage() {
                         <Input placeholder={t("clients.addressExtra")} />
                     </Form.Item>
 
-                    <Space style={{ width: "100%" }}>
-                        <Form.Item
-                            name="postal_code"
-                            label={t("clients.postalCode")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("clients.required"),
-                                },
-                            ]}
-                            style={{ width: 120 }}
-                        >
-                            <Input placeholder={t("clients.postalCode")} />
-                        </Form.Item>
+                    <Row gutter={[12, 0]}>
+                        <Col xs={24} sm={8}>
+                            <Form.Item
+                                name="postal_code"
+                                label={t("clients.postalCode")}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("clients.required"),
+                                    },
+                                ]}
+                            >
+                                <Input placeholder={t("clients.postalCode")} />
+                            </Form.Item>
+                        </Col>
 
-                        <Form.Item
-                            name="city"
-                            label={t("clients.city")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("clients.required"),
-                                },
-                            ]}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder={t("clients.city")} />
-                        </Form.Item>
-                    </Space>
+                        <Col xs={24} sm={16}>
+                            <Form.Item
+                                name="city"
+                                label={t("clients.city")}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("clients.required"),
+                                    },
+                                ]}
+                            >
+                                <Input placeholder={t("clients.city")} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
                     <Form.Item name="country" label={t("clients.country")}>
                         <Input placeholder={t("clients.country")} />
                     </Form.Item>
 
-                    <Space style={{ width: "100%" }}>
-                        <Form.Item
-                            name="email"
-                            label={t("clients.email")}
-                            style={{ flex: 1 }}
-                        >
-                            <Input
-                                placeholder="email@example.com"
-                                type="email"
-                            />
-                        </Form.Item>
+                    <Row gutter={[12, 0]}>
+                        <Col xs={24} sm={12}>
+                            <Form.Item name="email" label={t("clients.email")}>
+                                <Input
+                                    placeholder="email@example.com"
+                                    type="email"
+                                />
+                            </Form.Item>
+                        </Col>
 
-                        <Form.Item
-                            name="phone"
-                            label={t("clients.phone")}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder="+49 123 456789" />
-                        </Form.Item>
-                    </Space>
+                        <Col xs={24} sm={12}>
+                            <Form.Item name="phone" label={t("clients.phone")}>
+                                <Input placeholder="+49 123 456789" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
-                    <Space style={{ width: "100%" }}>
-                        <Form.Item
-                            name="vat_id"
-                            label={t("clients.vatId")}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder="DE123456789" />
-                        </Form.Item>
+                    <Row gutter={[12, 0]}>
+                        <Col xs={24} sm={12}>
+                            <Form.Item name="vat_id" label={t("clients.vatId")}>
+                                <Input placeholder="DE123456789" />
+                            </Form.Item>
+                        </Col>
 
-                        <Form.Item
-                            name="tax_number"
-                            label={t("clients.taxNumber")}
-                            style={{ flex: 1 }}
-                        >
-                            <Input placeholder="12/345/67890" />
-                        </Form.Item>
-                    </Space>
+                        <Col xs={24} sm={12}>
+                            <Form.Item
+                                name="tax_number"
+                                label={t("clients.taxNumber")}
+                            >
+                                <Input placeholder="12/345/67890" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
                     <Form.Item name="leitweg_id" label={t("clients.leitwegId")}>
                         <Input placeholder={t("clients.leitwegPlaceholder")} />

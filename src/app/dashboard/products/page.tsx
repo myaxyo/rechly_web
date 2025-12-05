@@ -13,6 +13,8 @@ import {
     message,
     Popconfirm,
     Typography,
+    Row,
+    Col,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -187,31 +189,28 @@ export default function ProductsPage() {
             <Title level={4}>{t("products.title")}</Title>
 
             {/* Toolbar */}
-            <div
-                style={{
-                    marginBottom: 16,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: 8,
-                }}
-            >
-                <Input
-                    placeholder={t("products.search")}
-                    prefix={<SearchOutlined />}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    style={{ width: 300 }}
-                    allowClear
-                />
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={openCreateModal}
-                >
-                    {t("products.new")}
-                </Button>
-            </div>
+            <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+                <Col xs={24} sm={16} md={12}>
+                    <Input
+                        placeholder={t("products.search")}
+                        prefix={<SearchOutlined />}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: "100%" }}
+                        allowClear
+                    />
+                </Col>
+                <Col xs={24} sm={8} md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={openCreateModal}
+                        style={{ width: "100%", maxWidth: 200 }}
+                    >
+                        {t("products.new")}
+                    </Button>
+                </Col>
+            </Row>
 
             {/* Table */}
             <Table
@@ -268,53 +267,55 @@ export default function ProductsPage() {
                         />
                     </Form.Item>
 
-                    <Space style={{ width: "100%" }}>
-                        <Form.Item
-                            name="price"
-                            label={t("products.priceLabel")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("products.required"),
-                                },
-                            ]}
-                            style={{ flex: 1 }}
-                        >
-                            <InputNumber
-                                placeholder="0.00"
-                                min={0}
-                                precision={2}
-                                style={{ width: "100%" }}
-                                formatter={(value) =>
-                                    `${value}`.replace(
-                                        /\B(?=(\d{3})+(?!\d))/g,
-                                        "."
-                                    )
-                                }
-                                parser={(value) =>
-                                    Number(
-                                        value
-                                            ?.replace(/\./g, "")
-                                            .replace(",", ".")
-                                    ) as unknown as 0
-                                }
-                            />
-                        </Form.Item>
+                    <Row gutter={[12, 0]}>
+                        <Col xs={24} sm={14}>
+                            <Form.Item
+                                name="price"
+                                label={t("products.priceLabel")}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("products.required"),
+                                    },
+                                ]}
+                            >
+                                <InputNumber
+                                    placeholder="0.00"
+                                    min={0}
+                                    precision={2}
+                                    style={{ width: "100%" }}
+                                    formatter={(value) =>
+                                        `${value}`.replace(
+                                            /\B(?=(\d{3})+(?!\d))/g,
+                                            "."
+                                        )
+                                    }
+                                    parser={(value) =>
+                                        Number(
+                                            value
+                                                ?.replace(/\./g, "")
+                                                .replace(",", ".")
+                                        ) as unknown as 0
+                                    }
+                                />
+                            </Form.Item>
+                        </Col>
 
-                        <Form.Item
-                            name="tax_rate_percent"
-                            label={t("products.vatRate")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("products.required"),
-                                },
-                            ]}
-                            style={{ width: 160 }}
-                        >
-                            <Select options={taxRateOptions} />
-                        </Form.Item>
-                    </Space>
+                        <Col xs={24} sm={10}>
+                            <Form.Item
+                                name="tax_rate_percent"
+                                label={t("products.vatRate")}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("products.required"),
+                                    },
+                                ]}
+                            >
+                                <Select options={taxRateOptions} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
 
                     <Form.Item
                         name="unit_of_measure"
