@@ -100,7 +100,7 @@ export const metadata: Metadata = {
     // Icons
     icons: {
         icon: [
-            { url: "/favicon/favicon.ico", sizes: "any" },
+            { url: "/favicon.ico", sizes: "any" },
             { url: "/favicon/favicon.svg", type: "image/svg+xml" },
             {
                 url: "/favicon/favicon-96x96.png",
@@ -108,7 +108,7 @@ export const metadata: Metadata = {
                 type: "image/png",
             },
         ],
-        shortcut: "/favicon/favicon.ico",
+        shortcut: "/favicon.ico",
         apple: "/favicon/apple-touch-icon.png",
     },
     manifest: "/favicon/site.webmanifest",
