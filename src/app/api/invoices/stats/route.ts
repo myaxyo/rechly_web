@@ -10,7 +10,17 @@ import {
 // GET invoice stats
 export async function GET() {
     try {
-        const { account } = await createSessionClient();
+        let account;
+        try {
+            const sessionClient = await createSessionClient();
+            account = sessionClient.account;
+        } catch {
+            return NextResponse.json(
+                { error: "Not authenticated" },
+                { status: 401 }
+            );
+        }
+
         const { databases } = await createAdminClient();
 
         // Get current user

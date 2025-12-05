@@ -14,7 +14,17 @@ import {
 // GET all invoices with client info
 export async function GET() {
     try {
-        const { account } = await createSessionClient();
+        let account;
+        try {
+            const sessionClient = await createSessionClient();
+            account = sessionClient.account;
+        } catch {
+            return NextResponse.json(
+                { error: "Not authenticated" },
+                { status: 401 }
+            );
+        }
+
         const { databases } = await createAdminClient();
 
         // Get current user
@@ -100,7 +110,17 @@ export async function GET() {
 // POST create new invoice with items
 export async function POST(request: NextRequest) {
     try {
-        const { account } = await createSessionClient();
+        let account;
+        try {
+            const sessionClient = await createSessionClient();
+            account = sessionClient.account;
+        } catch {
+            return NextResponse.json(
+                { error: "Not authenticated" },
+                { status: 401 }
+            );
+        }
+
         const { databases } = await createAdminClient();
 
         // Get current user
