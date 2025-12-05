@@ -117,7 +117,9 @@ export async function POST(request: NextRequest) {
                 vatId: body.vat_id || null,
                 taxNumber: body.tax_number || null,
                 leitwegId: body.leitweg_id || null,
-                registrationDate: body.registration_date || new Date().toISOString().split("T")[0],
+                registrationDate:
+                    body.registration_date ||
+                    new Date().toISOString().split("T")[0],
                 status: body.status || "active",
             },
             [
