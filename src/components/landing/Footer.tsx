@@ -3,18 +3,16 @@
 import { Typography, Space, Divider } from "antd";
 import { GithubOutlined, HeartOutlined } from "@ant-design/icons";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const { Text, Title } = Typography;
 
 export default function Footer() {
-    const router = useRouter();
     const { t } = useLanguage();
 
     const linkStyle = {
         color: "#64748b",
-        cursor: "pointer",
         fontSize: 14,
         transition: "color 0.2s",
     };
@@ -82,12 +80,9 @@ export default function Footer() {
                             {t("footer.product")}
                         </Text>
                         <Space direction="vertical" size={8}>
-                            <a
-                                onClick={() => router.push("/features")}
-                                style={linkStyle}
-                            >
+                            <Link href="/features" style={linkStyle}>
                                 {t("nav.features")}
-                            </a>
+                            </Link>
                             <a
                                 href="https://github.com/myaxyo/rechly"
                                 target="_blank"
@@ -115,24 +110,15 @@ export default function Footer() {
                             {t("footer.legal")}
                         </Text>
                         <Space direction="vertical" size={8}>
-                            <a
-                                onClick={() => router.push("/impressum")}
-                                style={linkStyle}
-                            >
+                            <Link href="/impressum" style={linkStyle}>
                                 {t("footer.impressum")}
-                            </a>
-                            <a
-                                onClick={() => router.push("/datenschutz")}
-                                style={linkStyle}
-                            >
+                            </Link>
+                            <Link href="/datenschutz" style={linkStyle}>
                                 {t("footer.privacy")}
-                            </a>
-                            <a
-                                onClick={() => router.push("/agb")}
-                                style={linkStyle}
-                            >
+                            </Link>
+                            <Link href="/agb" style={linkStyle}>
                                 {t("footer.terms")}
-                            </a>
+                            </Link>
                         </Space>
                     </div>
                 </div>
