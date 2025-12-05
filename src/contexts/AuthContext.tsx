@@ -79,25 +79,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const checkAuth = async () => {
         try {
-            // First try to get user from client-side Appwrite SDK
-            let currentUser = await getCurrentUser();
-
-            // If no client-side session, check for SSR session
-            if (!currentUser) {
-                try {
-                    const response = await fetch("/api/auth/user");
-                    if (response.ok) {
-                        currentUser = await response.json();
-                        console.log("Found SSR session:", currentUser?.$id);
-                    }
-                } catch (ssrError) {
-                    console.log("No SSR session found");
+            // Use SSR session check via API route (avoids client-side Appwrite 401)
+            const response = await fetch("/api/auth/user");
+            if (response.ok) {
+                const currentUser = await response.json();
+                if (currentUser) {
+                    console.log("Found SSR session:", currentUser.$id);
+                    setUser(currentUser);
+                    setIsAnonymous(!currentUser.email);
+                } else {
+                    setUser(null);
+                    setIsAnonymous(false);
                 }
+            } else {
+                console.log("No active session");
+                setUser(null);
+                setIsAnonymous(false);
             }
-
-            setUser(currentUser);
-            // Check if user is anonymous (no email means anonymous)
-            setIsAnonymous(!currentUser?.email);
         } catch {
             setUser(null);
             setIsAnonymous(false);
