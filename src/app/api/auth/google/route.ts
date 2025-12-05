@@ -28,8 +28,9 @@ export async function GET(request: NextRequest) {
 
         console.log("OAuth origin detection:", { forwardedHost, host, origin });
 
+        // Use api/auth/callback for both success and failure to properly handle errors
         const successUrl = `${origin}/api/auth/callback`;
-        const failureUrl = `${origin}/login?error=oauth_failed`;
+        const failureUrl = `${origin}/api/auth/callback`;
 
         const redirectUrl = await getGoogleOAuthURL(successUrl, failureUrl);
 

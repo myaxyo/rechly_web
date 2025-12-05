@@ -200,7 +200,12 @@ export default function ProductsPage() {
                         allowClear
                     />
                 </Col>
-                <Col xs={24} sm={8} md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Col
+                    xs={24}
+                    sm={8}
+                    md={12}
+                    style={{ display: "flex", justifyContent: "flex-end" }}
+                >
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}

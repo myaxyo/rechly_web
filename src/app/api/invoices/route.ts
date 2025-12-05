@@ -133,7 +133,16 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
+        
+        // Generate a unique ID - ID.unique() should always be unique
+        // but we log it for debugging purposes
         const invoiceId = ID.unique();
+
+        // Log request body for debugging
+        console.log("Generated invoice ID:", invoiceId);
+        console.log("Invoice number from body:", body.invoice_number);
+        console.log("Client ID from body:", body.client_id);
+        console.log("User ID:", user.$id);
 
         // Calculate totals
         const totals = calculateInvoiceTotals(
@@ -216,6 +225,26 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ id: invoiceId });
     } catch (error) {
         console.error("Error creating invoice:", error);
+        // Log more details for debugging
+        if (error instanceof Error) {
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
+            console.error("Error stack:", error.stack);
+        }
+        // Check if it's an Appwrite error with more details
+        const appwriteError = error as {
+            code?: number;
+            type?: string;
+            response?: unknown;
+        };
+        if (appwriteError.code) {
+            console.error("Appwrite error code:", appwriteError.code);
+            console.error("Appwrite error type:", appwriteError.type);
+            console.error(
+                "Appwrite error response:",
+                JSON.stringify(appwriteError.response)
+            );
+        }
         const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
         return NextResponse.json(

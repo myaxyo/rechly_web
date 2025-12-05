@@ -48,15 +48,31 @@ function LoginForm() {
         if (errorParam) {
             console.log("OAuth error param:", errorParam);
             try {
-                const error = JSON.parse(decodeURIComponent(errorParam));
-                if (error.type === "user_already_exists") {
-                    message.info(t("auth.accountExists"));
-                } else {
-                    message.error(error.message || t("auth.loginFailed"));
+                const decodedError = decodeURIComponent(errorParam);
+                // Try to parse as JSON first
+                try {
+                    const error = JSON.parse(decodedError);
+                    if (error.type === "user_already_exists") {
+                        message.info(t("auth.accountExists"));
+                    } else {
+                        message.error(error.message || t("auth.loginFailed"));
+                    }
+                } catch {
+                    // Not JSON - check if it contains the error text directly
+                    const lowerError = decodedError.toLowerCase();
+                    if (
+                        lowerError.includes("user_already_exists") ||
+                        lowerError.includes("already exists") ||
+                        lowerError.includes("existiert bereits")
+                    ) {
+                        message.info(t("auth.accountExists"));
+                    } else {
+                        message.error(decodedError || t("auth.loginFailed"));
+                    }
                 }
             } catch {
-                // If it's not JSON, show the raw error
-                message.error(errorParam || t("auth.loginFailed"));
+                // Fallback for any decoding errors
+                message.error(t("auth.loginFailed"));
             }
             // Clear the error from URL
             router.replace("/login");

@@ -28,8 +28,9 @@ function getOrigin(request: NextRequest): string {
  * Creates session cookie and redirects to appropriate page
  */
 export async function GET(request: NextRequest) {
+    const origin = getOrigin(request);
+
     try {
-        const origin = getOrigin(request);
         console.log("OAuth callback origin:", origin);
 
         const { searchParams } = request.nextUrl;
@@ -43,9 +44,30 @@ export async function GET(request: NextRequest) {
             error,
         });
 
-        // Handle OAuth error
+        // Handle OAuth error - check for user_already_exists
         if (error) {
             console.error("OAuth error from provider:", error);
+
+            // Check if this is the "account exists" error (in English or German)
+            const lowerError = error.toLowerCase();
+            if (
+                lowerError.includes("user_already_exists") ||
+                lowerError.includes("already exists") ||
+                lowerError.includes("existiert bereits") ||
+                lowerError.includes("409")
+            ) {
+                const errorMessage = encodeURIComponent(
+                    JSON.stringify({
+                        type: "user_already_exists",
+                        message:
+                            "An account with this email already exists. Please log in with your email and password.",
+                    })
+                );
+                return NextResponse.redirect(
+                    `${origin}/login?error=${errorMessage}`
+                );
+            }
+
             return NextResponse.redirect(
                 `${origin}/login?error=${encodeURIComponent(error)}`
             );
@@ -60,8 +82,38 @@ export async function GET(request: NextRequest) {
         }
 
         // Create session from OAuth token
-        await createSessionFromOAuth(userId, secret);
-        console.log("Session created for user:", userId);
+        try {
+            await createSessionFromOAuth(userId, secret);
+            console.log("Session created for user:", userId);
+        } catch (sessionError: unknown) {
+            console.error("Session creation error:", sessionError);
+
+            // Check if it's a user_already_exists error (in English or German)
+            const errorMessage =
+                sessionError instanceof Error
+                    ? sessionError.message
+                    : String(sessionError);
+            const lowerErrorMsg = errorMessage.toLowerCase();
+            if (
+                lowerErrorMsg.includes("user_already_exists") ||
+                lowerErrorMsg.includes("already exists") ||
+                lowerErrorMsg.includes("existiert bereits") ||
+                lowerErrorMsg.includes("409")
+            ) {
+                const error = encodeURIComponent(
+                    JSON.stringify({
+                        type: "user_already_exists",
+                        message:
+                            "An account with this email already exists. Please log in with your email and password.",
+                    })
+                );
+                return NextResponse.redirect(`${origin}/login?error=${error}`);
+            }
+
+            return NextResponse.redirect(
+                `${origin}/login?error=session_creation_failed`
+            );
+        }
 
         // Check if user has company info (to determine onboarding)
         try {
@@ -80,7 +132,6 @@ export async function GET(request: NextRequest) {
         }
     } catch (error) {
         console.error("OAuth callback error:", error);
-        const origin = getOrigin(request);
         return NextResponse.redirect(
             `${origin}/login?error=session_creation_failed`
         );
