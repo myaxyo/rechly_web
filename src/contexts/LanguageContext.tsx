@@ -24,16 +24,16 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero
         "hero.badge": "Open Source • Kostenlos",
-        "hero.title": "Rechnungen erstellen,",
-        "hero.titleHighlight": "einfach gemacht.",
+        "hero.title": "Rechnung erstellen online –",
+        "hero.titleHighlight": "kostenlos & einfach",
         "hero.subtitle":
-            "Ein kostenloses Open-Source-Projekt für Freelancer, Selbstständige und kleine Unternehmen. Erstelle rechtskonforme Rechnungen in wenigen Klicks.",
+            "Rechly ist das kostenlose Rechnungsprogramm für Freelancer und Selbstständige. Erstelle professionelle Rechnungen in Sekunden – DSGVO-konform, Open Source, ohne versteckte Kosten.",
         "hero.cta": "Kostenlos starten",
         "hero.secondary": "Auf GitHub ansehen",
 
         // About
         "about.badge": "ÜBER DAS PROJEKT",
-        "about.title": "Von einem Studenten für alle.",
+        "about.title": "Open Source Rechnungssoftware",
         "about.description":
             "Rechly ist ein Nebenprojekt, das ich als Student entwickle. Keine versteckten Kosten, keine Premium-Pläne – einfach ein nützliches Tool, das ich selbst gebraucht habe und jetzt mit euch teile.",
         "about.point1": "100% kostenlos & Open Source",
@@ -42,7 +42,7 @@ const translations: Record<Language, Record<string, string>> = {
         "about.point4": "Aktiv weiterentwickelt",
 
         // Features
-        "features.title": "Was Rechly kann",
+        "features.title": "Dein kostenloses Rechnungsprogramm",
         "features.invoices.title": "Rechnungen erstellen",
         "features.invoices.desc":
             "Professionelle PDF-Rechnungen mit allen Pflichtangaben.",
@@ -56,11 +56,15 @@ const translations: Record<Language, Record<string, string>> = {
         "features.mobile.desc": "Native Android-App, iOS folgt bald.",
 
         // CTA
-        "cta.title": "Probier es aus",
+        "cta.title": "Jetzt Rechnung erstellen",
         "cta.subtitle":
             "Erstelle dein kostenloses Konto und schreibe deine erste Rechnung.",
         "cta.button": "Jetzt registrieren",
         "cta.note": "Keine Kreditkarte • Keine versteckten Kosten",
+
+        // FAQ
+        "faq.title": "Häufige Fragen zum Rechnungsprogramm",
+        "faq.subtitle": "Alles was du über unsere kostenlose Rechnungssoftware wissen musst",
 
         // Footer
         "footer.tagline":
@@ -383,16 +387,16 @@ const translations: Record<Language, Record<string, string>> = {
 
         // Hero
         "hero.badge": "Open Source • Free",
-        "hero.title": "Create invoices,",
-        "hero.titleHighlight": "made simple.",
+        "hero.title": "Create invoices online –",
+        "hero.titleHighlight": "free & simple",
         "hero.subtitle":
-            "A free open-source project for freelancers, self-employed, and small businesses. Create compliant invoices in just a few clicks.",
+            "Rechly is the free invoicing software for freelancers and self-employed professionals. Create professional invoices in seconds – GDPR compliant, open source, no hidden costs.",
         "hero.cta": "Get Started Free",
         "hero.secondary": "View on GitHub",
 
         // About
         "about.badge": "ABOUT THE PROJECT",
-        "about.title": "Built by a student, for everyone.",
+        "about.title": "Open Source Invoicing Software",
         "about.description":
             "Rechly is a side project I'm building as a student. No hidden costs, no premium plans – just a useful tool I needed myself and now share with you.",
         "about.point1": "100% free & Open Source",
@@ -401,7 +405,7 @@ const translations: Record<Language, Record<string, string>> = {
         "about.point4": "Actively maintained",
 
         // Features
-        "features.title": "What Rechly does",
+        "features.title": "Your free invoicing software",
         "features.invoices.title": "Create Invoices",
         "features.invoices.desc":
             "Professional PDF invoices with all required fields.",
@@ -414,11 +418,15 @@ const translations: Record<Language, Record<string, string>> = {
         "features.mobile.desc": "Native Android app, iOS coming soon.",
 
         // CTA
-        "cta.title": "Try it out",
+        "cta.title": "Create your invoice now",
         "cta.subtitle":
             "Create your free account and write your first invoice.",
         "cta.button": "Sign Up Now",
         "cta.note": "No credit card • No hidden costs",
+
+        // FAQ
+        "faq.title": "Frequently Asked Questions",
+        "faq.subtitle": "Everything you need to know about our free invoicing software",
 
         // Footer
         "footer.tagline":

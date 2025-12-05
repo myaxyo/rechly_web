@@ -300,14 +300,10 @@ export default function Home() {
                         color: "#111",
                     }}
                 >
-                    {language === "de"
-                        ? "Rechnung erstellen online –"
-                        : t("hero.title")}
+                    {t("hero.title")}
                     <br />
                     <span style={{ color: "#1890ff" }}>
-                        {language === "de"
-                            ? "kostenlos & einfach"
-                            : t("hero.titleHighlight")}
+                        {t("hero.titleHighlight")}
                     </span>
                 </h1>
 
@@ -319,9 +315,7 @@ export default function Home() {
                         lineHeight: 1.7,
                     }}
                 >
-                    {language === "de"
-                        ? "Rechly ist das kostenlose Rechnungsprogramm für Freelancer und Selbstständige. Erstelle professionelle Rechnungen in Sekunden – DSGVO-konform, Open Source, ohne versteckte Kosten."
-                        : t("hero.subtitle")}
+                    {t("hero.subtitle")}
                 </p>
 
                 <Space size="middle" wrap style={{ justifyContent: "center" }}>
@@ -377,9 +371,7 @@ export default function Home() {
                             fontSize: 28,
                         }}
                     >
-                        {language === "de"
-                            ? "Dein kostenloses Rechnungsprogramm"
-                            : t("features.title")}
+                        {t("features.title")}
                     </h2>
 
                     <div
@@ -460,9 +452,7 @@ export default function Home() {
                         fontSize: 28,
                     }}
                 >
-                    {language === "de"
-                        ? "Open Source Rechnungssoftware"
-                        : t("about.title")}
+                    {t("about.title")}
                 </h2>
 
                 <p
@@ -515,9 +505,7 @@ export default function Home() {
                             fontSize: 28,
                         }}
                     >
-                        {language === "de"
-                            ? "Häufige Fragen zum Rechnungsprogramm"
-                            : "Frequently Asked Questions"}
+                        {t("faq.title")}
                     </h2>
                     <p
                         style={{
@@ -527,9 +515,7 @@ export default function Home() {
                             fontSize: 16,
                         }}
                     >
-                        {language === "de"
-                            ? "Alles was du über unsere kostenlose Rechnungssoftware wissen musst"
-                            : "Everything you need to know about our free invoicing software"}
+                        {t("faq.subtitle")}
                     </p>
 
                     <Collapse
@@ -582,9 +568,7 @@ export default function Home() {
                             fontSize: 24,
                         }}
                     >
-                        {language === "de"
-                            ? "Jetzt Rechnung erstellen"
-                            : t("cta.title")}
+                        {t("cta.title")}
                     </h2>
                     <p
                         style={{

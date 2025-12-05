@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        
+
         // Generate a unique ID - ID.unique() should always be unique
         // but we log it for debugging purposes
         const invoiceId = ID.unique();
