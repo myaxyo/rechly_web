@@ -193,12 +193,11 @@ export async function POST(request: NextRequest) {
                 COLLECTIONS.INVOICE_ITEMS,
                 ID.unique(),
                 {
-                    userId: user.$id,
                     invoiceId: invoiceId,
                     productId: item.product_id || null,
                     description: item.description,
                     quantity: item.quantity,
-                    unitOfMeasure: item.unit_of_measure,
+                    unitOfMeasure: item.unit_of_measure || "Stück",
                     price: item.price,
                     taxRatePercent: item.tax_rate_percent,
                     discountPercent: item.discount_percent || 0,
