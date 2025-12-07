@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -137,6 +138,19 @@ export default function RootLayout({
     return (
         <html lang="de" suppressHydrationWarning>
             <body>
+                <Script
+                    src="https://www.googletagmanager.com/gtag/js?id=G-CNKVXS1FVZ"
+                    strategy="afterInteractive"
+                />
+                <Script id="google-analytics" strategy="afterInteractive">
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+
+                        gtag('config', 'G-CNKVXS1FVZ');
+                    `}
+                </Script>
                 <AntdRegistry>
                     <LanguageProvider>
                         <AuthProvider>{children}</AuthProvider>

@@ -64,7 +64,8 @@ const translations: Record<Language, Record<string, string>> = {
 
         // FAQ
         "faq.title": "Häufige Fragen zum Rechnungsprogramm",
-        "faq.subtitle": "Alles was du über unsere kostenlose Rechnungssoftware wissen musst",
+        "faq.subtitle":
+            "Alles was du über unsere kostenlose Rechnungssoftware wissen musst",
 
         // Footer
         "footer.tagline":
@@ -426,7 +427,8 @@ const translations: Record<Language, Record<string, string>> = {
 
         // FAQ
         "faq.title": "Frequently Asked Questions",
-        "faq.subtitle": "Everything you need to know about our free invoicing software",
+        "faq.subtitle":
+            "Everything you need to know about our free invoicing software",
 
         // Footer
         "footer.tagline":
