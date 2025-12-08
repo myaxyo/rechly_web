@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 interface NavbarProps {
     showAuth?: boolean;
@@ -73,12 +73,12 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                         height={32}
                         style={{ borderRadius: 6 }}
                     />
-                    <Title
-                        level={5}
-                        style={{ margin: 0, fontWeight: 600, color: "#111" }}
+                    <Text
+                        strong
+                        style={{ margin: 0, fontSize: 16, color: "#111" }}
                     >
                         Rechly
-                    </Title>
+                    </Text>
                 </div>
 
                 {/* Desktop Navigation */}

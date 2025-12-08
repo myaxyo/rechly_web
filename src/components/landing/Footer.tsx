@@ -52,12 +52,12 @@ export default function Footer() {
                                 height={24}
                                 style={{ borderRadius: 4 }}
                             />
-                            <Title
-                                level={5}
-                                style={{ margin: 0, fontWeight: 600 }}
+                            <Text
+                                strong
+                                style={{ margin: 0, fontSize: 16 }}
                             >
                                 Rechly
-                            </Title>
+                            </Text>
                         </div>
                         <Text style={{ color: "#64748b", fontSize: 14 }}>
                             {t("footer.tagline")}
@@ -134,7 +134,7 @@ export default function Footer() {
                         gap: 16,
                     }}
                 >
-                    <Text style={{ color: "#9ca3af", fontSize: 13 }}>
+                    <Text style={{ color: "#64748b", fontSize: 13 }}>
                         <HeartOutlined style={{ marginRight: 6 }} />
                         {t("footer.madeBy")}
                     </Text>
@@ -142,7 +142,7 @@ export default function Footer() {
                         href="https://github.com/myaxyo/rechly"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: "#9ca3af" }}
+                        style={{ color: "#64748b" }}
                     >
                         <GithubOutlined style={{ fontSize: 18 }} />
                     </a>
