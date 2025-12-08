@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button, Space, Typography, Select, Drawer } from "antd";
 import { GithubOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import Image from "next/image";
@@ -17,16 +17,6 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
     const router = useRouter();
     const { language, setLanguage, t } = useLanguage();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-        return () => window.removeEventListener("resize", checkMobile);
-    }, []);
 
     const handleNavigation = (path: string) => {
         setMobileMenuOpen(false);
@@ -82,7 +72,7 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                 </div>
 
                 {/* Desktop Navigation */}
-                {!isMobile && (
+                <div className="hidden md:block">
                     <Space size="small">
                         <Select
                             value={language}
@@ -118,17 +108,17 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                             </>
                         )}
                     </Space>
-                )}
+                </div>
 
                 {/* Mobile Menu Button */}
-                {isMobile && (
+                <div className="md:hidden">
                     <Button
                         type="text"
                         icon={<MenuOutlined style={{ fontSize: 20 }} />}
                         onClick={() => setMobileMenuOpen(true)}
                         style={{ padding: "4px 8px" }}
                     />
-                )}
+                </div>
 
                 {/* Mobile Drawer Menu */}
                 <Drawer
