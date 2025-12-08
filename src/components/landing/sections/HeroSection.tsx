@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button, Typography, Space } from "antd";
+import { Button, Typography } from "antd";
 import { ArrowRightOutlined, GithubOutlined } from "@ant-design/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -72,11 +72,12 @@ export default function HeroSection() {
                 {t("hero.subtitle")}
             </p>
 
-            <Space size="middle" wrap style={{ justifyContent: "center" }}>
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                 <Button
                     type="primary"
                     size="large"
                     onClick={() => router.push("/register")}
+                    className="w-full sm:w-auto"
                     style={{
                         height: 48,
                         paddingInline: 28,
@@ -95,6 +96,7 @@ export default function HeroSection() {
                     href="https://github.com/myaxyo/rechly"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="w-full sm:w-auto"
                     style={{
                         height: 48,
                         paddingInline: 24,
@@ -104,7 +106,7 @@ export default function HeroSection() {
                 >
                     {t("hero.secondary")}
                 </Button>
-            </Space>
+            </div>
         </section>
     );
 }
