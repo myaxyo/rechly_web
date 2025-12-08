@@ -16,6 +16,16 @@ const nextConfig: NextConfig = {
             canvas: { browser: "./empty-module.js" },
         },
     },
+
+    // Optimizations
+    experimental: {
+        optimizePackageImports: [
+            "antd",
+            "@ant-design/icons",
+            "dayjs",
+            "@ant-design/nextjs-registry",
+        ],
+    },
 };
 
 export default nextConfig;
