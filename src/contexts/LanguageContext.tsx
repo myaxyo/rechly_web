@@ -11,7 +11,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
-    undefined
+    undefined,
 );
 
 const translations: Record<Language, Record<string, string>> = {
@@ -78,7 +78,7 @@ const translations: Record<Language, Record<string, string>> = {
         "footer.terms": "AGB",
         "footer.cookies": "Cookies",
         "footer.copyright": "Open Source Projekt",
-        "footer.madeBy": "Entwickelt von einem Studenten in Deutschland",
+        "footer.madeBy": "Entwickelt von einem Studenten",
 
         // Legal pages
         "legal.backToHome": "Zurück zur Startseite",
@@ -441,7 +441,7 @@ const translations: Record<Language, Record<string, string>> = {
         "footer.terms": "Terms",
         "footer.cookies": "Cookies",
         "footer.copyright": "Open Source Project",
-        "footer.madeBy": "Built by a student in Germany",
+        "footer.madeBy": "Built by a student",
 
         // Legal pages
         "legal.backToHome": "Back to Home",

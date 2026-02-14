@@ -23,6 +23,8 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
 import Link from "next/link";
 
 const { Title, Text } = Typography;
@@ -30,7 +32,7 @@ const { Title, Text } = Typography;
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { login, googleLogin, loginAnonymously } = useAuth();
+    const { login, loginAnonymously } = useAuth();
     const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [guestLoading, setGuestLoading] = useState(false);
@@ -115,121 +117,138 @@ function LoginForm() {
     };
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
-                padding: 20,
-            }}
-        >
-            <Card
+        <div style={{ minHeight: "100vh", background: "#fff" }}>
+            <Navbar showAuth={false} />
+
+            <main
                 style={{
-                    width: "100%",
-                    maxWidth: 420,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+                    maxWidth: 1000,
+                    margin: "0 auto",
+                    padding: "120px 24px 64px",
                 }}
             >
-                <div style={{ textAlign: "center", marginBottom: 32 }}>
-                    <Title
-                        level={2}
-                        style={{ marginBottom: 8, color: "#1976d2" }}
-                    >
-                        Rechly
-                    </Title>
-                    <Text type="secondary">{t("auth.subtitle")}</Text>
-                </div>
-
-                <Form
-                    name="login"
-                    onFinish={onFinish}
-                    layout="vertical"
-                    size="large"
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        minHeight: "calc(100vh - 260px)",
+                    }}
                 >
-                    <Form.Item
-                        name="email"
-                        rules={[
-                            {
-                                required: true,
-                                message: t("auth.emailRequired"),
-                            },
-                            {
-                                type: "email",
-                                message: t("auth.emailInvalid"),
-                            },
-                        ]}
+                    <Card
+                        style={{
+                            width: "100%",
+                            maxWidth: 420,
+                            borderRadius: 12,
+                            border: "1px solid #f0f0f0",
+                            boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+                        }}
                     >
-                        <Input
-                            prefix={<MailOutlined />}
-                            placeholder={t("auth.email")}
-                        />
-                    </Form.Item>
+                        <div style={{ textAlign: "center", marginBottom: 32 }}>
+                            <Title
+                                level={2}
+                                style={{ marginBottom: 8, color: "#111" }}
+                            >
+                                Rechly
+                            </Title>
+                            <Text type="secondary">{t("auth.subtitle")}</Text>
+                        </div>
 
-                    <Form.Item
-                        name="password"
-                        rules={[
-                            {
-                                required: true,
-                                message: t("auth.passwordRequired"),
-                            },
-                        ]}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined />}
-                            placeholder={t("auth.password")}
-                        />
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            block
-                            loading={loading}
+                        <Form
+                            name="login"
+                            onFinish={onFinish}
+                            layout="vertical"
+                            size="large"
                         >
-                            {t("auth.login")}
-                        </Button>
-                    </Form.Item>
-                </Form>
+                            <Form.Item
+                                name="email"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("auth.emailRequired"),
+                                    },
+                                    {
+                                        type: "email",
+                                        message: t("auth.emailInvalid"),
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    prefix={<MailOutlined />}
+                                    placeholder={t("auth.email")}
+                                />
+                            </Form.Item>
 
-                <Divider>{t("auth.or")}</Divider>
+                            <Form.Item
+                                name="password"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("auth.passwordRequired"),
+                                    },
+                                ]}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    placeholder={t("auth.password")}
+                                />
+                            </Form.Item>
 
-                <Space
-                    direction="vertical"
-                    style={{ width: "100%" }}
-                    size="middle"
-                >
-                    <Button
-                        icon={<GoogleOutlined />}
-                        block
-                        size="large"
-                        href="/api/auth/google"
-                    >
-                        {t("auth.withGoogle")}
-                    </Button>
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    block
+                                    loading={loading}
+                                >
+                                    {t("auth.login")}
+                                </Button>
+                            </Form.Item>
+                        </Form>
 
-                    <Button
-                        icon={<UserOutlined />}
-                        block
-                        size="large"
-                        onClick={showGuestWarning}
-                        loading={guestLoading}
-                    >
-                        {t("auth.asGuest")}
-                    </Button>
-                </Space>
+                        <Divider>{t("auth.or")}</Divider>
 
-                <div style={{ textAlign: "center", marginTop: 24 }}>
-                    <Text type="secondary">
-                        {t("auth.noAccount")}{" "}
-                        <Link href="/register" style={{ color: "#1976d2" }}>
-                            {t("auth.signUpNow")}
-                        </Link>
-                    </Text>
+                        <Space
+                            direction="vertical"
+                            style={{ width: "100%" }}
+                            size="middle"
+                        >
+                            <Button
+                                icon={<GoogleOutlined />}
+                                block
+                                size="large"
+                                href="/api/auth/google"
+                            >
+                                {t("auth.withGoogle")}
+                            </Button>
+
+                            <Button
+                                icon={<UserOutlined />}
+                                block
+                                size="large"
+                                onClick={showGuestWarning}
+                                loading={guestLoading}
+                            >
+                                {t("auth.asGuest")}
+                            </Button>
+                        </Space>
+
+                        <div style={{ textAlign: "center", marginTop: 24 }}>
+                            <Text type="secondary">
+                                {t("auth.noAccount")}{" "}
+                                <Link
+                                    href="/register"
+                                    style={{ color: "#1976d2" }}
+                                >
+                                    {t("auth.signUpNow")}
+                                </Link>
+                            </Text>
+                        </div>
+                    </Card>
                 </div>
-            </Card>
+            </main>
+
+            <Footer />
 
             <Modal
                 title={
@@ -288,8 +307,7 @@ export default function LoginPage() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        background:
-                            "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
+                        background: "#fff",
                     }}
                 >
                     <Spin size="large" />

@@ -22,13 +22,15 @@ import {
     EuroOutlined,
     PlusOutlined,
     ArrowRightOutlined,
+    AlertOutlined,
 } from "@ant-design/icons";
 import { useInvoiceStore, useClientStore, useProductStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCompanyInfo } from "@/lib/companyService";
+import { getDashboardAnalytics } from "@/lib/analyticsService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
-import type { UserCompany } from "@/types";
+import type { DashboardAnalytics, UserCompany } from "@/types";
 
 const { Title, Text } = Typography;
 
@@ -37,6 +39,7 @@ export default function DashboardPage() {
     const { t } = useLanguage();
     const [company, setCompany] = useState<UserCompany | null>(null);
     const [companyLoading, setCompanyLoading] = useState(true);
+    const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
 
     const statusColors: Record<string, string> = {
         draft: "default",
@@ -85,6 +88,7 @@ export default function DashboardPage() {
                 fetchClients(),
                 fetchProducts(),
                 getCompanyInfo().then(setCompany),
+                getDashboardAnalytics().then(setAnalytics),
             ]);
         } catch (error) {
             console.error("Error loading dashboard data:", error);
@@ -296,6 +300,185 @@ export default function DashboardPage() {
                 </Col>
             </Row>
 
+            {/* Data Science Insights */}
+            <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                <Col xs={24} lg={12}>
+                    <Card title="Revenue Forecast (30/90 days)">
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Statistic
+                                    title="Next 30 days"
+                                    value={analytics?.forecast.next30Days ?? 0}
+                                    precision={2}
+                                    suffix="€"
+                                />
+                            </Col>
+                            <Col span={12}>
+                                <Statistic
+                                    title="Next 90 days"
+                                    value={analytics?.forecast.next90Days ?? 0}
+                                    precision={2}
+                                    suffix="€"
+                                />
+                            </Col>
+                        </Row>
+                        <div style={{ marginTop: 12 }}>
+                            <Text type="secondary">
+                                Model confidence:{" "}
+                                {analytics?.forecast.confidence ?? 0}%
+                            </Text>
+                        </div>
+                    </Card>
+                </Col>
+
+                <Col xs={24} lg={12}>
+                    <Card title="Late-Payment Risk (Top Clients)">
+                        {analytics?.latePaymentRisk?.length ? (
+                            <Space
+                                direction="vertical"
+                                style={{ width: "100%" }}
+                            >
+                                {analytics.latePaymentRisk
+                                    .slice(0, 5)
+                                    .map((risk) => (
+                                        <Flex
+                                            key={risk.clientId}
+                                            justify="space-between"
+                                            align="center"
+                                        >
+                                            <div>
+                                                <Text strong>
+                                                    {risk.clientName}
+                                                </Text>
+                                                <br />
+                                                <Text type="secondary">
+                                                    Late rate: {risk.lateRate}%
+                                                    • Avg late:{" "}
+                                                    {risk.averageDaysLate}d
+                                                </Text>
+                                            </div>
+                                            <Tag
+                                                color={
+                                                    risk.riskLevel === "high"
+                                                        ? "error"
+                                                        : risk.riskLevel ===
+                                                            "medium"
+                                                          ? "warning"
+                                                          : "success"
+                                                }
+                                            >
+                                                {(risk.riskScore * 100).toFixed(
+                                                    1,
+                                                )}
+                                                %
+                                            </Tag>
+                                        </Flex>
+                                    ))}
+                            </Space>
+                        ) : (
+                            <Text type="secondary">
+                                Not enough data for risk scoring yet.
+                            </Text>
+                        )}
+                    </Card>
+                </Col>
+            </Row>
+
+            <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                <Col xs={24} lg={12}>
+                    <Card title="Customer Segmentation (RFM)">
+                        {analytics?.customerSegments?.length ? (
+                            <Space wrap>
+                                {[
+                                    "champions",
+                                    "loyal",
+                                    "at_risk",
+                                    "new",
+                                    "needs_attention",
+                                ].map((segment) => {
+                                    const count =
+                                        analytics.customerSegments.filter(
+                                            (entry) =>
+                                                entry.segment === segment,
+                                        ).length;
+                                    return (
+                                        <Tag key={segment} color="blue">
+                                            {segment.replace("_", " ")}: {count}
+                                        </Tag>
+                                    );
+                                })}
+                            </Space>
+                        ) : (
+                            <Text type="secondary">
+                                No segmentation data yet.
+                            </Text>
+                        )}
+                    </Card>
+                </Col>
+
+                <Col xs={24} lg={12}>
+                    <Card title="Anomaly Detection" extra={<AlertOutlined />}>
+                        {analytics?.anomalies?.length ? (
+                            <Space
+                                direction="vertical"
+                                style={{ width: "100%" }}
+                            >
+                                {analytics.anomalies
+                                    .slice(0, 4)
+                                    .map((anomaly, index) => (
+                                        <div key={`${anomaly.type}-${index}`}>
+                                            <Tag
+                                                color={
+                                                    anomaly.severity === "high"
+                                                        ? "error"
+                                                        : anomaly.severity ===
+                                                            "medium"
+                                                          ? "warning"
+                                                          : "default"
+                                                }
+                                            >
+                                                {anomaly.type.replace("_", " ")}
+                                            </Tag>
+                                            <Text>{anomaly.message}</Text>
+                                        </div>
+                                    ))}
+                            </Space>
+                        ) : (
+                            <Text type="secondary">No anomalies detected.</Text>
+                        )}
+                    </Card>
+                </Col>
+            </Row>
+
+            <Card title="KPI Intelligence" style={{ marginTop: 16 }}>
+                {analytics?.kpiInsights?.length ? (
+                    <Space direction="vertical" style={{ width: "100%" }}>
+                        {analytics.kpiInsights.map((insight) => (
+                            <Flex
+                                key={insight.key}
+                                justify="space-between"
+                                align="center"
+                            >
+                                <Text>{insight.value}</Text>
+                                <Tag
+                                    color={
+                                        insight.importance === "high"
+                                            ? "error"
+                                            : insight.importance === "medium"
+                                              ? "warning"
+                                              : "default"
+                                    }
+                                >
+                                    {insight.importance}
+                                </Tag>
+                            </Flex>
+                        ))}
+                    </Space>
+                ) : (
+                    <Text type="secondary">No KPI insights generated yet.</Text>
+                )}
+            </Card>
+
             {/* Recent Invoices */}
             <Card
                 title={t("dashboard.recentInvoices")}
@@ -330,7 +513,7 @@ export default function DashboardPage() {
                                 key={invoice.id}
                                 onClick={() =>
                                     router.push(
-                                        `/dashboard/invoices/${invoice.id}`
+                                        `/dashboard/invoices/${invoice.id}`,
                                     )
                                 }
                                 style={{
@@ -353,11 +536,11 @@ export default function DashboardPage() {
                                         <Text type="secondary">
                                             {invoice.client?.name ||
                                                 t(
-                                                    "dashboard.unknownClient"
+                                                    "dashboard.unknownClient",
                                                 )}{" "}
                                             •{" "}
                                             {formatDateGerman(
-                                                invoice.issue_date
+                                                invoice.issue_date,
                                             )}
                                         </Text>
                                     </div>
@@ -369,7 +552,7 @@ export default function DashboardPage() {
                                         </Tag>
                                         <Text strong>
                                             {formatCurrency(
-                                                invoice.total_gross
+                                                invoice.total_gross,
                                             )}
                                         </Text>
                                     </Space>

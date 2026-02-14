@@ -143,3 +143,51 @@ export interface InvoiceFormData {
     payment_terms?: string;
     items: InvoiceItemFormData[];
 }
+
+export interface RevenueForecast {
+    next30Days: number;
+    next90Days: number;
+    confidence: number;
+}
+
+export interface ClientRiskScore {
+    clientId: string;
+    clientName: string;
+    riskScore: number;
+    riskLevel: "low" | "medium" | "high";
+    lateRate: number;
+    averageDaysLate: number;
+    overdueOpenInvoices: number;
+}
+
+export interface CustomerSegment {
+    clientId: string;
+    clientName: string;
+    recencyDays: number;
+    frequency: number;
+    monetary: number;
+    segment: "champions" | "loyal" | "at_risk" | "new" | "needs_attention";
+}
+
+export interface AnalyticsAnomaly {
+    type: "amount_outlier" | "client_dropoff" | "duplicate_pattern";
+    severity: "low" | "medium" | "high";
+    message: string;
+    invoiceId?: string;
+    clientId?: string;
+}
+
+export interface KPIInsight {
+    key: string;
+    value: string;
+    importance: "low" | "medium" | "high";
+}
+
+export interface DashboardAnalytics {
+    forecast: RevenueForecast;
+    latePaymentRisk: ClientRiskScore[];
+    customerSegments: CustomerSegment[];
+    anomalies: AnalyticsAnomaly[];
+    kpiInsights: KPIInsight[];
+    generatedAt: string;
+}
