@@ -63,6 +63,217 @@ function makeRiskLevel(score: number): "low" | "medium" | "high" {
     return "low";
 }
 
+type ClientRiskBucket = {
+    paidWithDue: number;
+    latePaid: number;
+    sumLateDays: number;
+    overdueOpen: number;
+    totalOpen: number;
+};
+
+type ClientPaidHistory = {
+    paidWithDue: number;
+    latePaid: number;
+    sumLateDays: number;
+};
+
+type LatePaymentTrainingRow = {
+    timestamp: number;
+    features: number[];
+    label: 0 | 1;
+};
+
+type LogisticRegressionModel = {
+    weights: number[];
+    bias: number;
+    means: number[];
+    stds: number[];
+    validationAccuracy: number;
+    validationLogLoss: number;
+};
+
+function sigmoid(value: number): number {
+    if (value >= 0) {
+        const z = Math.exp(-value);
+        return 1 / (1 + z);
+    }
+    const z = Math.exp(value);
+    return z / (1 + z);
+}
+
+function dotProduct(a: number[], b: number[]): number {
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
+    return sum;
+}
+
+function makeLatePaymentFeatureVector(
+    invoice: InvoiceDoc,
+    history: ClientPaidHistory,
+): number[] | null {
+    const dueDate = toDate(invoice.dueDate);
+    if (!dueDate) return null;
+
+    const issueDate =
+        toDate(invoice.issueDate) || toDate(invoice.$createdAt) || dueDate;
+    const amount = Math.max(0, invoice.totalGross ?? 0);
+    const termDays = Math.max(
+        0,
+        Math.floor(
+            (startOfDay(dueDate).getTime() - startOfDay(issueDate).getTime()) /
+                DAY_MS,
+        ),
+    );
+
+    const smoothedLateRate = (history.latePaid + 1) / (history.paidWithDue + 2);
+    const avgLateDays =
+        history.latePaid > 0 ? history.sumLateDays / history.latePaid : 0;
+
+    const monthAngle = ((dueDate.getMonth() + 1) / 12) * 2 * Math.PI;
+
+    return [
+        Math.log1p(amount),
+        clamp(termDays / 90, 0, 2),
+        clamp(smoothedLateRate, 0, 1),
+        clamp(avgLateDays / 45, 0, 2),
+        Math.sin(monthAngle),
+        Math.cos(monthAngle),
+    ];
+}
+
+function trainTemporalLogisticRegression(
+    rows: LatePaymentTrainingRow[],
+): LogisticRegressionModel | null {
+    const minSamples = 40;
+    if (rows.length < minSamples) return null;
+
+    const sorted = [...rows].sort((a, b) => a.timestamp - b.timestamp);
+    const splitIndex = Math.min(
+        sorted.length - 1,
+        Math.max(1, Math.floor(sorted.length * 0.8)),
+    );
+
+    const trainRows = sorted.slice(0, splitIndex);
+    const validationRows = sorted.slice(splitIndex);
+
+    const hasBothClasses = (dataset: LatePaymentTrainingRow[]) => {
+        let has0 = false;
+        let has1 = false;
+        for (const row of dataset) {
+            if (row.label === 0) has0 = true;
+            else has1 = true;
+            if (has0 && has1) return true;
+        }
+        return false;
+    };
+
+    if (!hasBothClasses(trainRows) || !hasBothClasses(sorted)) return null;
+
+    const featureCount = trainRows[0]?.features.length ?? 0;
+    if (featureCount === 0) return null;
+
+    const means = Array<number>(featureCount).fill(0);
+    const stds = Array<number>(featureCount).fill(1);
+
+    for (const row of trainRows) {
+        for (let i = 0; i < featureCount; i++) means[i] += row.features[i];
+    }
+    for (let i = 0; i < featureCount; i++) means[i] /= trainRows.length;
+
+    for (const row of trainRows) {
+        for (let i = 0; i < featureCount; i++) {
+            const diff = row.features[i] - means[i];
+            stds[i] += diff * diff;
+        }
+    }
+    for (let i = 0; i < featureCount; i++) {
+        stds[i] = Math.sqrt(stds[i] / trainRows.length);
+        if (!Number.isFinite(stds[i]) || stds[i] < 1e-6) stds[i] = 1;
+    }
+
+    const normalize = (features: number[]) =>
+        features.map((value, i) => (value - means[i]) / stds[i]);
+
+    const normalizedTrain = trainRows.map((row) => ({
+        x: normalize(row.features),
+        y: row.label,
+    }));
+    const normalizedValidation = validationRows.map((row) => ({
+        x: normalize(row.features),
+        y: row.label,
+    }));
+
+    const weights = Array<number>(featureCount).fill(0);
+    let bias = 0;
+
+    const learningRate = 0.08;
+    const l2 = 0.0015;
+    const epochs = 220;
+
+    for (let epoch = 0; epoch < epochs; epoch++) {
+        const gradW = Array<number>(featureCount).fill(0);
+        let gradB = 0;
+
+        for (const row of normalizedTrain) {
+            const prediction = sigmoid(dotProduct(weights, row.x) + bias);
+            const error = prediction - row.y;
+            for (let i = 0; i < featureCount; i++) gradW[i] += error * row.x[i];
+            gradB += error;
+        }
+
+        const scale = 1 / normalizedTrain.length;
+        for (let i = 0; i < featureCount; i++) {
+            const regularizedGrad = gradW[i] * scale + l2 * weights[i];
+            weights[i] -= learningRate * regularizedGrad;
+        }
+        bias -= learningRate * gradB * scale;
+    }
+
+    let correct = 0;
+    let logLoss = 0;
+    const eps = 1e-8;
+
+    for (const row of normalizedValidation) {
+        const p = sigmoid(dotProduct(weights, row.x) + bias);
+        const predicted = p >= 0.5 ? 1 : 0;
+        if (predicted === row.y) correct += 1;
+        logLoss += -(
+            row.y * Math.log(p + eps) +
+            (1 - row.y) * Math.log(1 - p + eps)
+        );
+    }
+
+    const validationAccuracy =
+        normalizedValidation.length > 0
+            ? correct / normalizedValidation.length
+            : 0;
+    const validationLogLoss =
+        normalizedValidation.length > 0
+            ? logLoss / normalizedValidation.length
+            : Number.POSITIVE_INFINITY;
+
+    if (!Number.isFinite(validationLogLoss)) return null;
+
+    return {
+        weights,
+        bias,
+        means,
+        stds,
+        validationAccuracy,
+        validationLogLoss,
+    };
+}
+
+function predictLatePaymentProbability(
+    model: LogisticRegressionModel,
+    rawFeatures: number[],
+): number {
+    const normalized = rawFeatures.map(
+        (value, i) => (value - model.means[i]) / model.stds[i],
+    );
+    return sigmoid(dotProduct(model.weights, normalized) + model.bias);
+}
+
 function computeAnalytics(
     invoices: InvoiceDoc[],
     clients: ClientDoc[],
@@ -88,16 +299,7 @@ function computeAnalytics(
     });
 
     // --- Late-payment risk (client-level) ---
-    const riskByClient = new Map<
-        string,
-        {
-            paidWithDue: number;
-            latePaid: number;
-            sumLateDays: number;
-            overdueOpen: number;
-            totalOpen: number;
-        }
-    >();
+    const riskByClient = new Map<string, ClientRiskBucket>();
 
     const ensureRisk = (clientId: string) => {
         if (!riskByClient.has(clientId)) {
@@ -145,40 +347,172 @@ function computeAnalytics(
         }
     }
 
-    const latePaymentRisk: ClientRiskScore[] = Array.from(
-        riskByClient.entries(),
-    )
-        .map(([clientId, bucket]) => {
-            const lateRate =
-                bucket.paidWithDue > 0
-                    ? bucket.latePaid / bucket.paidWithDue
-                    : 0;
-            const averageDaysLate =
-                bucket.latePaid > 0 ? bucket.sumLateDays / bucket.latePaid : 0;
-            const overdueOpenRate =
-                bucket.totalOpen > 0
-                    ? bucket.overdueOpen / bucket.totalOpen
-                    : 0;
+    const clientPaidHistory = new Map<string, ClientPaidHistory>();
+    const ensurePaidHistory = (clientId: string) => {
+        if (!clientPaidHistory.has(clientId)) {
+            clientPaidHistory.set(clientId, {
+                paidWithDue: 0,
+                latePaid: 0,
+                sumLateDays: 0,
+            });
+        }
+        return clientPaidHistory.get(clientId)!;
+    };
 
-            const score = clamp(
-                lateRate * 0.5 +
-                    clamp(averageDaysLate / 30, 0, 1) * 0.3 +
-                    overdueOpenRate * 0.2,
-                0,
-                1,
-            );
+    const paidTrainingRows: LatePaymentTrainingRow[] = [];
+    const paidForTraining = paidInvoices
+        .filter((invoice) => !!invoice.clientId && !!toDate(invoice.dueDate))
+        .sort((a, b) => {
+            const aDue = startOfDay(toDate(a.dueDate) || now).getTime();
+            const bDue = startOfDay(toDate(b.dueDate) || now).getTime();
+            if (aDue !== bDue) return aDue - bDue;
+            const aPaid = startOfDay(toDate(a.$updatedAt) || now).getTime();
+            const bPaid = startOfDay(toDate(b.$updatedAt) || now).getTime();
+            return aPaid - bPaid;
+        });
 
-            return {
-                clientId,
-                clientName: clientNameMap.get(clientId) || "Unknown client",
-                riskScore: Number(score.toFixed(3)),
-                riskLevel: makeRiskLevel(score),
-                lateRate: Number((lateRate * 100).toFixed(1)),
-                averageDaysLate: Number(averageDaysLate.toFixed(1)),
-                overdueOpenInvoices: bucket.overdueOpen,
-            };
-        })
-        .sort((a, b) => b.riskScore - a.riskScore);
+    for (const invoice of paidForTraining) {
+        const clientId = invoice.clientId!;
+        const history = ensurePaidHistory(clientId);
+        const dueDate = toDate(invoice.dueDate);
+        const featureVector = makeLatePaymentFeatureVector(invoice, history);
+
+        if (!dueDate || !featureVector) continue;
+
+        const paidDate = toDate(invoice.$updatedAt) || now;
+        const lateDays = Math.max(
+            0,
+            Math.floor(
+                (startOfDay(paidDate).getTime() -
+                    startOfDay(dueDate).getTime()) /
+                    DAY_MS,
+            ),
+        );
+        const label: 0 | 1 = lateDays > 0 ? 1 : 0;
+
+        paidTrainingRows.push({
+            timestamp: startOfDay(dueDate).getTime(),
+            features: featureVector,
+            label,
+        });
+
+        history.paidWithDue += 1;
+        if (lateDays > 0) {
+            history.latePaid += 1;
+            history.sumLateDays += lateDays;
+        }
+    }
+
+    const latePaymentModel = trainTemporalLogisticRegression(paidTrainingRows);
+
+    const buildHeuristicRisk = (): ClientRiskScore[] =>
+        Array.from(riskByClient.entries())
+            .map(([clientId, bucket]) => {
+                const lateRate =
+                    bucket.paidWithDue > 0
+                        ? bucket.latePaid / bucket.paidWithDue
+                        : 0;
+                const averageDaysLate =
+                    bucket.latePaid > 0
+                        ? bucket.sumLateDays / bucket.latePaid
+                        : 0;
+                const overdueOpenRate =
+                    bucket.totalOpen > 0
+                        ? bucket.overdueOpen / bucket.totalOpen
+                        : 0;
+
+                const score = clamp(
+                    lateRate * 0.5 +
+                        clamp(averageDaysLate / 30, 0, 1) * 0.3 +
+                        overdueOpenRate * 0.2,
+                    0,
+                    1,
+                );
+
+                return {
+                    clientId,
+                    clientName: clientNameMap.get(clientId) || "Unknown client",
+                    riskScore: Number(score.toFixed(3)),
+                    riskLevel: makeRiskLevel(score),
+                    lateRate: Number((lateRate * 100).toFixed(1)),
+                    averageDaysLate: Number(averageDaysLate.toFixed(1)),
+                    overdueOpenInvoices: bucket.overdueOpen,
+                };
+            })
+            .sort((a, b) => b.riskScore - a.riskScore);
+
+    const latePaymentRisk: ClientRiskScore[] = latePaymentModel
+        ? (() => {
+              const openProbabilityByClient = new Map<
+                  string,
+                  { sum: number; count: number }
+              >();
+
+              for (const invoice of openInvoices) {
+                  if (!invoice.clientId) continue;
+                  const history = clientPaidHistory.get(invoice.clientId) || {
+                      paidWithDue: 0,
+                      latePaid: 0,
+                      sumLateDays: 0,
+                  };
+
+                  const features = makeLatePaymentFeatureVector(
+                      invoice,
+                      history,
+                  );
+                  if (!features) continue;
+
+                  const probability = predictLatePaymentProbability(
+                      latePaymentModel,
+                      features,
+                  );
+
+                  const aggregate = openProbabilityByClient.get(
+                      invoice.clientId,
+                  ) || {
+                      sum: 0,
+                      count: 0,
+                  };
+                  aggregate.sum += probability;
+                  aggregate.count += 1;
+                  openProbabilityByClient.set(invoice.clientId, aggregate);
+              }
+
+              return Array.from(riskByClient.entries())
+                  .map(([clientId, bucket]) => {
+                      const lateRate =
+                          bucket.paidWithDue > 0
+                              ? bucket.latePaid / bucket.paidWithDue
+                              : 0;
+                      const averageDaysLate =
+                          bucket.latePaid > 0
+                              ? bucket.sumLateDays / bucket.latePaid
+                              : 0;
+
+                      const clientOpen = openProbabilityByClient.get(clientId);
+                      const historicalPrior =
+                          bucket.paidWithDue > 0 ? lateRate : 0.35;
+                      const mlScore =
+                          clientOpen && clientOpen.count > 0
+                              ? clientOpen.sum / clientOpen.count
+                              : historicalPrior;
+
+                      const score = clamp(mlScore, 0, 1);
+
+                      return {
+                          clientId,
+                          clientName:
+                              clientNameMap.get(clientId) || "Unknown client",
+                          riskScore: Number(score.toFixed(3)),
+                          riskLevel: makeRiskLevel(score),
+                          lateRate: Number((lateRate * 100).toFixed(1)),
+                          averageDaysLate: Number(averageDaysLate.toFixed(1)),
+                          overdueOpenInvoices: bucket.overdueOpen,
+                      };
+                  })
+                  .sort((a, b) => b.riskScore - a.riskScore);
+          })()
+        : buildHeuristicRisk();
 
     const riskMap = new Map(
         latePaymentRisk.map((risk) => [risk.clientId, risk.riskScore]),
