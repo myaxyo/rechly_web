@@ -32,6 +32,12 @@ type ClientDoc = {
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const ML_API_BASE_URL =
+    process.env.ML_API_URL?.replace(/\/+$/, "") ||
+    "https://ml-api-07b0434278d6.herokuapp.com";
+const ML_API_SECRET =
+    process.env.ML_API_SECRET || process.env.CLEANUP_API_SECRET || "";
+const ML_API_TIMEOUT_MS = 4500;
 
 function toDate(value?: string): Date | null {
     if (!value) return null;
@@ -90,6 +96,25 @@ type LogisticRegressionModel = {
     stds: number[];
     validationAccuracy: number;
     validationLogLoss: number;
+};
+
+type MlForecastResponse = {
+    forecast?: {
+        next_30_days?: number;
+        next_90_days?: number;
+        interval_30_days?: {
+            lower?: number;
+            upper?: number;
+        };
+    };
+};
+
+type MlMetricsResponse = {
+    metrics?: {
+        test_metrics?: {
+            pr_auc?: number;
+        };
+    };
 };
 
 function sigmoid(value: number): number {
@@ -272,6 +297,103 @@ function predictLatePaymentProbability(
         (value, i) => (value - model.means[i]) / model.stds[i],
     );
     return sigmoid(dotProduct(model.weights, normalized) + model.bias);
+}
+
+async function fetchMlApi<T>(path: string): Promise<T | null> {
+    if (!ML_API_SECRET) return null;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), ML_API_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(`${ML_API_BASE_URL}${path}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${ML_API_SECRET}`,
+            },
+            cache: "no-store",
+            signal: controller.signal,
+        });
+
+        if (!response.ok) return null;
+        return (await response.json()) as T;
+    } catch {
+        return null;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+async function enrichWithMlAnalytics(
+    base: DashboardAnalytics,
+): Promise<DashboardAnalytics> {
+    const [forecastResponse, metricsResponse] = await Promise.all([
+        fetchMlApi<MlForecastResponse>("/forecast/revenue"),
+        fetchMlApi<MlMetricsResponse>("/metrics/late-payment"),
+    ]);
+
+    const forecast = forecastResponse?.forecast;
+    if (!forecast) return base;
+
+    const next30Days =
+        typeof forecast.next_30_days === "number" &&
+        Number.isFinite(forecast.next_30_days)
+            ? Number(forecast.next_30_days.toFixed(2))
+            : base.forecast.next30Days;
+
+    const next90Days =
+        typeof forecast.next_90_days === "number" &&
+        Number.isFinite(forecast.next_90_days)
+            ? Number(forecast.next_90_days.toFixed(2))
+            : base.forecast.next90Days;
+
+    let confidence = base.forecast.confidence;
+
+    const prAuc = metricsResponse?.metrics?.test_metrics?.pr_auc;
+    if (typeof prAuc === "number" && Number.isFinite(prAuc)) {
+        confidence = Number(clamp(prAuc * 100, 0, 100).toFixed(1));
+    } else {
+        const lower = forecast.interval_30_days?.lower;
+        const upper = forecast.interval_30_days?.upper;
+        if (
+            typeof lower === "number" &&
+            Number.isFinite(lower) &&
+            typeof upper === "number" &&
+            Number.isFinite(upper) &&
+            next30Days > 0
+        ) {
+            const intervalWidthRatio =
+                (upper - lower) / Math.max(next30Days, 1);
+            confidence = Number(
+                clamp((1 - intervalWidthRatio) * 100, 35, 95).toFixed(1),
+            );
+        }
+    }
+
+    const hasMlForecastSource = base.kpiInsights.some(
+        (insight) => insight.key === "ml_forecast_source",
+    );
+    const kpiInsights = hasMlForecastSource
+        ? base.kpiInsights
+        : [
+              {
+                  key: "ml_forecast_source",
+                  value: "Revenue forecast powered by deployed ML API.",
+                  importance: "low" as const,
+              },
+              ...base.kpiInsights,
+          ];
+
+    return {
+        ...base,
+        forecast: {
+            ...base.forecast,
+            next30Days,
+            next90Days,
+            confidence,
+        },
+        kpiInsights,
+    };
 }
 
 function computeAnalytics(
@@ -973,8 +1095,9 @@ export async function GET() {
             invoicesResponse.documents as unknown as InvoiceDoc[],
             clientsResponse.documents as unknown as ClientDoc[],
         );
+        const enrichedAnalytics = await enrichWithMlAnalytics(analytics);
 
-        return NextResponse.json(analytics);
+        return NextResponse.json(enrichedAnalytics);
     } catch (error) {
         console.error("Error generating dashboard analytics:", error);
 
