@@ -47,7 +47,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
  * Create new product
  */
 export const createProduct = async (
-    data: ProductFormData
+    data: ProductFormData,
 ): Promise<Product> => {
     try {
         const res = await fetch("/api/products", {
@@ -73,7 +73,7 @@ export const createProduct = async (
  */
 export const updateProduct = async (
     id: string,
-    data: Partial<ProductFormData>
+    data: Partial<ProductFormData>,
 ): Promise<Product> => {
     try {
         const res = await fetch(`/api/products/${id}`, {
@@ -111,4 +111,22 @@ export const deleteProduct = async (id: string): Promise<void> => {
         console.error("Error deleting product:", error);
         throw error;
     }
+};
+
+export const bulkUploadProducts = async (
+    file: File,
+): Promise<import("@/types").ProductBulkUploadResult> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/products/bulk-upload", {
+        method: "POST",
+        body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || "Bulk upload failed");
+    }
+    return data;
 };

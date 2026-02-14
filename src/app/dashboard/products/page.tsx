@@ -15,18 +15,30 @@ import {
     Typography,
     Row,
     Col,
+    Progress,
+    Upload,
+    Alert,
+    Divider,
 } from "antd";
+import type { UploadProps } from "antd";
 import type { TableProps } from "antd";
 import {
     PlusOutlined,
     SearchOutlined,
     EditOutlined,
     DeleteOutlined,
+    UploadOutlined,
+    DownloadOutlined,
 } from "@ant-design/icons";
 import { useProductStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/currencyUtils";
-import type { Product, ProductFormData } from "@/types";
+import type {
+    Product,
+    ProductBulkUploadResult,
+    ProductCsvPreviewRow,
+    ProductFormData,
+} from "@/types";
 
 const { Title } = Typography;
 
@@ -37,6 +49,16 @@ export default function ProductsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [form] = Form.useForm();
     const [submitting, setSubmitting] = useState(false);
+    const [csvFile, setCsvFile] = useState<File | null>(null);
+    const [csvPreviewRows, setCsvPreviewRows] = useState<
+        ProductCsvPreviewRow[]
+    >([]);
+    const [csvPreviewErrors, setCsvPreviewErrors] = useState<string[]>([]);
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [uploadingCsv, setUploadingCsv] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [bulkUploadResult, setBulkUploadResult] =
+        useState<ProductBulkUploadResult | null>(null);
 
     const unitOptions = [
         { value: "Stück", label: t("products.unit.piece") },
@@ -72,12 +94,218 @@ export default function ProductsPage() {
             product.name.toLowerCase().includes(searchText.toLowerCase()) ||
             product.description
                 ?.toLowerCase()
-                .includes(searchText.toLowerCase())
+                .includes(searchText.toLowerCase()),
     );
 
     useEffect(() => {
         fetchProducts();
     }, []);
+
+    const parseCsvLine = (line: string): string[] => {
+        const out: string[] = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i += 1;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === "," && !inQuotes) {
+                out.push(current.trim());
+                current = "";
+            } else {
+                current += char;
+            }
+        }
+        out.push(current.trim());
+        return out;
+    };
+
+    const validatePreviewRow = (
+        row: Record<string, string>,
+        line: number,
+    ): ProductCsvPreviewRow => {
+        const errors: string[] = [];
+        const name = (row.name || "").trim();
+        const description = (row.description || "").trim();
+        const price = Number(String(row.price || "").replace(",", "."));
+        const taxRate = Number(
+            String(row.tax_rate_percent || "").replace(",", "."),
+        );
+        const unit = (row.unit_of_measure || "Stück").trim() || "Stück";
+
+        if (!name) errors.push("name is required");
+        if (!Number.isFinite(price) || price < 0)
+            errors.push("price must be a non-negative number");
+        if (!Number.isFinite(taxRate) || taxRate < 0 || taxRate > 100)
+            errors.push("tax_rate_percent must be between 0 and 100");
+
+        return {
+            row: line,
+            name,
+            description,
+            price: Number.isFinite(price) ? price : 0,
+            tax_rate_percent: Number.isFinite(taxRate) ? taxRate : 0,
+            unit_of_measure: unit,
+            errors,
+        };
+    };
+
+    const buildCsvPreview = async (file: File) => {
+        const raw = await file.text();
+        const lines = raw
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+        if (lines.length < 2) {
+            setCsvPreviewRows([]);
+            setCsvPreviewErrors(["CSV needs at least header + 1 data row"]);
+            return;
+        }
+
+        const headers = parseCsvLine(lines[0]).map((header) =>
+            header.toLowerCase(),
+        );
+        const requiredHeaders = [
+            "name",
+            "price",
+            "tax_rate_percent",
+            "unit_of_measure",
+        ];
+        const missing = requiredHeaders.filter(
+            (header) => !headers.includes(header),
+        );
+
+        if (missing.length > 0) {
+            setCsvPreviewRows([]);
+            setCsvPreviewErrors([
+                `Missing required columns: ${missing.join(", ")}`,
+            ]);
+            return;
+        }
+
+        const previewRows = lines.slice(1, 16).map((line, index) => {
+            const values = parseCsvLine(line);
+            const rowObj: Record<string, string> = {};
+            headers.forEach((header, colIndex) => {
+                rowObj[header] = values[colIndex] || "";
+            });
+            return validatePreviewRow(rowObj, index + 2);
+        });
+
+        setCsvPreviewErrors([]);
+        setCsvPreviewRows(previewRows);
+    };
+
+    const downloadSampleCsv = () => {
+        const sample = [
+            "name,description,price,tax_rate_percent,unit_of_measure",
+            'Website Audit,"Technical and SEO audit",450,19,Stück',
+            'Monthly Maintenance,"Maintenance package",99.99,19,Monat',
+            'Consulting Hour,"Strategic consulting",120,19,Stunde',
+        ].join("\n");
+
+        const blob = new Blob([sample], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = "products-sample.csv";
+        anchor.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const uploadProps: UploadProps = {
+        accept: ".csv,text/csv",
+        maxCount: 1,
+        beforeUpload: async (file) => {
+            setCsvFile(file as File);
+            setBulkUploadResult(null);
+            await buildCsvPreview(file as File);
+            return false;
+        },
+        onRemove: () => {
+            setCsvFile(null);
+            setCsvPreviewRows([]);
+            setCsvPreviewErrors([]);
+        },
+        fileList: csvFile
+            ? [
+                  {
+                      uid: "products-csv",
+                      name: csvFile.name,
+                      status: "done",
+                  },
+              ]
+            : [],
+    };
+
+    const startCsvUpload = async () => {
+        if (!csvFile) {
+            message.warning("Please choose a CSV file first.");
+            return;
+        }
+
+        if (
+            csvPreviewErrors.length > 0 ||
+            csvPreviewRows.some((r) => r.errors.length > 0)
+        ) {
+            message.error("Fix CSV validation errors before uploading.");
+            return;
+        }
+
+        setUploadingCsv(true);
+        setUploadProgress(0);
+        setBulkUploadResult(null);
+
+        const formData = new FormData();
+        formData.append("file", csvFile);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/products/bulk-upload", true);
+
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                setUploadProgress(percent);
+            }
+        };
+
+        xhr.onload = async () => {
+            setUploadingCsv(false);
+            setUploadProgress(100);
+
+            try {
+                const data = JSON.parse(
+                    xhr.responseText || "{}",
+                ) as ProductBulkUploadResult & { error?: string };
+
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    setBulkUploadResult(data);
+                    message.success(
+                        `Imported ${data.insertedRows} products (${data.failedRows} failed).`,
+                    );
+                    await fetchProducts(true);
+                } else {
+                    message.error(data.error || "Bulk upload failed.");
+                }
+            } catch {
+                message.error("Bulk upload response could not be parsed.");
+            }
+        };
+
+        xhr.onerror = () => {
+            setUploadingCsv(false);
+            message.error("Upload failed. Please try again.");
+        };
+
+        xhr.send(formData);
+    };
 
     const openCreateModal = () => {
         setEditingProduct(null);
@@ -206,14 +434,29 @@ export default function ProductsPage() {
                     md={12}
                     style={{ display: "flex", justifyContent: "flex-end" }}
                 >
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={openCreateModal}
-                        style={{ width: "100%", maxWidth: 200 }}
+                    <Space
+                        style={{ width: "100%", justifyContent: "flex-end" }}
                     >
-                        {t("products.new")}
-                    </Button>
+                        <Button
+                            icon={<DownloadOutlined />}
+                            onClick={downloadSampleCsv}
+                        >
+                            Download sample CSV
+                        </Button>
+                        <Button
+                            icon={<UploadOutlined />}
+                            onClick={() => setPreviewModalOpen(true)}
+                        >
+                            CSV Upload
+                        </Button>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={openCreateModal}
+                        >
+                            {t("products.new")}
+                        </Button>
+                    </Space>
                 </Col>
             </Row>
 
@@ -292,14 +535,14 @@ export default function ProductsPage() {
                                     formatter={(value) =>
                                         `${value}`.replace(
                                             /\B(?=(\d{3})+(?!\d))/g,
-                                            "."
+                                            ".",
                                         )
                                     }
                                     parser={(value) =>
                                         Number(
                                             value
                                                 ?.replace(/\./g, "")
-                                                .replace(",", ".")
+                                                .replace(",", "."),
                                         ) as unknown as 0
                                     }
                                 />
@@ -349,6 +592,130 @@ export default function ProductsPage() {
                         </Space>
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            <Modal
+                title="CSV Bulk Upload"
+                open={previewModalOpen}
+                onCancel={() => setPreviewModalOpen(false)}
+                onOk={startCsvUpload}
+                okText="Upload"
+                confirmLoading={uploadingCsv}
+                width={900}
+            >
+                <Space direction="vertical" style={{ width: "100%" }}>
+                    <Upload {...uploadProps}>
+                        <Button icon={<UploadOutlined />}>
+                            Select CSV file
+                        </Button>
+                    </Upload>
+
+                    {uploadingCsv ? (
+                        <Progress percent={uploadProgress} />
+                    ) : null}
+
+                    {csvPreviewErrors.map((error, index) => (
+                        <Alert
+                            key={`${error}-${index}`}
+                            type="error"
+                            message={error}
+                        />
+                    ))}
+
+                    {csvPreviewRows.length > 0 ? (
+                        <>
+                            <Divider style={{ margin: "8px 0" }} />
+                            <Table<ProductCsvPreviewRow>
+                                size="small"
+                                rowKey="row"
+                                pagination={false}
+                                dataSource={csvPreviewRows}
+                                columns={[
+                                    {
+                                        title: "Row",
+                                        dataIndex: "row",
+                                        width: 70,
+                                    },
+                                    { title: "Name", dataIndex: "name" },
+                                    {
+                                        title: "Price",
+                                        dataIndex: "price",
+                                        width: 120,
+                                        render: (value) =>
+                                            formatCurrency(value),
+                                    },
+                                    {
+                                        title: "VAT",
+                                        dataIndex: "tax_rate_percent",
+                                        width: 90,
+                                        render: (value) => `${value}%`,
+                                    },
+                                    {
+                                        title: "Unit",
+                                        dataIndex: "unit_of_measure",
+                                        width: 100,
+                                    },
+                                    {
+                                        title: "Validation",
+                                        dataIndex: "errors",
+                                        render: (errors: string[]) =>
+                                            errors.length > 0 ? (
+                                                <span
+                                                    style={{ color: "#ff4d4f" }}
+                                                >
+                                                    {errors.join("; ")}
+                                                </span>
+                                            ) : (
+                                                <span
+                                                    style={{ color: "#52c41a" }}
+                                                >
+                                                    valid
+                                                </span>
+                                            ),
+                                    },
+                                ]}
+                            />
+                        </>
+                    ) : null}
+
+                    {bulkUploadResult ? (
+                        <Alert
+                            type={
+                                bulkUploadResult.failedRows > 0
+                                    ? "warning"
+                                    : "success"
+                            }
+                            message={`Processed: ${bulkUploadResult.processedRows}, Inserted: ${bulkUploadResult.insertedRows}, Failed: ${bulkUploadResult.failedRows}`}
+                            description={
+                                <div>
+                                    {bulkUploadResult.mlTrigger
+                                        ? `ML recompute: ${bulkUploadResult.mlTrigger.success ? "success" : "not completed"}${bulkUploadResult.mlTrigger.details ? ` (${bulkUploadResult.mlTrigger.details})` : ""}`
+                                        : null}
+                                    {bulkUploadResult.errors.length > 0 ? (
+                                        <ul
+                                            style={{
+                                                marginTop: 8,
+                                                marginBottom: 0,
+                                                paddingLeft: 18,
+                                            }}
+                                        >
+                                            {bulkUploadResult.errors
+                                                .slice(0, 10)
+                                                .map((error) => (
+                                                    <li
+                                                        key={`${error.row}-${error.message}`}
+                                                    >
+                                                        Row {error.row}:{" "}
+                                                        {error.message}
+                                                    </li>
+                                                ))}
+                                        </ul>
+                                    ) : null}
+                                </div>
+                            }
+                        />
+                    ) : null}
+                </Space>
             </Modal>
         </div>
     );

@@ -122,6 +122,31 @@ export interface ProductFormData {
     unit_of_measure: string;
 }
 
+export interface ProductCsvPreviewRow {
+    row: number;
+    name: string;
+    description?: string;
+    price: number;
+    tax_rate_percent: number;
+    unit_of_measure: string;
+    errors: string[];
+}
+
+export interface ProductBulkUploadResult {
+    processedRows: number;
+    insertedRows: number;
+    failedRows: number;
+    errors: Array<{
+        row: number;
+        message: string;
+    }>;
+    mlTrigger?: {
+        attempted: boolean;
+        success: boolean;
+        details?: string;
+    };
+}
+
 export interface InvoiceItemFormData {
     product_id?: string;
     description: string;
