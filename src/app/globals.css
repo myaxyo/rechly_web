@@ -85,6 +85,25 @@ body {
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
+.landing-eyebrow {
+  display: inline-block;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 244, 230, 0.95);
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.landing-highlight-card {
+  border-radius: 20px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
 ::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 4px;

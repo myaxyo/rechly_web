@@ -24,6 +24,9 @@ const FeaturesSection = dynamic(
 const AboutSection = dynamic(
     () => import("@/components/landing/sections/AboutSection"),
 );
+const WorkflowSection = dynamic(
+    () => import("@/components/landing/sections/WorkflowSection"),
+);
 const FaqSection = dynamic(
     () => import("@/components/landing/sections/FaqSection"),
 );
@@ -188,6 +191,7 @@ export default function Home() {
             <main role="main">
                 <HeroSection />
                 <FeaturesSection />
+                <WorkflowSection />
                 <AboutSection />
                 <FaqSection />
                 <CtaSection />

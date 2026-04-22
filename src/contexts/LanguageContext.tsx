@@ -42,18 +42,62 @@ const translations: Record<Language, Record<string, string>> = {
         "about.point4": "Aktiv weiterentwickelt",
 
         // Features
+        "features.badge": "PRODUKT-HIGHLIGHTS",
         "features.title": "Dein kostenloses Rechnungsprogramm",
+        "features.subtitle":
+            "Von der ersten Rechnung bis zur Nachverfolgung offener Zahlungen: Rechly bündelt Schreiben, Erinnern, KI-Unterstützung und Prognosen in einem klaren Workflow.",
         "features.invoices.title": "Rechnungen erstellen",
         "features.invoices.desc":
             "Professionelle PDF-Rechnungen mit allen Pflichtangaben.",
         "features.clients.title": "Kunden verwalten",
         "features.clients.desc":
             "Speichere Kundendaten und greife schnell darauf zu.",
-        "features.sync.title": "Cloud-Sync",
-        "features.sync.desc":
-            "Deine Daten sind sicher gespeichert und überall verfügbar.",
-        "features.mobile.title": "Mobile App",
-        "features.mobile.desc": "Native Android-App, iOS folgt bald.",
+        "features.reminders.title": "Zahlungserinnerungen",
+        "features.reminders.desc":
+            "Entwürfe für höfliche Follow-ups direkt aus Rechnung und Kundenkontext erzeugen.",
+        "features.ai.title": "KI-Schreibhilfe",
+        "features.ai.desc":
+            "Texte für Notizen, Leistungsbeschreibungen und E-Mails mit deinem eigenen Anbieter generieren.",
+        "features.analytics.title": "Analysen & Prognosen",
+        "features.analytics.desc":
+            "Offene Beträge, Risiken und Umsatztrends auf einen Blick beobachten.",
+        "features.opensource.title": "Open Source & kontrollierbar",
+        "features.opensource.desc":
+            "Selbst hosten, anpassen und nachvollziehen, wie Daten und Automationen funktionieren.",
+        "features.highlight1.value": "BYOK",
+        "features.highlight1.label":
+            "Wähle selbst KI-Provider, Modell und Schlüssel pro Account.",
+        "features.highlight2.value": "1 Klick",
+        "features.highlight2.label":
+            "Erinnerungen und Textentwürfe direkt im Rechnungs-Workflow starten.",
+        "features.highlight3.value": "EU ready",
+        "features.highlight3.label":
+            "DSGVO-freundlicher Workflow mit offenem Deployment-Setup.",
+
+        // Workflow
+        "workflow.badge": "SO ARBEITEST DU MIT RECHLY",
+        "workflow.title":
+            "Von Angebotston bis Zahlungseingang in einem ruhigen Ablauf",
+        "workflow.subtitle":
+            "Die Landing Page zeigt jetzt nicht nur klassische Rechnungsfunktionen, sondern auch die tatsächlichen Produktwege: schreiben, senden, erinnern und auswerten.",
+        "workflow.step1.title": "1. Rechnung aufsetzen",
+        "workflow.step1.desc":
+            "Positionen, Notizen und Zahlungsbedingungen schnell vorbereiten und bei Bedarf per KI verfeinern.",
+        "workflow.step2.title": "2. Versenden & nachfassen",
+        "workflow.step2.desc":
+            "Sobald Rechnungen offen bleiben, erzeugst du passende Erinnerungen direkt aus der Liste oder Detailansicht.",
+        "workflow.step3.title": "3. Risiken sichtbar halten",
+        "workflow.step3.desc":
+            "Dashboard und ML-Service liefern dir Prognosen und Kennzahlen, sobald genügend echte Daten vorhanden sind.",
+        "workflow.cardTitle": "Produktbild statt Marketing-Sprech",
+        "workflow.cardDesc":
+            "Rechly wirkt auf der Startseite jetzt näher an der echten App: fokussiert, offen und auf Freelancer-Operationen zugeschnitten.",
+        "workflow.point1":
+            "KI-Funktionen bleiben serverseitig gekapselt und pro Nutzer konfigurierbar.",
+        "workflow.point2":
+            "Erinnerungs- und Schreibflows tauchen dort auf, wo Rechnungen tatsächlich bearbeitet werden.",
+        "workflow.point3":
+            "Analysen degradieren sauber, wenn noch nicht genug Historie zum Trainieren vorhanden ist.",
 
         // CTA
         "cta.title": "Jetzt Rechnung erstellen",
@@ -459,17 +503,61 @@ const translations: Record<Language, Record<string, string>> = {
         "about.point4": "Actively maintained",
 
         // Features
+        "features.badge": "PRODUCT HIGHLIGHTS",
         "features.title": "Your free invoicing software",
+        "features.subtitle":
+            "From the first invoice to overdue follow-up: Rechly combines writing, reminders, AI assistance, and forecasting in one clear workflow.",
         "features.invoices.title": "Create Invoices",
         "features.invoices.desc":
             "Professional PDF invoices with all required fields.",
         "features.clients.title": "Manage Clients",
         "features.clients.desc": "Store client data and access it quickly.",
-        "features.sync.title": "Cloud Sync",
-        "features.sync.desc":
-            "Your data is securely stored and available everywhere.",
-        "features.mobile.title": "Mobile App",
-        "features.mobile.desc": "Native Android app, iOS coming soon.",
+        "features.reminders.title": "Payment reminders",
+        "features.reminders.desc":
+            "Generate polite follow-up drafts directly from invoice and client context.",
+        "features.ai.title": "AI writing assistance",
+        "features.ai.desc":
+            "Generate notes, line descriptions, and emails with your own provider and model.",
+        "features.analytics.title": "Analytics & forecasting",
+        "features.analytics.desc":
+            "Track open amounts, payment risk, and revenue trends from one dashboard.",
+        "features.opensource.title": "Open source and controllable",
+        "features.opensource.desc":
+            "Self-host, adapt, and inspect how your data flows and automations work.",
+        "features.highlight1.value": "BYOK",
+        "features.highlight1.label":
+            "Choose your own AI provider, model, and key per account.",
+        "features.highlight2.value": "1 click",
+        "features.highlight2.label":
+            "Start reminders and writing drafts directly inside invoice workflows.",
+        "features.highlight3.value": "EU ready",
+        "features.highlight3.label":
+            "GDPR-friendly workflow with an open deployment setup.",
+
+        // Workflow
+        "workflow.badge": "HOW RECHLY WORKS",
+        "workflow.title":
+            "From draft tone to payment follow-up in one calm flow",
+        "workflow.subtitle":
+            "The landing page now reflects the actual product paths, not just generic invoicing claims: write, send, remind, and review.",
+        "workflow.step1.title": "1. Prepare the invoice",
+        "workflow.step1.desc":
+            "Set up line items, notes, and payment terms quickly, then refine the wording with AI when useful.",
+        "workflow.step2.title": "2. Send and follow up",
+        "workflow.step2.desc":
+            "When invoices remain unpaid, generate context-aware reminders directly from the list or detail view.",
+        "workflow.step3.title": "3. Watch the risk",
+        "workflow.step3.desc":
+            "The dashboard and ML service expose forecasts and key signals as soon as there is enough real history.",
+        "workflow.cardTitle": "Closer to the real product",
+        "workflow.cardDesc":
+            "Rechly now presents itself on the homepage the way the app actually behaves: focused, open, and built around freelancer operations.",
+        "workflow.point1":
+            "AI features stay server-side and configurable per user.",
+        "workflow.point2":
+            "Reminder and drafting flows appear where invoices are actually handled.",
+        "workflow.point3":
+            "Analytics degrade cleanly when there is not enough history for full training yet.",
 
         // CTA
         "cta.title": "Create your invoice now",
