@@ -1,5 +1,10 @@
 import { Client, Account, Databases, OAuthProvider } from "node-appwrite";
 import { cookies } from "next/headers";
+import {
+    getAppwriteEndpoint,
+    getAppwriteProjectId,
+    getOptionalEnv,
+} from "@/lib/env";
 
 /**
  * Appwrite SSR Server Configuration
@@ -7,12 +12,9 @@ import { cookies } from "next/headers";
  * Session is stored in httpOnly cookies for security
  */
 
-const APPWRITE_ENDPOINT =
-    process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ||
-    "https://fra.cloud.appwrite.io/v1";
-const APPWRITE_PROJECT_ID =
-    process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "692d4bf1002b21c4b2b7";
-const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY || "";
+const APPWRITE_ENDPOINT = getAppwriteEndpoint();
+const APPWRITE_PROJECT_ID = getAppwriteProjectId();
+const APPWRITE_API_KEY = getOptionalEnv("APPWRITE_API_KEY") || "";
 
 // Database configuration - Must match client-side appwrite.ts
 export const DATABASE_ID = "rechly-db";
@@ -149,7 +151,7 @@ export async function loginWithEmailSSR(email: string, password: string) {
 export async function registerWithEmailSSR(
     email: string,
     password: string,
-    name: string
+    name: string,
 ) {
     const { account } = await createAdminClient();
 
@@ -183,14 +185,14 @@ export async function createAnonymousSessionSSR() {
  */
 export async function getGoogleOAuthURL(
     successUrl: string,
-    failureUrl: string
+    failureUrl: string,
 ) {
     const { account } = await createAdminClient();
 
     const redirectUrl = await account.createOAuth2Token(
         OAuthProvider.Google,
         successUrl,
-        failureUrl
+        failureUrl,
     );
 
     return redirectUrl;

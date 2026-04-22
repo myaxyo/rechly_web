@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rechly
 
-## Getting Started
+Rechly is an open-source invoicing app for freelancers and small businesses. The repository contains the Next.js web app and an optional Django-based ML service used for forecasting and payment-risk insights.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router, React, TypeScript, Ant Design
+- Appwrite for auth, database, and server-side admin operations
+- Django REST Framework and Python-based ML workflows in `services/ml_api`
+
+## Repository Layout
+
+- `src/` - web app routes, UI, shared services, and client/server Appwrite code
+- `services/ml_api/` - optional ML and analytics service
+- `public/` - static assets and favicons
+
+## Prerequisites
+
+- Node.js 20+
+- npm
+- An Appwrite project with the database and collections used by the app
+- Python 3.12+ if you want to run the ML service
+
+## Web App Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy the example environment file and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app expects the Appwrite database and collections defined in `src/lib/appwrite.ts` and `src/lib/appwrite-server.ts`. Rechly does not yet ship Appwrite provisioning automation, so self-hosters need to create those resources in their own Appwrite project.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ML Service Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The ML service is optional. The web app will still run without it, but analytics features that rely on forecasting or risk scoring will degrade gracefully.
 
-## Learn More
+1. Follow the setup instructions in `services/ml_api/README.md`.
+2. Set `ML_API_URL` and `ML_API_SECRET` in `.env.local` once the service is running.
 
-To learn more about Next.js, take a look at the following resources:
+## Open-Source Release Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Do not commit `.env.local` or any real credentials.
+- Rotate any secrets that existed in local or historical tracked files before publishing this repository.
+- Google Analytics is disabled by default unless `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` is set.
+- All deploy-specific URLs, repo links, and contact details should be configured via environment variables.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development Commands
 
-## Deploy on Vercel
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Current Gaps
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Appwrite infrastructure is documented but not auto-provisioned.
+- The ML service requires Appwrite data and trained artifacts for full functionality.
+- Secret scanning and CI release checks are still recommended before the public launch.
+
+## License
+
+This repository is intended to ship under the GNU Affero General Public License v3.0. See `LICENSE` once the public release packaging is complete.

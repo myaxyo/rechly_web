@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import { Button, Typography } from "antd";
 import { ArrowRightOutlined, GithubOutlined } from "@ant-design/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getRepoUrl } from "@/lib/env";
 
 const { Text } = Typography;
+const repoUrl = getRepoUrl();
 
 export default function HeroSection() {
     const router = useRouter();
@@ -93,7 +95,7 @@ export default function HeroSection() {
                 <Button
                     size="large"
                     icon={<GithubOutlined />}
-                    href="https://github.com/myaxyo/rechly"
+                    href={repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full sm:w-auto"

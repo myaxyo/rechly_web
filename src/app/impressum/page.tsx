@@ -9,8 +9,12 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import { getContactEmail, getOptionalLinkedInUrl, getRepoUrl } from "@/lib/env";
 
 const { Title, Paragraph, Text } = Typography;
+const contactEmail = getContactEmail();
+const linkedInUrl = getOptionalLinkedInUrl();
+const repoUrl = getRepoUrl();
 
 const content = {
     de: {
@@ -88,29 +92,31 @@ export default function ImpressumPage() {
                         <Button
                             type="link"
                             icon={<MailOutlined />}
-                            href="mailto:myaxyoyev@icloud.com"
+                            href={`mailto:${contactEmail}`}
                             style={{ padding: 0, height: "auto" }}
                         >
-                            myaxyoyev@icloud.com
+                            {contactEmail}
                         </Button>
                         <Button
                             type="link"
                             icon={<GithubOutlined />}
-                            href="https://github.com/myaxyo"
+                            href={repoUrl}
                             target="_blank"
                             style={{ padding: 0, height: "auto" }}
                         >
-                            github.com/myaxyo
+                            {repoUrl.replace(/^https?:\/\//, "")}
                         </Button>
-                        <Button
-                            type="link"
-                            icon={<LinkedinOutlined />}
-                            href="https://linkedin.com/in/myaxyo"
-                            target="_blank"
-                            style={{ padding: 0, height: "auto" }}
-                        >
-                            linkedin.com/in/myaxyo
-                        </Button>
+                        {linkedInUrl ? (
+                            <Button
+                                type="link"
+                                icon={<LinkedinOutlined />}
+                                href={linkedInUrl}
+                                target="_blank"
+                                style={{ padding: 0, height: "auto" }}
+                            >
+                                {linkedInUrl.replace(/^https?:\/\//, "")}
+                            </Button>
+                        ) : null}
                     </Space>
 
                     <Title level={4}>{t.liabilityContentTitle}</Title>

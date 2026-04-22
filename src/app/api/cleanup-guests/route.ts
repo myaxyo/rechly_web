@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Client, Users, Databases, Query } from "node-appwrite";
+import {
+    getAppwriteEndpoint,
+    getAppwriteProjectId,
+    getOptionalEnv,
+} from "@/lib/env";
 
 /**
  * Server-side cleanup for anonymous guest accounts
@@ -22,9 +27,9 @@ import { Client, Users, Databases, Query } from "node-appwrite";
 
 // Use environment variables from .env.local
 const APPWRITE_ENDPOINT =
-    process.env.APPWRITE_API_ENDPOINT || "https://fra.cloud.appwrite.io/v1";
+    getOptionalEnv("APPWRITE_API_ENDPOINT") || getAppwriteEndpoint();
 const APPWRITE_PROJECT_ID =
-    process.env.APPWRITE_PROJECT_ID || "692d4bf1002b21c4b2b7";
+    getOptionalEnv("APPWRITE_PROJECT_ID") || getAppwriteProjectId();
 
 // Cleanup guests older than this (in milliseconds)
 const GUEST_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -42,13 +47,13 @@ const COLLECTIONS = {
 export async function POST(request: NextRequest) {
     // Verify authorization
     const authHeader = request.headers.get("authorization");
-    const expectedSecret = process.env.CLEANUP_API_SECRET;
+    const expectedSecret = getOptionalEnv("CLEANUP_API_SECRET");
 
     if (!expectedSecret) {
         console.error("CLEANUP_API_SECRET not configured");
         return NextResponse.json(
             { error: "Server configuration error" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 
@@ -56,12 +61,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const apiKey = process.env.APPWRITE_API_KEY;
+    const apiKey = getOptionalEnv("APPWRITE_API_KEY");
     if (!apiKey) {
         console.error("APPWRITE_API_KEY not configured");
         return NextResponse.json(
             { error: "Server configuration error" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 
@@ -107,21 +112,21 @@ export async function POST(request: NextRequest) {
                                 [
                                     Query.equal("userId", userId),
                                     Query.limit(100),
-                                ]
+                                ],
                             );
 
                             for (const doc of docs.documents) {
                                 await databases.deleteDocument(
                                     DATABASE_ID,
                                     collectionId,
-                                    doc.$id
+                                    doc.$id,
                                 );
                                 dataDeletedCount++;
                             }
                         } catch (collectionError) {
                             // Collection might not exist or no documents found
                             console.log(
-                                `No documents in ${collectionId} for user ${userId}`
+                                `No documents in ${collectionId} for user ${userId}`,
                             );
                         }
                     }
@@ -136,11 +141,11 @@ export async function POST(request: NextRequest) {
                             ? deleteError.message
                             : "Unknown error";
                     errors.push(
-                        `Failed to delete user ${userId}: ${errorMessage}`
+                        `Failed to delete user ${userId}: ${errorMessage}`,
                     );
                     console.error(
                         `Failed to delete user ${userId}:`,
-                        deleteError
+                        deleteError,
                     );
                 }
             }
@@ -163,7 +168,7 @@ export async function POST(request: NextRequest) {
             error instanceof Error ? error.message : "Unknown error";
         return NextResponse.json(
             { error: "Cleanup failed", details: errorMessage },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

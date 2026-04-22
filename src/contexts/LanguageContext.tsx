@@ -307,6 +307,33 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.deleteAccountCancel": "Abbrechen",
         "settings.accountDeleted": "Ihr Konto wurde gelöscht",
         "settings.deleteError": "Fehler beim Löschen des Kontos",
+        "settings.ai": "KI",
+        "settings.aiTitle": "KI-Provider verbinden",
+        "settings.aiDescription":
+            "Wählen Sie einen Provider, ein Modell und hinterlegen Sie Ihren eigenen API-Schlüssel.",
+        "settings.aiProvider": "Provider",
+        "settings.aiModel": "Modell",
+        "settings.aiApiKey": "API-Schlüssel",
+        "settings.aiApiKeyHelp":
+            "Leer lassen, um den bereits gespeicherten Schlüssel zu behalten.",
+        "settings.aiSystemPrompt": "System-Prompt",
+        "settings.aiSystemPromptPlaceholder":
+            "Optional: Verhalten Ihres Rechnungsassistenten definieren",
+        "settings.aiSave": "KI-Einstellungen speichern",
+        "settings.aiSaved": "KI-Einstellungen gespeichert",
+        "settings.aiLoadError": "KI-Einstellungen konnten nicht geladen werden",
+        "settings.aiTestPrompt": "Test-Prompt",
+        "settings.aiTestPromptPlaceholder":
+            "Zum Beispiel: Formuliere eine freundliche Zahlungserinnerung für eine überfällige Rechnung.",
+        "settings.aiTestRun": "KI testen",
+        "settings.aiTestSuccess": "KI-Antwort erhalten",
+        "settings.aiTestError": "KI-Test fehlgeschlagen",
+        "settings.aiResponse": "Antwort",
+        "settings.aiConfigured": "API-Schlüssel gespeichert",
+        "settings.aiNotConfigured": "Noch kein API-Schlüssel gespeichert",
+        "settings.aiProviderOpenAI": "OpenAI",
+        "settings.aiProviderAnthropic": "Anthropic",
+        "settings.aiProviderOpenRouter": "OpenRouter",
 
         // Invoices page
         "invoices.title": "Rechnungen",
@@ -666,6 +693,33 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.deleteAccountCancel": "Cancel",
         "settings.accountDeleted": "Your account has been deleted",
         "settings.deleteError": "Error deleting account",
+        "settings.ai": "AI",
+        "settings.aiTitle": "Connect an AI provider",
+        "settings.aiDescription":
+            "Choose a provider, model, and your own API key.",
+        "settings.aiProvider": "Provider",
+        "settings.aiModel": "Model",
+        "settings.aiApiKey": "API key",
+        "settings.aiApiKeyHelp":
+            "Leave blank to keep the currently stored key.",
+        "settings.aiSystemPrompt": "System prompt",
+        "settings.aiSystemPromptPlaceholder":
+            "Optional: define how your invoicing assistant should behave",
+        "settings.aiSave": "Save AI settings",
+        "settings.aiSaved": "AI settings saved",
+        "settings.aiLoadError": "Could not load AI settings",
+        "settings.aiTestPrompt": "Test prompt",
+        "settings.aiTestPromptPlaceholder":
+            "For example: Draft a polite payment reminder for an overdue invoice.",
+        "settings.aiTestRun": "Test AI",
+        "settings.aiTestSuccess": "AI responded successfully",
+        "settings.aiTestError": "AI test failed",
+        "settings.aiResponse": "Response",
+        "settings.aiConfigured": "API key saved",
+        "settings.aiNotConfigured": "No API key saved yet",
+        "settings.aiProviderOpenAI": "OpenAI",
+        "settings.aiProviderAnthropic": "Anthropic",
+        "settings.aiProviderOpenRouter": "OpenRouter",
 
         // Invoices page
         "invoices.title": "Invoices",

@@ -6,6 +6,7 @@ import {
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
+import { getMlApiSecret, getOptionalMlApiUrl } from "@/lib/env";
 import type {
     AnalyticsAnomaly,
     ClientRiskScore,
@@ -32,11 +33,8 @@ type ClientDoc = {
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const ML_API_BASE_URL =
-    process.env.ML_API_URL?.replace(/\/+$/, "") ||
-    "https://ml-api-07b0434278d6.herokuapp.com";
-const ML_API_SECRET =
-    process.env.ML_API_SECRET || process.env.CLEANUP_API_SECRET || "";
+const ML_API_BASE_URL = getOptionalMlApiUrl();
+const ML_API_SECRET = getMlApiSecret() || "";
 const ML_API_TIMEOUT_MS = 4500;
 
 function toDate(value?: string): Date | null {

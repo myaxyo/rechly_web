@@ -6,8 +6,10 @@ import { GithubOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getRepoUrl } from "@/lib/env";
 
 const { Title, Text } = Typography;
+const repoUrl = getRepoUrl();
 
 interface NavbarProps {
     showAuth?: boolean;
@@ -87,7 +89,7 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                         <Button
                             type="text"
                             icon={<GithubOutlined />}
-                            href="https://github.com/myaxyo/rechly"
+                            href={repoUrl}
                             target="_blank"
                         />
                         {showAuth && (
@@ -178,7 +180,7 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                         <Button
                             type="text"
                             icon={<GithubOutlined />}
-                            href="https://github.com/myaxyo/rechly"
+                            href={repoUrl}
                             target="_blank"
                             style={{
                                 width: "100%",

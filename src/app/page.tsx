@@ -8,23 +8,27 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import Script from "next/script";
 import HeroSection from "@/components/landing/sections/HeroSection";
+import { getRepoUrl, getSiteUrl } from "@/lib/env";
+
+const siteUrl = getSiteUrl();
+const repoUrl = getRepoUrl();
 
 // Lazy load non-critical sections
 const FeaturesSection = dynamic(
     () => import("@/components/landing/sections/FeaturesSection"),
-    { ssr: true } // Keep SSR for SEO, but hydrate later? No, usually false for pure client interaction, but these have text content.
+    { ssr: true }, // Keep SSR for SEO, but hydrate later? No, usually false for pure client interaction, but these have text content.
     // If I use ssr: false, the content won't be in the initial HTML, bad for SEO.
     // Next.js dynamic imports automatically split the bundle.
     // Loading priority is managed by Next.js.
 );
 const AboutSection = dynamic(
-    () => import("@/components/landing/sections/AboutSection")
+    () => import("@/components/landing/sections/AboutSection"),
 );
 const FaqSection = dynamic(
-    () => import("@/components/landing/sections/FaqSection")
+    () => import("@/components/landing/sections/FaqSection"),
 );
 const CtaSection = dynamic(
-    () => import("@/components/landing/sections/CtaSection")
+    () => import("@/components/landing/sections/CtaSection"),
 );
 
 // JSON-LD Structured Data for SEO
@@ -43,7 +47,7 @@ const structuredData = {
             },
             description:
                 "Kostenlose Rechnungssoftware für Freelancer und Selbstständige. Erstelle professionelle Rechnungen online.",
-            url: "https://rechly.de",
+            url: siteUrl,
             author: {
                 "@type": "Organization",
                 name: "Rechly",
@@ -57,19 +61,19 @@ const structuredData = {
         {
             "@type": "Organization",
             name: "Rechly",
-            url: "https://rechly.de",
-            logo: "https://rechly.de/favicon/favicon.svg",
+            url: siteUrl,
+            logo: `${siteUrl}/favicon/favicon.svg`,
             description:
                 "Open-Source Rechnungssoftware für Deutschland. DSGVO-konform, kostenlos, einfach.",
-            sameAs: ["https://github.com/myaxyo/rechly"],
+            sameAs: [repoUrl],
         },
         {
             "@type": "WebSite",
             name: "Rechly - Kostenlose Rechnungssoftware",
-            url: "https://rechly.de",
+            url: siteUrl,
             potentialAction: {
                 "@type": "SearchAction",
-                target: "https://rechly.de/search?q={search_term_string}",
+                target: `${siteUrl}/search?q={search_term_string}`,
                 "query-input": "required name=search_term_string",
             },
         },

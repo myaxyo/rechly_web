@@ -3,9 +3,16 @@ import Script from "next/script";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import {
+    getOptionalAnalyticsId,
+    getSiteUrl,
+    getTwitterHandle,
+} from "@/lib/env";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rechly.de";
+const siteUrl = getSiteUrl();
+const analyticsId = getOptionalAnalyticsId();
+const twitterHandle = getTwitterHandle();
 
 // Viewport configuration to prevent iOS zoom on input focus
 export const viewport: Viewport = {
@@ -90,7 +97,7 @@ export const metadata: Metadata = {
         description:
             "Professionelle Rechnungen erstellen in Sekunden. Kostenlos, Open Source, DSGVO-konform. Das Rechnungsprogramm für Freelancer in Deutschland.",
         images: [`${siteUrl}/og-image.png`],
-        creator: "@rechly_app",
+        creator: twitterHandle,
     },
     // Robots
     robots: {
@@ -136,19 +143,26 @@ export default function RootLayout({
     return (
         <html lang="de" suppressHydrationWarning>
             <body>
-                <Script
-                    src="https://www.googletagmanager.com/gtag/js?id=G-CNKVXS1FVZ"
-                    strategy="afterInteractive"
-                />
-                <Script id="google-analytics" strategy="afterInteractive">
-                    {`
-                        window.dataLayer = window.dataLayer || [];
-                        function gtag(){dataLayer.push(arguments);}
-                        gtag('js', new Date());
+                {analyticsId ? (
+                    <>
+                        <Script
+                            src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}
+                            strategy="afterInteractive"
+                        />
+                        <Script
+                            id="google-analytics"
+                            strategy="afterInteractive"
+                        >
+                            {`
+                                window.dataLayer = window.dataLayer || [];
+                                function gtag(){dataLayer.push(arguments);}
+                                gtag('js', new Date());
 
-                        gtag('config', 'G-CNKVXS1FVZ');
-                    `}
-                </Script>
+                                gtag('config', '${analyticsId}');
+                            `}
+                        </Script>
+                    </>
+                ) : null}
                 <AntdRegistry>
                     <LanguageProvider>
                         <AuthProvider>{children}</AuthProvider>

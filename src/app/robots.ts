@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/env";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://rechly.de";
+const siteUrl = getSiteUrl();
 
 export default function robots(): MetadataRoute.Robots {
     return {

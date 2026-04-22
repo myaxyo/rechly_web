@@ -216,3 +216,29 @@ export interface DashboardAnalytics {
     kpiInsights: KPIInsight[];
     generatedAt: string;
 }
+
+export type AIProvider = "openai" | "anthropic" | "openrouter";
+
+export interface AISettings {
+    provider: AIProvider;
+    model: string;
+    system_prompt?: string;
+    api_key_configured: boolean;
+}
+
+export interface AISettingsUpdate {
+    provider: AIProvider;
+    model: string;
+    system_prompt?: string;
+    api_key?: string;
+}
+
+export interface AIChatRequest {
+    prompt: string;
+}
+
+export interface AIChatResponse {
+    content: string;
+    provider: AIProvider;
+    model: string;
+}

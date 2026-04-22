@@ -33,6 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env
 .env*.local
+.env.local
 
 # vercel
 .vercel
@@ -40,6 +41,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+services/ml_api/.env
+services/ml_api/artifacts/
+services/ml_api/db.sqlite3
 
 # Editors
 .idea
@@ -52,5 +64,3 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Separate ML service (maintained in its own repository)
-/services/ml_api/

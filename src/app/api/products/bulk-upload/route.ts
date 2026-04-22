@@ -8,6 +8,7 @@ import {
     createSessionClient,
     DATABASE_ID,
 } from "@/lib/appwrite-server";
+import { getMlApiSecret, getOptionalMlApiUrl } from "@/lib/env";
 
 const BATCH_SIZE = 50;
 const MAX_ERRORS = 100;
@@ -23,11 +24,8 @@ const ALLOWED_UNITS = new Set([
     "m²",
     "Liter",
 ]);
-const ML_API_URL =
-    process.env.ML_API_URL?.replace(/\/+$/, "") ||
-    "https://ml-api-07b0434278d6.herokuapp.com";
-const ML_API_SECRET =
-    process.env.ML_API_SECRET || process.env.CLEANUP_API_SECRET || "";
+const ML_API_URL = getOptionalMlApiUrl();
+const ML_API_SECRET = getMlApiSecret() || "";
 
 type ProductInsertPayload = {
     row: number;

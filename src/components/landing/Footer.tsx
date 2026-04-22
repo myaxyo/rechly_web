@@ -5,8 +5,10 @@ import { GithubOutlined, HeartOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getRepoUrl } from "@/lib/env";
 
 const { Text, Title } = Typography;
+const repoUrl = getRepoUrl();
 
 export default function Footer() {
     const { t } = useLanguage();
@@ -52,10 +54,7 @@ export default function Footer() {
                                 height={24}
                                 style={{ borderRadius: 4 }}
                             />
-                            <Text
-                                strong
-                                style={{ margin: 0, fontSize: 16 }}
-                            >
+                            <Text strong style={{ margin: 0, fontSize: 16 }}>
                                 Rechly
                             </Text>
                         </div>
@@ -84,7 +83,7 @@ export default function Footer() {
                                 {t("nav.features")}
                             </Link>
                             <a
-                                href="https://github.com/myaxyo/rechly"
+                                href={repoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={linkStyle}
@@ -139,7 +138,7 @@ export default function Footer() {
                         {t("footer.madeBy")}
                     </Text>
                     <a
-                        href="https://github.com/myaxyo/rechly"
+                        href={repoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ color: "#64748b" }}

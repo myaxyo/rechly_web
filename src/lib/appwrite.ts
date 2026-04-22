@@ -7,17 +7,15 @@ import {
     Permission,
     Role,
 } from "appwrite";
+import { getAppwriteEndpoint, getAppwriteProjectId } from "@/lib/env";
 
 /**
  * Appwrite Cloud Configuration
  * Uses environment variables from .env.local
  * Same backend as mobile app for seamless sync
  */
-const APPWRITE_ENDPOINT =
-    process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ||
-    "https://fra.cloud.appwrite.io/v1";
-const APPWRITE_PROJECT_ID =
-    process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "692d4bf1002b21c4b2b7";
+const APPWRITE_ENDPOINT = getAppwriteEndpoint();
+const APPWRITE_PROJECT_ID = getAppwriteProjectId();
 
 /**
  * Initialize Appwrite Client for Browser
@@ -101,7 +99,7 @@ export const getCurrentUser = async () => {
 export const registerWithEmail = async (
     email: string,
     password: string,
-    name: string
+    name: string,
 ) => {
     try {
         const user = await account.create(ID.unique(), email, password, name);
@@ -122,7 +120,7 @@ export const loginWithEmail = async (email: string, password: string) => {
     try {
         const session = await account.createEmailPasswordSession(
             email,
-            password
+            password,
         );
         console.log("✓ Logged in:", session.userId);
         return session;
@@ -206,6 +204,6 @@ export const loginWithGoogle = () => {
     account.createOAuth2Session(
         "google" as OAuthProvider,
         successUrl,
-        failureUrl
+        failureUrl,
     );
 };
