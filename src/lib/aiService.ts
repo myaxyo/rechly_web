@@ -3,7 +3,9 @@ import type { AIChatResponse, AISettings, AISettingsUpdate } from "@/types";
 type InvoiceAssistantAction =
     | "invoice_note"
     | "payment_terms"
-    | "payment_reminder";
+    | "payment_reminder"
+    | "line_item_description"
+    | "overdue_client_reply";
 
 type InvoiceAssistantPayload = {
     action: InvoiceAssistantAction;
@@ -17,11 +19,19 @@ type InvoiceAssistantPayload = {
     currency?: string;
     notes?: string;
     paymentTerms?: string;
+    serviceSummary?: string;
     lineItems?: Array<{
         description: string;
         quantity: number;
         unit_of_measure?: string;
         price: number;
+    }>;
+    invoices?: Array<{
+        invoiceNumber?: string;
+        issueDate?: string;
+        dueDate?: string;
+        totalGross?: number;
+        status?: string;
     }>;
 };
 

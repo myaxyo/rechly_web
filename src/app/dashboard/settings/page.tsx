@@ -17,6 +17,7 @@ import {
     Modal,
     Row,
     Col,
+    Progress,
 } from "antd";
 import {
     SaveOutlined,
@@ -48,8 +49,22 @@ export default function SettingsPage() {
     const [aiTesting, setAiTesting] = useState(false);
     const [aiKeyConfigured, setAiKeyConfigured] = useState(false);
     const [aiResponse, setAiResponse] = useState<string>("");
+    const [aiDailyUsage, setAiDailyUsage] = useState<{
+        used: number;
+        limit: number;
+        remaining: number;
+    } | null>(null);
+    const [aiModelPresets, setAiModelPresets] = useState<
+        Record<AIProvider, string[]>
+    >({
+        openai: [],
+        anthropic: [],
+        openrouter: [],
+    });
     const [form] = Form.useForm();
     const [aiForm] = Form.useForm();
+    const selectedProvider =
+        Form.useWatch("provider", aiForm) || ("openai" as AIProvider);
 
     useEffect(() => {
         loadCompanyInfo();
@@ -82,6 +97,10 @@ export default function SettingsPage() {
                     system_prompt: data.system_prompt,
                 });
                 setAiKeyConfigured(data.api_key_configured);
+                setAiDailyUsage(data.daily_usage || null);
+                if (data.model_presets) {
+                    setAiModelPresets(data.model_presets);
+                }
             }
         } catch (error) {
             console.error("Error loading AI settings:", error);
@@ -182,6 +201,10 @@ export default function SettingsPage() {
             const saved = await saveAISettings(values);
             aiForm.setFieldValue("api_key", "");
             setAiKeyConfigured(saved.api_key_configured);
+            setAiDailyUsage(saved.daily_usage || null);
+            if (saved.model_presets) {
+                setAiModelPresets(saved.model_presets);
+            }
             message.success(t("settings.aiSaved"));
         } catch (error) {
             console.error("Error saving AI settings:", error);
@@ -206,6 +229,10 @@ export default function SettingsPage() {
         try {
             const result = await testAI(prompt);
             setAiResponse(result.content);
+            const refreshedSettings = await getAISettings();
+            if (refreshedSettings?.daily_usage) {
+                setAiDailyUsage(refreshedSettings.daily_usage);
+            }
             message.success(t("settings.aiTestSuccess"));
         } catch (error) {
             console.error("Error testing AI:", error);
@@ -225,6 +252,9 @@ export default function SettingsPage() {
         { value: "anthropic", label: t("settings.aiProviderAnthropic") },
         { value: "openrouter", label: t("settings.aiProviderOpenRouter") },
     ];
+    const modelOptions = (aiModelPresets[selectedProvider] || []).map(
+        (model) => ({ value: model, label: model }),
+    );
 
     const tabItems = [
         {
@@ -517,6 +547,53 @@ export default function SettingsPage() {
 
                         <Divider />
 
+                        {aiDailyUsage ? (
+                            <Card size="small" style={{ marginBottom: 16 }}>
+                                <Space
+                                    direction="vertical"
+                                    style={{ width: "100%" }}
+                                    size={4}
+                                >
+                                    <Text strong>
+                                        {t("settings.aiUsageTitle")}
+                                    </Text>
+                                    <Text type="secondary">
+                                        {t("settings.aiUsageSummary")
+                                            .replace(
+                                                "{used}",
+                                                String(aiDailyUsage.used),
+                                            )
+                                            .replace(
+                                                "{limit}",
+                                                String(aiDailyUsage.limit),
+                                            )
+                                            .replace(
+                                                "{remaining}",
+                                                String(aiDailyUsage.remaining),
+                                            )}
+                                    </Text>
+                                    <Progress
+                                        percent={Math.min(
+                                            100,
+                                            aiDailyUsage.limit > 0
+                                                ? (aiDailyUsage.used /
+                                                      aiDailyUsage.limit) *
+                                                      100
+                                                : 0,
+                                        )}
+                                        showInfo={false}
+                                        status={
+                                            aiDailyUsage.remaining === 0
+                                                ? "exception"
+                                                : aiDailyUsage.remaining <= 10
+                                                  ? "active"
+                                                  : "normal"
+                                        }
+                                    />
+                                </Space>
+                            </Card>
+                        ) : null}
+
                         <Form.Item
                             name="provider"
                             label={t("settings.aiProvider")}
@@ -527,7 +604,23 @@ export default function SettingsPage() {
                                 },
                             ]}
                         >
-                            <Input.Select options={providerOptions} />
+                            <Select
+                                options={providerOptions}
+                                onChange={(value: AIProvider) => {
+                                    const presets = aiModelPresets[value] || [];
+                                    const currentModel =
+                                        aiForm.getFieldValue("model");
+                                    if (
+                                        presets.length > 0 &&
+                                        !presets.includes(currentModel)
+                                    ) {
+                                        aiForm.setFieldValue(
+                                            "model",
+                                            presets[0],
+                                        );
+                                    }
+                                }}
+                            />
                         </Form.Item>
 
                         <Form.Item
@@ -540,7 +633,12 @@ export default function SettingsPage() {
                                 },
                             ]}
                         >
-                            <Input placeholder="gpt-4o-mini, claude-3-5-sonnet-latest, openrouter/auto" />
+                            <Select
+                                options={modelOptions}
+                                placeholder={t("settings.aiModelPlaceholder")}
+                                showSearch
+                                optionFilterProp="label"
+                            />
                         </Form.Item>
 
                         <Form.Item

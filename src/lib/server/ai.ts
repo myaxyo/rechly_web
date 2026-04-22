@@ -4,11 +4,28 @@ import {
     createHash,
     randomBytes,
 } from "node:crypto";
+import type { Models } from "node-appwrite";
 import type { AIChatResponse, AIProvider, AISettings } from "@/types";
 
 export const AI_PREFS_KEY = "rechly_ai_settings";
+export const AI_USAGE_PREFS_KEY = "rechly_ai_usage";
 const VALID_PROVIDERS: AIProvider[] = ["openai", "anthropic", "openrouter"];
 const ENCRYPTION_ALGORITHM = "aes-256-gcm";
+const DEFAULT_DAILY_AI_REQUEST_LIMIT = 100;
+export const AI_MODEL_PRESETS: Record<AIProvider, string[]> = {
+    openai: ["gpt-4o-mini", "gpt-4.1-mini", "gpt-4.1", "o4-mini"],
+    anthropic: [
+        "claude-3-5-haiku-latest",
+        "claude-3-5-sonnet-latest",
+        "claude-3-7-sonnet-latest",
+    ],
+    openrouter: [
+        "openrouter/auto",
+        "openai/gpt-4o-mini",
+        "anthropic/claude-3.5-sonnet",
+        "google/gemini-2.0-flash-001",
+    ],
+};
 
 export type StoredAISettings = {
     provider: AIProvider;
@@ -27,12 +44,32 @@ export type ResolvedAISettings = {
     api_key: string;
 };
 
+type AIUsageLog = {
+    current_day: string;
+    current_day_count: number;
+    total_requests: number;
+    recent_events: Array<{
+        timestamp: string;
+        action: string;
+        provider: AIProvider;
+        model: string;
+    }>;
+};
+
 function getEncryptionSecret(): string {
     const secret = process.env.AI_SETTINGS_ENCRYPTION_SECRET?.trim();
     if (!secret) {
         throw new Error("AI_SETTINGS_ENCRYPTION_SECRET is not configured");
     }
     return secret;
+}
+
+function getDailyAIRateLimit(): number {
+    const parsed = Number(process.env.AI_DAILY_REQUEST_LIMIT);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+        return DEFAULT_DAILY_AI_REQUEST_LIMIT;
+    }
+    return Math.floor(parsed);
 }
 
 function getEncryptionKey(): Buffer {
@@ -130,6 +167,7 @@ export function sanitizeStoredAISettings(
 
 export function toPublicAISettings(
     settings: StoredAISettings | null,
+    usage?: { used: number; limit: number; remaining: number },
 ): AISettings | null {
     if (!settings) {
         return null;
@@ -145,6 +183,8 @@ export function toPublicAISettings(
                 settings.encryption_iv &&
                 settings.encryption_tag),
         ),
+        daily_usage: usage,
+        model_presets: AI_MODEL_PRESETS,
     };
 }
 
@@ -322,5 +362,107 @@ export async function generateAIText(
         content,
         provider: settings.provider,
         model: settings.model,
+    };
+}
+
+function sanitizeAIUsageLog(value: unknown): AIUsageLog {
+    if (!value || typeof value !== "object") {
+        return {
+            current_day: new Date().toISOString().slice(0, 10),
+            current_day_count: 0,
+            total_requests: 0,
+            recent_events: [],
+        };
+    }
+
+    const candidate = value as Partial<AIUsageLog>;
+    return {
+        current_day:
+            typeof candidate.current_day === "string"
+                ? candidate.current_day
+                : new Date().toISOString().slice(0, 10),
+        current_day_count:
+            typeof candidate.current_day_count === "number"
+                ? candidate.current_day_count
+                : 0,
+        total_requests:
+            typeof candidate.total_requests === "number"
+                ? candidate.total_requests
+                : 0,
+        recent_events: Array.isArray(candidate.recent_events)
+            ? candidate.recent_events
+                  .filter(
+                      (event): event is AIUsageLog["recent_events"][number] =>
+                          Boolean(event) &&
+                          typeof event === "object" &&
+                          typeof event.timestamp === "string" &&
+                          typeof event.action === "string" &&
+                          isValidAIProvider(event.provider) &&
+                          typeof event.model === "string",
+                  )
+                  .slice(0, 20)
+            : [],
+    };
+}
+
+export function getPublicAIUsage(prefs: Record<string, unknown>) {
+    const today = new Date().toISOString().slice(0, 10);
+    const usage = sanitizeAIUsageLog(prefs[AI_USAGE_PREFS_KEY]);
+    const limit = getDailyAIRateLimit();
+    const used = usage.current_day === today ? usage.current_day_count : 0;
+
+    return {
+        used,
+        limit,
+        remaining: Math.max(0, limit - used),
+    };
+}
+
+export async function assertAndRecordAIUsage(options: {
+    account: {
+        updatePrefs: (
+            prefs: Models.Preferences,
+        ) => Promise<Models.User<Models.Preferences>>;
+    };
+    prefs: Record<string, unknown>;
+    provider: AIProvider;
+    model: string;
+    action: string;
+}) {
+    const today = new Date().toISOString().slice(0, 10);
+    const usage = sanitizeAIUsageLog(options.prefs[AI_USAGE_PREFS_KEY]);
+    const dailyLimit = getDailyAIRateLimit();
+    const currentDayCount =
+        usage.current_day === today ? usage.current_day_count : 0;
+
+    if (currentDayCount >= dailyLimit) {
+        throw new Error(
+            `Daily AI request limit reached (${dailyLimit}). Try again tomorrow or raise AI_DAILY_REQUEST_LIMIT.`,
+        );
+    }
+
+    const nextUsage: AIUsageLog = {
+        current_day: today,
+        current_day_count: currentDayCount + 1,
+        total_requests: usage.total_requests + 1,
+        recent_events: [
+            {
+                timestamp: new Date().toISOString(),
+                action: options.action,
+                provider: options.provider,
+                model: options.model,
+            },
+            ...usage.recent_events,
+        ].slice(0, 20),
+    };
+
+    await options.account.updatePrefs({
+        ...options.prefs,
+        [AI_USAGE_PREFS_KEY]: nextUsage,
+    });
+
+    return {
+        currentDayCount: nextUsage.current_day_count,
+        dailyLimit,
     };
 }

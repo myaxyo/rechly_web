@@ -14,6 +14,7 @@ import {
     Typography,
     Row,
     Col,
+    Card,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -21,10 +22,21 @@ import {
     SearchOutlined,
     EditOutlined,
     DeleteOutlined,
+    RobotOutlined,
+    MailOutlined,
+    CopyOutlined,
 } from "@ant-design/icons";
 import { useClientStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { Client, ClientFormData } from "@/types";
+import { getAllInvoices } from "@/lib/invoiceService";
+import { getCompanyInfo } from "@/lib/companyService";
+import { runInvoiceAssistant } from "@/lib/aiService";
+import type {
+    Client,
+    ClientFormData,
+    InvoiceWithClient,
+    UserCompany,
+} from "@/types";
 
 const { Title } = Typography;
 
@@ -36,6 +48,14 @@ export default function ClientsPage() {
     const [editingClient, setEditingClient] = useState<Client | null>(null);
     const [form] = Form.useForm();
     const [submitting, setSubmitting] = useState(false);
+    const [invoices, setInvoices] = useState<InvoiceWithClient[]>([]);
+    const [company, setCompany] = useState<UserCompany | null>(null);
+    const [draftingClientId, setDraftingClientId] = useState<string | null>(
+        null,
+    );
+    const [replyModalOpen, setReplyModalOpen] = useState(false);
+    const [replyDraft, setReplyDraft] = useState("");
+    const [replyClient, setReplyClient] = useState<Client | null>(null);
 
     // Zustand store
     const {
@@ -52,12 +72,130 @@ export default function ClientsPage() {
         (client) =>
             client.name.toLowerCase().includes(searchText.toLowerCase()) ||
             client.email?.toLowerCase().includes(searchText.toLowerCase()) ||
-            client.city?.toLowerCase().includes(searchText.toLowerCase())
+            client.city?.toLowerCase().includes(searchText.toLowerCase()),
     );
 
     useEffect(() => {
         fetchClients();
+        loadReplyContext();
     }, []);
+
+    const loadReplyContext = async () => {
+        try {
+            const [invoiceData, companyData] = await Promise.all([
+                getAllInvoices(),
+                getCompanyInfo(),
+            ]);
+            setInvoices(invoiceData);
+            setCompany(companyData);
+        } catch (error) {
+            console.error("Error loading client reply context:", error);
+        }
+    };
+
+    const getOverdueInvoicesForClient = (clientId?: string) => {
+        if (!clientId) return [];
+
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+
+        return invoices
+            .filter((invoice) => {
+                if (invoice.client_id !== clientId || !invoice.due_date) {
+                    return false;
+                }
+
+                if (
+                    invoice.status === "paid" ||
+                    invoice.status === "cancelled"
+                ) {
+                    return false;
+                }
+
+                const dueDate = new Date(invoice.due_date);
+                dueDate.setHours(0, 0, 0, 0);
+                return dueDate < now;
+            })
+            .sort((left, right) => {
+                const leftDue = left.due_date
+                    ? new Date(left.due_date).getTime()
+                    : 0;
+                const rightDue = right.due_date
+                    ? new Date(right.due_date).getTime()
+                    : 0;
+                return leftDue - rightDue;
+            });
+    };
+
+    const handleDraftOverdueReply = async (client: Client) => {
+        const overdueInvoices = getOverdueInvoicesForClient(client.id);
+        if (overdueInvoices.length === 0) {
+            message.warning(t("clients.aiNoOverdueInvoices"));
+            return;
+        }
+
+        setDraftingClientId(client.id || null);
+        try {
+            const result = await runInvoiceAssistant({
+                action: "overdue_client_reply",
+                companyName: company?.name,
+                clientName: client.name,
+                clientEmail: client.email,
+                currency: "EUR",
+                invoices: overdueInvoices.map((invoice) => ({
+                    invoiceNumber: invoice.invoice_number,
+                    issueDate: invoice.issue_date,
+                    dueDate: invoice.due_date,
+                    totalGross: invoice.total_gross,
+                    status: invoice.status,
+                })),
+            });
+            setReplyClient(client);
+            setReplyDraft(result.content);
+            setReplyModalOpen(true);
+            message.success(t("clients.aiDraftSuccess"));
+        } catch (error) {
+            console.error("Error drafting overdue client reply:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : t("clients.aiDraftError"),
+            );
+        } finally {
+            setDraftingClientId(null);
+        }
+    };
+
+    const handleCopyReplyDraft = async () => {
+        try {
+            await navigator.clipboard.writeText(replyDraft);
+            message.success(t("clients.aiCopySuccess"));
+        } catch (error) {
+            console.error("Error copying client reply draft:", error);
+            message.error(t("clients.aiCopyError"));
+        }
+    };
+
+    const handleOpenReplyEmail = () => {
+        if (!replyClient?.email || !replyDraft) {
+            message.warning(t("clients.aiEmailMissing"));
+            return;
+        }
+
+        const lines = replyDraft.split("\n");
+        const subjectLine = lines.find((line) =>
+            line.toLowerCase().startsWith("betreff:"),
+        );
+        const subject = subjectLine
+            ? subjectLine.replace(/^Betreff:\s*/i, "").trim()
+            : t("clients.aiMailSubjectFallback");
+        const body = replyDraft.replace(/^Betreff:\s*.*$/im, "").trim();
+
+        window.open(
+            `mailto:${replyClient.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+            "_blank",
+        );
+    };
 
     const openCreateModal = () => {
         setEditingClient(null);
@@ -135,9 +273,21 @@ export default function ClientsPage() {
         {
             title: t("clients.actions"),
             key: "actions",
-            width: 120,
+            width: 180,
             render: (_, record) => (
                 <Space>
+                    <Button
+                        type="text"
+                        icon={<RobotOutlined />}
+                        disabled={
+                            getOverdueInvoicesForClient(record.id).length === 0
+                        }
+                        loading={draftingClientId === record.id}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDraftOverdueReply(record);
+                        }}
+                    />
                     <Button
                         type="text"
                         icon={<EditOutlined />}
@@ -157,6 +307,41 @@ export default function ClientsPage() {
                         okText={t("clients.delete")}
                         cancelText={t("clients.cancel")}
                     >
+                        <Modal
+                            title={t("clients.aiDraftTitle")}
+                            open={replyModalOpen}
+                            onCancel={() => setReplyModalOpen(false)}
+                            footer={[
+                                <Button
+                                    key="copy"
+                                    icon={<CopyOutlined />}
+                                    onClick={() => void handleCopyReplyDraft()}
+                                >
+                                    {t("clients.aiCopy")}
+                                </Button>,
+                                <Button
+                                    key="email"
+                                    type="primary"
+                                    icon={<MailOutlined />}
+                                    onClick={handleOpenReplyEmail}
+                                    disabled={!replyClient?.email}
+                                >
+                                    {t("clients.aiOpenEmail")}
+                                </Button>,
+                            ]}
+                            width={760}
+                        >
+                            <Card size="small" style={{ marginBottom: 16 }}>
+                                <strong>{replyClient?.name}</strong>
+                                <div>
+                                    {replyClient?.email ||
+                                        t("clients.aiEmailMissing")}
+                                </div>
+                            </Card>
+                            <div style={{ whiteSpace: "pre-wrap" }}>
+                                {replyDraft}
+                            </div>
+                        </Modal>
                         <Button
                             type="text"
                             danger

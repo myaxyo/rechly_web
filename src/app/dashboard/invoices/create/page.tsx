@@ -51,6 +51,7 @@ const { Title, Text } = Typography;
 interface LineItem {
     key: string;
     description: string;
+    service_summary?: string;
     quantity: number;
     unit_of_measure: string;
     price: number;
@@ -78,6 +79,9 @@ export default function InvoiceCreatePage() {
     const [paymentTerms, setPaymentTerms] = useState("");
     const [generatingNotes, setGeneratingNotes] = useState(false);
     const [generatingPaymentTerms, setGeneratingPaymentTerms] = useState(false);
+    const [generatingLineItemKey, setGeneratingLineItemKey] = useState<
+        string | null
+    >(null);
 
     const [createdInvoiceId, setCreatedInvoiceId] = useState<string | null>(
         null,
@@ -121,6 +125,7 @@ export default function InvoiceCreatePage() {
         const newItem: LineItem = {
             key: Date.now().toString(),
             description: "",
+            service_summary: "",
             quantity: 1,
             unit_of_measure: "Stück",
             price: 0,
@@ -156,6 +161,7 @@ export default function InvoiceCreatePage() {
         const newItem: LineItem = {
             key: Date.now().toString(),
             description: product.name,
+            service_summary: product.description || product.name,
             quantity: 1,
             unit_of_measure: product.unit_of_measure || "Stück",
             price: product.price,
@@ -289,23 +295,82 @@ export default function InvoiceCreatePage() {
         }
     };
 
+    const handleGenerateLineItemDescription = async (item: LineItem) => {
+        const serviceSummary =
+            item.service_summary?.trim() || item.description.trim();
+        if (!serviceSummary) {
+            message.warning(
+                "Bitte zuerst eine kurze Leistungszusammenfassung eingeben",
+            );
+            return;
+        }
+
+        setGeneratingLineItemKey(item.key);
+        try {
+            const result = await runInvoiceAssistant({
+                action: "line_item_description",
+                ...buildAssistantPayload(),
+                serviceSummary,
+            });
+            updateLineItem(item.key, "description", result.content);
+            if (!item.service_summary?.trim()) {
+                updateLineItem(item.key, "service_summary", serviceSummary);
+            }
+            message.success("Positionsbeschreibung mit KI erstellt");
+        } catch (error) {
+            console.error("Error generating line item description:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : "KI-Positionsbeschreibung konnte nicht erstellt werden",
+            );
+        } finally {
+            setGeneratingLineItemKey(null);
+        }
+    };
+
     const columns = [
         {
             title: "Beschreibung",
             dataIndex: "description",
             key: "description",
             render: (_: unknown, record: LineItem) => (
-                <Input
-                    value={record.description}
-                    onChange={(e) =>
-                        updateLineItem(
-                            record.key,
-                            "description",
-                            e.target.value,
-                        )
-                    }
-                    placeholder="Beschreibung"
-                />
+                <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                    <Input.TextArea
+                        value={record.description}
+                        onChange={(e) =>
+                            updateLineItem(
+                                record.key,
+                                "description",
+                                e.target.value,
+                            )
+                        }
+                        placeholder="Ausführliche Positionsbeschreibung"
+                        rows={2}
+                    />
+                    <Space.Compact style={{ width: "100%" }}>
+                        <Input
+                            value={record.service_summary}
+                            onChange={(e) =>
+                                updateLineItem(
+                                    record.key,
+                                    "service_summary",
+                                    e.target.value,
+                                )
+                            }
+                            placeholder="Kurze Leistungszusammenfassung"
+                        />
+                        <Button
+                            icon={<RobotOutlined />}
+                            loading={generatingLineItemKey === record.key}
+                            onClick={() =>
+                                void handleGenerateLineItemDescription(record)
+                            }
+                        >
+                            KI
+                        </Button>
+                    </Space.Compact>
+                </Space>
             ),
         },
         {

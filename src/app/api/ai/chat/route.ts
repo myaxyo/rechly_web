@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSessionClient } from "@/lib/appwrite-server";
 import {
     AI_PREFS_KEY,
+    assertAndRecordAIUsage,
     generateAIText,
     resolveAISettings,
     sanitizeStoredAISettings,
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
         }
 
         const sessionClient = await createSessionClient();
+        const account = sessionClient.account;
         const user = await sessionClient.account.get();
         const prefs = (user.prefs || {}) as Record<string, unknown>;
         const settings = resolveAISettings(
@@ -35,6 +37,14 @@ export async function POST(request: NextRequest) {
                 { status: 400 },
             );
         }
+
+        await assertAndRecordAIUsage({
+            account,
+            prefs,
+            provider: settings.provider,
+            model: settings.model,
+            action: "chat_test",
+        });
 
         const response = await generateAIText(settings, prompt);
 

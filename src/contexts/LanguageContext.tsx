@@ -205,6 +205,17 @@ const translations: Record<Language, Record<string, string>> = {
         "clients.save": "Speichern",
         "clients.create": "Erstellen",
         "clients.pagination": "{0}-{1} von {2} Kunden",
+        "clients.aiDraftTitle": "KI-Nachricht für überfälligen Kunden",
+        "clients.aiDraftSuccess": "KI-Nachricht erstellt",
+        "clients.aiDraftError": "KI-Nachricht konnte nicht erstellt werden",
+        "clients.aiNoOverdueInvoices":
+            "Für diesen Kunden gibt es keine überfälligen Rechnungen",
+        "clients.aiCopy": "Kopieren",
+        "clients.aiCopySuccess": "Entwurf kopiert",
+        "clients.aiCopyError": "Kopieren fehlgeschlagen",
+        "clients.aiOpenEmail": "Als E-Mail öffnen",
+        "clients.aiEmailMissing": "Keine E-Mail-Adresse hinterlegt",
+        "clients.aiMailSubjectFallback": "Zahlungserinnerung",
 
         // Products page
         "products.title": "Produkte & Dienstleistungen",
@@ -313,6 +324,7 @@ const translations: Record<Language, Record<string, string>> = {
             "Wählen Sie einen Provider, ein Modell und hinterlegen Sie Ihren eigenen API-Schlüssel.",
         "settings.aiProvider": "Provider",
         "settings.aiModel": "Modell",
+        "settings.aiModelPlaceholder": "Modell auswählen",
         "settings.aiApiKey": "API-Schlüssel",
         "settings.aiApiKeyHelp":
             "Leer lassen, um den bereits gespeicherten Schlüssel zu behalten.",
@@ -331,6 +343,9 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.aiResponse": "Antwort",
         "settings.aiConfigured": "API-Schlüssel gespeichert",
         "settings.aiNotConfigured": "Noch kein API-Schlüssel gespeichert",
+        "settings.aiUsageTitle": "Heutige KI-Nutzung",
+        "settings.aiUsageSummary":
+            "{used} von {limit} Anfragen genutzt, {remaining} verbleibend.",
         "settings.aiProviderOpenAI": "OpenAI",
         "settings.aiProviderAnthropic": "Anthropic",
         "settings.aiProviderOpenRouter": "OpenRouter",
@@ -365,6 +380,17 @@ const translations: Record<Language, Record<string, string>> = {
         "invoices.overdue": "Überfällig",
         "invoices.loadError": "Fehler beim Laden der Daten",
         "invoices.pagination": "{0}-{1} von {2} Rechnungen",
+        "invoices.aiReminder": "KI-Zahlungserinnerung",
+        "invoices.aiReminderTitle": "KI-Zahlungserinnerung",
+        "invoices.aiReminderSuccess": "KI-Zahlungserinnerung erstellt",
+        "invoices.aiReminderError":
+            "KI-Zahlungserinnerung konnte nicht erstellt werden",
+        "invoices.aiCopy": "Kopieren",
+        "invoices.aiCopySuccess": "Entwurf kopiert",
+        "invoices.aiCopyError": "Kopieren fehlgeschlagen",
+        "invoices.aiOpenEmail": "Als E-Mail öffnen",
+        "invoices.aiEmailMissing": "Keine E-Mail-Adresse hinterlegt",
+        "invoices.aiMailSubjectFallback": "Zahlungserinnerung",
 
         // Invoice create page
         "invoiceCreate.title": "Rechnung erstellen",
@@ -593,6 +619,16 @@ const translations: Record<Language, Record<string, string>> = {
         "clients.save": "Save",
         "clients.create": "Create",
         "clients.pagination": "{0}-{1} of {2} clients",
+        "clients.aiDraftTitle": "AI message for overdue client",
+        "clients.aiDraftSuccess": "AI draft created",
+        "clients.aiDraftError": "Could not create AI draft",
+        "clients.aiNoOverdueInvoices": "This client has no overdue invoices",
+        "clients.aiCopy": "Copy",
+        "clients.aiCopySuccess": "Draft copied",
+        "clients.aiCopyError": "Copy failed",
+        "clients.aiOpenEmail": "Open as email",
+        "clients.aiEmailMissing": "No email address available",
+        "clients.aiMailSubjectFallback": "Payment reminder",
 
         // Products page
         "products.title": "Products & Services",
@@ -699,6 +735,7 @@ const translations: Record<Language, Record<string, string>> = {
             "Choose a provider, model, and your own API key.",
         "settings.aiProvider": "Provider",
         "settings.aiModel": "Model",
+        "settings.aiModelPlaceholder": "Select model",
         "settings.aiApiKey": "API key",
         "settings.aiApiKeyHelp":
             "Leave blank to keep the currently stored key.",
@@ -717,6 +754,9 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.aiResponse": "Response",
         "settings.aiConfigured": "API key saved",
         "settings.aiNotConfigured": "No API key saved yet",
+        "settings.aiUsageTitle": "Today's AI usage",
+        "settings.aiUsageSummary":
+            "{used} of {limit} requests used, {remaining} remaining.",
         "settings.aiProviderOpenAI": "OpenAI",
         "settings.aiProviderAnthropic": "Anthropic",
         "settings.aiProviderOpenRouter": "OpenRouter",
@@ -750,6 +790,16 @@ const translations: Record<Language, Record<string, string>> = {
         "invoices.overdue": "Overdue",
         "invoices.loadError": "Error loading data",
         "invoices.pagination": "{0}-{1} of {2} invoices",
+        "invoices.aiReminder": "AI payment reminder",
+        "invoices.aiReminderTitle": "AI payment reminder",
+        "invoices.aiReminderSuccess": "AI payment reminder created",
+        "invoices.aiReminderError": "Could not create AI payment reminder",
+        "invoices.aiCopy": "Copy",
+        "invoices.aiCopySuccess": "Draft copied",
+        "invoices.aiCopyError": "Copy failed",
+        "invoices.aiOpenEmail": "Open as email",
+        "invoices.aiEmailMissing": "No email address available",
+        "invoices.aiMailSubjectFallback": "Payment reminder",
 
         // Invoice create page
         "invoiceCreate.title": "Create Invoice",

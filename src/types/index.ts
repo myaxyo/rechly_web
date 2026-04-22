@@ -224,6 +224,12 @@ export interface AISettings {
     model: string;
     system_prompt?: string;
     api_key_configured: boolean;
+    daily_usage?: {
+        used: number;
+        limit: number;
+        remaining: number;
+    };
+    model_presets?: Record<AIProvider, string[]>;
 }
 
 export interface AISettingsUpdate {

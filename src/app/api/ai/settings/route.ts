@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSessionClient } from "@/lib/appwrite-server";
 import type { AISettingsUpdate } from "@/types";
 import {
+    AI_MODEL_PRESETS,
     AI_PREFS_KEY,
     buildStoredAISettings,
+    getPublicAIUsage,
     isValidAIProvider,
     sanitizeStoredAISettings,
     toPublicAISettings,
@@ -24,7 +26,20 @@ export async function GET() {
     try {
         const { prefs } = await getCurrentUserAndPrefs();
         const settings = sanitizeStoredAISettings(prefs[AI_PREFS_KEY]);
-        return NextResponse.json(toPublicAISettings(settings));
+        const usage = getPublicAIUsage(prefs);
+
+        if (!settings) {
+            return NextResponse.json({
+                provider: "openai",
+                model: AI_MODEL_PRESETS.openai[0],
+                system_prompt: undefined,
+                api_key_configured: false,
+                daily_usage: usage,
+                model_presets: AI_MODEL_PRESETS,
+            });
+        }
+
+        return NextResponse.json(toPublicAISettings(settings, usage));
     } catch {
         return NextResponse.json(
             { error: "Not authenticated" },
@@ -92,7 +107,9 @@ export async function POST(request: NextRequest) {
             [AI_PREFS_KEY]: nextSettings,
         });
 
-        return NextResponse.json(toPublicAISettings(nextSettings));
+        return NextResponse.json(
+            toPublicAISettings(nextSettings, getPublicAIUsage(prefs)),
+        );
     } catch (error) {
         console.error("Error saving AI settings:", error);
         return NextResponse.json(

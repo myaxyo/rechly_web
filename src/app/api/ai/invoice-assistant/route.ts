@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSessionClient } from "@/lib/appwrite-server";
 import {
     AI_PREFS_KEY,
+    assertAndRecordAIUsage,
     generateAIText,
     resolveAISettings,
     sanitizeStoredAISettings,
 } from "@/lib/server/ai";
 
-type AssistantAction = "invoice_note" | "payment_terms" | "payment_reminder";
+type AssistantAction =
+    | "invoice_note"
+    | "payment_terms"
+    | "payment_reminder"
+    | "line_item_description"
+    | "overdue_client_reply";
 
 type InvoiceLineItemInput = {
     description: string;
@@ -28,7 +34,15 @@ type InvoiceAssistantBody = {
     currency?: string;
     notes?: string;
     paymentTerms?: string;
+    serviceSummary?: string;
     lineItems?: InvoiceLineItemInput[];
+    invoices?: Array<{
+        invoiceNumber?: string;
+        issueDate?: string;
+        dueDate?: string;
+        totalGross?: number;
+        status?: string;
+    }>;
 };
 
 function buildPrompt(
@@ -44,6 +58,28 @@ function buildPrompt(
                 `- ${item.description}: ${item.quantity} ${item.unit_of_measure || "Einheit"} zu ${item.price.toFixed(2)} EUR`,
         )
         .join("\n");
+    const invoiceSummary = (body.invoices || [])
+        .map(
+            (invoice) =>
+                `- ${invoice.invoiceNumber || "Unbekannt"}: fällig ${invoice.dueDate || "Unbekannt"}, Betrag ${typeof invoice.totalGross === "number" ? invoice.totalGross.toFixed(2) : "unbekannt"} ${body.currency || "EUR"}, Status ${invoice.status || "offen"}`,
+        )
+        .join("\n");
+
+    if (body.action === "line_item_description") {
+        return [
+            "Schreibe eine professionelle Positionsbeschreibung für eine Rechnung auf Deutsch.",
+            "Die Antwort soll direkt einsetzbar sein, ohne Einleitung, ohne Aufzählung, in einem Satz oder kurzen Absatz.",
+            `Kurze Leistungszusammenfassung: ${body.serviceSummary || ""}`,
+            `Unternehmen: ${body.companyName || "Unbekannt"}`,
+            `Kunde: ${body.clientName || "Unbekannt"}`,
+            typeof body.totalGross === "number"
+                ? `Gesamtangebot bisher: ${body.totalGross.toFixed(2)} ${body.currency || "EUR"}`
+                : "",
+            "Formuliere die Beschreibung konkret, professionell und abrechnungsfähig.",
+        ]
+            .filter(Boolean)
+            .join("\n\n");
+    }
 
     if (body.action === "invoice_note") {
         return [
@@ -79,6 +115,20 @@ function buildPrompt(
             .join("\n\n");
     }
 
+    if (body.action === "overdue_client_reply") {
+        return [
+            "Entwirf eine professionelle Nachricht auf Deutsch an einen Kunden mit überfälligen Rechnungen.",
+            "Struktur: zuerst eine Betreffzeile in der Form 'Betreff: ...', dann eine Leerzeile, dann der Nachrichtentext.",
+            `Unternehmen: ${body.companyName || "Unbekannt"}`,
+            `Kunde: ${body.clientName || "Unbekannt"}`,
+            `Kunden-E-Mail: ${body.clientEmail || "Nicht hinterlegt"}`,
+            invoiceSummary ? `Überfällige Rechnungen:\n${invoiceSummary}` : "",
+            "Ton: freundlich, bestimmt, professionell. Bitte um kurze Rückmeldung und Zahlungsausgleich. Keine Markdown-Formatierung.",
+        ]
+            .filter(Boolean)
+            .join("\n\n");
+    }
+
     return [
         "Entwirf eine professionelle Zahlungserinnerung auf Deutsch als E-Mail.",
         "Struktur: zuerst eine Betreffzeile in der Form 'Betreff: ...', dann eine Leerzeile, dann der E-Mail-Text.",
@@ -105,7 +155,9 @@ export async function POST(request: NextRequest) {
         if (
             body.action !== "invoice_note" &&
             body.action !== "payment_terms" &&
-            body.action !== "payment_reminder"
+            body.action !== "payment_reminder" &&
+            body.action !== "line_item_description" &&
+            body.action !== "overdue_client_reply"
         ) {
             return NextResponse.json(
                 { error: "Invalid assistant action" },
@@ -116,6 +168,7 @@ export async function POST(request: NextRequest) {
         const sessionClient = await createSessionClient();
         const user = await sessionClient.account.get();
         const prefs = (user.prefs || {}) as Record<string, unknown>;
+        const account = sessionClient.account;
         const settings = resolveAISettings(
             sanitizeStoredAISettings(prefs[AI_PREFS_KEY]),
         );
@@ -128,6 +181,14 @@ export async function POST(request: NextRequest) {
                 { status: 400 },
             );
         }
+
+        await assertAndRecordAIUsage({
+            account,
+            prefs,
+            provider: settings.provider,
+            model: settings.model,
+            action: body.action,
+        });
 
         const response = await generateAIText(
             settings,

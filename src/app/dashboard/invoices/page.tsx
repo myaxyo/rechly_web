@@ -27,11 +27,16 @@ import {
     FilePdfOutlined,
     CheckCircleOutlined,
     SendOutlined,
+    RobotOutlined,
+    CopyOutlined,
+    MailOutlined,
 } from "@ant-design/icons";
 import { useInvoiceStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
+import { runInvoiceAssistant } from "@/lib/aiService";
+import { getCompanyInfo } from "@/lib/companyService";
 import type { InvoiceWithClient, Invoice } from "@/types";
 
 const statusColors: Record<string, string> = {
@@ -45,6 +50,14 @@ export default function InvoicesPage() {
     const router = useRouter();
     const { t } = useLanguage();
     const [searchText, setSearchText] = useState("");
+    const [companyName, setCompanyName] = useState<string | undefined>();
+    const [draftingInvoiceId, setDraftingInvoiceId] = useState<string | null>(
+        null,
+    );
+    const [reminderModalOpen, setReminderModalOpen] = useState(false);
+    const [reminderDraft, setReminderDraft] = useState("");
+    const [selectedInvoice, setSelectedInvoice] =
+        useState<InvoiceWithClient | null>(null);
 
     const statusLabels: Record<string, string> = {
         draft: t("status.draft"),
@@ -72,13 +85,23 @@ export default function InvoicesPage() {
                 .includes(searchText.toLowerCase()) ||
             invoice.client?.name
                 ?.toLowerCase()
-                .includes(searchText.toLowerCase())
+                .includes(searchText.toLowerCase()),
     );
 
     useEffect(() => {
         fetchInvoices();
         fetchStats();
+        void loadCompanyInfo();
     }, []);
+
+    const loadCompanyInfo = async () => {
+        try {
+            const company = await getCompanyInfo();
+            setCompanyName(company?.name);
+        } catch (error) {
+            console.error("Error loading company info for AI reminder:", error);
+        }
+    };
 
     const handleDelete = (id: string) => {
         Modal.confirm({
@@ -101,7 +124,7 @@ export default function InvoicesPage() {
 
     const handleStatusChange = async (
         id: string,
-        status: Invoice["status"]
+        status: Invoice["status"],
     ) => {
         try {
             await updateStatus(id, status);
@@ -110,6 +133,69 @@ export default function InvoicesPage() {
             console.error("Error updating status:", error);
             message.error(t("invoices.updateError"));
         }
+    };
+
+    const handleDraftReminder = async (invoice: InvoiceWithClient) => {
+        setDraftingInvoiceId(invoice.id || null);
+        try {
+            const result = await runInvoiceAssistant({
+                action: "payment_reminder",
+                companyName,
+                clientName: invoice.client?.name,
+                clientEmail: invoice.client?.email,
+                invoiceNumber: invoice.invoice_number,
+                issueDate: invoice.issue_date,
+                dueDate: invoice.due_date,
+                totalGross: invoice.total_gross,
+                currency: "EUR",
+                notes: invoice.notes,
+                paymentTerms: invoice.payment_terms,
+            });
+            setSelectedInvoice(invoice);
+            setReminderDraft(result.content);
+            setReminderModalOpen(true);
+            message.success(t("invoices.aiReminderSuccess"));
+        } catch (error) {
+            console.error("Error drafting invoice reminder:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : t("invoices.aiReminderError"),
+            );
+        } finally {
+            setDraftingInvoiceId(null);
+        }
+    };
+
+    const handleCopyReminderDraft = async () => {
+        try {
+            await navigator.clipboard.writeText(reminderDraft);
+            message.success(t("invoices.aiCopySuccess"));
+        } catch (error) {
+            console.error("Error copying invoice reminder draft:", error);
+            message.error(t("invoices.aiCopyError"));
+        }
+    };
+
+    const handleOpenReminderEmail = () => {
+        if (!selectedInvoice?.client?.email || !reminderDraft) {
+            message.warning(t("invoices.aiEmailMissing"));
+            return;
+        }
+
+        const lines = reminderDraft.split("\n");
+        const subjectLine = lines.find((line) =>
+            line.toLowerCase().startsWith("betreff:"),
+        );
+        const subject = subjectLine
+            ? subjectLine.replace(/^Betreff:\s*/i, "").trim()
+            : t("invoices.aiMailSubjectFallback");
+        const body = reminderDraft.replace(/^Betreff:\s*.*$/im, "").trim();
+
+        window.open(
+            `mailto:${selectedInvoice.client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+            "_blank",
+        );
     };
 
     const getActionMenu = (record: InvoiceWithClient): MenuProps["items"] => [
@@ -130,6 +216,15 @@ export default function InvoicesPage() {
             icon: <FilePdfOutlined />,
             label: t("invoices.downloadPdf"),
             onClick: () => router.push(`/dashboard/invoices/${record.id}/pdf`),
+        },
+        {
+            key: "ai-reminder",
+            icon: <RobotOutlined />,
+            label: t("invoices.aiReminder"),
+            disabled: !record.client?.email,
+            onClick: () => {
+                void handleDraftReminder(record);
+            },
         },
         { type: "divider" },
         ...(record.status === "draft"
@@ -216,7 +311,11 @@ export default function InvoicesPage() {
                     menu={{ items: getActionMenu(record) }}
                     trigger={["click"]}
                 >
-                    <Button type="text" icon={<MoreOutlined />} />
+                    <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        loading={draftingInvoiceId === record.id}
+                    />
                 </Dropdown>
             ),
         },
@@ -318,6 +417,33 @@ export default function InvoicesPage() {
                     style: { cursor: "pointer" },
                 })}
             />
+
+            <Modal
+                title={t("invoices.aiReminderTitle")}
+                open={reminderModalOpen}
+                onCancel={() => setReminderModalOpen(false)}
+                footer={[
+                    <Button
+                        key="copy"
+                        icon={<CopyOutlined />}
+                        onClick={() => void handleCopyReminderDraft()}
+                    >
+                        {t("invoices.aiCopy")}
+                    </Button>,
+                    <Button
+                        key="email"
+                        type="primary"
+                        icon={<MailOutlined />}
+                        onClick={handleOpenReminderEmail}
+                        disabled={!selectedInvoice?.client?.email}
+                    >
+                        {t("invoices.aiOpenEmail")}
+                    </Button>,
+                ]}
+                width={760}
+            >
+                <div style={{ whiteSpace: "pre-wrap" }}>{reminderDraft}</div>
+            </Modal>
         </div>
     );
 }
