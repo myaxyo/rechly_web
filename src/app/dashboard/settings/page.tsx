@@ -63,8 +63,10 @@ export default function SettingsPage() {
     });
     const [form] = Form.useForm();
     const [aiForm] = Form.useForm();
-    const selectedProvider =
-        Form.useWatch("provider", aiForm) || ("openai" as AIProvider);
+    const watchedProvider = Form.useWatch("provider", aiForm);
+    const selectedProvider = (
+        typeof watchedProvider === "string" ? watchedProvider : "openai"
+    ) as AIProvider;
 
     useEffect(() => {
         loadCompanyInfo();
