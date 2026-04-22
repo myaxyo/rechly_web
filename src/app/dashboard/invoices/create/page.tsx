@@ -25,12 +25,14 @@ import {
     ArrowRightOutlined,
     CheckOutlined,
     FileTextOutlined,
+    RobotOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { getAllClients } from "@/lib/clientService";
 import { getAllProducts } from "@/lib/productService";
 import { createInvoice } from "@/lib/invoiceService";
 import { getCompanyInfo } from "@/lib/companyService";
+import { runInvoiceAssistant } from "@/lib/aiService";
 import {
     formatCurrency,
     calculateInvoiceTotals,
@@ -73,9 +75,12 @@ export default function InvoiceCreatePage() {
     const [dueDate, setDueDate] = useState(dayjs().add(14, "day"));
     const [invoiceNumber, setInvoiceNumber] = useState("");
     const [notes, setNotes] = useState("");
+    const [paymentTerms, setPaymentTerms] = useState("");
+    const [generatingNotes, setGeneratingNotes] = useState(false);
+    const [generatingPaymentTerms, setGeneratingPaymentTerms] = useState(false);
 
     const [createdInvoiceId, setCreatedInvoiceId] = useState<string | null>(
-        null
+        null,
     );
 
     useEffect(() => {
@@ -94,6 +99,7 @@ export default function InvoiceCreatePage() {
             setClients(clientsData);
             setProducts(productsData);
             setCompany(companyData);
+            setPaymentTerms(companyData?.payment_terms_default || "");
         } catch (error) {
             console.error("Error loading data:", error);
             message.error("Fehler beim Laden der Daten");
@@ -127,7 +133,7 @@ export default function InvoiceCreatePage() {
     const updateLineItem = (
         key: string,
         field: keyof LineItem,
-        value: unknown
+        value: unknown,
     ) => {
         setLineItems(
             lineItems.map((item) => {
@@ -135,7 +141,7 @@ export default function InvoiceCreatePage() {
                     return { ...item, [field]: value };
                 }
                 return item;
-            })
+            }),
         );
     };
 
@@ -165,7 +171,7 @@ export default function InvoiceCreatePage() {
             price: item.price,
             tax_rate_percent: item.tax_rate_percent,
             discount_percent: item.discount_percent,
-        }))
+        })),
     );
 
     const handleCreateInvoice = async () => {
@@ -195,6 +201,7 @@ export default function InvoiceCreatePage() {
                 issue_date: invoiceDate.format("YYYY-MM-DD"),
                 due_date: dueDate.format("YYYY-MM-DD"),
                 notes: notes || undefined,
+                payment_terms: paymentTerms || undefined,
                 items,
             };
 
@@ -211,6 +218,77 @@ export default function InvoiceCreatePage() {
         }
     };
 
+    const buildAssistantPayload = () => ({
+        companyName: company?.name,
+        clientName: selectedClient?.name,
+        clientEmail: selectedClient?.email,
+        invoiceNumber,
+        issueDate: invoiceDate.format("YYYY-MM-DD"),
+        dueDate: dueDate.format("YYYY-MM-DD"),
+        totalGross: totals.totalGross,
+        currency: "EUR",
+        notes: notes || undefined,
+        paymentTerms: paymentTerms || undefined,
+        lineItems: lineItems.map((item) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit_of_measure: item.unit_of_measure,
+            price: item.price,
+        })),
+    });
+
+    const handleGenerateNotes = async () => {
+        if (!selectedClient) {
+            message.warning("Bitte zuerst einen Kunden auswählen");
+            return;
+        }
+
+        setGeneratingNotes(true);
+        try {
+            const result = await runInvoiceAssistant({
+                action: "invoice_note",
+                ...buildAssistantPayload(),
+            });
+            setNotes(result.content);
+            message.success("Notizen mit KI erstellt");
+        } catch (error) {
+            console.error("Error generating invoice notes:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : "KI-Notizen konnten nicht erstellt werden",
+            );
+        } finally {
+            setGeneratingNotes(false);
+        }
+    };
+
+    const handleGeneratePaymentTerms = async () => {
+        if (!selectedClient) {
+            message.warning("Bitte zuerst einen Kunden auswählen");
+            return;
+        }
+
+        setGeneratingPaymentTerms(true);
+        try {
+            const result = await runInvoiceAssistant({
+                action: "payment_terms",
+                ...buildAssistantPayload(),
+            });
+            setPaymentTerms(result.content);
+            message.success("Zahlungsbedingungen mit KI erstellt");
+        } catch (error) {
+            console.error("Error generating payment terms:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : "KI-Zahlungsbedingungen konnten nicht erstellt werden",
+            );
+        } finally {
+            setGeneratingPaymentTerms(false);
+        }
+    };
+
     const columns = [
         {
             title: "Beschreibung",
@@ -223,7 +301,7 @@ export default function InvoiceCreatePage() {
                         updateLineItem(
                             record.key,
                             "description",
-                            e.target.value
+                            e.target.value,
                         )
                     }
                     placeholder="Beschreibung"
@@ -350,7 +428,7 @@ export default function InvoiceCreatePage() {
                             value={selectedClient?.id}
                             onChange={(value) => {
                                 const client = clients.find(
-                                    (c) => c.id === value
+                                    (c) => c.id === value,
                                 );
                                 setSelectedClient(client || null);
                             }}
@@ -398,7 +476,7 @@ export default function InvoiceCreatePage() {
                                 options={products.map((p) => ({
                                     value: p.id,
                                     label: `${p.name} - ${formatCurrency(
-                                        p.price
+                                        p.price,
                                     )}`,
                                 }))}
                             />
@@ -426,7 +504,7 @@ export default function InvoiceCreatePage() {
                                     Zwischensumme:{" "}
                                     <Text strong>
                                         {formatCurrency(
-                                            totals.netAfterDiscount
+                                            totals.netAfterDiscount,
                                         )}
                                     </Text>
                                 </Text>
@@ -493,11 +571,51 @@ export default function InvoiceCreatePage() {
                             </Space>
 
                             <Form.Item label="Notizen (optional)">
+                                <Space style={{ marginBottom: 8 }}>
+                                    <Button
+                                        icon={<RobotOutlined />}
+                                        loading={generatingNotes}
+                                        onClick={handleGenerateNotes}
+                                    >
+                                        Mit KI generieren
+                                    </Button>
+                                </Space>
                                 <Input.TextArea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     rows={3}
                                     placeholder="Zusätzliche Hinweise für diese Rechnung..."
+                                />
+                            </Form.Item>
+
+                            <Form.Item label="Zahlungsbedingungen (optional)">
+                                <Space style={{ marginBottom: 8 }}>
+                                    <Button
+                                        icon={<RobotOutlined />}
+                                        loading={generatingPaymentTerms}
+                                        onClick={handleGeneratePaymentTerms}
+                                    >
+                                        Mit KI generieren
+                                    </Button>
+                                    {company?.payment_terms_default ? (
+                                        <Button
+                                            onClick={() =>
+                                                setPaymentTerms(
+                                                    company.payment_terms_default,
+                                                )
+                                            }
+                                        >
+                                            Standard wiederherstellen
+                                        </Button>
+                                    ) : null}
+                                </Space>
+                                <Input.TextArea
+                                    value={paymentTerms}
+                                    onChange={(e) =>
+                                        setPaymentTerms(e.target.value)
+                                    }
+                                    rows={3}
+                                    placeholder="Zum Beispiel: Bitte zahlen Sie innerhalb von 14 Tagen ohne Abzug."
                                 />
                             </Form.Item>
                         </Form>
@@ -544,7 +662,7 @@ export default function InvoiceCreatePage() {
                                 key="view"
                                 onClick={() =>
                                     router.push(
-                                        `/dashboard/invoices/${createdInvoiceId}`
+                                        `/dashboard/invoices/${createdInvoiceId}`,
                                     )
                                 }
                             >
@@ -554,7 +672,7 @@ export default function InvoiceCreatePage() {
                                 key="pdf"
                                 onClick={() =>
                                     router.push(
-                                        `/dashboard/invoices/${createdInvoiceId}/pdf`
+                                        `/dashboard/invoices/${createdInvoiceId}/pdf`,
                                     )
                                 }
                             >

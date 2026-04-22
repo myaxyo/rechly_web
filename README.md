@@ -56,6 +56,7 @@ The ML service is optional. The web app will still run without it, but analytics
 - Rotate any secrets that existed in local or historical tracked files before publishing this repository.
 - Google Analytics is disabled by default unless `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` is set.
 - All deploy-specific URLs, repo links, and contact details should be configured via environment variables.
+- User-provided AI API keys are encrypted server-side and require `AI_SETTINGS_ENCRYPTION_SECRET` to be set.
 
 ## Development Commands
 

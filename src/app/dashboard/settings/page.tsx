@@ -312,7 +312,7 @@ export default function SettingsPage() {
                     <Form.Item
                         name="legal_form"
                         label={t("settings.legalForm")}
-                            <Select options={providerOptions} />
+                    >
                         <Input
                             placeholder={t("settings.legalFormPlaceholder")}
                         />

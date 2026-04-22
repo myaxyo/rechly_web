@@ -20,3 +20,7 @@ The goal is to acknowledge valid reports promptly, confirm impact, and ship a fi
 ## Scope
 
 This policy covers the web app, the ML service, deployment configuration committed to the repository, and any supported release artifacts.
+
+## AI Credentials
+
+User-supplied AI provider keys should only be stored in encrypted form. Set `AI_SETTINGS_ENCRYPTION_SECRET` in every deployment environment before enabling AI features.

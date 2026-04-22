@@ -26,15 +26,19 @@ import {
     ClockCircleOutlined,
     ExclamationCircleOutlined,
     PrinterOutlined,
+    RobotOutlined,
+    CopyOutlined,
 } from "@ant-design/icons";
 import {
     getInvoiceById,
     updateInvoiceStatus,
     deleteInvoice,
 } from "@/lib/invoiceService";
+import { getCompanyInfo } from "@/lib/companyService";
+import { runInvoiceAssistant } from "@/lib/aiService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
-import type { InvoiceWithDetails } from "@/types";
+import type { InvoiceWithDetails, UserCompany } from "@/types";
 
 const { Title, Text } = Typography;
 
@@ -59,6 +63,10 @@ export default function InvoiceDetailPage() {
 
     const [loading, setLoading] = useState(true);
     const [invoice, setInvoice] = useState<InvoiceWithDetails | null>(null);
+    const [company, setCompany] = useState<UserCompany | null>(null);
+    const [draftingReminder, setDraftingReminder] = useState(false);
+    const [reminderDraft, setReminderDraft] = useState("");
+    const [reminderModalOpen, setReminderModalOpen] = useState(false);
 
     useEffect(() => {
         if (invoiceId) {
@@ -69,8 +77,12 @@ export default function InvoiceDetailPage() {
     const loadInvoice = async () => {
         try {
             setLoading(true);
-            const data = await getInvoiceById(invoiceId);
+            const [data, companyData] = await Promise.all([
+                getInvoiceById(invoiceId),
+                getCompanyInfo(),
+            ]);
             setInvoice(data);
+            setCompany(companyData);
         } catch (error) {
             console.error("Error loading invoice:", error);
             message.error("Rechnung nicht gefunden");
@@ -80,8 +92,80 @@ export default function InvoiceDetailPage() {
         }
     };
 
+    const handleDraftReminder = async () => {
+        if (!invoice) {
+            return;
+        }
+
+        setDraftingReminder(true);
+        try {
+            const result = await runInvoiceAssistant({
+                action: "payment_reminder",
+                companyName: company?.name,
+                clientName: invoice.client?.name,
+                clientEmail: invoice.client?.email,
+                invoiceNumber: invoice.invoice_number,
+                issueDate: invoice.issue_date,
+                dueDate: invoice.due_date,
+                totalGross: invoice.total_gross,
+                currency: "EUR",
+                notes: invoice.notes,
+                paymentTerms: invoice.payment_terms,
+                lineItems: invoice.items.map((item) => ({
+                    description: item.description,
+                    quantity: item.quantity,
+                    unit_of_measure: item.unit_of_measure,
+                    price: item.price,
+                })),
+            });
+            setReminderDraft(result.content);
+            setReminderModalOpen(true);
+            message.success("Zahlungserinnerung erstellt");
+        } catch (error) {
+            console.error("Error drafting payment reminder:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : "KI-Zahlungserinnerung konnte nicht erstellt werden",
+            );
+        } finally {
+            setDraftingReminder(false);
+        }
+    };
+
+    const copyReminderDraft = async () => {
+        try {
+            await navigator.clipboard.writeText(reminderDraft);
+            message.success("Entwurf kopiert");
+        } catch (error) {
+            console.error("Error copying reminder draft:", error);
+            message.error("Kopieren fehlgeschlagen");
+        }
+    };
+
+    const openReminderAsEmail = () => {
+        if (!invoice?.client?.email || !reminderDraft) {
+            message.warning("Keine E-Mail-Adresse oder kein Entwurf vorhanden");
+            return;
+        }
+
+        const lines = reminderDraft.split("\n");
+        const subjectLine = lines.find((line) =>
+            line.toLowerCase().startsWith("betreff:"),
+        );
+        const subject = subjectLine
+            ? subjectLine.replace(/^Betreff:\s*/i, "").trim()
+            : `Zahlungserinnerung ${invoice.invoice_number}`;
+        const body = reminderDraft.replace(/^Betreff:\s*.*$/im, "").trim();
+
+        window.open(
+            `mailto:${invoice.client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+            "_blank",
+        );
+    };
+
     const handleStatusChange = async (
-        newStatus: "draft" | "sent" | "paid" | "cancelled"
+        newStatus: "draft" | "sent" | "paid" | "cancelled",
     ) => {
         if (!invoice || !invoice.id) return;
 
@@ -360,6 +444,14 @@ export default function InvoiceDetailPage() {
                 </Card>
             )}
 
+            {invoice.payment_terms && (
+                <Card title="Zahlungsbedingungen" style={{ marginTop: 24 }}>
+                    <Text style={{ whiteSpace: "pre-line" }}>
+                        {invoice.payment_terms}
+                    </Text>
+                </Card>
+            )}
+
             {/* Actions */}
             <Card title="Aktionen" style={{ marginTop: 24 }}>
                 <Space wrap>
@@ -375,11 +467,18 @@ export default function InvoiceDetailPage() {
                         icon={<PrinterOutlined />}
                         onClick={() => {
                             router.push(
-                                `/dashboard/invoices/${invoice.id}/pdf?print=true`
+                                `/dashboard/invoices/${invoice.id}/pdf?print=true`,
                             );
                         }}
                     >
                         Drucken
+                    </Button>
+                    <Button
+                        icon={<RobotOutlined />}
+                        loading={draftingReminder}
+                        onClick={handleDraftReminder}
+                    >
+                        KI-Zahlungserinnerung
                     </Button>
                     <Button
                         icon={<MailOutlined />}
@@ -387,11 +486,11 @@ export default function InvoiceDetailPage() {
                             if (invoice.client?.email) {
                                 window.open(
                                     `mailto:${invoice.client.email}?subject=Rechnung ${invoice.invoice_number}`,
-                                    "_blank"
+                                    "_blank",
                                 );
                             } else {
                                 message.warning(
-                                    "Keine E-Mail-Adresse hinterlegt"
+                                    "Keine E-Mail-Adresse hinterlegt",
                                 );
                             }
                         }}
@@ -400,6 +499,33 @@ export default function InvoiceDetailPage() {
                     </Button>
                 </Space>
             </Card>
+
+            <Modal
+                title="KI-Zahlungserinnerung"
+                open={reminderModalOpen}
+                onCancel={() => setReminderModalOpen(false)}
+                footer={[
+                    <Button
+                        key="copy"
+                        icon={<CopyOutlined />}
+                        onClick={copyReminderDraft}
+                    >
+                        Kopieren
+                    </Button>,
+                    <Button
+                        key="mail"
+                        type="primary"
+                        icon={<MailOutlined />}
+                        onClick={openReminderAsEmail}
+                        disabled={!invoice.client?.email}
+                    >
+                        Als E-Mail öffnen
+                    </Button>,
+                ]}
+                width={760}
+            >
+                <div style={{ whiteSpace: "pre-wrap" }}>{reminderDraft}</div>
+            </Modal>
         </div>
     );
 }
