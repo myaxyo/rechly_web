@@ -6,8 +6,23 @@ function trimTrailingSlashes(value: string): string {
     return value.replace(/\/+$/, "");
 }
 
+// NEXT_PUBLIC_* vars must be accessed with literal keys so Next.js can inline
+// them at build time. Dynamic `process.env[key]` access is only valid server-side.
+const CLIENT_ENV: Record<string, string | undefined> = {
+    NEXT_PUBLIC_APPWRITE_ENDPOINT: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
+    NEXT_PUBLIC_APPWRITE_PROJECT_ID:
+        process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_GOOGLE_ANALYTICS_ID:
+        process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID,
+    NEXT_PUBLIC_REPOSITORY_URL: process.env.NEXT_PUBLIC_REPOSITORY_URL,
+    NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+    NEXT_PUBLIC_LINKEDIN_URL: process.env.NEXT_PUBLIC_LINKEDIN_URL,
+    NEXT_PUBLIC_TWITTER_HANDLE: process.env.NEXT_PUBLIC_TWITTER_HANDLE,
+};
+
 function getEnvValue(key: string): string | undefined {
-    const value = process.env[key]?.trim();
+    const value = (CLIENT_ENV[key] ?? process.env[key])?.trim();
     return value ? value : undefined;
 }
 
