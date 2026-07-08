@@ -68,6 +68,13 @@ npm run start
 npm run lint
 ```
 
+## Related Repositories
+
+| Repository | Description |
+|---|---|
+| [rechly_web](https://github.com/myaxyo/rechly_web) | Next.js web app (this repo) |
+| [rechly_ml](https://github.com/myaxyo/rechly_ml) | Django ML service for analytics, forecasting, and payment-risk scoring |
+
 ## Current Gaps
 
 - Appwrite infrastructure is documented but not auto-provisioned.

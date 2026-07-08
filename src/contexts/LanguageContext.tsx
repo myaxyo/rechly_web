@@ -60,10 +60,10 @@ const translations: Record<Language, Record<string, string>> = {
             "Texte für Notizen, Leistungsbeschreibungen und E-Mails mit deinem eigenen Anbieter generieren.",
         "features.analytics.title": "Analysen & Prognosen",
         "features.analytics.desc":
-            "Offene Beträge, Risiken und Umsatztrends auf einen Blick beobachten.",
+            "Offene Beträge, Risiken und Umsatztrends auf einen Blick beobachten. Powered by unserem separaten ML-Service (rechly_ml auf GitHub).",
         "features.opensource.title": "Open Source & kontrollierbar",
         "features.opensource.desc":
-            "Selbst hosten, anpassen und nachvollziehen, wie Daten und Automationen funktionieren.",
+            "Zwei Repositories auf GitHub: rechly_web (Next.js App) und rechly_ml (ML-Service). Selbst hosten, anpassen und nachvollziehen.",
         "features.highlight1.value": "BYOK",
         "features.highlight1.label":
             "Wähle selbst KI-Provider, Modell und Schlüssel pro Account.",
@@ -794,10 +794,10 @@ const translations: Record<Language, Record<string, string>> = {
             "Generate notes, line descriptions, and emails with your own provider and model.",
         "features.analytics.title": "Analytics & forecasting",
         "features.analytics.desc":
-            "Track open amounts, payment risk, and revenue trends from one dashboard.",
+            "Track open amounts, payment risk, and revenue trends from one dashboard. Powered by our separate ML service (rechly_ml on GitHub).",
         "features.opensource.title": "Open source and controllable",
         "features.opensource.desc":
-            "Self-host, adapt, and inspect how your data flows and automations work.",
+            "Two repos on GitHub: rechly_web (Next.js app) and rechly_ml (ML service). Self-host, adapt, and inspect how your data flows.",
         "features.highlight1.value": "BYOK",
         "features.highlight1.label":
             "Choose your own AI provider, model, and key per account.",
