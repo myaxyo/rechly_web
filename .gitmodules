@@ -1,0 +1,3 @@
+[submodule "services/ml_api"]
+	path = services/ml_api
+	url = https://github.com/myaxyo/rechly_ml.git
