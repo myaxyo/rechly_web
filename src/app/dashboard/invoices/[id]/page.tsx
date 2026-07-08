@@ -24,10 +24,10 @@ import {
     DeleteOutlined,
     CheckCircleOutlined,
     ClockCircleOutlined,
-    ExclamationCircleOutlined,
     PrinterOutlined,
     RobotOutlined,
     CopyOutlined,
+    RollbackOutlined,
 } from "@ant-design/icons";
 import {
     getInvoiceById,
@@ -72,6 +72,7 @@ export default function InvoiceDetailPage() {
         if (invoiceId) {
             loadInvoice();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invoiceId]);
 
     const loadInvoice = async () => {
@@ -197,6 +198,32 @@ export default function InvoiceDetailPage() {
                 }
             },
         });
+    };
+
+    const [correctionLoading, setCorrectionLoading] = useState(false);
+    const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
+    const [correctionType, setCorrectionType] = useState<
+        "credit_note" | "correction"
+    >("credit_note");
+
+    const handleCreateCorrection = async () => {
+        setCorrectionLoading(true);
+        try {
+            const res = await fetch(`/api/invoices/${invoiceId}/correction`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: correctionType }),
+            });
+            if (!res.ok) throw new Error("Failed");
+            const data = await res.json();
+            message.success("Korrekturdokument erstellt");
+            setCorrectionModalOpen(false);
+            router.push(`/dashboard/invoices/${data.invoiceId}`);
+        } catch {
+            message.error("Fehler beim Erstellen des Korrekturdokuments");
+        } finally {
+            setCorrectionLoading(false);
+        }
     };
 
     const statusMenuItems = [
@@ -474,6 +501,13 @@ export default function InvoiceDetailPage() {
                         Drucken
                     </Button>
                     <Button
+                        icon={<RollbackOutlined />}
+                        onClick={() => setCorrectionModalOpen(true)}
+                        disabled={invoice.status === "draft"}
+                    >
+                        Storno / Korrektur
+                    </Button>
+                    <Button
                         icon={<RobotOutlined />}
                         loading={draftingReminder}
                         onClick={handleDraftReminder}
@@ -499,6 +533,51 @@ export default function InvoiceDetailPage() {
                     </Button>
                 </Space>
             </Card>
+
+            <Modal
+                title="Korrekturdokument erstellen"
+                open={correctionModalOpen}
+                onCancel={() => setCorrectionModalOpen(false)}
+                onOk={handleCreateCorrection}
+                okText="Erstellen"
+                cancelText="Abbrechen"
+                confirmLoading={correctionLoading}
+            >
+                <p>Wähle die Art des Korrekturdokuments:</p>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 12,
+                        marginTop: 12,
+                    }}
+                >
+                    <label style={{ cursor: "pointer" }}>
+                        <input
+                            type="radio"
+                            name="correctionType"
+                            value="credit_note"
+                            checked={correctionType === "credit_note"}
+                            onChange={() => setCorrectionType("credit_note")}
+                            style={{ marginRight: 8 }}
+                        />
+                        <strong>Gutschrift (GS-...)</strong> — Storniert die
+                        Rechnung mit negierten Beträgen
+                    </label>
+                    <label style={{ cursor: "pointer" }}>
+                        <input
+                            type="radio"
+                            name="correctionType"
+                            value="correction"
+                            checked={correctionType === "correction"}
+                            onChange={() => setCorrectionType("correction")}
+                            style={{ marginRight: 8 }}
+                        />
+                        <strong>Korrekturrechnung (KR-...)</strong> — Kopie zum
+                        Bearbeiten
+                    </label>
+                </div>
+            </Modal>
 
             <Modal
                 title="KI-Zahlungserinnerung"

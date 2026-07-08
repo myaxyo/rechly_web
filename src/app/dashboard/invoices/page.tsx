@@ -6,7 +6,6 @@ import {
     Table,
     Button,
     Input,
-    Space,
     Tag,
     Dropdown,
     Modal,
@@ -92,6 +91,7 @@ export default function InvoicesPage() {
         fetchInvoices();
         fetchStats();
         void loadCompanyInfo();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadCompanyInfo = async () => {

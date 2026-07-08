@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getRepoUrl } from "@/lib/env";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const repoUrl = getRepoUrl();
 
 interface NavbarProps {

@@ -471,6 +471,7 @@ export default function InvoicePDFPage() {
         if (invoiceId) {
             loadData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invoiceId]);
 
     const loadData = async () => {

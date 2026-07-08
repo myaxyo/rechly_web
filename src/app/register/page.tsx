@@ -26,7 +26,7 @@ const { Title, Text } = Typography;
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { register, googleLogin } = useAuth();
+    const { register } = useAuth();
     const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
 

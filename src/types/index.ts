@@ -22,6 +22,9 @@ export interface UserCompany {
     phone?: string;
     website?: string;
     logo_base64?: string;
+    datev_chart_of_accounts?: "SKR03" | "SKR04";
+    datev_consultant_number?: string;
+    datev_client_number?: string;
     created_at: number;
     updated_at: number;
 }
@@ -69,6 +72,8 @@ export interface Invoice {
     purchase_order_ref?: string;
     delivery_date?: string;
     payment_terms?: string;
+    correction_type?: "credit_note" | "correction" | null;
+    corrects_invoice_id?: string | null;
     created_at: number;
     updated_at: number;
 }
@@ -247,4 +252,215 @@ export interface AIChatResponse {
     content: string;
     provider: AIProvider;
     model: string;
+}
+
+// ─── Offers / Quotations ─────────────────────────────────────────────────────
+
+export type OfferStatus =
+    | "draft"
+    | "sent"
+    | "accepted"
+    | "rejected"
+    | "expired"
+    | "converted";
+
+export interface Offer {
+    id?: string;
+    client_id: string;
+    offer_number: string;
+    issue_date: string;
+    valid_until?: string;
+    subtotal: number;
+    total_vat: number;
+    total_gross: number;
+    status: OfferStatus;
+    notes?: string;
+    purchase_order_ref?: string;
+    payment_terms?: string;
+    converted_invoice_id?: string | null;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface OfferItem {
+    id?: string;
+    offer_id: string;
+    product_id?: string;
+    description: string;
+    quantity: number;
+    unit_of_measure: string;
+    price: number;
+    tax_rate_percent: number;
+    discount_percent: number;
+    subtotal: number;
+    tax_amount: number;
+    total: number;
+}
+
+export interface OfferWithClient extends Offer {
+    client?: Client;
+}
+
+export interface OfferWithDetails extends Offer {
+    client?: Client;
+    items: OfferItem[];
+}
+
+export interface OfferItemFormData {
+    product_id?: string;
+    description: string;
+    quantity: number;
+    unit_of_measure: string;
+    price: number;
+    tax_rate_percent: number;
+    discount_percent: number;
+}
+
+export interface OfferFormData {
+    client_id: string;
+    offer_number: string;
+    issue_date: string;
+    valid_until?: string;
+    notes?: string;
+    purchase_order_ref?: string;
+    payment_terms?: string;
+    items: OfferItemFormData[];
+}
+
+// ─── Recurring Invoices ───────────────────────────────────────────────────────
+
+export type RecurringInterval = "weekly" | "monthly" | "quarterly" | "annually";
+
+export interface RecurringInvoice {
+    id?: string;
+    template_name: string;
+    client_id: string;
+    interval: RecurringInterval;
+    next_due_date: string;
+    end_date?: string | null;
+    is_active: boolean;
+    last_created_invoice_id?: string | null;
+    notes?: string;
+    payment_terms?: string;
+    subtotal: number;
+    total_vat: number;
+    total_gross: number;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface RecurringInvoiceItem {
+    id?: string;
+    recurring_invoice_id: string;
+    product_id?: string;
+    description: string;
+    quantity: number;
+    unit_of_measure: string;
+    price: number;
+    tax_rate_percent: number;
+    discount_percent: number;
+    subtotal: number;
+    tax_amount: number;
+    total: number;
+}
+
+export interface RecurringInvoiceWithDetails extends RecurringInvoice {
+    client?: Client;
+    items: RecurringInvoiceItem[];
+}
+
+export interface RecurringFormData {
+    template_name: string;
+    client_id: string;
+    interval: RecurringInterval;
+    next_due_date: string;
+    end_date?: string;
+    notes?: string;
+    payment_terms?: string;
+    items: OfferItemFormData[];
+}
+
+// ─── Expenses ─────────────────────────────────────────────────────────────────
+
+export type ExpenseCategory =
+    | "office"
+    | "travel"
+    | "software"
+    | "hardware"
+    | "marketing"
+    | "consulting"
+    | "utilities"
+    | "rent"
+    | "insurance"
+    | "other";
+
+export type PaymentMethod =
+    | "bank_transfer"
+    | "cash"
+    | "credit_card"
+    | "paypal"
+    | "other";
+
+export interface Expense {
+    id?: string;
+    date: string;
+    vendor_name: string;
+    description?: string;
+    amount_net: number;
+    vat_amount: number;
+    amount_gross: number;
+    vat_rate_percent: number;
+    category: ExpenseCategory;
+    payment_method: PaymentMethod;
+    receipt_file_id?: string | null;
+    status: "pending" | "approved";
+    created_at: number;
+    updated_at: number;
+}
+
+export interface ExpenseFormData {
+    date: string;
+    vendor_name: string;
+    description?: string;
+    amount_net: number;
+    vat_amount: number;
+    amount_gross: number;
+    vat_rate_percent: number;
+    category: ExpenseCategory;
+    payment_method: PaymentMethod;
+}
+
+export interface ExpenseOCRResult {
+    vendor_name?: string;
+    date?: string;
+    amount_gross?: number;
+    vat_rate?: number;
+    description?: string;
+}
+
+// ─── Bank Transactions ────────────────────────────────────────────────────────
+
+export type BankTransactionStatus = "unmatched" | "matched" | "ignored";
+
+export interface BankTransaction {
+    id?: string;
+    transaction_date: string;
+    amount: number;
+    currency: string;
+    description: string;
+    reference?: string;
+    counterpart_name?: string;
+    counterpart_iban?: string;
+    status: BankTransactionStatus;
+    matched_invoice_id?: string | null;
+    raw_data?: string | null;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface AutoMatchSuggestion {
+    transaction: BankTransaction;
+    invoice: InvoiceWithClient;
+    confidence: number;
+    reason: string;
 }

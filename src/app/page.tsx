@@ -1,17 +1,33 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useAuth } from "@/contexts/AuthContext";
+import type { Metadata } from "next";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import Script from "next/script";
 import HeroSection from "@/components/landing/sections/HeroSection";
+import AuthRedirect from "@/components/landing/AuthRedirect";
+import SeoTopicsSection from "@/components/landing/sections/SeoTopicsSection";
+import ComparisonTopicsSection from "@/components/landing/sections/ComparisonTopicsSection";
+import TransactionalTopicsSection from "@/components/landing/sections/TransactionalTopicsSection";
 import { getRepoUrl, getSiteUrl } from "@/lib/env";
 
 const siteUrl = getSiteUrl();
 const repoUrl = getRepoUrl();
+
+export const metadata: Metadata = {
+    title: "Rechnungssoftware für Deutschland",
+    description:
+        "Rechly hilft Freelancern, Selbstständigen und kleinen Unternehmen in Deutschland beim Schreiben von Rechnungen, Verwalten von Kunden und Erstellen professioneller PDF-Rechnungen.",
+    alternates: {
+        canonical: "/",
+    },
+    openGraph: {
+        title: "Rechly - Rechnungssoftware für Deutschland",
+        description:
+            "Online Rechnungen erstellen, Kunden verwalten und professionelle PDFs exportieren. Entwickelt für den deutschen Markt.",
+        url: siteUrl,
+        type: "website",
+    },
+};
 
 // Lazy load non-critical sections
 const FeaturesSection = dynamic(
@@ -41,25 +57,37 @@ const structuredData = {
         {
             "@type": "SoftwareApplication",
             name: "Rechly",
+            url: siteUrl,
             applicationCategory: "BusinessApplication",
+            applicationSubCategory: "Rechnungssoftware",
             operatingSystem: "Web, Android",
+            inLanguage: ["de-DE", "en"],
+            areaServed: "DE",
+            audience: {
+                "@type": "Audience",
+                audienceType:
+                    "Freelancer, Selbstständige und kleine Unternehmen in Deutschland",
+            },
             offers: {
                 "@type": "Offer",
                 price: "0",
                 priceCurrency: "EUR",
             },
+            isAccessibleForFree: true,
             description:
-                "Kostenlose Rechnungssoftware für Freelancer und Selbstständige. Erstelle professionelle Rechnungen online.",
-            url: siteUrl,
+                "Deutsche Rechnungssoftware für Freelancer, Selbstständige und kleine Unternehmen mit Fokus auf schnelle Rechnungserstellung, Kundenverwaltung und PDF-Export.",
             author: {
                 "@type": "Organization",
                 name: "Rechly",
             },
-            aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.8",
-                ratingCount: "50",
-            },
+            featureList: [
+                "Rechnungen online erstellen",
+                "Kundenverwaltung",
+                "PDF-Rechnungen exportieren",
+                "Cloud-Synchronisation",
+                "DSGVO-konforme Workflows",
+                "KI-gestützte Rechnungshilfe",
+            ],
         },
         {
             "@type": "Organization",
@@ -67,18 +95,30 @@ const structuredData = {
             url: siteUrl,
             logo: `${siteUrl}/favicon/favicon.svg`,
             description:
-                "Open-Source Rechnungssoftware für Deutschland. DSGVO-konform, kostenlos, einfach.",
+                "Open-Source Rechnungssoftware für Deutschland. Entwickelt für Freelancer, Selbstständige und kleine Unternehmen.",
             sameAs: [repoUrl],
         },
         {
             "@type": "WebSite",
-            name: "Rechly - Kostenlose Rechnungssoftware",
+            name: "Rechly - Rechnungssoftware für Deutschland",
             url: siteUrl,
-            potentialAction: {
-                "@type": "SearchAction",
-                target: `${siteUrl}/search?q={search_term_string}`,
-                "query-input": "required name=search_term_string",
+            inLanguage: "de-DE",
+        },
+        {
+            "@type": "WebPage",
+            name: "Rechly Startseite",
+            url: siteUrl,
+            isPartOf: {
+                "@type": "WebSite",
+                name: "Rechly",
+                url: siteUrl,
             },
+            about: {
+                "@type": "Thing",
+                name: "Rechnungssoftware für Deutschland",
+            },
+            primaryImageOfPage: `${siteUrl}/opengraph-image`,
+            inLanguage: "de-DE",
         },
         {
             "@type": "FAQPage",
@@ -129,54 +169,10 @@ const structuredData = {
 };
 
 export default function Home() {
-    const router = useRouter();
-    const { user, loading } = useAuth();
-    const [showContent, setShowContent] = useState(false);
-
-    useEffect(() => {
-        if (!loading) {
-            if (user) {
-                router.push("/dashboard");
-            } else {
-                setShowContent(true);
-            }
-        }
-    }, [user, loading, router]);
-
-    if (loading || (!showContent && !user)) {
-        return (
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100vh",
-                    background: "#fff",
-                }}
-            >
-                <div
-                    style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: "50%",
-                        border: "3px solid #f0f0f0",
-                        borderTopColor: "#1890ff",
-                        animation: "spin 0.8s linear infinite",
-                    }}
-                />
-                <style jsx>{`
-                    @keyframes spin {
-                        to {
-                            transform: rotate(360deg);
-                        }
-                    }
-                `}</style>
-            </div>
-        );
-    }
-
     return (
         <div style={{ minHeight: "100vh", background: "#fff" }}>
+            <AuthRedirect />
+
             {/* JSON-LD Structured Data for SEO */}
             <Script
                 id="structured-data"
@@ -191,6 +187,9 @@ export default function Home() {
             <main role="main">
                 <HeroSection />
                 <FeaturesSection />
+                <SeoTopicsSection />
+                <ComparisonTopicsSection />
+                <TransactionalTopicsSection />
                 <WorkflowSection />
                 <AboutSection />
                 <FaqSection />

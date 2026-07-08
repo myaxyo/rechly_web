@@ -26,7 +26,7 @@ const { Title, Text, Paragraph } = Typography;
 
 export default function OnboardingPage() {
     const router = useRouter();
-    const { user, loading: authLoading, isAnonymous } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { language } = useLanguage();
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
@@ -136,6 +136,7 @@ export default function OnboardingPage() {
         if (user) {
             checkExistingCompany();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, authLoading, router]);
 
     const checkExistingCompany = async () => {

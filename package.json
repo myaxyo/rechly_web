@@ -1,9 +1,14 @@
 {
-  "name": "web",
+  "name": "rechly",
   "version": "0.1.0",
   "private": true,
-  "description": "Rechly web app and supporting services for open-source invoicing workflows.",
+  "description": "Open-source invoicing app for freelancers and small businesses.",
   "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/myaxyo/rechly_web.git"
+  },
+  "homepage": "https://rechly.de",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,8 +23,11 @@
     "appwrite": "^21.5.0",
     "csv-parse": "^6.1.0",
     "dayjs": "^1.11.19",
+    "iconv-lite": "^0.7.2",
     "next": "^16.0.7",
     "node-appwrite": "^21.0.0",
+    "papaparse": "^5.5.3",
+    "pdfkit": "^0.18.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "zustand": "^5.0.9"
@@ -27,6 +35,8 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

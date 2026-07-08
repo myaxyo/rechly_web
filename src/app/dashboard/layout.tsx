@@ -25,6 +25,10 @@ import {
     LogoutOutlined,
     WarningOutlined,
     GlobalOutlined,
+    TagsOutlined,
+    RedoOutlined,
+    WalletOutlined,
+    BankOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -48,7 +52,7 @@ export default function DashboardLayout({
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    // Menu items with translations
+    // Menu items with translations - grouped
     const menuItems = [
         {
             key: "/dashboard",
@@ -56,19 +60,60 @@ export default function DashboardLayout({
             label: t("dashboard.home"),
         },
         {
-            key: "/dashboard/invoices",
-            icon: <FileTextOutlined />,
-            label: t("dashboard.invoices"),
+            key: "group-documents",
+            type: "group" as const,
+            label: t("dashboard.navDocuments"),
+            children: [
+                {
+                    key: "/dashboard/offers",
+                    icon: <TagsOutlined />,
+                    label: t("dashboard.offers"),
+                },
+                {
+                    key: "/dashboard/invoices",
+                    icon: <FileTextOutlined />,
+                    label: t("dashboard.invoices"),
+                },
+                {
+                    key: "/dashboard/recurring",
+                    icon: <RedoOutlined />,
+                    label: t("dashboard.recurring"),
+                },
+            ],
         },
         {
-            key: "/dashboard/clients",
-            icon: <UserOutlined />,
-            label: t("dashboard.clients"),
+            key: "group-accounting",
+            type: "group" as const,
+            label: t("dashboard.navAccounting"),
+            children: [
+                {
+                    key: "/dashboard/expenses",
+                    icon: <WalletOutlined />,
+                    label: t("dashboard.expenses"),
+                },
+                {
+                    key: "/dashboard/bank",
+                    icon: <BankOutlined />,
+                    label: t("dashboard.bank"),
+                },
+            ],
         },
         {
-            key: "/dashboard/products",
-            icon: <ShoppingOutlined />,
-            label: t("dashboard.products"),
+            key: "group-management",
+            type: "group" as const,
+            label: "",
+            children: [
+                {
+                    key: "/dashboard/clients",
+                    icon: <UserOutlined />,
+                    label: t("dashboard.clients"),
+                },
+                {
+                    key: "/dashboard/products",
+                    icon: <ShoppingOutlined />,
+                    label: t("dashboard.products"),
+                },
+            ],
         },
         {
             key: "/dashboard/settings",

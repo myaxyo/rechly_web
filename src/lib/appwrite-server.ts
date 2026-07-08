@@ -1,4 +1,10 @@
-import { Client, Account, Databases, OAuthProvider } from "node-appwrite";
+import {
+    Client,
+    Account,
+    Databases,
+    Storage,
+    OAuthProvider,
+} from "node-appwrite";
 import { cookies } from "next/headers";
 import {
     getAppwriteEndpoint,
@@ -25,6 +31,16 @@ export const COLLECTIONS = {
     INVOICES: "invoices",
     INVOICE_ITEMS: "invoice_items",
     COMPANY_INFO: "user_company",
+    OFFERS: "offers",
+    OFFER_ITEMS: "offer_items",
+    RECURRING_INVOICES: "recurring_invoices",
+    RECURRING_INVOICE_ITEMS: "recurring_invoice_items",
+    EXPENSES: "expenses",
+    BANK_TRANSACTIONS: "bank_transactions",
+} as const;
+
+export const STORAGE = {
+    RECEIPTS: "receipts",
 } as const;
 
 // Cookie name for session storage
@@ -52,11 +68,13 @@ export async function createAdminClient() {
         get databases() {
             return new Databases(client);
         },
+        get storage() {
+            return new Storage(client);
+        },
     };
 }
 
 /**
- * Create Session Client (with user session)
  * Used for authenticated requests on behalf of the user
  * IMPORTANT: Never share this client between requests
  */
