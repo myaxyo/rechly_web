@@ -66,6 +66,16 @@ export const COLLECTIONS = {
     PRODUCTS: "products",
     INVOICES: "invoices",
     INVOICE_ITEMS: "invoice_items",
+    OFFERS: "offers",
+    OFFER_ITEMS: "offer_items",
+    RECURRING_INVOICES: "recurring_invoices",
+    RECURRING_INVOICE_ITEMS: "recurring_invoice_items",
+    EXPENSES: "expenses",
+    BANK_TRANSACTIONS: "bank_transactions",
+} as const;
+
+export const STORAGE = {
+    RECEIPTS: "receipts",
 } as const;
 
 /**

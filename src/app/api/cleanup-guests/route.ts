@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
                                 );
                                 dataDeletedCount++;
                             }
-                        } catch (collectionError) {
+                        } catch {
                             // Collection might not exist or no documents found
                             console.log(
                                 `No documents in ${collectionId} for user ${userId}`,

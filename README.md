@@ -72,8 +72,7 @@ npm run lint
 
 - Appwrite infrastructure is documented but not auto-provisioned.
 - The ML service requires Appwrite data and trained artifacts for full functionality.
-- Secret scanning and CI release checks are still recommended before the public launch.
 
 ## License
 
-This repository is intended to ship under the GNU Affero General Public License v3.0. See `LICENSE` once the public release packaging is complete.
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only).

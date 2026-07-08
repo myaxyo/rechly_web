@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getRepoUrl } from "@/lib/env";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 const repoUrl = getRepoUrl();
 
 export default function Footer() {

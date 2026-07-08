@@ -21,7 +21,7 @@ export async function GET() {
         } catch {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -32,7 +32,7 @@ export async function GET() {
         if (!user) {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -44,14 +44,14 @@ export async function GET() {
                 Query.equal("userId", user.$id),
                 Query.orderDesc("$createdAt"),
                 Query.limit(1000),
-            ]
+            ],
         );
 
         // Get all clients for this user to join
         const clientsResponse = await databases.listDocuments(
             DATABASE_ID,
             COLLECTIONS.CLIENTS,
-            [Query.equal("userId", user.$id), Query.limit(1000)]
+            [Query.equal("userId", user.$id), Query.limit(1000)],
         );
 
         const clientsMap = new Map(
@@ -74,7 +74,7 @@ export async function GET() {
                     created_at: new Date(c.$createdAt).getTime(),
                     updated_at: new Date(c.$updatedAt).getTime(),
                 },
-            ])
+            ]),
         );
 
         // Map documents to invoice format with client
@@ -92,6 +92,8 @@ export async function GET() {
             purchase_order_ref: doc.purchaseOrderRef ?? undefined,
             delivery_date: doc.deliveryDate ?? undefined,
             payment_terms: doc.paymentTerms ?? undefined,
+            correction_type: doc.correctionType ?? null,
+            corrects_invoice_id: doc.correctsInvoiceId ?? null,
             created_at: new Date(doc.$createdAt).getTime(),
             updated_at: new Date(doc.$updatedAt).getTime(),
             client: clientsMap.get(doc.clientId) || undefined,
@@ -102,7 +104,7 @@ export async function GET() {
         console.error("Error fetching invoices:", error);
         return NextResponse.json(
             { error: "Failed to fetch invoices" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
@@ -117,7 +119,7 @@ export async function POST(request: NextRequest) {
         } catch {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -157,8 +159,8 @@ export async function POST(request: NextRequest) {
                     price: item.price,
                     tax_rate_percent: item.tax_rate_percent,
                     discount_percent: item.discount_percent || 0,
-                })
-            )
+                }),
+            ),
         );
 
         // Create invoice document with permissions
@@ -180,12 +182,14 @@ export async function POST(request: NextRequest) {
                 purchaseOrderRef: body.purchase_order_ref || null,
                 deliveryDate: body.delivery_date || null,
                 paymentTerms: body.payment_terms || null,
+                correctionType: null,
+                correctsInvoiceId: null,
             },
             [
                 Permission.read(Role.user(user.$id)),
                 Permission.update(Role.user(user.$id)),
                 Permission.delete(Role.user(user.$id)),
-            ]
+            ],
         );
 
         // Create invoice items
@@ -194,7 +198,7 @@ export async function POST(request: NextRequest) {
                 item.quantity,
                 item.price,
                 item.tax_rate_percent,
-                item.discount_percent || 0
+                item.discount_percent || 0,
             );
 
             await databases.createDocument(
@@ -218,7 +222,7 @@ export async function POST(request: NextRequest) {
                     Permission.read(Role.user(user.$id)),
                     Permission.update(Role.user(user.$id)),
                     Permission.delete(Role.user(user.$id)),
-                ]
+                ],
             );
         }
 
@@ -242,14 +246,14 @@ export async function POST(request: NextRequest) {
             console.error("Appwrite error type:", appwriteError.type);
             console.error(
                 "Appwrite error response:",
-                JSON.stringify(appwriteError.response)
+                JSON.stringify(appwriteError.response),
             );
         }
         const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
         return NextResponse.json(
             { error: "Failed to create invoice", details: errorMessage },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

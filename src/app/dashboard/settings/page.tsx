@@ -71,6 +71,7 @@ export default function SettingsPage() {
     useEffect(() => {
         loadCompanyInfo();
         loadAISettings();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadCompanyInfo = async () => {

@@ -10,7 +10,7 @@ import {
 // GET single invoice with details
 export async function GET(
     _request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
@@ -21,7 +21,7 @@ export async function GET(
         } catch {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -32,7 +32,7 @@ export async function GET(
         if (!user) {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -40,7 +40,7 @@ export async function GET(
         const doc = await databases.getDocument(
             DATABASE_ID,
             COLLECTIONS.INVOICES,
-            id
+            id,
         );
 
         // Get client
@@ -50,7 +50,7 @@ export async function GET(
                 const clientDoc = await databases.getDocument(
                     DATABASE_ID,
                     COLLECTIONS.CLIENTS,
-                    doc.clientId
+                    doc.clientId,
                 );
                 client = {
                     id: clientDoc.$id,
@@ -78,7 +78,7 @@ export async function GET(
         const itemsResponse = await databases.listDocuments(
             DATABASE_ID,
             COLLECTIONS.INVOICE_ITEMS,
-            [Query.equal("invoiceId", id), Query.limit(100)]
+            [Query.equal("invoiceId", id), Query.limit(100)],
         );
 
         const items = itemsResponse.documents.map((item) => ({
@@ -110,6 +110,8 @@ export async function GET(
             purchase_order_ref: doc.purchaseOrderRef ?? undefined,
             delivery_date: doc.deliveryDate ?? undefined,
             payment_terms: doc.paymentTerms ?? undefined,
+            correction_type: doc.correctionType ?? null,
+            corrects_invoice_id: doc.correctsInvoiceId ?? null,
             created_at: new Date(doc.$createdAt).getTime(),
             updated_at: new Date(doc.$updatedAt).getTime(),
             client,
@@ -121,7 +123,7 @@ export async function GET(
         console.error("Error fetching invoice:", error);
         return NextResponse.json(
             { error: "Failed to fetch invoice" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
@@ -129,7 +131,7 @@ export async function GET(
 // PUT update invoice status
 export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
@@ -140,7 +142,7 @@ export async function PUT(
         } catch {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -151,7 +153,7 @@ export async function PUT(
         if (!user) {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -167,7 +169,7 @@ export async function PUT(
         console.error("Error updating invoice:", error);
         return NextResponse.json(
             { error: "Failed to update invoice" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
@@ -175,7 +177,7 @@ export async function PUT(
 // DELETE invoice and its items
 export async function DELETE(
     _request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
@@ -186,7 +188,7 @@ export async function DELETE(
         } catch {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -197,7 +199,7 @@ export async function DELETE(
         if (!user) {
             return NextResponse.json(
                 { error: "Not authenticated" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -205,14 +207,14 @@ export async function DELETE(
         const itemsResponse = await databases.listDocuments(
             DATABASE_ID,
             COLLECTIONS.INVOICE_ITEMS,
-            [Query.equal("invoiceId", id)]
+            [Query.equal("invoiceId", id)],
         );
 
         for (const item of itemsResponse.documents) {
             await databases.deleteDocument(
                 DATABASE_ID,
                 COLLECTIONS.INVOICE_ITEMS,
-                item.$id
+                item.$id,
             );
         }
 
@@ -224,7 +226,7 @@ export async function DELETE(
         console.error("Error deleting invoice:", error);
         return NextResponse.json(
             { error: "Failed to delete invoice" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

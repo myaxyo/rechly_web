@@ -21,39 +21,33 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    // Primary Meta Tags - German SEO optimized
+    applicationName: "Rechly",
     title: {
         default:
-            "Rechly - Kostenlose Rechnungssoftware | Rechnung erstellen online",
+            "Rechly - Rechnungssoftware für Freelancer & Selbstständige in Deutschland",
         template: "%s | Rechly - Rechnungsprogramm",
     },
     description:
-        "Rechnung erstellen online kostenlos mit Rechly. Das beste Rechnungsprogramm für Freelancer und Selbstständige in Deutschland. DSGVO-konform, Open Source, keine versteckten Kosten. Professionelle Rechnungsvorlagen, Kundenverwaltung & Cloud-Sync.",
+        "Rechly ist eine deutsche Rechnungssoftware für Freelancer, Selbstständige und kleine Unternehmen. Online Rechnungen schreiben, Kunden verwalten, PDFs erzeugen und DSGVO-konform arbeiten.",
     keywords: [
-        // Primary German keywords
         "Rechnung erstellen online",
         "Rechnungsprogramm",
         "Rechnungssoftware",
-        "Rechnungstool",
         "Online Rechnungssoftware",
         "Rechnung schreiben online",
-        "Rechnungsvorlage online",
-        "Rechnungsprogramm kostenlos",
-        "Rechnung erstellen kostenlos",
-        // Secondary keywords
+        "Rechnungsvorlage",
         "Rechnungsgenerator",
-        "Invoice Generator",
+        "Rechnungsprogramm kostenlos",
         "Freelancer Rechnungsprogramm",
         "Selbstständige Rechnungssoftware",
         "Kleinunternehmer Rechnung",
+        "E-Rechnung Software Kleinunternehmer",
         "GoBD konforme Rechnung",
         "DSGVO konforme Rechnungssoftware",
         "Open Source Rechnungsprogramm",
-        // Long-tail keywords
-        "kostenlose Rechnungsvorlage",
-        "Rechnung online erstellen ohne Anmeldung",
-        "einfaches Rechnungsprogramm",
         "Rechnungen schreiben Freiberufler",
+        "Rechnungssoftware Deutschland",
+        "Rechnung erstellen für Freelancer",
     ],
     authors: [{ name: "Rechly", url: siteUrl }],
     creator: "Rechly",
@@ -66,40 +60,32 @@ export const metadata: Metadata = {
     metadataBase: new URL(siteUrl),
     alternates: {
         canonical: "/",
-        languages: {
-            "de-DE": "/",
-            "en-US": "/",
-        },
     },
-    // Open Graph for Social Sharing
     openGraph: {
         type: "website",
         locale: "de_DE",
-        alternateLocale: "en_US",
         url: siteUrl,
         siteName: "Rechly",
-        title: "Rechly - Kostenlose Rechnungssoftware für Deutschland",
+        title: "Rechly - Deutsche Rechnungssoftware für Freelancer und Selbstständige",
         description:
-            "Erstelle professionelle Rechnungen in Sekunden. Kostenloses Open-Source Rechnungsprogramm für Freelancer, Selbstständige und kleine Unternehmen. DSGVO-konform, Server in Deutschland.",
+            "Rechnungen online erstellen, Kunden verwalten und professionelle PDFs erzeugen. Entwickelt für den deutschen Markt mit Fokus auf DSGVO, GoBD und einfache Workflows.",
         images: [
             {
-                url: `${siteUrl}/og-image.png`,
+                url: `${siteUrl}/opengraph-image`,
                 width: 1200,
                 height: 630,
-                alt: "Rechly - Kostenlose Rechnungssoftware",
+                alt: "Rechly - Deutsche Rechnungssoftware",
             },
         ],
     },
-    // Twitter Card
     twitter: {
         card: "summary_large_image",
-        title: "Rechly - Kostenlose Rechnungssoftware | Online Rechnung erstellen",
+        title: "Rechly - Rechnungen online schreiben für den deutschen Markt",
         description:
-            "Professionelle Rechnungen erstellen in Sekunden. Kostenlos, Open Source, DSGVO-konform. Das Rechnungsprogramm für Freelancer in Deutschland.",
-        images: [`${siteUrl}/og-image.png`],
+            "Deutsche Rechnungssoftware für Freelancer, Selbstständige und kleine Teams. DSGVO-konform, Open Source und auf schnelle Rechnungserstellung ausgelegt.",
+        images: [`${siteUrl}/opengraph-image`],
         creator: twitterHandle,
     },
-    // Robots
     robots: {
         index: true,
         follow: true,
@@ -111,7 +97,6 @@ export const metadata: Metadata = {
             "max-snippet": -1,
         },
     },
-    // Icons
     icons: {
         icon: [
             { url: "/favicon.ico", sizes: "any" },
@@ -126,12 +111,7 @@ export const metadata: Metadata = {
         apple: "/favicon/apple-touch-icon.png",
     },
     manifest: "/favicon/site.webmanifest",
-    // Verification (add your IDs later)
-    verification: {
-        // google: "your-google-verification-code",
-        // yandex: "your-yandex-verification-code",
-    },
-    // Category
+    verification: {},
     category: "business",
 };
 

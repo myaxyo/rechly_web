@@ -4,8 +4,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { Models } from "appwrite";
 import {
     getCurrentUser,
-    loginWithEmail,
-    registerWithEmail,
     logout as appwriteLogout,
     loginWithGoogle,
     createAnonymousSession,
@@ -75,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             sessionStorage.removeItem("guestHiddenAt");
             logout();
         }
-    }, []);
+    }, [isAnonymous]);
 
     const checkAuth = async () => {
         try {

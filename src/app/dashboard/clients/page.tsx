@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
     Table,
     Button,
@@ -41,7 +40,6 @@ import type {
 const { Title } = Typography;
 
 export default function ClientsPage() {
-    const router = useRouter();
     const { t } = useLanguage();
     const [searchText, setSearchText] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
@@ -78,6 +76,7 @@ export default function ClientsPage() {
     useEffect(() => {
         fetchClients();
         loadReplyContext();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadReplyContext = async () => {

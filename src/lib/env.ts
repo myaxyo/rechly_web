@@ -2,6 +2,9 @@ type RequiredEnvKey =
     | "NEXT_PUBLIC_APPWRITE_ENDPOINT"
     | "NEXT_PUBLIC_APPWRITE_PROJECT_ID";
 
+const PRODUCTION_SITE_URL = "https://rechly.de";
+const PRODUCTION_REPOSITORY_URL = "https://github.com/myaxyo/rechly_web";
+
 function trimTrailingSlashes(value: string): string {
     return value.replace(/\/+$/, "");
 }
@@ -50,7 +53,23 @@ export function getAppwriteProjectId(): string {
 
 export function getSiteUrl(): string {
     const value = getOptionalEnv("NEXT_PUBLIC_APP_URL");
-    return value ? trimTrailingSlashes(value) : "http://localhost:3000";
+
+    if (!value) {
+        return process.env.NODE_ENV === "production"
+            ? PRODUCTION_SITE_URL
+            : "http://localhost:3000";
+    }
+
+    const normalized = trimTrailingSlashes(value);
+
+    if (
+        process.env.NODE_ENV === "production" &&
+        /localhost|127\.0\.0\.1/.test(normalized)
+    ) {
+        return PRODUCTION_SITE_URL;
+    }
+
+    return normalized;
 }
 
 export function getOptionalMlApiUrl(): string | undefined {
@@ -71,7 +90,7 @@ export function getOptionalAnalyticsId(): string | undefined {
 export function getRepoUrl(): string {
     return (
         getOptionalEnv("NEXT_PUBLIC_REPOSITORY_URL") ||
-        "https://github.com/your-org/rechly"
+        PRODUCTION_REPOSITORY_URL
     );
 }
 

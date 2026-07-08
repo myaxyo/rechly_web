@@ -1,10 +1,8 @@
 "use client";
 
-import { Collapse, Typography } from "antd";
+import { Collapse } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const { Text } = Typography;
 
 // FAQ Data for display
 const faqData = {

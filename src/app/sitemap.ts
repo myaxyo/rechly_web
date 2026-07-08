@@ -6,7 +6,6 @@ const siteUrl = getSiteUrl();
 export default function sitemap(): MetadataRoute.Sitemap {
     const currentDate = new Date().toISOString();
 
-    // Define all public pages with their priorities and change frequencies
     const routes = [
         {
             url: "",
@@ -21,16 +20,58 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
-            url: "/login",
+            url: "/rechnungssoftware-fuer-freelancer",
             lastModified: currentDate,
             changeFrequency: "monthly" as const,
-            priority: 0.7,
+            priority: 0.9,
         },
         {
-            url: "/register",
+            url: "/kleinunternehmer-rechnung",
             lastModified: currentDate,
             changeFrequency: "monthly" as const,
-            priority: 0.8,
+            priority: 0.88,
+        },
+        {
+            url: "/e-rechnung-software",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.88,
+        },
+        {
+            url: "/lexoffice-alternative",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.87,
+        },
+        {
+            url: "/sevdesk-alternative",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.87,
+        },
+        {
+            url: "/rechnungsprogramm-kostenlos",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.89,
+        },
+        {
+            url: "/rechnungsvorlage",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.86,
+        },
+        {
+            url: "/zahlungserinnerung-schreiben",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.86,
+        },
+        {
+            url: "/rechnung-fuer-kleinunternehmer-erstellen",
+            lastModified: currentDate,
+            changeFrequency: "monthly" as const,
+            priority: 0.86,
         },
         {
             url: "/impressum",
@@ -63,12 +104,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: route.lastModified,
         changeFrequency: route.changeFrequency,
         priority: route.priority,
-        // Add hreflang alternates for multi-language support
-        alternates: {
-            languages: {
-                de: `${siteUrl}${route.url}`,
-                en: `${siteUrl}${route.url}`,
-            },
-        },
     }));
 }
