@@ -38,6 +38,7 @@ import {
     calculateInvoiceTotals,
     type InvoiceTotals,
 } from "@/lib/currencyUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type {
     Client,
     Product,
@@ -61,6 +62,7 @@ interface LineItem {
 
 export default function InvoiceCreatePage() {
     const router = useRouter();
+    const { t } = useLanguage();
 
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -106,7 +108,7 @@ export default function InvoiceCreatePage() {
             setPaymentTerms(companyData?.payment_terms_default || "");
         } catch (error) {
             console.error("Error loading data:", error);
-            message.error("Fehler beim Laden der Daten");
+            message.error(t("invoiceCreate.loadError"));
         } finally {
             setLoading(false);
         }
@@ -127,7 +129,7 @@ export default function InvoiceCreatePage() {
             description: "",
             service_summary: "",
             quantity: 1,
-            unit_of_measure: "Stück",
+            unit_of_measure: t("invoiceCreate.unitPiece"),
             price: 0,
             tax_rate_percent: 19,
             discount_percent: 0,
@@ -163,7 +165,7 @@ export default function InvoiceCreatePage() {
             description: product.name,
             service_summary: product.description || product.name,
             quantity: 1,
-            unit_of_measure: product.unit_of_measure || "Stück",
+            unit_of_measure: product.unit_of_measure || t("invoiceCreate.unitPiece"),
             price: product.price,
             tax_rate_percent: product.tax_rate_percent || 19,
             discount_percent: 0,
@@ -182,11 +184,11 @@ export default function InvoiceCreatePage() {
 
     const handleCreateInvoice = async () => {
         if (!selectedClient || !selectedClient.id) {
-            message.error("Bitte wählen Sie einen Kunden aus");
+            message.error(t("invoiceCreate.selectClientError"));
             return;
         }
         if (lineItems.length === 0) {
-            message.error("Bitte fügen Sie mindestens eine Position hinzu");
+            message.error(t("invoiceCreate.addItemsError"));
             return;
         }
 
@@ -215,10 +217,10 @@ export default function InvoiceCreatePage() {
 
             setCreatedInvoiceId(newInvoiceId);
             setCurrentStep(3);
-            message.success("Rechnung erstellt");
+            message.success(t("invoiceCreate.created"));
         } catch (error) {
             console.error("Error creating invoice:", error);
-            message.error("Fehler beim Erstellen der Rechnung");
+            message.error(t("invoiceCreate.createError"));
         } finally {
             setSaving(false);
         }
@@ -245,7 +247,7 @@ export default function InvoiceCreatePage() {
 
     const handleGenerateNotes = async () => {
         if (!selectedClient) {
-            message.warning("Bitte zuerst einen Kunden auswählen");
+            message.warning(t("invoiceCreate.selectClientFirst"));
             return;
         }
 
@@ -256,13 +258,13 @@ export default function InvoiceCreatePage() {
                 ...buildAssistantPayload(),
             });
             setNotes(result.content);
-            message.success("Notizen mit KI erstellt");
+            message.success(t("invoiceCreate.notesAiCreated"));
         } catch (error) {
             console.error("Error generating invoice notes:", error);
             message.error(
                 error instanceof Error
                     ? error.message
-                    : "KI-Notizen konnten nicht erstellt werden",
+                    : t("invoiceCreate.notesAiError"),
             );
         } finally {
             setGeneratingNotes(false);
@@ -271,7 +273,7 @@ export default function InvoiceCreatePage() {
 
     const handleGeneratePaymentTerms = async () => {
         if (!selectedClient) {
-            message.warning("Bitte zuerst einen Kunden auswählen");
+            message.warning(t("invoiceCreate.selectClientFirst"));
             return;
         }
 
@@ -282,13 +284,13 @@ export default function InvoiceCreatePage() {
                 ...buildAssistantPayload(),
             });
             setPaymentTerms(result.content);
-            message.success("Zahlungsbedingungen mit KI erstellt");
+            message.success(t("invoiceCreate.paymentTermsAiCreated"));
         } catch (error) {
             console.error("Error generating payment terms:", error);
             message.error(
                 error instanceof Error
                     ? error.message
-                    : "KI-Zahlungsbedingungen konnten nicht erstellt werden",
+                    : t("invoiceCreate.paymentTermsAiError"),
             );
         } finally {
             setGeneratingPaymentTerms(false);
@@ -300,7 +302,7 @@ export default function InvoiceCreatePage() {
             item.service_summary?.trim() || item.description.trim();
         if (!serviceSummary) {
             message.warning(
-                "Bitte zuerst eine kurze Leistungszusammenfassung eingeben",
+                t("invoiceCreate.serviceSummaryHint"),
             );
             return;
         }
@@ -316,13 +318,13 @@ export default function InvoiceCreatePage() {
             if (!item.service_summary?.trim()) {
                 updateLineItem(item.key, "service_summary", serviceSummary);
             }
-            message.success("Positionsbeschreibung mit KI erstellt");
+            message.success(t("invoiceCreate.lineItemAiCreated"));
         } catch (error) {
             console.error("Error generating line item description:", error);
             message.error(
                 error instanceof Error
                     ? error.message
-                    : "KI-Positionsbeschreibung konnte nicht erstellt werden",
+                    : t("invoiceCreate.lineItemAiError"),
             );
         } finally {
             setGeneratingLineItemKey(null);
@@ -331,7 +333,7 @@ export default function InvoiceCreatePage() {
 
     const columns = [
         {
-            title: "Beschreibung",
+            title: t("invoiceCreate.description"),
             dataIndex: "description",
             key: "description",
             render: (_: unknown, record: LineItem) => (
@@ -345,7 +347,7 @@ export default function InvoiceCreatePage() {
                                 e.target.value,
                             )
                         }
-                        placeholder="Ausführliche Positionsbeschreibung"
+                        placeholder={t("invoiceCreate.descriptionPlaceholder")}
                         rows={2}
                     />
                     <Space.Compact style={{ width: "100%" }}>
@@ -358,7 +360,7 @@ export default function InvoiceCreatePage() {
                                     e.target.value,
                                 )
                             }
-                            placeholder="Kurze Leistungszusammenfassung"
+                            placeholder={t("invoiceCreate.serviceSummaryPlaceholder")}
                         />
                         <Button
                             icon={<RobotOutlined />}
@@ -367,14 +369,14 @@ export default function InvoiceCreatePage() {
                                 void handleGenerateLineItemDescription(record)
                             }
                         >
-                            KI
+                            {t("invoiceCreate.ai")}
                         </Button>
                     </Space.Compact>
                 </Space>
             ),
         },
         {
-            title: "Menge",
+            title: t("invoiceCreate.quantity"),
             dataIndex: "quantity",
             key: "quantity",
             width: 100,
@@ -390,7 +392,7 @@ export default function InvoiceCreatePage() {
             ),
         },
         {
-            title: "Einheit",
+            title: t("invoiceDetail.unit"),
             dataIndex: "unit_of_measure",
             key: "unit_of_measure",
             width: 100,
@@ -402,11 +404,11 @@ export default function InvoiceCreatePage() {
                     }
                     style={{ width: "100%" }}
                     options={[
-                        { value: "Stück", label: "Stück" },
-                        { value: "Stunde", label: "Stunde" },
-                        { value: "Tag", label: "Tag" },
-                        { value: "Monat", label: "Monat" },
-                        { value: "Pauschal", label: "Pauschal" },
+                        { value: t("invoiceCreate.unitPiece"), label: t("invoiceCreate.unitPiece") },
+                        { value: t("invoiceCreate.unitHour"), label: t("invoiceCreate.unitHour") },
+                        { value: t("invoiceCreate.unitDay"), label: t("invoiceCreate.unitDay") },
+                        { value: t("invoiceCreate.unitMonth"), label: t("invoiceCreate.unitMonth") },
+                        { value: t("invoiceCreate.unitFlatRate"), label: t("invoiceCreate.unitFlatRate") },
                         { value: "m²", label: "m²" },
                         { value: "kg", label: "kg" },
                     ]}
@@ -414,7 +416,7 @@ export default function InvoiceCreatePage() {
             ),
         },
         {
-            title: "Einzelpreis",
+            title: t("invoiceCreate.unitPrice"),
             dataIndex: "price",
             key: "price",
             width: 120,
@@ -437,7 +439,7 @@ export default function InvoiceCreatePage() {
             ),
         },
         {
-            title: "MwSt.",
+            title: t("invoiceCreate.vat"),
             dataIndex: "tax_rate_percent",
             key: "tax_rate_percent",
             width: 100,
@@ -457,7 +459,7 @@ export default function InvoiceCreatePage() {
             ),
         },
         {
-            title: "Gesamt",
+            title: t("invoiceCreate.lineTotal"),
             key: "line_total",
             width: 100,
             render: (_: unknown, record: LineItem) => {
@@ -484,11 +486,11 @@ export default function InvoiceCreatePage() {
         switch (currentStep) {
             case 0:
                 return (
-                    <Card title="Kunde auswählen">
+                    <Card title={t("invoiceCreate.selectClientCard")}>
                         <Select
                             showSearch
                             style={{ width: "100%" }}
-                            placeholder="Kunde suchen..."
+                            placeholder={t("invoiceCreate.clientSearch")}
                             optionFilterProp="label"
                             value={selectedClient?.id}
                             onChange={(value) => {
@@ -531,11 +533,11 @@ export default function InvoiceCreatePage() {
 
             case 1:
                 return (
-                    <Card title="Positionen hinzufügen">
+                    <Card title={t("invoiceCreate.addPositions")}>
                         <Space style={{ marginBottom: 16 }}>
                             <Select
                                 style={{ width: 300 }}
-                                placeholder="Produkt hinzufügen..."
+                                placeholder={t("invoiceCreate.addProduct")}
                                 onChange={addProductAsLineItem}
                                 value={undefined}
                                 options={products.map((p) => ({
@@ -549,7 +551,7 @@ export default function InvoiceCreatePage() {
                                 icon={<PlusOutlined />}
                                 onClick={addLineItem}
                             >
-                                Freie Position
+                                {t("invoiceCreate.freePosition")}
                             </Button>
                         </Space>
 
@@ -558,7 +560,7 @@ export default function InvoiceCreatePage() {
                             dataSource={lineItems}
                             pagination={false}
                             rowKey="key"
-                            locale={{ emptyText: "Keine Positionen" }}
+                            locale={{ emptyText: t("invoiceDetail.noPositions") }}
                         />
 
                         <Divider />
@@ -566,7 +568,7 @@ export default function InvoiceCreatePage() {
                         <div style={{ textAlign: "right" }}>
                             <Space direction="vertical" align="end">
                                 <Text>
-                                    Zwischensumme:{" "}
+                                    {t("invoiceCreate.subtotal")}:{" "}
                                     <Text strong>
                                         {formatCurrency(
                                             totals.netAfterDiscount,
@@ -574,13 +576,13 @@ export default function InvoiceCreatePage() {
                                     </Text>
                                 </Text>
                                 <Text>
-                                    MwSt.:{" "}
+                                    {t("invoiceCreate.vat")}:{" "}
                                     <Text strong>
                                         {formatCurrency(totals.totalVAT)}
                                     </Text>
                                 </Text>
                                 <Title level={4} style={{ margin: 0 }}>
-                                    Gesamt: {formatCurrency(totals.totalGross)}
+                                    {t("invoiceCreate.total")}: {formatCurrency(totals.totalGross)}
                                 </Title>
                             </Space>
                         </div>
@@ -589,11 +591,11 @@ export default function InvoiceCreatePage() {
 
             case 2:
                 return (
-                    <Card title="Rechnungsdetails">
+                    <Card title={t("invoiceCreate.invoiceDetails")}>
                         <Form layout="vertical">
                             <Space style={{ width: "100%" }}>
                                 <Form.Item
-                                    label="Rechnungsnummer"
+                                    label={t("invoiceCreate.invoiceNumber")}
                                     style={{ flex: 1 }}
                                 >
                                     <Input
@@ -607,7 +609,7 @@ export default function InvoiceCreatePage() {
 
                             <Space style={{ width: "100%" }}>
                                 <Form.Item
-                                    label="Rechnungsdatum"
+                                    label={t("invoiceCreate.invoiceDate")}
                                     style={{ flex: 1 }}
                                 >
                                     <DatePicker
@@ -621,7 +623,7 @@ export default function InvoiceCreatePage() {
                                 </Form.Item>
 
                                 <Form.Item
-                                    label="Fälligkeitsdatum"
+                                    label={t("invoiceCreate.dueDate")}
                                     style={{ flex: 1 }}
                                 >
                                     <DatePicker
@@ -635,32 +637,32 @@ export default function InvoiceCreatePage() {
                                 </Form.Item>
                             </Space>
 
-                            <Form.Item label="Notizen (optional)">
+                            <Form.Item label={t("invoiceCreate.notesLabel")}>
                                 <Space style={{ marginBottom: 8 }}>
                                     <Button
                                         icon={<RobotOutlined />}
                                         loading={generatingNotes}
                                         onClick={handleGenerateNotes}
                                     >
-                                        Mit KI generieren
+                                        {t("invoiceCreate.generateWithAi")}
                                     </Button>
                                 </Space>
                                 <Input.TextArea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     rows={3}
-                                    placeholder="Zusätzliche Hinweise für diese Rechnung..."
+                                    placeholder={t("invoiceCreate.notesPlaceholderLong")}
                                 />
                             </Form.Item>
 
-                            <Form.Item label="Zahlungsbedingungen (optional)">
+                            <Form.Item label={t("invoiceCreate.paymentTermsLabel")}>
                                 <Space style={{ marginBottom: 8 }}>
                                     <Button
                                         icon={<RobotOutlined />}
                                         loading={generatingPaymentTerms}
                                         onClick={handleGeneratePaymentTerms}
                                     >
-                                        Mit KI generieren
+                                        {t("invoiceCreate.generateWithAi")}
                                     </Button>
                                     {company?.payment_terms_default ? (
                                         <Button
@@ -670,7 +672,7 @@ export default function InvoiceCreatePage() {
                                                 )
                                             }
                                         >
-                                            Standard wiederherstellen
+                                            {t("invoiceCreate.restoreDefault")}
                                         </Button>
                                     ) : null}
                                 </Space>
@@ -680,12 +682,12 @@ export default function InvoiceCreatePage() {
                                         setPaymentTerms(e.target.value)
                                     }
                                     rows={3}
-                                    placeholder="Zum Beispiel: Bitte zahlen Sie innerhalb von 14 Tagen ohne Abzug."
+                                    placeholder={t("invoiceCreate.paymentTermsPlaceholderLong")}
                                 />
                             </Form.Item>
                         </Form>
 
-                        <Divider>Zusammenfassung</Divider>
+                        <Divider>{t("invoiceCreate.summary")}</Divider>
 
                         <Card size="small" style={{ background: "#f5f5f5" }}>
                             <Space
@@ -693,17 +695,17 @@ export default function InvoiceCreatePage() {
                                 style={{ width: "100%" }}
                             >
                                 <div>
-                                    <Text type="secondary">Kunde:</Text>
+                                    <Text type="secondary">{t("invoiceCreate.client")}</Text>
                                     <br />
                                     <Text strong>{selectedClient?.name}</Text>
                                 </div>
                                 <div>
-                                    <Text type="secondary">Positionen:</Text>
+                                    <Text type="secondary">{t("invoiceCreate.positionsCount")}</Text>
                                     <br />
                                     <Text strong>{lineItems.length}</Text>
                                 </div>
                                 <div>
-                                    <Text type="secondary">Gesamtbetrag:</Text>
+                                    <Text type="secondary">{t("invoiceCreate.totalAmount")}</Text>
                                     <br />
                                     <Title level={4} style={{ margin: 0 }}>
                                         {formatCurrency(totals.totalGross)}
@@ -719,8 +721,8 @@ export default function InvoiceCreatePage() {
                     <Result
                         status="success"
                         icon={<FileTextOutlined style={{ color: "#1976d2" }} />}
-                        title="Rechnung erstellt!"
-                        subTitle={`Rechnungsnummer: ${invoiceNumber}`}
+                        title={t("invoiceCreate.successTitle")}
+                        subTitle={`${t("invoiceCreate.successSubtitle")} ${invoiceNumber}`}
                         extra={[
                             <Button
                                 type="primary"
@@ -731,7 +733,7 @@ export default function InvoiceCreatePage() {
                                     )
                                 }
                             >
-                                Rechnung ansehen
+                                {t("invoiceCreate.viewInvoiceBtn")}
                             </Button>,
                             <Button
                                 key="pdf"
@@ -741,13 +743,13 @@ export default function InvoiceCreatePage() {
                                     )
                                 }
                             >
-                                PDF erstellen
+                                {t("invoiceCreate.createPdf")}
                             </Button>,
                             <Button
                                 key="new"
                                 onClick={() => window.location.reload()}
                             >
-                                Neue Rechnung
+                                {t("invoiceCreate.newInvoice")}
                             </Button>,
                         ]}
                     />
@@ -782,10 +784,10 @@ export default function InvoiceCreatePage() {
                     icon={<ArrowLeftOutlined />}
                     onClick={() => router.push("/dashboard/invoices")}
                 >
-                    Zurück
+                    {t("invoiceCreate.backBtn")}
                 </Button>
                 <Title level={4} style={{ margin: 0 }}>
-                    Neue Rechnung erstellen
+                    {t("invoiceCreate.newInvoiceTitle")}
                 </Title>
             </Space>
 
@@ -793,10 +795,10 @@ export default function InvoiceCreatePage() {
                 current={currentStep}
                 style={{ marginBottom: 24 }}
                 items={[
-                    { title: "Kunde" },
-                    { title: "Positionen" },
-                    { title: "Details" },
-                    { title: "Fertig" },
+                    { title: t("invoiceCreate.stepClient") },
+                    { title: t("invoiceCreate.stepPositions") },
+                    { title: t("invoiceCreate.stepDetails") },
+                    { title: t("invoiceCreate.stepDone") },
                 ]}
             />
 
@@ -809,7 +811,7 @@ export default function InvoiceCreatePage() {
                             <Button
                                 onClick={() => setCurrentStep(currentStep - 1)}
                             >
-                                <ArrowLeftOutlined /> Zurück
+                                <ArrowLeftOutlined /> {t("invoiceCreate.backBtn")}
                             </Button>
                         )}
                         {currentStep < 2 && (
@@ -818,7 +820,7 @@ export default function InvoiceCreatePage() {
                                 onClick={() => setCurrentStep(currentStep + 1)}
                                 disabled={!canProceed()}
                             >
-                                Weiter <ArrowRightOutlined />
+                                {t("invoiceCreate.nextBtn")} <ArrowRightOutlined />
                             </Button>
                         )}
                         {currentStep === 2 && (
@@ -828,7 +830,7 @@ export default function InvoiceCreatePage() {
                                 loading={saving}
                                 disabled={!canProceed()}
                             >
-                                <CheckOutlined /> Rechnung erstellen
+                                <CheckOutlined /> {t("invoiceCreate.createBtn")}
                             </Button>
                         )}
                     </Space>

@@ -21,6 +21,7 @@ import { getInvoiceById } from "@/lib/invoiceService";
 import { getCompanyInfo } from "@/lib/companyService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { InvoiceWithDetails, UserCompany, InvoiceItem } from "@/types";
 
 const styles = StyleSheet.create({
@@ -231,9 +232,10 @@ const styles = StyleSheet.create({
 interface InvoicePDFProps {
     invoice: InvoiceWithDetails;
     company: UserCompany | null;
+    t: (key: string) => string;
 }
 
-const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
+const InvoicePDF = ({ invoice, company, t }: InvoicePDFProps) => {
     const clientAddress = invoice.client
         ? `${invoice.client.address_line1}\n${invoice.client.postal_code} ${invoice.client.city}`
         : "";
@@ -245,7 +247,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                 <View style={styles.header}>
                     <View style={styles.companyInfo}>
                         <Text style={styles.companyName}>
-                            {company?.name || "Firma"}
+                            {company?.name || t("invoicePdf.company")}
                         </Text>
                         <Text style={styles.addressText}>
                             {company?.address_line1}
@@ -257,7 +259,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                         </Text>
                     </View>
                     <View>
-                        <Text style={styles.invoiceTitle}>RECHNUNG</Text>
+                        <Text style={styles.invoiceTitle}>{t("invoicePdf.invoiceTitle")}</Text>
                         <Text style={styles.invoiceNumber}>
                             {invoice.invoice_number}
                         </Text>
@@ -268,10 +270,10 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                 <View style={styles.addresses}>
                     <View style={styles.addressBlock}>
                         <Text style={styles.addressLabel}>
-                            Rechnungsempfänger
+                            {t("invoicePdf.recipient")}
                         </Text>
                         <Text style={styles.addressName}>
-                            {invoice.client?.name || "Unbekannt"}
+                            {invoice.client?.name || t("invoicePdf.unknown")}
                         </Text>
                         <Text style={styles.addressText}>{clientAddress}</Text>
                         {invoice.client?.email && (
@@ -282,7 +284,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                     </View>
                     <View style={styles.addressBlock}>
                         <Text style={styles.addressLabel}>
-                            Rechnungssteller
+                            {t("invoicePdf.sender")}
                         </Text>
                         <Text style={styles.addressName}>{company?.name}</Text>
                         <Text style={styles.addressText}>
@@ -301,13 +303,13 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                 {/* Invoice Info */}
                 <View style={styles.infoRow}>
                     <View style={styles.infoItem}>
-                        <Text style={styles.infoLabel}>Rechnungsdatum</Text>
+                        <Text style={styles.infoLabel}>{t("invoicePdf.invoiceDate")}</Text>
                         <Text style={styles.infoValue}>
                             {formatDateGerman(invoice.issue_date)}
                         </Text>
                     </View>
                     <View style={styles.infoItem}>
-                        <Text style={styles.infoLabel}>Fälligkeitsdatum</Text>
+                        <Text style={styles.infoLabel}>{t("invoicePdf.dueDate")}</Text>
                         <Text style={styles.infoValue}>
                             {invoice.due_date
                                 ? formatDateGerman(invoice.due_date)
@@ -315,7 +317,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                         </Text>
                     </View>
                     <View style={styles.infoItem}>
-                        <Text style={styles.infoLabel}>Währung</Text>
+                        <Text style={styles.infoLabel}>{t("invoicePdf.currency")}</Text>
                         <Text style={styles.infoValue}>EUR</Text>
                     </View>
                 </View>
@@ -327,22 +329,22 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                         <Text
                             style={[styles.colDescription, styles.headerText]}
                         >
-                            Beschreibung
+                            {t("invoicePdf.description")}
                         </Text>
                         <Text style={[styles.colQuantity, styles.headerText]}>
-                            Menge
+                            {t("invoicePdf.quantity")}
                         </Text>
                         <Text style={[styles.colUnit, styles.headerText]}>
-                            Einheit
+                            {t("invoicePdf.unit")}
                         </Text>
                         <Text style={[styles.colPrice, styles.headerText]}>
-                            Preis
+                            {t("invoicePdf.price")}
                         </Text>
                         <Text style={[styles.colTax, styles.headerText]}>
-                            MwSt.
+                            {t("invoicePdf.vat")}
                         </Text>
                         <Text style={[styles.colTotal, styles.headerText]}>
-                            Gesamt
+                            {t("invoicePdf.total")}
                         </Text>
                     </View>
 
@@ -379,20 +381,20 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                 {/* Totals */}
                 <View style={styles.totals}>
                     <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Zwischensumme:</Text>
+                        <Text style={styles.totalLabel}>{t("invoicePdf.subtotal")}</Text>
                         <Text style={styles.totalValue}>
                             {formatCurrency(invoice.subtotal)}
                         </Text>
                     </View>
                     <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>MwSt.:</Text>
+                        <Text style={styles.totalLabel}>{t("invoicePdf.vatTotal")}</Text>
                         <Text style={styles.totalValue}>
                             {formatCurrency(invoice.total_vat)}
                         </Text>
                     </View>
                     <View style={styles.totalFinal}>
                         <Text style={styles.totalFinalLabel}>
-                            Gesamtbetrag:
+                            {t("invoicePdf.grandTotal")}
                         </Text>
                         <Text style={styles.totalFinalValue}>
                             {formatCurrency(invoice.total_gross)}
@@ -403,7 +405,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                 {/* Notes */}
                 {invoice.notes && (
                     <View style={styles.notes}>
-                        <Text style={styles.notesLabel}>Hinweise:</Text>
+                        <Text style={styles.notesLabel}>{t("invoicePdf.notes")}</Text>
                         <Text style={styles.notesText}>{invoice.notes}</Text>
                     </View>
                 )}
@@ -420,7 +422,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                     <View style={styles.footerDivider}>
                         <View style={styles.footerContent}>
                             <View style={styles.footerColumn}>
-                                <Text style={styles.footerLabel}>Kontakt</Text>
+                                <Text style={styles.footerLabel}>{t("invoicePdf.contact")}</Text>
                                 <Text style={styles.footerText}>
                                     {company?.email}
                                     {company?.phone && `\n${company.phone}`}
@@ -429,7 +431,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                             </View>
                             <View style={styles.footerColumn}>
                                 <Text style={styles.footerLabel}>
-                                    Bankverbindung
+                                    {t("invoicePdf.bankDetails")}
                                 </Text>
                                 <Text style={styles.footerText}>
                                     {company?.bank_name}
@@ -440,7 +442,7 @@ const InvoicePDF = ({ invoice, company }: InvoicePDFProps) => {
                                 </Text>
                             </View>
                             <View style={styles.footerColumn}>
-                                <Text style={styles.footerLabel}>Steuer</Text>
+                                <Text style={styles.footerLabel}>{t("invoicePdf.tax")}</Text>
                                 <Text style={styles.footerText}>
                                     {company?.vat_id &&
                                         `USt-IdNr.: ${company.vat_id}`}
@@ -462,6 +464,7 @@ export default function InvoicePDFPage() {
     const searchParams = useSearchParams();
     const invoiceId = params.id as string;
     const shouldPrint = searchParams.get("print") === "true";
+    const { t } = useLanguage();
 
     const [loading, setLoading] = useState(true);
     const [invoice, setInvoice] = useState<InvoiceWithDetails | null>(null);
@@ -485,7 +488,7 @@ export default function InvoicePDFPage() {
             setCompany(companyData);
         } catch (error) {
             console.error("Error loading data:", error);
-            message.error("Fehler beim Laden der Rechnung");
+            message.error(t("invoicePdf.loadError"));
             router.push("/dashboard/invoices");
         } finally {
             setLoading(false);
@@ -507,7 +510,7 @@ export default function InvoicePDFPage() {
         return (
             <div style={{ textAlign: "center", padding: 50 }}>
                 <Spin size="large" />
-                <p>PDF wird geladen...</p>
+                <p>{t("invoicePdf.loading")}</p>
             </div>
         );
     }
@@ -534,7 +537,7 @@ export default function InvoicePDFPage() {
                                 router.push(`/dashboard/invoices/${invoiceId}`)
                             }
                         >
-                            Zurück
+                            {t("invoicePdf.back")}
                         </Button>
                         <span style={{ fontWeight: 500 }}>
                             PDF: {invoice.invoice_number}
@@ -545,13 +548,14 @@ export default function InvoicePDFPage() {
                             icon={<PrinterOutlined />}
                             onClick={handlePrint}
                         >
-                            Drucken
+                            {t("invoicePdf.print")}
                         </Button>
                         <PDFDownloadLink
                             document={
                                 <InvoicePDF
                                     invoice={invoice}
                                     company={company}
+                                    t={t}
                                 />
                             }
                             fileName={`Rechnung_${invoice.invoice_number}.pdf`}
@@ -562,7 +566,7 @@ export default function InvoicePDFPage() {
                                     icon={<DownloadOutlined />}
                                     loading={pdfLoading}
                                 >
-                                    PDF herunterladen
+                                    {t("invoicePdf.download")}
                                 </Button>
                             )}
                         </PDFDownloadLink>
@@ -573,7 +577,7 @@ export default function InvoicePDFPage() {
             {/* PDF Viewer */}
             <div style={{ height: "calc(100vh - 200px)", minHeight: 600 }}>
                 <PDFViewer width="100%" height="100%" showToolbar={false}>
-                    <InvoicePDF invoice={invoice} company={company} />
+                    <InvoicePDF invoice={invoice} company={company} t={t} />
                 </PDFViewer>
             </div>
 

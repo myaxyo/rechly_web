@@ -153,7 +153,7 @@ export default function DashboardLayout({
     const userMenuItems = [
         {
             key: "profile",
-            label: user?.email || (language === "de" ? "Gast" : "Guest"),
+            label: user?.email || t("settings.guest"),
             disabled: true,
         },
         {
@@ -388,27 +388,17 @@ export default function DashboardLayout({
                 </Header>
                 {isAnonymous && (
                     <Alert
-                        message={
-                            language === "de"
-                                ? "Gastmodus aktiv"
-                                : "Guest mode active"
-                        }
+                        message={t("dashboard.guestModeActive")}
                         description={
                             <span>
-                                {language === "de"
-                                    ? "Deine Daten werden gelöscht, wenn du den Tab schließt. "
-                                    : "Your data will be deleted when you close the tab. "}
+                                {t("dashboard.guestModeDesc")}
                                 <Link
                                     href="/register"
                                     style={{ fontWeight: 500 }}
                                 >
-                                    {language === "de"
-                                        ? "Jetzt registrieren"
-                                        : "Register now"}
+                                    {t("dashboard.guestModeRegister")}
                                 </Link>
-                                {language === "de"
-                                    ? ", um deine Daten zu speichern."
-                                    : " to save your data."}
+                                {t("dashboard.guestModeSuffix")}
                             </span>
                         }
                         type="warning"

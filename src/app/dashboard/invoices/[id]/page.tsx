@@ -38,28 +38,30 @@ import { getCompanyInfo } from "@/lib/companyService";
 import { runInvoiceAssistant } from "@/lib/aiService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { InvoiceWithDetails, UserCompany } from "@/types";
 
 const { Title, Text } = Typography;
-
-const statusConfig: Record<
-    string,
-    { color: string; label: string; icon: React.ReactNode }
-> = {
-    draft: { color: "default", label: "Entwurf", icon: <EditOutlined /> },
-    sent: { color: "processing", label: "Gesendet", icon: <MailOutlined /> },
-    paid: { color: "success", label: "Bezahlt", icon: <CheckCircleOutlined /> },
-    cancelled: {
-        color: "default",
-        label: "Storniert",
-        icon: <ClockCircleOutlined />,
-    },
-};
 
 export default function InvoiceDetailPage() {
     const router = useRouter();
     const params = useParams();
     const invoiceId = params.id as string;
+    const { t } = useLanguage();
+
+    const statusConfig: Record<
+        string,
+        { color: string; label: string; icon: React.ReactNode }
+    > = {
+        draft: { color: "default", label: t("status.draft"), icon: <EditOutlined /> },
+        sent: { color: "processing", label: t("status.sent"), icon: <MailOutlined /> },
+        paid: { color: "success", label: t("status.paid"), icon: <CheckCircleOutlined /> },
+        cancelled: {
+            color: "default",
+            label: t("status.cancelled"),
+            icon: <ClockCircleOutlined />,
+        },
+    };
 
     const [loading, setLoading] = useState(true);
     const [invoice, setInvoice] = useState<InvoiceWithDetails | null>(null);
@@ -86,7 +88,7 @@ export default function InvoiceDetailPage() {
             setCompany(companyData);
         } catch (error) {
             console.error("Error loading invoice:", error);
-            message.error("Rechnung nicht gefunden");
+            message.error(t("invoiceDetail.notFound"));
             router.push("/dashboard/invoices");
         } finally {
             setLoading(false);
@@ -121,13 +123,13 @@ export default function InvoiceDetailPage() {
             });
             setReminderDraft(result.content);
             setReminderModalOpen(true);
-            message.success("Zahlungserinnerung erstellt");
+            message.success(t("invoiceDetail.reminderCreated"));
         } catch (error) {
             console.error("Error drafting payment reminder:", error);
             message.error(
                 error instanceof Error
                     ? error.message
-                    : "KI-Zahlungserinnerung konnte nicht erstellt werden",
+                    : t("invoiceDetail.reminderError"),
             );
         } finally {
             setDraftingReminder(false);
@@ -137,16 +139,16 @@ export default function InvoiceDetailPage() {
     const copyReminderDraft = async () => {
         try {
             await navigator.clipboard.writeText(reminderDraft);
-            message.success("Entwurf kopiert");
+            message.success(t("invoiceDetail.draftCopied"));
         } catch (error) {
             console.error("Error copying reminder draft:", error);
-            message.error("Kopieren fehlgeschlagen");
+            message.error(t("invoiceDetail.copyFailed"));
         }
     };
 
     const openReminderAsEmail = () => {
         if (!invoice?.client?.email || !reminderDraft) {
-            message.warning("Keine E-Mail-Adresse oder kein Entwurf vorhanden");
+            message.warning(t("invoiceDetail.noEmailOrDraft"));
             return;
         }
 
@@ -156,7 +158,7 @@ export default function InvoiceDetailPage() {
         );
         const subject = subjectLine
             ? subjectLine.replace(/^Betreff:\s*/i, "").trim()
-            : `Zahlungserinnerung ${invoice.invoice_number}`;
+            : `${t("invoiceDetail.reminderSubject")} ${invoice.invoice_number}`;
         const body = reminderDraft.replace(/^Betreff:\s*.*$/im, "").trim();
 
         window.open(
@@ -173,28 +175,28 @@ export default function InvoiceDetailPage() {
         try {
             await updateInvoiceStatus(invoice.id, newStatus);
             setInvoice({ ...invoice, status: newStatus });
-            message.success("Status aktualisiert");
+            message.success(t("invoiceDetail.statusUpdated"));
         } catch (error) {
             console.error("Error updating status:", error);
-            message.error("Fehler beim Aktualisieren");
+            message.error(t("invoiceDetail.statusError"));
         }
     };
 
     const handleDelete = () => {
         Modal.confirm({
-            title: "Rechnung löschen?",
-            content: "Diese Aktion kann nicht rückgängig gemacht werden.",
-            okText: "Löschen",
+            title: t("invoiceDetail.deleteTitle"),
+            content: t("invoiceDetail.deleteContent"),
+            okText: t("invoiceDetail.deleteOk"),
             okType: "danger",
-            cancelText: "Abbrechen",
+            cancelText: t("invoiceDetail.deleteCancel"),
             onOk: async () => {
                 try {
                     await deleteInvoice(invoiceId);
-                    message.success("Rechnung gelöscht");
+                    message.success(t("invoiceDetail.deleted"));
                     router.push("/dashboard/invoices");
                 } catch (error) {
                     console.error("Error deleting invoice:", error);
-                    message.error("Fehler beim Löschen");
+                    message.error(t("invoiceDetail.deleteError"));
                 }
             },
         });
@@ -216,11 +218,11 @@ export default function InvoiceDetailPage() {
             });
             if (!res.ok) throw new Error("Failed");
             const data = await res.json();
-            message.success("Korrekturdokument erstellt");
+            message.success(t("invoiceDetail.correctionCreated"));
             setCorrectionModalOpen(false);
             router.push(`/dashboard/invoices/${data.invoiceId}`);
         } catch {
-            message.error("Fehler beim Erstellen des Korrekturdokuments");
+            message.error(t("invoiceDetail.correctionError"));
         } finally {
             setCorrectionLoading(false);
         }
@@ -229,47 +231,47 @@ export default function InvoiceDetailPage() {
     const statusMenuItems = [
         {
             key: "draft",
-            label: "Als Entwurf markieren",
+            label: t("invoiceDetail.markDraft"),
             onClick: () => handleStatusChange("draft"),
         },
         {
             key: "sent",
-            label: "Als Gesendet markieren",
+            label: t("invoiceDetail.markSent"),
             onClick: () => handleStatusChange("sent"),
         },
         {
             key: "paid",
-            label: "Als Bezahlt markieren",
+            label: t("invoiceDetail.markPaid"),
             onClick: () => handleStatusChange("paid"),
         },
         {
             key: "cancelled",
-            label: "Stornieren",
+            label: t("invoiceDetail.markCancelled"),
             onClick: () => handleStatusChange("cancelled"),
         },
     ];
 
     const columns = [
         {
-            title: "Beschreibung",
+            title: t("invoiceDetail.description"),
             dataIndex: "description",
             key: "description",
         },
         {
-            title: "Menge",
+            title: t("invoiceDetail.quantity"),
             dataIndex: "quantity",
             key: "quantity",
             width: 100,
             align: "right" as const,
         },
         {
-            title: "Einheit",
+            title: t("invoiceDetail.unit"),
             dataIndex: "unit_of_measure",
             key: "unit_of_measure",
             width: 100,
         },
         {
-            title: "Einzelpreis",
+            title: t("invoiceDetail.unitPrice"),
             dataIndex: "price",
             key: "price",
             width: 120,
@@ -277,7 +279,7 @@ export default function InvoiceDetailPage() {
             render: (val: number) => formatCurrency(val),
         },
         {
-            title: "MwSt.",
+            title: t("invoiceDetail.vat"),
             dataIndex: "tax_rate_percent",
             key: "tax_rate_percent",
             width: 80,
@@ -285,7 +287,7 @@ export default function InvoiceDetailPage() {
             render: (val: number) => `${val}%`,
         },
         {
-            title: "Gesamt",
+            title: t("invoiceDetail.total"),
             dataIndex: "total",
             key: "total",
             width: 120,
@@ -329,7 +331,7 @@ export default function InvoiceDetailPage() {
                         icon={<ArrowLeftOutlined />}
                         onClick={() => router.push("/dashboard/invoices")}
                     >
-                        Zurück
+                        {t("invoiceDetail.back")}
                     </Button>
                     <Title level={4} style={{ margin: 0 }}>
                         {invoice.invoice_number}
@@ -344,7 +346,7 @@ export default function InvoiceDetailPage() {
                         menu={{ items: statusMenuItems }}
                         trigger={["click"]}
                     >
-                        <Button>Status ändern</Button>
+                        <Button>{ t("invoiceDetail.changeStatus") }</Button>
                     </Dropdown>
                     <Button
                         type="primary"
@@ -360,7 +362,7 @@ export default function InvoiceDetailPage() {
                         icon={<DeleteOutlined />}
                         onClick={handleDelete}
                     >
-                        Löschen
+                        {t("invoiceDetail.delete")}
                     </Button>
                 </Space>
             </div>
@@ -369,9 +371,9 @@ export default function InvoiceDetailPage() {
             <Card style={{ marginBottom: 24 }}>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 32 }}>
                     <div style={{ flex: 1, minWidth: 250 }}>
-                        <Text type="secondary">Rechnungsempfänger</Text>
+                        <Text type="secondary">{t("invoiceDetail.recipient")}</Text>
                         <Title level={5} style={{ margin: "8px 0 4px" }}>
-                            {invoice.client?.name || "Unbekannter Kunde"}
+                            {invoice.client?.name || t("invoiceDetail.unknownClient")}
                         </Title>
                         <Text style={{ whiteSpace: "pre-line" }}>
                             {clientAddress}
@@ -384,18 +386,18 @@ export default function InvoiceDetailPage() {
 
                     <div style={{ flex: 1, minWidth: 250 }}>
                         <Descriptions column={1} size="small">
-                            <Descriptions.Item label="Rechnungsnummer">
+                            <Descriptions.Item label={t("invoiceDetail.invoiceNumber")}>
                                 <Text strong>{invoice.invoice_number}</Text>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Rechnungsdatum">
+                            <Descriptions.Item label={t("invoiceDetail.invoiceDate")}>
                                 {formatDateGerman(invoice.issue_date)}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Fälligkeitsdatum">
+                            <Descriptions.Item label={t("invoiceDetail.dueDate")}>
                                 {invoice.due_date
                                     ? formatDateGerman(invoice.due_date)
                                     : "-"}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Währung">
+                            <Descriptions.Item label={t("invoiceDetail.currency")}>
                                 EUR
                             </Descriptions.Item>
                         </Descriptions>
@@ -404,13 +406,13 @@ export default function InvoiceDetailPage() {
             </Card>
 
             {/* Line Items */}
-            <Card title="Positionen" style={{ marginBottom: 24 }}>
+            <Card title={t("invoiceDetail.positions")} style={{ marginBottom: 24 }}>
                 <Table
                     columns={columns}
                     dataSource={invoice.items || []}
                     pagination={false}
                     rowKey="id"
-                    locale={{ emptyText: "Keine Positionen" }}
+                    locale={{ emptyText: t("invoiceDetail.noPositions") }}
                 />
 
                 <Divider />
@@ -418,7 +420,7 @@ export default function InvoiceDetailPage() {
                 <div style={{ textAlign: "right" }}>
                     <Space direction="vertical" align="end" size={8}>
                         <div>
-                            <Text type="secondary">Zwischensumme: </Text>
+                            <Text type="secondary">{t("invoiceDetail.subtotal")}: </Text>
                             <Text
                                 style={{
                                     minWidth: 100,
@@ -430,7 +432,7 @@ export default function InvoiceDetailPage() {
                             </Text>
                         </div>
                         <div>
-                            <Text type="secondary">MwSt.: </Text>
+                            <Text type="secondary">{t("invoiceDetail.vat")}: </Text>
                             <Text
                                 style={{
                                     minWidth: 100,
@@ -444,7 +446,7 @@ export default function InvoiceDetailPage() {
                         <Divider style={{ margin: "8px 0" }} />
                         <div>
                             <Text strong style={{ fontSize: 18 }}>
-                                Gesamt:{" "}
+                                {t("invoiceDetail.totalLabel")}:{" "}
                             </Text>
                             <Text
                                 strong
@@ -464,7 +466,7 @@ export default function InvoiceDetailPage() {
 
             {/* Notes */}
             {invoice.notes && (
-                <Card title="Notizen">
+                <Card title={t("invoiceDetail.notes")}>
                     <Text style={{ whiteSpace: "pre-line" }}>
                         {invoice.notes}
                     </Text>
@@ -472,7 +474,7 @@ export default function InvoiceDetailPage() {
             )}
 
             {invoice.payment_terms && (
-                <Card title="Zahlungsbedingungen" style={{ marginTop: 24 }}>
+                <Card title={t("invoiceDetail.paymentTerms")} style={{ marginTop: 24 }}>
                     <Text style={{ whiteSpace: "pre-line" }}>
                         {invoice.payment_terms}
                     </Text>
@@ -480,7 +482,7 @@ export default function InvoiceDetailPage() {
             )}
 
             {/* Actions */}
-            <Card title="Aktionen" style={{ marginTop: 24 }}>
+            <Card title={t("invoiceDetail.actions")} style={{ marginTop: 24 }}>
                 <Space wrap>
                     <Button
                         icon={<FilePdfOutlined />}
@@ -488,7 +490,7 @@ export default function InvoiceDetailPage() {
                             router.push(`/dashboard/invoices/${invoice.id}/pdf`)
                         }
                     >
-                        PDF anzeigen
+                        {t("invoiceDetail.viewPdf")}
                     </Button>
                     <Button
                         icon={<PrinterOutlined />}
@@ -498,52 +500,52 @@ export default function InvoiceDetailPage() {
                             );
                         }}
                     >
-                        Drucken
+                        {t("invoiceDetail.print")}
                     </Button>
                     <Button
                         icon={<RollbackOutlined />}
                         onClick={() => setCorrectionModalOpen(true)}
                         disabled={invoice.status === "draft"}
                     >
-                        Storno / Korrektur
+                        {t("invoiceDetail.cancelCorrection")}
                     </Button>
                     <Button
                         icon={<RobotOutlined />}
                         loading={draftingReminder}
                         onClick={handleDraftReminder}
                     >
-                        KI-Zahlungserinnerung
+                        {t("invoiceDetail.aiReminder")}
                     </Button>
                     <Button
                         icon={<MailOutlined />}
                         onClick={() => {
                             if (invoice.client?.email) {
                                 window.open(
-                                    `mailto:${invoice.client.email}?subject=Rechnung ${invoice.invoice_number}`,
+                                    `mailto:${invoice.client.email}?subject=${t("invoiceDetail.invoiceSubject")} ${invoice.invoice_number}`,
                                     "_blank",
                                 );
                             } else {
                                 message.warning(
-                                    "Keine E-Mail-Adresse hinterlegt",
+                                    t("invoiceDetail.noEmail"),
                                 );
                             }
                         }}
                     >
-                        Per E-Mail senden
+                        {t("invoiceDetail.sendEmail")}
                     </Button>
                 </Space>
             </Card>
 
             <Modal
-                title="Korrekturdokument erstellen"
+                title={t("invoiceDetail.correctionTitle")}
                 open={correctionModalOpen}
                 onCancel={() => setCorrectionModalOpen(false)}
                 onOk={handleCreateCorrection}
-                okText="Erstellen"
-                cancelText="Abbrechen"
+                okText={t("invoiceDetail.correctionOk")}
+                cancelText={t("invoiceDetail.correctionCancel")}
                 confirmLoading={correctionLoading}
             >
-                <p>Wähle die Art des Korrekturdokuments:</p>
+                <p>{t("invoiceDetail.correctionPrompt")}</p>
                 <div
                     style={{
                         display: "flex",
@@ -561,8 +563,7 @@ export default function InvoiceDetailPage() {
                             onChange={() => setCorrectionType("credit_note")}
                             style={{ marginRight: 8 }}
                         />
-                        <strong>Gutschrift (GS-...)</strong> — Storniert die
-                        Rechnung mit negierten Beträgen
+                        <strong>{t("invoiceDetail.creditNote")}</strong> — {t("invoiceDetail.creditNoteDesc")}
                     </label>
                     <label style={{ cursor: "pointer" }}>
                         <input
@@ -573,14 +574,13 @@ export default function InvoiceDetailPage() {
                             onChange={() => setCorrectionType("correction")}
                             style={{ marginRight: 8 }}
                         />
-                        <strong>Korrekturrechnung (KR-...)</strong> — Kopie zum
-                        Bearbeiten
+                        <strong>{t("invoiceDetail.correctionInvoice")}</strong> — {t("invoiceDetail.correctionInvoiceDesc")}
                     </label>
                 </div>
             </Modal>
 
             <Modal
-                title="KI-Zahlungserinnerung"
+                title={t("invoiceDetail.aiReminderTitle")}
                 open={reminderModalOpen}
                 onCancel={() => setReminderModalOpen(false)}
                 footer={[
@@ -589,7 +589,7 @@ export default function InvoiceDetailPage() {
                         icon={<CopyOutlined />}
                         onClick={copyReminderDraft}
                     >
-                        Kopieren
+                        {t("invoiceDetail.copy")}
                     </Button>,
                     <Button
                         key="mail"
@@ -598,7 +598,7 @@ export default function InvoiceDetailPage() {
                         onClick={openReminderAsEmail}
                         disabled={!invoice.client?.email}
                     >
-                        Als E-Mail öffnen
+                        {t("invoiceDetail.openAsEmail")}
                     </Button>,
                 ]}
                 width={760}
