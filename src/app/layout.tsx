@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import {
@@ -148,6 +149,7 @@ export default function RootLayout({
                         <AuthProvider>{children}</AuthProvider>
                     </LanguageProvider>
                 </AntdRegistry>
+                <Analytics />
             </body>
         </html>
     );
