@@ -337,7 +337,7 @@ export default function ExpensesPage() {
                 <Col xs={12} sm={8}>
                     <Card size="small">
                         <Statistic
-                            title={t("expenses.thisMonth")}
+                            title={t("expenses.monthTotal")}
                             value={currentMonthTotal}
                             precision={2}
                             prefix="€"
@@ -347,7 +347,7 @@ export default function ExpensesPage() {
                 <Col xs={12} sm={8}>
                     <Card size="small">
                         <Statistic
-                            title={t("expenses.ytd")}
+                            title={t("expenses.ytdTotal")}
                             value={ytdTotal}
                             precision={2}
                             prefix="€"
@@ -392,7 +392,7 @@ export default function ExpensesPage() {
                 title={
                     editingId
                         ? t("expenses.editTitle")
-                        : t("expenses.createTitle")
+                        : t("expenses.newTitle")
                 }
                 open={modalOpen}
                 onCancel={() => setModalOpen(false)}
