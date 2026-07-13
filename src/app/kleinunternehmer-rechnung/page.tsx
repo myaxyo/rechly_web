@@ -6,16 +6,16 @@ const siteUrl = getSiteUrl();
 const path = "/kleinunternehmer-rechnung";
 
 export const metadata: Metadata = {
-    title: "Kleinunternehmer Rechnung",
+    title: "Kleinunternehmer Rechnung erstellen – §19 UStG Vorlage",
     description:
-        "Kleinunternehmer Rechnung in Deutschland: Welche Angaben wichtig sind, wie du Kundendaten strukturierst und Rechnungen sauber vorbereitest.",
+        "Kleinunternehmer Rechnung erstellen: Alle Pflichtangaben nach §19 UStG, korrekte Rechnungsnummern, Kundenverwaltung und PDF-Export. Kostenlos mit Rechly.",
     alternates: {
         canonical: path,
     },
     openGraph: {
         title: "Kleinunternehmer Rechnung | Rechly",
         description:
-            "Hinweise und Workflow für Rechnungen von Kleinunternehmern in Deutschland – mit Fokus auf Pflichtangaben, Kundendaten und PDF-Erstellung.",
+            "Rechnungen für Kleinunternehmer mit allen Pflichtangaben nach deutschem Recht. PDF-Export, Kundenverwaltung und Zahlungserinnerungen inklusive.",
         url: `${siteUrl}${path}`,
         type: "article",
     },

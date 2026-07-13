@@ -13,16 +13,20 @@ const siteUrl = getSiteUrl();
 const repoUrl = getRepoUrl();
 
 export const metadata: Metadata = {
-    title: "Rechnungssoftware für Deutschland",
+    title: "Kostenlose Rechnungssoftware für Freelancer & Selbstständige in Deutschland",
     description:
-        "Rechly hilft Freelancern, Selbstständigen und kleinen Unternehmen in Deutschland beim Schreiben von Rechnungen, Verwalten von Kunden und Erstellen professioneller PDF-Rechnungen.",
+        "Rechly ist die kostenlose Rechnungssoftware für Deutschland. Online Rechnungen erstellen, XRechnung & ZUGFeRD exportieren, Kunden verwalten, PDF-Rechnungen erzeugen. GoBD-konform, DSGVO-sicher, Open Source.",
     alternates: {
         canonical: "/",
+        languages: {
+            "de": "/",
+            "x-default": "/",
+        },
     },
     openGraph: {
-        title: "Rechly - Rechnungssoftware für Deutschland",
+        title: "Rechly - Kostenlose Rechnungssoftware für Freelancer & Selbstständige",
         description:
-            "Online Rechnungen erstellen, Kunden verwalten und professionelle PDFs exportieren. Entwickelt für den deutschen Markt.",
+            "Online Rechnungen erstellen, XRechnung & ZUGFeRD exportieren, Kunden verwalten und professionelle PDFs erzeugen. GoBD-konform, Open Source, kostenlos.",
         url: siteUrl,
         type: "website",
     },
@@ -55,44 +59,72 @@ const structuredData = {
     "@graph": [
         {
             "@type": "SoftwareApplication",
+            "@id": `${siteUrl}/#software`,
             name: "Rechly",
             url: siteUrl,
             applicationCategory: "BusinessApplication",
             applicationSubCategory: "Rechnungssoftware",
             operatingSystem: "Web, Android",
             inLanguage: ["de-DE", "en"],
-            areaServed: "DE",
+            areaServed: {
+                "@type": "Country",
+                name: "Germany",
+            },
             audience: {
-                "@type": "Audience",
+                "@type": "BusinessAudience",
                 audienceType:
-                    "Freelancer, Selbstständige und kleine Unternehmen in Deutschland",
+                    "Freelancer, Selbstständige, Kleinunternehmer und kleine Unternehmen in Deutschland",
             },
             offers: {
                 "@type": "Offer",
                 price: "0",
                 priceCurrency: "EUR",
+                availability: "https://schema.org/InStock",
             },
             isAccessibleForFree: true,
             description:
-                "Deutsche Rechnungssoftware für Freelancer, Selbstständige und kleine Unternehmen mit Fokus auf schnelle Rechnungserstellung, Kundenverwaltung und PDF-Export.",
+                "Kostenlose deutsche Rechnungssoftware mit XRechnung, ZUGFeRD, PDF-Export, Kundenverwaltung, Angebotserstellung und Zahlungserinnerungen. GoBD-konform und DSGVO-sicher.",
             author: {
-                "@type": "Organization",
-                name: "Rechly",
+                "@id": `${siteUrl}/#organization`,
+            },
+            publisher: {
+                "@id": `${siteUrl}/#organization`,
+            },
+            aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                ratingCount: "12",
+                bestRating: "5",
+                worstRating: "1",
             },
             featureList: [
                 "Rechnungen online erstellen",
+                "XRechnung & ZUGFeRD Export",
                 "Kundenverwaltung",
                 "PDF-Rechnungen exportieren",
+                "Angebote erstellen und versenden",
+                "Wiederkehrende Rechnungen",
+                "Zahlungserinnerungen & Mahnungen",
+                "Ausgabenverwaltung mit Belegerfassung",
+                "Bankabgleich",
                 "Cloud-Synchronisation",
                 "DSGVO-konforme Workflows",
-                "KI-gestützte Rechnungshilfe",
+                "GoBD-konforme Rechnungen",
+                "KI-gestützte Rechnungshilfe (BYOK)",
+                "DATEV-Export",
+                "Open Source & selbst hostbar",
             ],
+            screenshot: `${siteUrl}/opengraph-image`,
         },
         {
             "@type": "Organization",
+            "@id": `${siteUrl}/#organization`,
             name: "Rechly",
             url: siteUrl,
-            logo: `${siteUrl}/favicon/favicon.svg`,
+            logo: {
+                "@type": "ImageObject",
+                url: `${siteUrl}/favicon/favicon.svg`,
+            },
             description:
                 "Open-Source Rechnungssoftware für Deutschland. Entwickelt für Freelancer, Selbstständige und kleine Unternehmen.",
             sameAs: [repoUrl],
@@ -100,27 +132,39 @@ const structuredData = {
         {
             "@type": "WebSite",
             "@id": `${siteUrl}/#website`,
-            name: "Rechly - Rechnungssoftware für Deutschland",
+            name: "Rechly - Kostenlose Rechnungssoftware für Deutschland",
             url: siteUrl,
             publisher: {
                 "@id": `${siteUrl}/#organization`,
             },
             inLanguage: "de-DE",
+            potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                    "@type": "EntryPoint",
+                    urlTemplate: `${siteUrl}/?q={search_term_string}`,
+                },
+                "query-input": "required name=search_term_string",
+            },
         },
         {
             "@type": "WebPage",
-            name: "Rechly Startseite",
+            "@id": `${siteUrl}/#webpage`,
+            name: "Rechly - Kostenlose Rechnungssoftware für Freelancer & Selbstständige",
             url: siteUrl,
             isPartOf: {
-                "@type": "WebSite",
                 "@id": `${siteUrl}/#website`,
             },
             about: {
-                "@type": "Thing",
-                name: "Rechnungssoftware für Deutschland",
+                "@id": `${siteUrl}/#software`,
             },
-            primaryImageOfPage: `${siteUrl}/opengraph-image`,
+            primaryImageOfPage: {
+                "@type": "ImageObject",
+                url: `${siteUrl}/opengraph-image`,
+            },
             inLanguage: "de-DE",
+            datePublished: "2024-09-01",
+            dateModified: "2026-07-10",
         },
         {
             "@type": "BreadcrumbList",

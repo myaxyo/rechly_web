@@ -6,16 +6,16 @@ const siteUrl = getSiteUrl();
 const path = "/rechnungsprogramm-kostenlos";
 
 export const metadata: Metadata = {
-    title: "Rechnungsprogramm kostenlos",
+    title: "Rechnungsprogramm kostenlos – Open Source für Freelancer",
     description:
-        "Rechnungsprogramm kostenlos: Worauf es bei einer kostenlosen deutschen Rechnungssoftware ankommt und wann Rechly als Open-Source-Lösung besonders sinnvoll ist.",
+        "Kostenloses Rechnungsprogramm für Deutschland: Rechnungen online erstellen, PDF exportieren, Kunden verwalten. Open Source, ohne Abo, ohne versteckte Kosten. Jetzt kostenlos starten.",
     alternates: {
         canonical: path,
     },
     openGraph: {
         title: "Rechnungsprogramm kostenlos | Rechly",
         description:
-            "Kostenloses Rechnungsprogramm für Deutschland mit Open-Source-Ansatz, PDF-Rechnungen, Kundenverwaltung und Erinnerungsschritten im Workflow.",
+            "Kostenloses Open-Source Rechnungsprogramm mit PDF-Rechnungen, Kundenverwaltung und Zahlungserinnerungen. Ohne Abo, ohne Limits.",
         url: `${siteUrl}${path}`,
         type: "article",
     },

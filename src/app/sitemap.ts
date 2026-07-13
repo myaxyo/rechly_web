@@ -4,97 +4,109 @@ import { getSiteUrl } from "@/lib/env";
 const siteUrl = getSiteUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const currentDate = new Date().toISOString();
-
-    const routes = [
+    // Use stable dates to signal actual content changes to Google.
+    // Update these when page content is meaningfully modified.
+    const routes: Array<{
+        url: string;
+        lastModified: string;
+        changeFrequency:
+            | "always"
+            | "hourly"
+            | "daily"
+            | "weekly"
+            | "monthly"
+            | "yearly"
+            | "never";
+        priority: number;
+    }> = [
         {
             url: "",
-            lastModified: currentDate,
-            changeFrequency: "weekly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "weekly",
             priority: 1.0,
         },
         {
             url: "/features",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.9,
         },
         {
             url: "/rechnungssoftware-fuer-freelancer",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
+            priority: 0.9,
+        },
+        {
+            url: "/rechnungsprogramm-kostenlos",
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.9,
         },
         {
             url: "/kleinunternehmer-rechnung",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.88,
         },
         {
             url: "/e-rechnung-software",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
-            priority: 0.88,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
+            priority: 0.9,
+        },
+        {
+            url: "/rechnung-fuer-kleinunternehmer-erstellen",
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
+            priority: 0.87,
         },
         {
             url: "/lexoffice-alternative",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.87,
         },
         {
             url: "/sevdesk-alternative",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.87,
         },
         {
-            url: "/rechnungsprogramm-kostenlos",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
-            priority: 0.89,
-        },
-        {
             url: "/rechnungsvorlage",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.86,
         },
         {
             url: "/zahlungserinnerung-schreiben",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
-            priority: 0.86,
-        },
-        {
-            url: "/rechnung-fuer-kleinunternehmer-erstellen",
-            lastModified: currentDate,
-            changeFrequency: "monthly" as const,
+            lastModified: "2026-07-10",
+            changeFrequency: "monthly",
             priority: 0.86,
         },
         {
             url: "/impressum",
-            lastModified: currentDate,
-            changeFrequency: "yearly" as const,
+            lastModified: "2025-12-01",
+            changeFrequency: "yearly",
             priority: 0.3,
         },
         {
             url: "/datenschutz",
-            lastModified: currentDate,
-            changeFrequency: "yearly" as const,
+            lastModified: "2025-12-01",
+            changeFrequency: "yearly",
             priority: 0.3,
         },
         {
             url: "/agb",
-            lastModified: currentDate,
-            changeFrequency: "yearly" as const,
+            lastModified: "2025-12-01",
+            changeFrequency: "yearly",
             priority: 0.3,
         },
         {
             url: "/cookies",
-            lastModified: currentDate,
-            changeFrequency: "yearly" as const,
+            lastModified: "2025-12-01",
+            changeFrequency: "yearly",
             priority: 0.2,
         },
     ];
