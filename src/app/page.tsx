@@ -2,7 +2,6 @@ import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import Script from "next/script";
 import HeroSection from "@/components/landing/sections/HeroSection";
 import AuthRedirect from "@/components/landing/AuthRedirect";
 import SeoTopicsSection from "@/components/landing/sections/SeoTopicsSection";
@@ -100,8 +99,12 @@ const structuredData = {
         },
         {
             "@type": "WebSite",
+            "@id": `${siteUrl}/#website`,
             name: "Rechly - Rechnungssoftware für Deutschland",
             url: siteUrl,
+            publisher: {
+                "@id": `${siteUrl}/#organization`,
+            },
             inLanguage: "de-DE",
         },
         {
@@ -110,8 +113,7 @@ const structuredData = {
             url: siteUrl,
             isPartOf: {
                 "@type": "WebSite",
-                name: "Rechly",
-                url: siteUrl,
+                "@id": `${siteUrl}/#website`,
             },
             about: {
                 "@type": "Thing",
@@ -119,6 +121,17 @@ const structuredData = {
             },
             primaryImageOfPage: `${siteUrl}/opengraph-image`,
             inLanguage: "de-DE",
+        },
+        {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+                {
+                    "@type": "ListItem",
+                    position: 1,
+                    name: "Startseite",
+                    item: siteUrl,
+                },
+            ],
         },
         {
             "@type": "FAQPage",
@@ -174,8 +187,7 @@ export default function Home() {
             <AuthRedirect />
 
             {/* JSON-LD Structured Data for SEO */}
-            <Script
-                id="structured-data"
+            <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
                     __html: JSON.stringify(structuredData),

@@ -9,6 +9,7 @@ import {
     getSiteUrl,
     getTwitterHandle,
 } from "@/lib/env";
+import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
@@ -59,9 +60,6 @@ export const metadata: Metadata = {
         telephone: false,
     },
     metadataBase: new URL(siteUrl),
-    alternates: {
-        canonical: "/",
-    },
     openGraph: {
         type: "website",
         locale: "de_DE",
@@ -123,6 +121,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="de" suppressHydrationWarning>
+            <head>
+                <GlobalJsonLd />
+            </head>
             <body>
                 {analyticsId ? (
                     <>

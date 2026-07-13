@@ -56,8 +56,7 @@ export default function KeywordLandingPage({
                 inLanguage: "de-DE",
                 isPartOf: {
                     "@type": "WebSite",
-                    name: "Rechly",
-                    url: siteUrl,
+                    "@id": `${siteUrl}/#website`,
                 },
             },
             {
