@@ -21,6 +21,7 @@ import {
     message,
 } from "antd";
 import {
+    ImportOutlined,
     PlusOutlined,
     DeleteOutlined,
     EditOutlined,
@@ -92,6 +93,60 @@ export default function ExpensesPage() {
         setPendingFile(null);
         setCreatedExpenseId(null);
         setModalOpen(true);
+    };
+
+    const handleImportEInvoice = () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".xml,.pdf,application/xml,text/xml,application/pdf";
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            try {
+                const buffer = await file.arrayBuffer();
+                const fileBase64 = btoa(
+                    Array.from(new Uint8Array(buffer))
+                        .map((byte) => String.fromCharCode(byte))
+                        .join("")
+                );
+                const res = await fetch("/api/expenses/import-einvoice", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fileBase64, filename: file.name }),
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    message.error(
+                        err.error === "no_embedded_xml"
+                            ? t("expenses.eInvoiceNoXml")
+                            : t("expenses.eInvoiceUnsupported")
+                    );
+                    return;
+                }
+                const parsed = await res.json();
+                setEditingId(null);
+                setPendingFile(null);
+                setCreatedExpenseId(null);
+                setForm({
+                    ...DEFAULT_FORM,
+                    date: parsed.date || DEFAULT_FORM.date,
+                    vendor_name: parsed.vendor_name || "",
+                    description: parsed.invoice_number
+                        ? `E-Rechnung ${parsed.invoice_number}`
+                        : DEFAULT_FORM.description,
+                    amount_net: parsed.amount_net ?? 0,
+                    vat_amount: parsed.vat_amount ?? 0,
+                    amount_gross: parsed.amount_gross ?? 0,
+                    vat_rate_percent: parsed.vat_rate_percent ?? 19,
+                });
+                setModalOpen(true);
+                message.success(t("expenses.eInvoiceParsed"));
+            } catch (error) {
+                console.error("E-invoice import failed:", error);
+                message.error(t("expenses.eInvoiceUnsupported"));
+            }
+        };
+        input.click();
     };
 
     const openEdit = (expense: Expense) => {
@@ -368,9 +423,16 @@ export default function ExpensesPage() {
                 style={{
                     display: "flex",
                     justifyContent: "flex-end",
+                    gap: 8,
                     marginBottom: 16,
                 }}
             >
+                <Button
+                    icon={<ImportOutlined />}
+                    onClick={handleImportEInvoice}
+                >
+                    {t("expenses.importEInvoice")}
+                </Button>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}

@@ -1,6 +1,6 @@
 # Rechly
 
-> Rechly ist eine kostenlose Open-Source-Rechnungssoftware für Freelancer, Selbstständige und kleine Unternehmen in Deutschland. Rechnungen, Angebote, wiederkehrende Rechnungen, E-Rechnung (XRechnung/ZUGFeRD), Ausgaben mit Beleg-Scan, Bankabgleich und DATEV-Export – ohne Rechnungslimit, DSGVO-konform mit Hosting in Frankfurt. Verfügbar im Web und als Mobile-App mit Offline-Modus.
+> Rechly ist eine kostenlose Open-Source-Rechnungssoftware für Freelancer, Selbstständige und kleine Unternehmen in Deutschland. Rechnungen, Angebote, wiederkehrende Rechnungen, E-Rechnung (XRechnung/ZUGFeRD senden und empfangen), mehrstufiges Mahnwesen, Girocode-Zahlungs-QR auf jeder Rechnung, UStVA- und EÜR-Auswertung, USt-IdNr.-Prüfung (VIES), Ausgaben mit Beleg-Scan, Bankabgleich und DATEV-Export – ohne Rechnungslimit, DSGVO-konform mit Hosting in Frankfurt. Verfügbar im Web und als Mobile-App mit Offline-Modus.
 
 Rechly ist dauerhaft kostenlos nutzbar (Open Source, AGPL-3.0) und richtet sich an den deutschen Markt: Pflichtangaben nach §14 UStG, Kleinunternehmerregelung nach §19 UStG, fortlaufende Rechnungsnummern, Rechnungskorrekturen und Gutschriften.
 

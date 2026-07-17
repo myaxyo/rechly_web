@@ -814,6 +814,10 @@ const translations: Record<Language, Record<string, string>> = {
         // Expenses page
         "expenses.title": "Ausgaben",
         "expenses.search": "Suchen...",
+        "expenses.importEInvoice": "E-Rechnung importieren",
+        "expenses.eInvoiceParsed": "E-Rechnung erkannt – bitte prüfen und speichern.",
+        "expenses.eInvoiceNoXml": "In dieser PDF wurde keine eingebettete E-Rechnung gefunden. Bitte laden Sie die XML-Datei direkt hoch.",
+        "expenses.eInvoiceUnsupported": "Format nicht erkannt. Unterstützt: XRechnung (XML) und ZUGFeRD (PDF).",
         "expenses.new": "Neue Ausgabe",
         "expenses.date": "Datum",
         "expenses.vendor": "Lieferant",
@@ -1696,6 +1700,10 @@ const translations: Record<Language, Record<string, string>> = {
         // Expenses page
         "expenses.title": "Expenses",
         "expenses.search": "Search...",
+        "expenses.importEInvoice": "Import e-invoice",
+        "expenses.eInvoiceParsed": "E-invoice recognized — please review and save.",
+        "expenses.eInvoiceNoXml": "No embedded e-invoice found in this PDF. Please upload the XML file directly.",
+        "expenses.eInvoiceUnsupported": "Format not recognized. Supported: XRechnung (XML) and ZUGFeRD (PDF).",
         "expenses.new": "New Expense",
         "expenses.date": "Date",
         "expenses.vendor": "Vendor",
