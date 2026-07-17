@@ -16,7 +16,10 @@ import {
     StyleSheet,
     PDFViewer,
     PDFDownloadLink,
+    Image,
 } from "@react-pdf/renderer";
+import QRCode from "qrcode";
+import { buildGirocodePayload } from "@/lib/girocode";
 import { getInvoiceById } from "@/lib/invoiceService";
 import { getCompanyInfo } from "@/lib/companyService";
 import { formatCurrency } from "@/lib/currencyUtils";
@@ -233,9 +236,10 @@ interface InvoicePDFProps {
     invoice: InvoiceWithDetails;
     company: UserCompany | null;
     t: (key: string) => string;
+    girocodeUrl?: string | null;
 }
 
-const InvoicePDF = ({ invoice, company, t }: InvoicePDFProps) => {
+const InvoicePDF = ({ invoice, company, t, girocodeUrl }: InvoicePDFProps) => {
     const clientAddress = invoice.client
         ? `${invoice.client.address_line1}\n${invoice.client.postal_code} ${invoice.client.city}`
         : "";
@@ -426,6 +430,34 @@ const InvoicePDF = ({ invoice, company, t }: InvoicePDFProps) => {
                     </View>
                 )}
 
+                {/* Girocode: scan-to-pay QR (EPC069-12) */}
+                {girocodeUrl && (
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 10,
+                            marginTop: 14,
+                        }}
+                    >
+                        {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                        <Image
+                            src={girocodeUrl}
+                            style={{ width: 64, height: 64 }}
+                        />
+                        <View style={{ maxWidth: 240 }}>
+                            <Text style={{ fontSize: 8, fontWeight: 700 }}>
+                                Bequem bezahlen mit Girocode
+                            </Text>
+                            <Text style={{ fontSize: 7, color: "#555555" }}>
+                                QR-Code mit Ihrer Banking-App scannen –
+                                Empfänger, Betrag und Verwendungszweck werden
+                                automatisch übernommen.
+                            </Text>
+                        </View>
+                    </View>
+                )}
+
                 {/* Footer */}
                 <View style={styles.footer}>
                     <View style={styles.footerDivider}>
@@ -478,6 +510,7 @@ export default function InvoicePDFPage() {
     const [loading, setLoading] = useState(true);
     const [invoice, setInvoice] = useState<InvoiceWithDetails | null>(null);
     const [company, setCompany] = useState<UserCompany | null>(null);
+    const [girocodeUrl, setGirocodeUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (invoiceId) {
@@ -495,6 +528,31 @@ export default function InvoicePDFPage() {
             ]);
             setInvoice(invoiceData);
             setCompany(companyData);
+
+            // Girocode: only for regular invoices with a positive total
+            if (
+                invoiceData &&
+                companyData?.bank_iban &&
+                !invoiceData.correction_type
+            ) {
+                const payload = buildGirocodePayload({
+                    name: companyData.name,
+                    iban: companyData.bank_iban,
+                    bic: companyData.bank_bic,
+                    amount: invoiceData.total_gross,
+                    reference: `Rechnung ${invoiceData.invoice_number}`,
+                });
+                if (payload) {
+                    const url = await QRCode.toDataURL(payload, {
+                        errorCorrectionLevel: "M",
+                        margin: 1,
+                        width: 256,
+                    });
+                    setGirocodeUrl(url);
+                }
+            } else {
+                setGirocodeUrl(null);
+            }
         } catch (error) {
             console.error("Error loading data:", error);
             message.error(t("invoicePdf.loadError"));
@@ -565,6 +623,7 @@ export default function InvoicePDFPage() {
                                     invoice={invoice}
                                     company={company}
                                     t={t}
+                                    girocodeUrl={girocodeUrl}
                                 />
                             }
                             fileName={`Rechnung_${invoice.invoice_number}.pdf`}
@@ -586,7 +645,7 @@ export default function InvoicePDFPage() {
             {/* PDF Viewer */}
             <div style={{ height: "calc(100vh - 200px)", minHeight: 600 }}>
                 <PDFViewer width="100%" height="100%" showToolbar={false}>
-                    <InvoicePDF invoice={invoice} company={company} t={t} />
+                    <InvoicePDF invoice={invoice} company={company} t={t} girocodeUrl={girocodeUrl} />
                 </PDFViewer>
             </div>
 
