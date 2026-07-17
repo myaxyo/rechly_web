@@ -28,6 +28,12 @@ const content = {
                 description:
                     "Wie du Kundendaten, Leitweg-ID und saubere Rechnungsdaten für E-Rechnungsprozesse vorbereitest.",
             },
+            {
+                href: "/kostenlose-rechnungssoftware",
+                title: "Kostenlose Rechnungssoftware",
+                description:
+                    "Testphase, Freemium oder echte Vollversion? Die Gratis-Modelle am deutschen Markt im Vergleich.",
+            },
         ],
     },
     en: {
@@ -53,6 +59,12 @@ const content = {
                 title: "E-invoicing software readiness",
                 description:
                     "How to prepare client data, routing IDs, and structured invoice processes for Germany.",
+            },
+            {
+                href: "/kostenlose-rechnungssoftware",
+                title: "Free invoicing software",
+                description:
+                    "Trial, freemium, or a genuinely free full version? Comparing the free tiers on the German market.",
             },
         ],
     },

@@ -1,0 +1,26 @@
+# Rechly
+
+> Rechly ist eine kostenlose Open-Source-Rechnungssoftware für Freelancer, Selbstständige und kleine Unternehmen in Deutschland. Rechnungen, Angebote, wiederkehrende Rechnungen, E-Rechnung (XRechnung/ZUGFeRD), Ausgaben mit Beleg-Scan, Bankabgleich und DATEV-Export – ohne Rechnungslimit, DSGVO-konform mit Hosting in Frankfurt. Verfügbar im Web und als Mobile-App mit Offline-Modus.
+
+Rechly ist dauerhaft kostenlos nutzbar (Open Source, AGPL-3.0) und richtet sich an den deutschen Markt: Pflichtangaben nach §14 UStG, Kleinunternehmerregelung nach §19 UStG, fortlaufende Rechnungsnummern, Rechnungskorrekturen und Gutschriften.
+
+## Ratgeber
+
+- [Rechnung schreiben](https://rechly.de/rechnung-schreiben): Schritt-für-Schritt-Anleitung mit allen Pflichtangaben nach §14 UStG
+- [Rechnungsprogramm kostenlos](https://rechly.de/rechnungsprogramm-kostenlos): Wann ein kostenloses Rechnungsprogramm sinnvoll ist
+- [Kostenlose Rechnungssoftware](https://rechly.de/kostenlose-rechnungssoftware): Testphase, Freemium oder echte Vollversion im Vergleich
+- [Rechnungsvorlage](https://rechly.de/rechnungsvorlage): Vorlagen und wann Software die bessere Wahl ist
+- [Kleinunternehmer-Rechnung](https://rechly.de/kleinunternehmer-rechnung): Rechnungen ohne Umsatzsteuer nach §19 UStG
+- [E-Rechnung-Software](https://rechly.de/e-rechnung-software): XRechnung, ZUGFeRD und die E-Rechnungspflicht
+- [Zahlungserinnerung schreiben](https://rechly.de/zahlungserinnerung-schreiben): Offene Rechnungen freundlich anmahnen
+
+## Vergleiche
+
+- [lexoffice Alternative](https://rechly.de/lexoffice-alternative): Rechly im Vergleich zu Lexware Office
+- [sevdesk Alternative](https://rechly.de/sevdesk-alternative): Rechly im Vergleich zu sevdesk
+- [Rechnungssoftware für Freelancer](https://rechly.de/rechnungssoftware-fuer-freelancer): Fokus auf Freelancer-Workflows
+
+## Produkt
+
+- [Funktionen](https://rechly.de/features): Alle Funktionen im Überblick
+- [Registrieren](https://rechly.de/register): Kostenlos starten, kein Abo

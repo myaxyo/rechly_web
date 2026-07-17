@@ -20,6 +20,16 @@ type KeywordLink = {
     description: string;
 };
 
+type KeywordHowToStep = {
+    name: string;
+    text: string;
+};
+
+type KeywordHowTo = {
+    title: string;
+    steps: KeywordHowToStep[];
+};
+
 interface KeywordLandingPageProps {
     path: string;
     title: string;
@@ -30,6 +40,8 @@ interface KeywordLandingPageProps {
     sections: KeywordSection[];
     faqs: KeywordFaq[];
     clusterLinks: KeywordLink[];
+    /** Optional numbered guide rendered after the hero, with HowTo schema */
+    howTo?: KeywordHowTo;
 }
 
 const siteUrl = getSiteUrl();
@@ -44,10 +56,26 @@ export default function KeywordLandingPage({
     sections,
     faqs,
     clusterLinks,
+    howTo,
 }: KeywordLandingPageProps) {
     const structuredData = {
         "@context": "https://schema.org",
         "@graph": [
+            ...(howTo
+                ? [
+                      {
+                          "@type": "HowTo",
+                          name: howTo.title,
+                          inLanguage: "de-DE",
+                          step: howTo.steps.map((step, index) => ({
+                              "@type": "HowToStep",
+                              position: index + 1,
+                              name: step.name,
+                              text: step.text,
+                          })),
+                      },
+                  ]
+                : []),
             {
                 "@type": "WebPage",
                 name: title,
@@ -173,6 +201,94 @@ export default function KeywordLandingPage({
                         </div>
                     </div>
                 </section>
+
+                {howTo ? (
+                    <section style={{ padding: "0 24px 48px" }}>
+                        <div style={{ maxWidth: 980, margin: "0 auto" }}>
+                            <article
+                                style={{
+                                    padding: 28,
+                                    borderRadius: 24,
+                                    border: "1px solid rgba(15, 23, 42, 0.08)",
+                                    background: "#ffffff",
+                                    boxShadow:
+                                        "0 18px 40px rgba(15, 23, 42, 0.05)",
+                                }}
+                            >
+                                <h2
+                                    style={{
+                                        marginBottom: 20,
+                                        fontSize: 28,
+                                        color: "#0f172a",
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    {howTo.title}
+                                </h2>
+                                <ol
+                                    style={{
+                                        margin: 0,
+                                        paddingLeft: 0,
+                                        listStyle: "none",
+                                        display: "grid",
+                                        gap: 18,
+                                    }}
+                                >
+                                    {howTo.steps.map((step, index) => (
+                                        <li
+                                            key={step.name}
+                                            style={{
+                                                display: "flex",
+                                                gap: 16,
+                                                alignItems: "flex-start",
+                                            }}
+                                        >
+                                            <span
+                                                aria-hidden
+                                                style={{
+                                                    flexShrink: 0,
+                                                    width: 34,
+                                                    height: 34,
+                                                    borderRadius: 999,
+                                                    background: "#eef6ff",
+                                                    color: "#1d4ed8",
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontWeight: 700,
+                                                    fontSize: 15,
+                                                }}
+                                            >
+                                                {index + 1}
+                                            </span>
+                                            <span>
+                                                <strong
+                                                    style={{
+                                                        display: "block",
+                                                        color: "#0f172a",
+                                                        fontSize: 17,
+                                                        marginBottom: 4,
+                                                    }}
+                                                >
+                                                    {step.name}
+                                                </strong>
+                                                <span
+                                                    style={{
+                                                        color: "#475569",
+                                                        fontSize: 15.5,
+                                                        lineHeight: 1.7,
+                                                    }}
+                                                >
+                                                    {step.text}
+                                                </span>
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ol>
+                            </article>
+                        </div>
+                    </section>
+                ) : null}
 
                 <section style={{ padding: "0 24px 48px" }}>
                     <div style={{ maxWidth: 980, margin: "0 auto" }}>

@@ -88,6 +88,18 @@ export default function RechnungsprogrammKostenlosPage() {
             ]}
             clusterLinks={[
                 {
+                    href: "/rechnung-schreiben",
+                    title: "Rechnung schreiben",
+                    description:
+                        "Die Schritt-für-Schritt-Anleitung mit allen Pflichtangaben nach §14 UStG.",
+                },
+                {
+                    href: "/kostenlose-rechnungssoftware",
+                    title: "Kostenlose Rechnungssoftware",
+                    description:
+                        "Testphase, Freemium oder echte Vollversion? Der ehrliche Vergleich der Gratis-Modelle.",
+                },
+                {
                     href: "/lexoffice-alternative",
                     title: "lexoffice Alternative",
                     description:

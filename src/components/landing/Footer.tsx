@@ -93,6 +93,98 @@ export default function Footer() {
                         </Space>
                     </div>
 
+                    {/* Ratgeber: sitewide links to the SEO landing pages */}
+                    <div>
+                        <Text
+                            strong
+                            style={{
+                                display: "block",
+                                marginBottom: 12,
+                                fontSize: 13,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
+                                color: "#374151",
+                            }}
+                        >
+                            Ratgeber
+                        </Text>
+                        <Space direction="vertical" size={8}>
+                            <Link href="/rechnung-schreiben" style={linkStyle}>
+                                Rechnung schreiben
+                            </Link>
+                            <Link
+                                href="/rechnungsprogramm-kostenlos"
+                                style={linkStyle}
+                            >
+                                Rechnungsprogramm kostenlos
+                            </Link>
+                            <Link
+                                href="/kostenlose-rechnungssoftware"
+                                style={linkStyle}
+                            >
+                                Kostenlose Rechnungssoftware
+                            </Link>
+                            <Link href="/rechnungsvorlage" style={linkStyle}>
+                                Rechnungsvorlage
+                            </Link>
+                            <Link
+                                href="/kleinunternehmer-rechnung"
+                                style={linkStyle}
+                            >
+                                Kleinunternehmer-Rechnung
+                            </Link>
+                            <Link
+                                href="/e-rechnung-software"
+                                style={linkStyle}
+                            >
+                                E-Rechnung-Software
+                            </Link>
+                        </Space>
+                    </div>
+
+                    {/* Vergleiche */}
+                    <div>
+                        <Text
+                            strong
+                            style={{
+                                display: "block",
+                                marginBottom: 12,
+                                fontSize: 13,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
+                                color: "#374151",
+                            }}
+                        >
+                            Vergleiche
+                        </Text>
+                        <Space direction="vertical" size={8}>
+                            <Link
+                                href="/lexoffice-alternative"
+                                style={linkStyle}
+                            >
+                                lexoffice Alternative
+                            </Link>
+                            <Link
+                                href="/sevdesk-alternative"
+                                style={linkStyle}
+                            >
+                                sevdesk Alternative
+                            </Link>
+                            <Link
+                                href="/rechnungssoftware-fuer-freelancer"
+                                style={linkStyle}
+                            >
+                                Software für Freelancer
+                            </Link>
+                            <Link
+                                href="/zahlungserinnerung-schreiben"
+                                style={linkStyle}
+                            >
+                                Zahlungserinnerung schreiben
+                            </Link>
+                        </Space>
+                    </div>
+
                     {/* Legal */}
                     <div>
                         <Text

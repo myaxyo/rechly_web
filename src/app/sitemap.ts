@@ -39,7 +39,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
         {
             url: "/rechnungsprogramm-kostenlos",
-            lastModified: "2026-07-10",
+            lastModified: "2026-07-17",
+            changeFrequency: "monthly",
+            priority: 0.9,
+        },
+        {
+            url: "/rechnung-schreiben",
+            lastModified: "2026-07-17",
+            changeFrequency: "monthly",
+            priority: 0.92,
+        },
+        {
+            url: "/kostenlose-rechnungssoftware",
+            lastModified: "2026-07-17",
             changeFrequency: "monthly",
             priority: 0.9,
         },

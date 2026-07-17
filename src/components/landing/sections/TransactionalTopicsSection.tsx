@@ -11,6 +11,12 @@ const content = {
             "Diese Themen zielen auf Nutzer, die nicht nur recherchieren, sondern sofort eine Vorlage, Erinnerung oder konkrete Rechnungsstruktur brauchen.",
         cards: [
             {
+                href: "/rechnung-schreiben",
+                title: "Rechnung schreiben",
+                description:
+                    "Die Schritt-für-Schritt-Anleitung mit allen Pflichtangaben nach §14 UStG – vom Absender bis zur E-Rechnung.",
+            },
+            {
                 href: "/rechnungsvorlage",
                 title: "Rechnungsvorlage",
                 description:
@@ -36,6 +42,12 @@ const content = {
         subtitle:
             "These topics target users who are ready to act now and need a template, reminder workflow, or a concrete invoice structure.",
         cards: [
+            {
+                href: "/rechnung-schreiben",
+                title: "How to write an invoice",
+                description:
+                    "The step-by-step guide covering every mandatory field under §14 UStG — from sender details to e-invoicing.",
+            },
             {
                 href: "/rechnungsvorlage",
                 title: "Invoice template",
