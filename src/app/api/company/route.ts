@@ -66,6 +66,7 @@ export async function GET() {
             bank_iban: doc.bankIban,
             bank_bic: doc.bankBic ?? undefined,
             logo_base64: doc.logoBase64 ?? undefined,
+            is_small_business: doc.isSmallBusiness ?? false,
             payment_terms_default: doc.paymentTermsDefault,
             created_at: new Date(doc.$createdAt).getTime(),
             updated_at: new Date(doc.$updatedAt).getTime(),
@@ -137,6 +138,7 @@ export async function POST(request: NextRequest) {
             bankIban: body.bank_iban,
             bankBic: body.bank_bic || null,
             logoBase64: body.logo_base64 || null,
+            isSmallBusiness: !!body.is_small_business,
             paymentTermsDefault: body.payment_terms_default,
         };
 
@@ -186,6 +188,7 @@ export async function POST(request: NextRequest) {
             bank_iban: doc.bankIban,
             bank_bic: doc.bankBic ?? undefined,
             logo_base64: doc.logoBase64 ?? undefined,
+            is_small_business: doc.isSmallBusiness ?? false,
             payment_terms_default: doc.paymentTermsDefault,
             created_at: new Date(doc.$createdAt).getTime(),
             updated_at: new Date(doc.$updatedAt).getTime(),

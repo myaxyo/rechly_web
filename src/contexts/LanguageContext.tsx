@@ -342,6 +342,9 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.bic": "BIC",
         "settings.invoiceSettings": "Rechnungseinstellungen",
         "settings.paymentTerms": "Standard-Zahlungsbedingungen",
+        "settings.smallBusiness": "Kleinunternehmer (§19 UStG)",
+        "settings.smallBusinessHint":
+            "Aktivieren, wenn Sie die Kleinunternehmerregelung nutzen. Rechnungen weisen dann keine Umsatzsteuer aus und enthalten den §19-Hinweis.",
         "settings.paymentTermsPlaceholder":
             "Zahlbar innerhalb von 14 Tagen ohne Abzug.",
         "settings.save": "Speichern",
@@ -1225,6 +1228,9 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.bic": "BIC",
         "settings.invoiceSettings": "Invoice Settings",
         "settings.paymentTerms": "Default Payment Terms",
+        "settings.smallBusiness": "Small business (§19 UStG)",
+        "settings.smallBusinessHint":
+            "Enable if you use the German small business scheme. Invoices then show no VAT and include the §19 note.",
         "settings.paymentTermsPlaceholder":
             "Payable within 14 days without deduction.",
         "settings.save": "Save",

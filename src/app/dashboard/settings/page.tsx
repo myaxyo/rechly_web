@@ -18,6 +18,7 @@ import {
     Row,
     Col,
     Progress,
+    Switch,
 } from "antd";
 import {
     SaveOutlined,
@@ -506,6 +507,15 @@ export default function SettingsPage() {
                             placeholder={t("settings.paymentTermsPlaceholder")}
                             rows={2}
                         />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="is_small_business"
+                        label={t("settings.smallBusiness")}
+                        valuePropName="checked"
+                        extra={t("settings.smallBusinessHint")}
+                    >
+                        <Switch />
                     </Form.Item>
 
                     <Form.Item style={{ marginTop: 24 }}>

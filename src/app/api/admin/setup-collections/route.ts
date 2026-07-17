@@ -1094,6 +1094,21 @@ export async function POST() {
             ),
         );
 
+        // ── Kleinunternehmer flag (§19 UStG) on user_company ───────────────
+        results.push(
+            await safeCreate(
+                () =>
+                    databases.createBooleanAttribute(
+                        DATABASE_ID,
+                        "user_company",
+                        "isSmallBusiness",
+                        false,
+                        false,
+                    ),
+                "attr:user_company.isSmallBusiness",
+            ),
+        );
+
         // ── Add DATEV fields to user_company collection ────────────────────
         results.push(
             await safeCreate(
