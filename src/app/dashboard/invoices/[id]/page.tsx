@@ -35,6 +35,7 @@ import {
     deleteInvoice,
 } from "@/lib/invoiceService";
 import { getCompanyInfo } from "@/lib/companyService";
+import DunningCard from "@/components/DunningCard";
 import { runInvoiceAssistant } from "@/lib/aiService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
@@ -535,6 +536,8 @@ export default function InvoiceDetailPage() {
                     </Button>
                 </Space>
             </Card>
+
+            <DunningCard invoice={invoice} company={company} />
 
             <Modal
                 title={t("invoiceDetail.correctionTitle")}

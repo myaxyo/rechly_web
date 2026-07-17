@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { Client, Databases, Storage, IndexType } from "node-appwrite";
+import {
+    Client,
+    Databases,
+    Storage,
+    IndexType,
+    Permission,
+    Role,
+} from "node-appwrite";
 import {
     getAppwriteEndpoint,
     getAppwriteProjectId,
@@ -1091,6 +1098,78 @@ export async function POST() {
                         false,
                     ),
                 "attr:invoices.correctsInvoiceId",
+            ),
+        );
+
+        // ── Dunning notices (Mahnwesen) ────────────────────────────────────
+        results.push(
+            await safeCreate(
+                () =>
+                    databases.createCollection(
+                        DATABASE_ID,
+                        "dunning_notices",
+                        "dunning_notices",
+                        [Permission.create(Role.users())],
+                        true,
+                    ),
+                "collection:dunning_notices",
+            ),
+        );
+        for (const [key, size, required] of [
+            ["userId", 64, true],
+            ["invoiceId", 64, true],
+            ["noticeNumber", 32, true],
+            ["issueDate", 16, true],
+            ["notes", 1000, false],
+        ] as const) {
+            results.push(
+                await safeCreate(
+                    () =>
+                        databases.createStringAttribute(
+                            DATABASE_ID,
+                            "dunning_notices",
+                            key,
+                            size,
+                            required,
+                        ),
+                    `attr:dunning_notices.${key}`,
+                ),
+            );
+        }
+        results.push(
+            await safeCreate(
+                () =>
+                    databases.createIntegerAttribute(
+                        DATABASE_ID,
+                        "dunning_notices",
+                        "level",
+                        true,
+                    ),
+                "attr:dunning_notices.level",
+            ),
+        );
+        results.push(
+            await safeCreate(
+                () =>
+                    databases.createIntegerAttribute(
+                        DATABASE_ID,
+                        "dunning_notices",
+                        "daysOverdue",
+                        false,
+                    ),
+                "attr:dunning_notices.daysOverdue",
+            ),
+        );
+        results.push(
+            await safeCreate(
+                () =>
+                    databases.createFloatAttribute(
+                        DATABASE_ID,
+                        "dunning_notices",
+                        "fee",
+                        false,
+                    ),
+                "attr:dunning_notices.fee",
             ),
         );
 

@@ -37,6 +37,7 @@ export const COLLECTIONS = {
     RECURRING_INVOICE_ITEMS: "recurring_invoice_items",
     EXPENSES: "expenses",
     BANK_TRANSACTIONS: "bank_transactions",
+    DUNNING_NOTICES: "dunning_notices",
 } as const;
 
 export const STORAGE = {
