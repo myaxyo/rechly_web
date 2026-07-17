@@ -28,6 +28,7 @@ import {
 import { useClientStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAllInvoices } from "@/lib/invoiceService";
+import { splitVatId } from "@/lib/validation";
 import { getCompanyInfo } from "@/lib/companyService";
 import { runInvoiceAssistant } from "@/lib/aiService";
 import type {
@@ -41,6 +42,34 @@ const { Title } = Typography;
 
 export default function ClientsPage() {
     const { t } = useLanguage();
+    const [vatCheck, setVatCheck] = useState<{
+        status: "idle" | "checking" | "valid" | "invalid" | "error";
+        name?: string;
+    }>({ status: "idle" });
+
+    const checkVatId = async () => {
+        const vatId = form.getFieldValue("vat_id");
+        if (!vatId || !splitVatId(vatId)) {
+            setVatCheck({ status: "invalid" });
+            return;
+        }
+        try {
+            setVatCheck({ status: "checking" });
+            const res = await fetch("/api/validate/vat-id", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ vat_id: vatId }),
+            });
+            if (!res.ok) throw new Error("vies_unavailable");
+            const result = await res.json();
+            setVatCheck({
+                status: result.valid ? "valid" : "invalid",
+                name: result.name,
+            });
+        } catch {
+            setVatCheck({ status: "error" });
+        }
+    };
     const [searchText, setSearchText] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -510,8 +539,35 @@ export default function ClientsPage() {
 
                     <Row gutter={[12, 0]}>
                         <Col xs={24} sm={12}>
-                            <Form.Item name="vat_id" label={t("clients.vatId")}>
-                                <Input placeholder="DE123456789" />
+                            <Form.Item
+                                name="vat_id"
+                                label={t("clients.vatId")}
+                                extra={
+                                    vatCheck.status === "valid"
+                                        ? `✓ ${t("clients.vatIdValid")}${vatCheck.name ? ` – ${vatCheck.name}` : ""}`
+                                        : vatCheck.status === "invalid"
+                                          ? t("clients.vatIdInvalid")
+                                          : vatCheck.status === "error"
+                                            ? t("clients.vatIdCheckFailed")
+                                            : undefined
+                                }
+                            >
+                                <Input
+                                    placeholder="DE123456789"
+                                    addonAfter={
+                                        <Button
+                                            type="link"
+                                            size="small"
+                                            style={{ padding: 0, height: "auto" }}
+                                            loading={
+                                                vatCheck.status === "checking"
+                                            }
+                                            onClick={checkVatId}
+                                        >
+                                            VIES
+                                        </Button>
+                                    }
+                                />
                             </Form.Item>
                         </Col>
 
