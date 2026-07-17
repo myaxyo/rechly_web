@@ -5,7 +5,7 @@ import {
     Storage,
     OAuthProvider,
 } from "node-appwrite";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
     getAppwriteEndpoint,
     getAppwriteProjectId,
@@ -75,7 +75,12 @@ export async function createAdminClient() {
 }
 
 /**
- * Used for authenticated requests on behalf of the user
+ * Used for authenticated requests on behalf of the user.
+ * Auth sources, in order:
+ * 1. `Authorization: Bearer <appwrite-jwt>` header — used by the mobile app,
+ *    which authenticates directly against Appwrite and mints a JWT via
+ *    account.createJWT(). The JWT scopes all queries to that user.
+ * 2. The httpOnly session cookie — used by the web app itself.
  * IMPORTANT: Never share this client between requests
  */
 export async function createSessionClient() {
@@ -83,14 +88,21 @@ export async function createSessionClient() {
         .setEndpoint(APPWRITE_ENDPOINT)
         .setProject(APPWRITE_PROJECT_ID);
 
-    const cookieStore = await cookies();
-    const session = cookieStore.get(SESSION_COOKIE_NAME);
+    const headerStore = await headers();
+    const authHeader = headerStore.get("authorization");
 
-    if (!session || !session.value) {
-        throw new Error("No session");
+    if (authHeader?.toLowerCase().startsWith("bearer ")) {
+        client.setJWT(authHeader.slice("bearer ".length).trim());
+    } else {
+        const cookieStore = await cookies();
+        const session = cookieStore.get(SESSION_COOKIE_NAME);
+
+        if (!session || !session.value) {
+            throw new Error("No session");
+        }
+
+        client.setSession(session.value);
     }
-
-    client.setSession(session.value);
 
     return {
         get account() {
