@@ -410,6 +410,15 @@ const InvoicePDF = ({ invoice, company, t }: InvoicePDFProps) => {
                     </View>
                 )}
 
+                {/* Kleinunternehmer note (§19 UStG) */}
+                {company?.is_small_business && (
+                    <View style={styles.paymentTerms}>
+                        <Text>
+                            Gemäß §19 UStG wird keine Umsatzsteuer berechnet.
+                        </Text>
+                    </View>
+                )}
+
                 {/* Payment Terms */}
                 {company?.payment_terms_default && (
                     <View style={styles.paymentTerms}>
