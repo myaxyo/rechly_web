@@ -15,6 +15,7 @@ import {
     Drawer,
 } from "antd";
 import {
+    CalculatorOutlined,
     DashboardOutlined,
     FileTextOutlined,
     UserOutlined,
@@ -95,6 +96,11 @@ export default function DashboardLayout({
                     key: "/dashboard/bank",
                     icon: <BankOutlined />,
                     label: t("dashboard.bank"),
+                },
+                {
+                    key: "/dashboard/reports",
+                    icon: <CalculatorOutlined />,
+                    label: t("dashboard.reports"),
                 },
             ],
         },
