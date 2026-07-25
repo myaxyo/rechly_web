@@ -212,6 +212,45 @@ export default function Footer() {
                             </Link>
                         </Space>
                     </div>
+
+                    {/* Contact */}
+                    <div>
+                        <Text
+                            strong
+                            style={{
+                                display: "block",
+                                marginBottom: 12,
+                                fontSize: 13,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
+                                color: "#374151",
+                            }}
+                        >
+                            {t("footer.contact")}
+                        </Text>
+                        <Text
+                            style={{
+                                color: "#64748b",
+                                fontSize: 13,
+                                display: "block",
+                                marginBottom: 10,
+                                lineHeight: 1.6,
+                            }}
+                        >
+                            {t("footer.contactHint")}
+                        </Text>
+                        <a
+                            href="mailto:admin@rechly.de"
+                            style={{
+                                color: "#1677ff",
+                                fontSize: 14,
+                                fontWeight: 500,
+                                textDecoration: "none",
+                            }}
+                        >
+                            admin@rechly.de
+                        </a>
+                    </div>
                 </div>
 
                 <Divider style={{ margin: "24px 0", borderColor: "#e5e7eb" }} />

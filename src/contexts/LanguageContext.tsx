@@ -116,6 +116,9 @@ const translations: Record<Language, Record<string, string>> = {
             "Open-Source Rechnungssoftware für Freelancer und kleine Unternehmen.",
         "footer.product": "Produkt",
         "footer.legal": "Rechtliches",
+        "footer.contact": "Kontakt",
+        "footer.contactHint":
+            "Probleme, Ideen oder Feedback? Schreib uns – wir freuen uns über jede Nachricht.",
         "footer.language": "Sprache",
         "footer.impressum": "Impressum",
         "footer.privacy": "Datenschutz",
@@ -1015,6 +1018,9 @@ const translations: Record<Language, Record<string, string>> = {
             "Open-source invoicing software for freelancers and small businesses.",
         "footer.product": "Product",
         "footer.legal": "Legal",
+        "footer.contact": "Contact",
+        "footer.contactHint":
+            "Issues, ideas, or feedback? Reach out – we'd love to hear from you.",
         "footer.language": "Language",
         "footer.impressum": "Imprint",
         "footer.privacy": "Privacy",
