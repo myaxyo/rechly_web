@@ -213,6 +213,7 @@ const translations: Record<Language, Record<string, string>> = {
         "dashboard.guestModeDesc": "Deine Daten werden gelöscht, wenn du den Tab schließt. ",
         "dashboard.guestModeRegister": "Jetzt registrieren",
         "dashboard.guestModeSuffix": ", um deine Daten zu speichern.",
+        "dashboard.feedbackCta": "Feedback? admin@rechly.de",
 
         // Status
         "status.draft": "Entwurf",
@@ -1114,6 +1115,7 @@ const translations: Record<Language, Record<string, string>> = {
         "dashboard.guestModeDesc": "Your data will be deleted when you close the tab. ",
         "dashboard.guestModeRegister": "Register now",
         "dashboard.guestModeSuffix": " to save your data.",
+        "dashboard.feedbackCta": "Feedback? admin@rechly.de",
 
         // Status
         "status.draft": "Draft",

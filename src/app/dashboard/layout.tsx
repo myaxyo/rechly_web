@@ -238,6 +238,31 @@ export default function DashboardLayout({
                         items={menuItems}
                         onClick={({ key }) => router.push(key)}
                     />
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: 16,
+                            left: 0,
+                            right: 0,
+                            padding: collapsed ? "0 8px" : "0 16px",
+                            textAlign: "center",
+                        }}
+                    >
+                        <a
+                            href="mailto:admin@rechly.de"
+                            style={{
+                                color: "rgba(255,255,255,0.45)",
+                                fontSize: 12,
+                                textDecoration: "none",
+                                lineHeight: 1.4,
+                                display: "block",
+                            }}
+                        >
+                            {collapsed
+                                ? "✉"
+                                : t("dashboard.feedbackCta")}
+                        </a>
+                    </div>
                 </Sider>
             )}
 
@@ -296,6 +321,18 @@ export default function DashboardLayout({
                     >
                         {t("auth.logout")}
                     </Button>
+                    <div style={{ marginTop: 16, textAlign: "center" }}>
+                        <a
+                            href="mailto:admin@rechly.de"
+                            style={{
+                                color: "#64748b",
+                                fontSize: 13,
+                                textDecoration: "none",
+                            }}
+                        >
+                            {t("dashboard.feedbackCta")}
+                        </a>
+                    </div>
                 </div>
             </Drawer>
 
