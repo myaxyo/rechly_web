@@ -8,7 +8,6 @@ import {
     createSessionClient,
     DATABASE_ID,
 } from "@/lib/appwrite-server";
-import { getMlApiSecret, getOptionalMlApiUrl } from "@/lib/env";
 
 const BATCH_SIZE = 50;
 const MAX_ERRORS = 100;
@@ -24,8 +23,6 @@ const ALLOWED_UNITS = new Set([
     "m²",
     "Liter",
 ]);
-const ML_API_URL = getOptionalMlApiUrl();
-const ML_API_SECRET = getMlApiSecret() || "";
 
 type ProductInsertPayload = {
     row: number;
@@ -146,66 +143,6 @@ function validateRow(
     };
 }
 
-async function triggerMlRecompute(): Promise<{
-    attempted: boolean;
-    success: boolean;
-    details?: string;
-}> {
-    if (!ML_API_URL || !ML_API_SECRET) {
-        return {
-            attempted: false,
-            success: false,
-            details: "ML_API_URL or ML_API_SECRET not configured",
-        };
-    }
-
-    try {
-        const endpoints = [
-            { method: "POST", path: "/train/revenue" },
-            { method: "POST", path: "/api/train/revenue" },
-            { method: "GET", path: "/forecast/revenue" },
-            { method: "GET", path: "/api/forecast/revenue" },
-        ] as const;
-
-        const statuses: string[] = [];
-        let ok = false;
-
-        for (const endpoint of endpoints) {
-            try {
-                const response = await fetch(`${ML_API_URL}${endpoint.path}`, {
-                    method: endpoint.method,
-                    headers: {
-                        Authorization: `Bearer ${ML_API_SECRET}`,
-                    },
-                    cache: "no-store",
-                });
-                statuses.push(
-                    `${endpoint.method} ${endpoint.path}: ${response.status}`,
-                );
-                if (response.ok) ok = true;
-            } catch {
-                statuses.push(
-                    `${endpoint.method} ${endpoint.path}: request failed`,
-                );
-            }
-        }
-
-        return {
-            attempted: true,
-            success: ok,
-            details: ok
-                ? "ML recomputation endpoint responded"
-                : `ML endpoints failed or returned non-OK (${statuses.join(" | ")})`,
-        };
-    } catch {
-        return {
-            attempted: true,
-            success: false,
-            details: "Failed to reach ML service",
-        };
-    }
-}
-
 export async function POST(request: NextRequest) {
     try {
         let account;
@@ -320,14 +257,11 @@ export async function POST(request: NextRequest) {
 
         await flushBatch();
 
-        const mlTrigger = await triggerMlRecompute();
-
         return NextResponse.json({
             processedRows,
             insertedRows,
             failedRows: errors.length,
             errors,
-            mlTrigger,
         });
     } catch (error) {
         console.error("Error during product CSV bulk upload:", error);

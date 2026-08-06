@@ -6,12 +6,10 @@ Rechly is an open-source invoicing app for freelancers and small businesses. The
 
 - Next.js App Router, React, TypeScript, Ant Design
 - Appwrite for auth, database, and server-side admin operations
-- Django REST Framework and Python-based ML workflows in `services/ml_api`
 
 ## Repository Layout
 
 - `src/` - web app routes, UI, shared services, and client/server Appwrite code
-- `services/ml_api/` - optional ML and analytics service
 - `public/` - static assets and favicons
 
 ## Prerequisites
@@ -19,7 +17,6 @@ Rechly is an open-source invoicing app for freelancers and small businesses. The
 - Node.js 20+
 - npm
 - An Appwrite project with the database and collections used by the app
-- Python 3.12+ if you want to run the ML service
 
 ## Web App Setup
 
@@ -43,12 +40,9 @@ npm run dev
 
 The app expects the Appwrite database and collections defined in `src/lib/appwrite.ts` and `src/lib/appwrite-server.ts`. Rechly does not yet ship Appwrite provisioning automation, so self-hosters need to create those resources in their own Appwrite project.
 
-## ML Service Setup
+## Analytics
 
-The ML service is optional. The web app will still run without it, but analytics features that rely on forecasting or risk scoring will degrade gracefully.
-
-1. Follow the setup instructions in `services/ml_api/README.md`.
-2. Set `ML_API_URL` and `ML_API_SECRET` in `.env.local` once the service is running.
+Revenue forecasting, late-payment risk scoring, customer segmentation, and anomaly detection are computed directly in the Next.js API route (`/api/analytics/insights`). No external ML service is required — the app trains a lightweight logistic regression model on the fly using your invoice history.
 
 ## Open-Source Release Notes
 
@@ -73,12 +67,10 @@ npm run lint
 | Repository | Description |
 |---|---|
 | [rechly_web](https://github.com/myaxyo/rechly_web) | Next.js web app (this repo) |
-| [rechly_ml](https://github.com/myaxyo/rechly_ml) | Django ML service for analytics, forecasting, and payment-risk scoring |
 
 ## Current Gaps
 
 - Appwrite infrastructure is documented but not auto-provisioned.
-- The ML service requires Appwrite data and trained artifacts for full functionality.
 
 ## License
 

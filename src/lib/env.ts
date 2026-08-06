@@ -72,17 +72,6 @@ export function getSiteUrl(): string {
     return normalized;
 }
 
-export function getOptionalMlApiUrl(): string | undefined {
-    const value = getOptionalEnv("ML_API_URL");
-    return value ? trimTrailingSlashes(value) : undefined;
-}
-
-export function getMlApiSecret(): string | undefined {
-    return (
-        getOptionalEnv("ML_API_SECRET") || getOptionalEnv("CLEANUP_API_SECRET")
-    );
-}
-
 export function getOptionalAnalyticsId(): string | undefined {
     return getOptionalEnv("NEXT_PUBLIC_GOOGLE_ANALYTICS_ID");
 }
