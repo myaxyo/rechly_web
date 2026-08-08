@@ -139,16 +139,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-
-        // Generate a unique ID - ID.unique() should always be unique
-        // but we log it for debugging purposes
         const invoiceId = ID.unique();
-
-        // Log request body for debugging
-        console.log("Generated invoice ID:", invoiceId);
-        console.log("Invoice number from body:", body.invoice_number);
-        console.log("Client ID from body:", body.client_id);
-        console.log("User ID:", user.$id);
 
         // Calculate totals
         const totals = calculateInvoiceTotals(
@@ -225,42 +216,6 @@ export async function POST(request: NextRequest) {
                 throw createError;
             }
         }
-
-        let invoiceDoc;
-        try {
-            // Try with all fields first
-            invoiceDoc = await databases.createDocument(
-                DATABASE_ID,
-                COLLECTIONS.INVOICES,
-                invoiceId,
-                { ...invoiceData, ...optionalAttrs },
-                [
-                    Permission.read(Role.user(user.$id)),
-                    Permission.update(Role.user(user.$id)),
-                    Permission.delete(Role.user(user.$id)),
-                ],
-            );
-        } catch (firstError) {
-            const errMsg = (firstError as { message?: string })?.message || "";
-            if (errMsg.includes("Unknown attribute")) {
-                // Retry without optional attributes
-                invoiceDoc = await databases.createDocument(
-                    DATABASE_ID,
-                    COLLECTIONS.INVOICES,
-                    invoiceId,
-                    invoiceData,
-                    [
-                        Permission.read(Role.user(user.$id)),
-                        Permission.update(Role.user(user.$id)),
-                        Permission.delete(Role.user(user.$id)),
-                    ],
-                );
-            } else {
-                throw firstError;
-            }
-        }
-
-        void invoiceDoc; // acknowledge usage
 
         // Create invoice items
         for (const item of body.items) {
