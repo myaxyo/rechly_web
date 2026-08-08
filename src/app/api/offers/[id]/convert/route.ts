@@ -37,6 +37,11 @@ export async function POST(
             return NextResponse.json({ error: "Not found" }, { status: 404 });
         }
 
+        // Prevent double conversion
+        if (offerDoc.status === "converted" && offerDoc.convertedInvoiceId) {
+            return NextResponse.json({ invoiceId: offerDoc.convertedInvoiceId });
+        }
+
         // Fetch offer items
         const itemsRes = await databases.listDocuments(
             DATABASE_ID,
@@ -58,29 +63,44 @@ export async function POST(
         const invoiceNumber = `RE-${yyyyMM}-${suffix}`;
 
         // Create invoice document
-        await databases.createDocument(
-            DATABASE_ID,
-            COLLECTIONS.INVOICES,
-            invoiceId,
-            {
-                userId: user.$id,
-                clientId: offerDoc.clientId,
-                invoiceNumber,
-                issueDate: new Date().toISOString().split("T")[0],
-                dueDate: null,
-                subtotal: offerDoc.subtotal,
-                totalVat: offerDoc.totalVat,
-                totalGross: offerDoc.totalGross,
-                status: "draft",
-                notes: offerDoc.notes || null,
-                purchaseOrderRef: offerDoc.purchaseOrderRef || null,
-                deliveryDate: null,
-                paymentTerms: offerDoc.paymentTerms || null,
-                correctionType: null,
-                correctsInvoiceId: null,
-            },
-            permissions,
-        );
+        const invoiceData: Record<string, unknown> = {
+            userId: user.$id,
+            clientId: offerDoc.clientId,
+            invoiceNumber,
+            issueDate: new Date().toISOString().split("T")[0],
+            dueDate: null,
+            subtotal: offerDoc.subtotal,
+            totalVat: offerDoc.totalVat,
+            totalGross: offerDoc.totalGross,
+            status: "draft",
+            notes: offerDoc.notes || null,
+            purchaseOrderRef: offerDoc.purchaseOrderRef || null,
+            deliveryDate: null,
+            paymentTerms: offerDoc.paymentTerms || null,
+        };
+
+        try {
+            await databases.createDocument(
+                DATABASE_ID,
+                COLLECTIONS.INVOICES,
+                invoiceId,
+                { ...invoiceData, correctionType: null, correctsInvoiceId: null },
+                permissions,
+            );
+        } catch (firstErr) {
+            const msg = (firstErr as { message?: string })?.message || "";
+            if (msg.includes("Unknown attribute")) {
+                await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTIONS.INVOICES,
+                    invoiceId,
+                    invoiceData,
+                    permissions,
+                );
+            } else {
+                throw firstErr;
+            }
+        }
 
         // Copy offer items to invoice items
         for (const item of itemsRes.documents) {
