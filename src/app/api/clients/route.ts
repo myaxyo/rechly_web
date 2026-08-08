@@ -98,36 +98,68 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { ID } = await import("node-appwrite");
 
-        // Create document with userId and user permissions
-        const doc = await databases.createDocument(
-            DATABASE_ID,
-            COLLECTIONS.CLIENTS,
-            ID.unique(),
-            {
-                userId: user.$id,
-                name: body.name,
-                contactPerson: body.contact_person || null,
-                addressLine1: body.address_line1,
-                addressLine2: body.address_line2 || null,
-                postalCode: body.postal_code,
-                city: body.city,
-                country: body.country || "Deutschland",
-                email: body.email || null,
-                phone: body.phone || null,
-                vatId: body.vat_id || null,
-                taxNumber: body.tax_number || null,
-                leitwegId: body.leitweg_id || null,
-                registrationDate:
-                    body.registration_date ||
-                    new Date().toISOString().split("T")[0],
-                status: body.status || "active",
-            },
-            [
-                Permission.read(Role.user(user.$id)),
-                Permission.update(Role.user(user.$id)),
-                Permission.delete(Role.user(user.$id)),
-            ]
-        );
+        // Build document data - only include fields that have values
+        // to avoid errors with attributes that may not exist in all setups
+        const documentData: Record<string, unknown> = {
+            userId: user.$id,
+            name: body.name,
+            contactPerson: body.contact_person || null,
+            addressLine1: body.address_line1,
+            addressLine2: body.address_line2 || null,
+            postalCode: body.postal_code,
+            city: body.city,
+            country: body.country || "Deutschland",
+            email: body.email || null,
+            phone: body.phone || null,
+            vatId: body.vat_id || null,
+            taxNumber: body.tax_number || null,
+            leitwegId: body.leitweg_id || null,
+        };
+
+        // Optional fields that may not exist in all Appwrite collection schemas
+        if (body.registration_date) {
+            documentData.registrationDate = body.registration_date;
+        }
+        if (body.status) {
+            documentData.status = body.status;
+        }
+
+        // Try creating with all fields first; if it fails due to unknown
+        // attributes, retry without optional fields
+        let doc;
+        try {
+            doc = await databases.createDocument(
+                DATABASE_ID,
+                COLLECTIONS.CLIENTS,
+                ID.unique(),
+                documentData,
+                [
+                    Permission.read(Role.user(user.$id)),
+                    Permission.update(Role.user(user.$id)),
+                    Permission.delete(Role.user(user.$id)),
+                ]
+            );
+        } catch (firstError) {
+            const errMsg = (firstError as { message?: string })?.message || "";
+            // If error is about unknown attributes, retry without optional fields
+            if (errMsg.includes("Unknown attribute") || errMsg.includes("Invalid document")) {
+                delete documentData.registrationDate;
+                delete documentData.status;
+                doc = await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTIONS.CLIENTS,
+                    ID.unique(),
+                    documentData,
+                    [
+                        Permission.read(Role.user(user.$id)),
+                        Permission.update(Role.user(user.$id)),
+                        Permission.delete(Role.user(user.$id)),
+                    ]
+                );
+            } else {
+                throw firstError;
+            }
+        }
 
         const client = {
             id: doc.$id,
@@ -152,11 +184,26 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(client);
     } catch (error) {
         console.error("Error creating client:", error);
-        const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
+        const appwriteError = error as {
+            code?: number;
+            type?: string;
+            message?: string;
+            response?: { message?: string };
+        };
+        let userMessage = "Fehler beim Speichern des Kunden";
+        let statusCode = 500;
+        if (appwriteError.code === 401 || appwriteError.code === 403) {
+            userMessage = "Sitzung abgelaufen – bitte erneut anmelden";
+            statusCode = 401;
+        } else if (appwriteError.code === 400) {
+            userMessage = appwriteError.response?.message || appwriteError.message || "Ungültige Daten – bitte alle Pflichtfelder prüfen";
+            statusCode = 400;
+        } else if (appwriteError.message) {
+            userMessage = appwriteError.message;
+        }
         return NextResponse.json(
-            { error: "Failed to create client", details: errorMessage },
-            { status: 500 }
+            { error: userMessage, details: appwriteError.message || "Unknown error", code: appwriteError.code },
+            { status: statusCode }
         );
     }
 }

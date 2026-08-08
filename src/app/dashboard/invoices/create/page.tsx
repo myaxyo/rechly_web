@@ -220,7 +220,8 @@ export default function InvoiceCreatePage() {
             message.success(t("invoiceCreate.created"));
         } catch (error) {
             console.error("Error creating invoice:", error);
-            message.error(t("invoiceCreate.createError"));
+            const errorMsg = error instanceof Error ? error.message : t("invoiceCreate.createError");
+            message.error(errorMsg);
         } finally {
             setSaving(false);
         }

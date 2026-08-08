@@ -251,7 +251,8 @@ export default function ClientsPage() {
             setModalOpen(false);
         } catch (error) {
             console.error("Error saving client:", error);
-            message.error(t("clients.saveError"));
+            const errorMsg = error instanceof Error ? error.message : t("clients.saveError");
+            message.error(errorMsg);
         } finally {
             setSubmitting(false);
         }

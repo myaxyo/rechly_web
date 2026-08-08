@@ -164,33 +164,64 @@ export async function POST(request: NextRequest) {
         );
 
         // Create invoice document with permissions
-        await databases.createDocument(
-            DATABASE_ID,
-            COLLECTIONS.INVOICES,
-            invoiceId,
-            {
-                userId: user.$id,
-                clientId: body.client_id,
-                invoiceNumber: body.invoice_number,
-                issueDate: body.issue_date,
-                dueDate: body.due_date || null,
-                subtotal: totals.netAfterDiscount,
-                totalVat: totals.totalVAT,
-                totalGross: totals.totalGross,
-                status: "draft",
-                notes: body.notes || null,
-                purchaseOrderRef: body.purchase_order_ref || null,
-                deliveryDate: body.delivery_date || null,
-                paymentTerms: body.payment_terms || null,
-                correctionType: null,
-                correctsInvoiceId: null,
-            },
-            [
-                Permission.read(Role.user(user.$id)),
-                Permission.update(Role.user(user.$id)),
-                Permission.delete(Role.user(user.$id)),
-            ],
-        );
+        // Build document data, keeping optional/newer attributes separate
+        const invoiceData: Record<string, unknown> = {
+            userId: user.$id,
+            clientId: body.client_id,
+            invoiceNumber: body.invoice_number,
+            issueDate: body.issue_date,
+            dueDate: body.due_date || null,
+            subtotal: totals.netAfterDiscount,
+            totalVat: totals.totalVAT,
+            totalGross: totals.totalGross,
+            status: "draft",
+            notes: body.notes || null,
+            purchaseOrderRef: body.purchase_order_ref || null,
+            deliveryDate: body.delivery_date || null,
+            paymentTerms: body.payment_terms || null,
+        };
+
+        // Optional attributes that may not exist in all Appwrite schemas
+        const optionalAttrs: Record<string, unknown> = {
+            correctionType: null,
+            correctsInvoiceId: null,
+        };
+
+        let invoiceDoc;
+        try {
+            // Try with all fields first
+            invoiceDoc = await databases.createDocument(
+                DATABASE_ID,
+                COLLECTIONS.INVOICES,
+                invoiceId,
+                { ...invoiceData, ...optionalAttrs },
+                [
+                    Permission.read(Role.user(user.$id)),
+                    Permission.update(Role.user(user.$id)),
+                    Permission.delete(Role.user(user.$id)),
+                ],
+            );
+        } catch (firstError) {
+            const errMsg = (firstError as { message?: string })?.message || "";
+            if (errMsg.includes("Unknown attribute")) {
+                // Retry without optional attributes
+                invoiceDoc = await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTIONS.INVOICES,
+                    invoiceId,
+                    invoiceData,
+                    [
+                        Permission.read(Role.user(user.$id)),
+                        Permission.update(Role.user(user.$id)),
+                        Permission.delete(Role.user(user.$id)),
+                    ],
+                );
+            } else {
+                throw firstError;
+            }
+        }
+
+        void invoiceDoc; // acknowledge usage
 
         // Create invoice items
         for (const item of body.items) {
@@ -229,31 +260,33 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ id: invoiceId });
     } catch (error) {
         console.error("Error creating invoice:", error);
-        // Log more details for debugging
-        if (error instanceof Error) {
-            console.error("Error name:", error.name);
-            console.error("Error message:", error.message);
-            console.error("Error stack:", error.stack);
-        }
-        // Check if it's an Appwrite error with more details
         const appwriteError = error as {
             code?: number;
             type?: string;
-            response?: unknown;
+            message?: string;
+            response?: { message?: string };
         };
         if (appwriteError.code) {
             console.error("Appwrite error code:", appwriteError.code);
             console.error("Appwrite error type:", appwriteError.type);
-            console.error(
-                "Appwrite error response:",
-                JSON.stringify(appwriteError.response),
-            );
         }
-        const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
+        let userMessage = "Fehler beim Erstellen der Rechnung";
+        let statusCode = 500;
+        if (appwriteError.code === 401 || appwriteError.code === 403) {
+            userMessage = "Sitzung abgelaufen – bitte erneut anmelden";
+            statusCode = 401;
+        } else if (appwriteError.code === 400) {
+            userMessage = appwriteError.response?.message || appwriteError.message || "Ungültige Daten – bitte alle Pflichtfelder prüfen";
+            statusCode = 400;
+        } else if (appwriteError.code === 404) {
+            userMessage = "Kunde oder Datenbank nicht gefunden – bitte Firmendaten unter Einstellungen prüfen";
+            statusCode = 404;
+        } else if (appwriteError.message) {
+            userMessage = appwriteError.message;
+        }
         return NextResponse.json(
-            { error: "Failed to create invoice", details: errorMessage },
-            { status: 500 },
+            { error: userMessage, details: appwriteError.message || "Unknown error", code: appwriteError.code },
+            { status: statusCode },
         );
     }
 }
