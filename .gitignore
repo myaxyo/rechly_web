@@ -70,3 +70,7 @@ Desktop.ini
 
 deck
 
+
+# Agent/IDE configs
+.agents/
+.claude/
