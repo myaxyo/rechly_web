@@ -1,0 +1,1720 @@
+{
+    "organizationId": "692d47cfb0fbe4297e5d",
+    "projectId": "692d4bf1002b21c4b2b7",
+    "projectName": "rechly",
+    "endpoint": "https://fra.cloud.appwrite.io/v1",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": true,
+            "teams": true,
+            "users": true,
+            "sites": true,
+            "functions": true,
+            "graphql": true,
+            "messaging": true
+        },
+        "protocols": {
+            "rest": true,
+            "graphql": true,
+            "websocket": true
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": null,
+                "sessionsLimit": 10,
+                "passwordHistory": null,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "tablesDB": [
+        {
+            "$id": "rechly-db",
+            "name": "rechly-db",
+            "enabled": true
+        }
+    ],
+    "tables": [
+        {
+            "$id": "user_company",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "rechly-db",
+            "name": "User Company Info",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "legalForm",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "addressLine1",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "addressLine2",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "postalCode",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "country",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 100,
+                    "default": "Deutschland",
+                    "encrypt": false
+                },
+                {
+                    "key": "email",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "phone",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "website",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "vatId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "taxNumber",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "commercialRegisterNumber",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "registryCourt",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "managingDirectors",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "bankName",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "bankIban",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 34,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "bankBic",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 11,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "paymentTermsDefault",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "logoBase64",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 5000000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "isSmallBusiness",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "datevChartOfAccounts",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "format": "enum",
+                    "elements": [
+                        "SKR03",
+                        "SKR04"
+                    ]
+                },
+                {
+                    "key": "datevConsultantNumber",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "datevClientNumber",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "clients",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "rechly-db",
+            "name": "Clients",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "contactPerson",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 128,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "addressLine1",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "addressLine2",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "postalCode",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "country",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 128,
+                    "default": "Deutschland",
+                    "encrypt": false
+                },
+                {
+                    "key": "email",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "phone",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 48,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "vatId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 32,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "taxNumber",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 32,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "leitwegId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 32,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "registrationDate",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "format": ""
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "format": "enum",
+                    "elements": [
+                        "active",
+                        "inactive",
+                        "suspended"
+                    ]
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "name_idx",
+                    "type": "fulltext",
+                    "status": "available",
+                    "columns": [
+                        "name"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                },
+                {
+                    "key": "userId",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "products",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "rechly-db",
+            "name": "Products",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "unitOfMeasure",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "format": "enum",
+                    "elements": [
+                        "Stück",
+                        "Piece",
+                        "Stunde",
+                        "Hour",
+                        "Tag",
+                        "Day",
+                        "Monat",
+                        "Month",
+                        "Pauschal",
+                        "Flat",
+                        "kg",
+                        "Liter",
+                        "m²",
+                        "m"
+                    ]
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "taxRatePercent",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": 19,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "index_idx",
+                    "type": "fulltext",
+                    "status": "available",
+                    "columns": [
+                        "name"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                },
+                {
+                    "key": "userId",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "invoices",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "rechly-db",
+            "name": "Invoices",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "invoiceNumber",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 64,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "issueDate",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "format": ""
+                },
+                {
+                    "key": "dueDate",
+                    "type": "datetime",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "format": ""
+                },
+                {
+                    "key": "notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 512,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "purchaseOrderRef",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 128,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "deliveryDate",
+                    "type": "datetime",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "format": ""
+                },
+                {
+                    "key": "totalVat",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "totalGross",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": "draft",
+                    "encrypt": false
+                },
+                {
+                    "key": "paymentTerms",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "clientId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "correctionType",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "correctsInvoiceId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "clientId_key",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "issueDate"
+                    ],
+                    "orders": []
+                },
+                {
+                    "key": "userId",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "invoice_items",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "rechly-db",
+            "name": "Invoice Items",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "unitOfMeasure",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "format": "enum",
+                    "elements": [
+                        "Stück",
+                        "Kg",
+                        "L",
+                        "Pack",
+                        "Box"
+                    ]
+                },
+                {
+                    "key": "quantity",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 10000
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 100000
+                },
+                {
+                    "key": "taxRatePercent",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": 19,
+                    "min": 0,
+                    "max": 100
+                },
+                {
+                    "key": "discountPercent",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "taxAmount",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "total",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "invoiceId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "productId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 255,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "description_fulltext",
+                    "type": "fulltext",
+                    "status": "available",
+                    "columns": [
+                        "description"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                },
+                {
+                    "key": "price_key",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "price"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "dunning_notices",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "databaseId": "rechly-db",
+            "name": "dunning_notices",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 64,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "invoiceId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 64,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "level",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "noticeNumber",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 32,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "issueDate",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 16,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "fee",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "daysOverdue",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1000,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "offers",
+            "$permissions": [],
+            "databaseId": "rechly-db",
+            "name": "offers",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "clientId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "offerNumber",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "issueDate",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "validUntil",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "totalVat",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "totalGross",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "purchaseOrderRef",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "paymentTerms",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "convertedInvoiceId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_idx",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "offer_items",
+            "$permissions": [],
+            "databaseId": "rechly-db",
+            "name": "offer_items",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "offerId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "productId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 1000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "quantity",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "unitOfMeasure",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "taxRatePercent",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "taxAmount",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "total",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "offerId_idx",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "offerId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "recurring_invoices",
+            "$permissions": [],
+            "databaseId": "rechly-db",
+            "name": "recurring_invoices",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "templateName",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "clientId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "nextDueDate",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "endDate",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "lastCreatedInvoiceId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "notes",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 2000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "paymentTerms",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "totalVat",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "totalGross",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_idx",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "recurring_invoice_items",
+            "$permissions": [],
+            "databaseId": "rechly-db",
+            "name": "recurring_invoice_items",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "recurringInvoiceId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "productId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 1000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "quantity",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "unitOfMeasure",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "price",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "taxRatePercent",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "subtotal",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "taxAmount",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "total",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "riId_idx",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "recurringInvoiceId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "expenses",
+            "$permissions": [],
+            "databaseId": "rechly-db",
+            "name": "expenses",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "date",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "vendorName",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 1000,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "amountNet",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "vatAmount",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "amountGross",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "vatRatePercent",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "receiptFileId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_idx",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "bank_transactions",
+            "$permissions": [],
+            "databaseId": "rechly-db",
+            "name": "bank_transactions",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "bookingDate",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "valueDate",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 10,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "counterpartName",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "counterpartIban",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 34,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "reference",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 500,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "amount",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "currency",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 3,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "matchedInvoiceId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "importBatchId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_idx",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "company-logos",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "fileSecurity": false,
+            "name": "Company Logos",
+            "enabled": true,
+            "maximumFileSize": 5000000,
+            "allowedFileExtensions": [
+                "jpg",
+                "png",
+                "jpeg"
+            ],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        },
+        {
+            "$id": "receipts",
+            "$permissions": [],
+            "fileSecurity": false,
+            "name": "receipts",
+            "enabled": true,
+            "maximumFileSize": 10485760,
+            "allowedFileExtensions": [
+                "jpg",
+                "jpeg",
+                "png",
+                "pdf",
+                "webp",
+                "heic"
+            ],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        }
+    ]
+}
