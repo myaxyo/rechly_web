@@ -6,6 +6,7 @@ import {
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
+import { isCollectionNotFound } from "@/lib/appwrite-errors";
 
 // GET single invoice with details
 export async function GET(
@@ -37,11 +38,29 @@ export async function GET(
         }
 
         // Get invoice
-        const doc = await databases.getDocument(
-            DATABASE_ID,
-            COLLECTIONS.INVOICES,
-            id,
-        );
+        let doc;
+        try {
+            doc = await databases.getDocument(
+                DATABASE_ID,
+                COLLECTIONS.INVOICES,
+                id,
+            );
+        } catch (error) {
+            if (isCollectionNotFound(error)) {
+                return NextResponse.json(
+                    { error: "Invoice not found" },
+                    { status: 404 },
+                );
+            }
+            throw error;
+        }
+
+        if (doc.userId !== user.$id) {
+            return NextResponse.json(
+                { error: "Invoice not found" },
+                { status: 404 },
+            );
+        }
 
         // Get client
         let client = undefined;
@@ -157,6 +176,31 @@ export async function PUT(
             );
         }
 
+        // Verify ownership before updating
+        let existing;
+        try {
+            existing = await databases.getDocument(
+                DATABASE_ID,
+                COLLECTIONS.INVOICES,
+                id,
+            );
+        } catch (error) {
+            if (isCollectionNotFound(error)) {
+                return NextResponse.json(
+                    { error: "Invoice not found" },
+                    { status: 404 },
+                );
+            }
+            throw error;
+        }
+
+        if (existing.userId !== user.$id) {
+            return NextResponse.json(
+                { error: "Invoice not found" },
+                { status: 404 },
+            );
+        }
+
         const body = await request.json();
 
         // Update status
@@ -200,6 +244,31 @@ export async function DELETE(
             return NextResponse.json(
                 { error: "Not authenticated" },
                 { status: 401 },
+            );
+        }
+
+        // Verify ownership before deleting
+        let existing;
+        try {
+            existing = await databases.getDocument(
+                DATABASE_ID,
+                COLLECTIONS.INVOICES,
+                id,
+            );
+        } catch (error) {
+            if (isCollectionNotFound(error)) {
+                return NextResponse.json(
+                    { error: "Invoice not found" },
+                    { status: 404 },
+                );
+            }
+            throw error;
+        }
+
+        if (existing.userId !== user.$id) {
+            return NextResponse.json(
+                { error: "Invoice not found" },
+                { status: 404 },
             );
         }
 
