@@ -191,6 +191,41 @@ export async function POST(request: NextRequest) {
             correctsInvoiceId: null,
         };
 
+        // Create invoice — handle 409 (duplicate from double-click) and unknown attributes
+        const permissions = [
+            Permission.read(Role.user(user.$id)),
+            Permission.update(Role.user(user.$id)),
+            Permission.delete(Role.user(user.$id)),
+        ];
+
+        try {
+            await databases.createDocument(
+                DATABASE_ID,
+                COLLECTIONS.INVOICES,
+                invoiceId,
+                { ...invoiceData, ...optionalAttrs },
+                permissions,
+            );
+        } catch (createError) {
+            const errMsg = (createError as { message?: string })?.message || "";
+            const errCode = (createError as { code?: number })?.code;
+
+            if (errMsg.includes("Unknown attribute")) {
+                await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTIONS.INVOICES,
+                    invoiceId,
+                    invoiceData,
+                    permissions,
+                );
+            } else if (errCode === 409) {
+                // Already exists from a previous attempt — return it as success
+                return NextResponse.json({ id: invoiceId });
+            } else {
+                throw createError;
+            }
+        }
+
         let invoiceDoc;
         try {
             // Try with all fields first
