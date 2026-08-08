@@ -336,41 +336,6 @@ export default function ClientsPage() {
                         okText={t("clients.delete")}
                         cancelText={t("clients.cancel")}
                     >
-                        <Modal
-                            title={t("clients.aiDraftTitle")}
-                            open={replyModalOpen}
-                            onCancel={() => setReplyModalOpen(false)}
-                            footer={[
-                                <Button
-                                    key="copy"
-                                    icon={<CopyOutlined />}
-                                    onClick={() => void handleCopyReplyDraft()}
-                                >
-                                    {t("clients.aiCopy")}
-                                </Button>,
-                                <Button
-                                    key="email"
-                                    type="primary"
-                                    icon={<MailOutlined />}
-                                    onClick={handleOpenReplyEmail}
-                                    disabled={!replyClient?.email}
-                                >
-                                    {t("clients.aiOpenEmail")}
-                                </Button>,
-                            ]}
-                            width={760}
-                        >
-                            <Card size="small" style={{ marginBottom: 16 }}>
-                                <strong>{replyClient?.name}</strong>
-                                <div>
-                                    {replyClient?.email ||
-                                        t("clients.aiEmailMissing")}
-                                </div>
-                            </Card>
-                            <div style={{ whiteSpace: "pre-wrap" }}>
-                                {replyDraft}
-                            </div>
-                        </Modal>
                         <Button
                             type="text"
                             danger
@@ -603,6 +568,40 @@ export default function ClientsPage() {
                         </Space>
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            {/* AI Reply Draft Modal */}
+            <Modal
+                title={t("clients.aiDraftTitle")}
+                open={replyModalOpen}
+                onCancel={() => setReplyModalOpen(false)}
+                footer={[
+                    <Button
+                        key="copy"
+                        icon={<CopyOutlined />}
+                        onClick={() => void handleCopyReplyDraft()}
+                    >
+                        {t("clients.aiCopy")}
+                    </Button>,
+                    <Button
+                        key="email"
+                        type="primary"
+                        icon={<MailOutlined />}
+                        onClick={handleOpenReplyEmail}
+                        disabled={!replyClient?.email}
+                    >
+                        {t("clients.aiOpenEmail")}
+                    </Button>,
+                ]}
+                width={760}
+            >
+                <Card size="small" style={{ marginBottom: 16 }}>
+                    <strong>{replyClient?.name}</strong>
+                    <div>
+                        {replyClient?.email || t("clients.aiEmailMissing")}
+                    </div>
+                </Card>
+                <div style={{ whiteSpace: "pre-wrap" }}>{replyDraft}</div>
             </Modal>
         </div>
     );
