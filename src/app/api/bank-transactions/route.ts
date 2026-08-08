@@ -6,6 +6,7 @@ import {
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
+import { isCollectionNotFound } from "@/lib/appwrite-errors";
 
 export async function GET(request: NextRequest) {
     try {
@@ -58,6 +59,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(transactions);
     } catch (error) {
         console.error("Error fetching bank transactions:", error);
+        if (isCollectionNotFound(error)) {
+            return NextResponse.json([]);
+        }
         return NextResponse.json(
             { error: "Failed to fetch bank transactions" },
             { status: 500 },

@@ -6,6 +6,7 @@ import {
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
+import { isCollectionNotFound } from "@/lib/appwrite-errors";
 import {
     calculateInvoiceTotals,
     calculateLineItemTotals,
@@ -102,6 +103,9 @@ export async function GET() {
         return NextResponse.json(invoices);
     } catch (error) {
         console.error("Error fetching invoices:", error);
+        if (isCollectionNotFound(error)) {
+            return NextResponse.json([]);
+        }
         return NextResponse.json(
             { error: "Failed to fetch invoices" },
             { status: 500 },

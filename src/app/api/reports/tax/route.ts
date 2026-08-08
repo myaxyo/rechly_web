@@ -6,6 +6,7 @@ import {
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
+import { isCollectionNotFound } from "@/lib/appwrite-errors";
 import {
     computeUstva,
     computeEuer,
@@ -101,6 +102,14 @@ export async function GET(request: NextRequest) {
         });
     } catch (error) {
         console.error("Error computing tax reports:", error);
+        if (isCollectionNotFound(error)) {
+            const year = new Date().getFullYear();
+            const rawPart = `Q${Math.floor(new Date().getMonth() / 3) + 1}` as "Q1" | "Q2" | "Q3" | "Q4";
+            return NextResponse.json({
+                ustva: computeUstva([], [], periodFor(year, rawPart)),
+                euer: computeEuer([], [], year),
+            });
+        }
         return NextResponse.json(
             { error: "Failed to compute tax reports" },
             { status: 500 }
