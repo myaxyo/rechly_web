@@ -222,12 +222,14 @@ export default function OffersPage() {
                 ].filter(Boolean);
 
                 return (
-                    <Dropdown
-                        menu={{ items: menuItems as [] }}
-                        trigger={["click"]}
-                    >
-                        <Button type="text" icon={<MoreOutlined />} />
-                    </Dropdown>
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <Dropdown
+                            menu={{ items: menuItems as [] }}
+                            trigger={["click"]}
+                        >
+                            <Button type="text" icon={<MoreOutlined />} />
+                        </Dropdown>
+                    </div>
                 );
             },
         },

@@ -307,16 +307,18 @@ export default function InvoicesPage() {
             key: "actions",
             width: 50,
             render: (_, record) => (
-                <Dropdown
-                    menu={{ items: getActionMenu(record) }}
-                    trigger={["click"]}
-                >
-                    <Button
-                        type="text"
-                        icon={<MoreOutlined />}
-                        loading={draftingInvoiceId === record.id}
-                    />
-                </Dropdown>
+                <div onClick={(e) => e.stopPropagation()}>
+                    <Dropdown
+                        menu={{ items: getActionMenu(record) }}
+                        trigger={["click"]}
+                    >
+                        <Button
+                            type="text"
+                            icon={<MoreOutlined />}
+                            loading={draftingInvoiceId === record.id}
+                        />
+                    </Dropdown>
+                </div>
             ),
         },
     ];
