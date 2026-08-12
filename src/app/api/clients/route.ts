@@ -42,6 +42,7 @@ export async function GET() {
         // Map documents to client format
         const clients = response.documents.map((doc) => ({
             id: doc.$id,
+            client_type: doc.clientType || "company",
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
             address_line1: doc.addressLine1,
@@ -101,6 +102,7 @@ export async function POST(request: NextRequest) {
         // Build document data
         const documentData: Record<string, unknown> = {
             userId: user.$id,
+            clientType: body.client_type || "company",
             name: body.name,
             contactPerson: body.contact_person || null,
             addressLine1: body.address_line1,
@@ -131,6 +133,7 @@ export async function POST(request: NextRequest) {
 
         const client = {
             id: doc.$id,
+            client_type: doc.clientType || "company",
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
             address_line1: doc.addressLine1,

@@ -14,6 +14,7 @@ import {
     Row,
     Col,
     Card,
+    Radio,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -228,13 +229,16 @@ export default function ClientsPage() {
     const openCreateModal = () => {
         setEditingClient(null);
         form.resetFields();
-        form.setFieldsValue({ country: "Deutschland" });
+        form.setFieldsValue({ country: "Deutschland", client_type: "company" });
         setModalOpen(true);
     };
 
     const openEditModal = (client: Client) => {
         setEditingClient(client);
-        form.setFieldsValue(client);
+        form.setFieldsValue({
+            ...client,
+            client_type: client.client_type || "company",
+        });
         setModalOpen(true);
     };
 
@@ -417,13 +421,41 @@ export default function ClientsPage() {
                     style={{ marginTop: 16 }}
                 >
                     <Form.Item
-                        name="name"
-                        label={t("clients.companyName")}
-                        rules={[
-                            { required: true, message: t("clients.required") },
-                        ]}
+                        name="client_type"
+                        label={t("clients.clientType")}
                     >
-                        <Input placeholder={t("clients.companyName")} />
+                        <Radio.Group>
+                            <Radio.Button value="company">
+                                {t("clients.typeCompany")}
+                            </Radio.Button>
+                            <Radio.Button value="person">
+                                {t("clients.typePerson")}
+                            </Radio.Button>
+                        </Radio.Group>
+                    </Form.Item>
+
+                    <Form.Item noStyle shouldUpdate={(prev, cur) => prev.client_type !== cur.client_type}>
+                        {() => (
+                            <Form.Item
+                                name="name"
+                                label={
+                                    form.getFieldValue("client_type") === "person"
+                                        ? t("clients.personName")
+                                        : t("clients.companyName")
+                                }
+                                rules={[
+                                    { required: true, message: t("clients.required") },
+                                ]}
+                            >
+                                <Input
+                                    placeholder={
+                                        form.getFieldValue("client_type") === "person"
+                                            ? t("clients.personNamePlaceholder")
+                                            : t("clients.companyName")
+                                    }
+                                />
+                            </Form.Item>
+                        )}
                     </Form.Item>
 
                     <Form.Item

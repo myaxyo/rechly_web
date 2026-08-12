@@ -32,6 +32,7 @@ export interface UserCompany {
 
 export interface Client {
     id?: string;
+    client_type?: "company" | "person";
     name: string;
     contact_person?: string;
     address_line1: string;
@@ -106,6 +107,7 @@ export interface InvoiceWithDetails extends Invoice {
 
 // Form input types
 export interface ClientFormData {
+    client_type?: "company" | "person";
     name: string;
     contact_person?: string;
     address_line1: string;
