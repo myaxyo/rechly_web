@@ -445,6 +445,18 @@
                     "size": 255,
                     "default": null,
                     "encrypt": false
+                },
+                {
+                    "key": "clientType",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "default": "company",
+                    "format": "enum",
+                    "elements": [
+                        "company",
+                        "person"
+                    ]
                 }
             ],
             "indexes": [

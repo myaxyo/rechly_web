@@ -108,6 +108,7 @@ export async function PUT(
             COLLECTIONS.CLIENTS,
             id,
             {
+                clientType: body.client_type || "company",
                 name: body.name,
                 contactPerson: body.contact_person || null,
                 addressLine1: body.address_line1,
@@ -127,6 +128,7 @@ export async function PUT(
 
         const client = {
             id: doc.$id,
+            client_type: doc.clientType || "company",
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
             address_line1: doc.addressLine1,
