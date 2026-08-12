@@ -374,19 +374,19 @@
                 {
                     "key": "email",
                     "type": "string",
-                    "required": true,
+                    "required": false,
                     "array": false,
                     "size": 128,
-                    "default": null,
+                    "default": "",
                     "encrypt": false
                 },
                 {
                     "key": "phone",
                     "type": "string",
-                    "required": true,
+                    "required": false,
                     "array": false,
                     "size": 48,
-                    "default": null,
+                    "default": "",
                     "encrypt": false
                 },
                 {

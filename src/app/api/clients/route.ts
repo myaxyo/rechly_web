@@ -98,8 +98,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { ID } = await import("node-appwrite");
 
-        // Build document data - only include fields that have values
-        // to avoid errors with attributes that may not exist in all setups
+        // Build document data
         const documentData: Record<string, unknown> = {
             userId: user.$id,
             name: body.name,
@@ -114,52 +113,21 @@ export async function POST(request: NextRequest) {
             vatId: body.vat_id || null,
             taxNumber: body.tax_number || null,
             leitwegId: body.leitweg_id || null,
+            registrationDate: body.registration_date || new Date().toISOString(),
+            status: body.status || "active",
         };
 
-        // Optional fields that may not exist in all Appwrite collection schemas
-        if (body.registration_date) {
-            documentData.registrationDate = body.registration_date;
-        }
-        if (body.status) {
-            documentData.status = body.status;
-        }
-
-        // Try creating with all fields first; if it fails due to unknown
-        // attributes, retry without optional fields
-        let doc;
-        try {
-            doc = await databases.createDocument(
-                DATABASE_ID,
-                COLLECTIONS.CLIENTS,
-                ID.unique(),
-                documentData,
-                [
-                    Permission.read(Role.user(user.$id)),
-                    Permission.update(Role.user(user.$id)),
-                    Permission.delete(Role.user(user.$id)),
-                ]
-            );
-        } catch (firstError) {
-            const errMsg = (firstError as { message?: string })?.message || "";
-            // If error is about unknown attributes, retry without optional fields
-            if (errMsg.includes("Unknown attribute") || errMsg.includes("Invalid document")) {
-                delete documentData.registrationDate;
-                delete documentData.status;
-                doc = await databases.createDocument(
-                    DATABASE_ID,
-                    COLLECTIONS.CLIENTS,
-                    ID.unique(),
-                    documentData,
-                    [
-                        Permission.read(Role.user(user.$id)),
-                        Permission.update(Role.user(user.$id)),
-                        Permission.delete(Role.user(user.$id)),
-                    ]
-                );
-            } else {
-                throw firstError;
-            }
-        }
+        const doc = await databases.createDocument(
+            DATABASE_ID,
+            COLLECTIONS.CLIENTS,
+            ID.unique(),
+            documentData,
+            [
+                Permission.read(Role.user(user.$id)),
+                Permission.update(Role.user(user.$id)),
+                Permission.delete(Role.user(user.$id)),
+            ]
+        );
 
         const client = {
             id: doc.$id,
