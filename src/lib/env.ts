@@ -22,6 +22,8 @@ const CLIENT_ENV: Record<string, string | undefined> = {
     NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
     NEXT_PUBLIC_LINKEDIN_URL: process.env.NEXT_PUBLIC_LINKEDIN_URL,
     NEXT_PUBLIC_TWITTER_HANDLE: process.env.NEXT_PUBLIC_TWITTER_HANDLE,
+    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:
+        process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
 };
 
 function getEnvValue(key: string): string | undefined {
@@ -93,4 +95,8 @@ export function getOptionalLinkedInUrl(): string | undefined {
 
 export function getTwitterHandle(): string | undefined {
     return getOptionalEnv("NEXT_PUBLIC_TWITTER_HANDLE");
+}
+
+export function getGoogleSiteVerification(): string | undefined {
+    return getOptionalEnv("NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION");
 }

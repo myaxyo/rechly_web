@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/e-rechnung-software";
 
-export const metadata: Metadata = {
-    title: "E-Rechnung Software – XRechnung & ZUGFeRD für Kleinunternehmer",
+export const metadata = createPageMetadata({
+    title: "E-Rechnung Software – XRechnung & ZUGFeRD",
     description:
-        "E-Rechnung Software für Deutschland: XRechnung erstellen, ZUGFeRD exportieren, Leitweg-ID verwalten. Bereite dein Unternehmen auf die E-Rechnungspflicht 2025 vor. Kostenlos mit Rechly.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "E-Rechnung Software | Rechly",
-        description:
-            "XRechnung und ZUGFeRD für kleine Unternehmen: Kundendaten, Leitweg-ID und strukturierte Rechnungsprozesse mit kostenloser Open-Source-Software vorbereiten.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "E-Rechnung Software für Deutschland: XRechnung erstellen, ZUGFeRD exportieren und Leitweg-IDs in einem offenen Rechnungsworkflow verwalten.",
+    path,
+    type: "article",
+});
 
 export default function ERechnungSoftwarePage() {
     return (

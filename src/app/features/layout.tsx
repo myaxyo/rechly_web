@@ -1,27 +1,14 @@
-import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/env";
 
 const siteUrl = getSiteUrl();
 
-export const metadata: Metadata = {
-    title: "Funktionen & Features der Rechnungssoftware",
+export const metadata = createPageMetadata({
+    title: "Funktionen der Rechly Rechnungssoftware",
     description:
-        "Alle Funktionen von Rechly im Überblick: Rechnungen erstellen, PDF-Export, XRechnung & ZUGFeRD, Kundenverwaltung, Zahlungserinnerungen, Ausgabenverwaltung, Bankabgleich, KI-Unterstützung. Kostenlos für Freelancer.",
-    alternates: {
-        canonical: "/features",
-        languages: {
-            "de": "/features",
-            "x-default": "/features",
-        },
-    },
-    openGraph: {
-        title: "Funktionen | Rechly - Kostenlose Rechnungssoftware",
-        description:
-            "Professionelle Rechnungen, PDF-Export, XRechnung, ZUGFeRD, Kundenverwaltung, Angebote, Zahlungserinnerungen und KI-Unterstützung für Freelancer und Selbstständige.",
-        url: `${siteUrl}/features`,
-        type: "website",
-    },
-};
+        "Rechnungen, Angebote, XRechnung, ZUGFeRD, Kundenverwaltung, Zahlungserinnerungen, Ausgaben, Bankabgleich und DATEV-Export in Rechly entdecken.",
+    path: "/features",
+});
 
 export default function FeaturesLayout({
     children,
@@ -34,7 +21,7 @@ export default function FeaturesLayout({
                 name: "Funktionen",
                 url: `${siteUrl}/features`,
                 description:
-                    "Entdecke die Funktionen von Rechly: Rechnungen online schreiben, Kunden verwalten, PDFs exportieren, Cloud-Sync nutzen und DSGVO-konform arbeiten.",
+                    "Entdecke die Funktionen von Rechly: Rechnungen online schreiben, Kunden verwalten, PDFs exportieren, Cloud-Sync nutzen und die Open-Source-Software selbst hosten.",
                 isPartOf: {
                     "@type": "WebSite",
                     "@id": `${siteUrl}/#website`,

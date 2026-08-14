@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/rechnungssoftware-fuer-freelancer";
 
-export const metadata: Metadata = {
-    title: "Rechnungssoftware für Freelancer",
+export const metadata = createPageMetadata({
+    title: "Rechnungssoftware für Freelancer in Deutschland",
     description:
-        "Rechnungssoftware für Freelancer in Deutschland: Rechnungen schreiben, Kunden verwalten, PDFs exportieren und offene Zahlungen im Blick behalten.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Rechnungssoftware für Freelancer | Rechly",
-        description:
-            "Deutsche Rechnungssoftware für Freelancer mit Fokus auf schnelle Rechnungserstellung, Kundenverwaltung und Follow-ups.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Rechnungssoftware für Freelancer: Rechnungen schreiben, Kunden verwalten, PDFs exportieren und offene Zahlungen in einem offenen System verfolgen.",
+    path,
+    type: "article",
+});
 
 export default function FreelancerPage() {
     return (

@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-    title: "Datenschutz",
+export const metadata = createPageMetadata({
+    title: "Datenschutzerklärung",
     description:
-        "Datenschutzerklärung von Rechly mit Informationen zu Hosting, Cookies, Datenverarbeitung und deinen Rechten nach DSGVO.",
-    alternates: {
-        canonical: "/datenschutz",
-    },
-};
+        "Datenschutzerklärung von Rechly mit Informationen zu Hosting, Cookies, Datenverarbeitung und Rechten nach der DSGVO.",
+    path: "/datenschutz",
+});
 
 export default function DatenschutzLayout({
     children,

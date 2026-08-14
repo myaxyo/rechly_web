@@ -83,8 +83,8 @@ export default function FeaturesPage() {
                               style={{ fontSize: 28, color: "#f5222d" }}
                           />
                       ),
-                      title: "DSGVO-konform",
-                      desc: "Server in Deutschland (Frankfurt). Deine Daten bleiben in Europa.",
+                      title: "Datenschutzfreundlich",
+                      desc: "Transparenter Open-Source-Code und europäische Infrastruktur. Alternativ kannst du Rechly selbst hosten.",
                   },
                   {
                       icon: (
@@ -157,8 +157,8 @@ export default function FeaturesPage() {
                               style={{ fontSize: 28, color: "#f5222d" }}
                           />
                       ),
-                      title: "GDPR Compliant",
-                      desc: "Servers in Germany (Frankfurt). Your data stays in Europe.",
+                      title: "Privacy-friendly",
+                      desc: "Transparent open-source code and European infrastructure. You can also self-host Rechly.",
                   },
                   {
                       icon: (
@@ -175,7 +175,8 @@ export default function FeaturesPage() {
         <div style={{ minHeight: "100vh", background: "#fff" }}>
             <Navbar />
 
-            {/* Hero */}
+            <main>
+                {/* Hero */}
             <section
                 style={{
                     paddingTop: 120,
@@ -212,6 +213,18 @@ export default function FeaturesPage() {
                     margin: "0 auto",
                 }}
             >
+                <Title
+                    level={2}
+                    style={{
+                        textAlign: "center",
+                        fontSize: 28,
+                        marginBottom: 28,
+                    }}
+                >
+                    {language === "de"
+                        ? "Alle Funktionen im Überblick"
+                        : "All features at a glance"}
+                </Title>
                 <div
                     style={{
                         display: "grid",
@@ -233,7 +246,7 @@ export default function FeaturesPage() {
                                 {feature.icon}
                             </div>
                             <Title
-                                level={5}
+                                level={3}
                                 style={{ marginBottom: 8, fontWeight: 600 }}
                             >
                                 {feature.title}
@@ -251,6 +264,7 @@ export default function FeaturesPage() {
                     ))}
                 </div>
             </section>
+            </main>
 
             <Footer />
         </div>

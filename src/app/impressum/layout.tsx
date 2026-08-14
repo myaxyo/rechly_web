@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
     title: "Impressum",
     description:
-        "Impressum und Kontaktinformationen zum Open-Source-Projekt Rechly.",
-    alternates: {
-        canonical: "/impressum",
-    },
-};
+        "Impressum, Verantwortliche und Kontaktinformationen zum Open-Source-Projekt Rechly.",
+    path: "/impressum",
+});
 
 export default function ImpressumLayout({
     children,

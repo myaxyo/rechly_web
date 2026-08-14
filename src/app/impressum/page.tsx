@@ -59,7 +59,7 @@ export default function ImpressumPage() {
         <div style={{ minHeight: "100vh", background: "#fff" }}>
             <Navbar showAuth={false} />
 
-            <section
+            <main
                 style={{
                     paddingTop: 100,
                     paddingBottom: 60,
@@ -74,7 +74,7 @@ export default function ImpressumPage() {
                         {t.title}
                     </Title>
 
-                    <Title level={4}>{t.aboutTitle}</Title>
+                    <Title level={2}>{t.aboutTitle}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.aboutText}
                     </Paragraph>
@@ -83,7 +83,7 @@ export default function ImpressumPage() {
                         {t.aboutNote}
                     </Paragraph>
 
-                    <Title level={4}>{t.contactTitle}</Title>
+                    <Title level={2}>{t.contactTitle}</Title>
                     <Space
                         direction="vertical"
                         size="small"
@@ -119,12 +119,12 @@ export default function ImpressumPage() {
                         ) : null}
                     </Space>
 
-                    <Title level={4}>{t.liabilityContentTitle}</Title>
+                    <Title level={2}>{t.liabilityContentTitle}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.liabilityContentText}
                     </Paragraph>
 
-                    <Title level={4}>{t.liabilityLinksTitle}</Title>
+                    <Title level={2}>{t.liabilityLinksTitle}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.liabilityLinksText}
                     </Paragraph>
@@ -140,7 +140,7 @@ export default function ImpressumPage() {
                         {t.lastUpdated}
                     </Text>
                 </Card>
-            </section>
+            </main>
 
             <Footer />
         </div>

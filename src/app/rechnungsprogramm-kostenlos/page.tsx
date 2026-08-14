@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/rechnungsprogramm-kostenlos";
 
-export const metadata: Metadata = {
-    title: "Rechnungsprogramm kostenlos – Open Source für Freelancer",
+export const metadata = createPageMetadata({
+    title: "Rechnungsprogramm kostenlos – Open Source",
     description:
-        "Kostenloses Rechnungsprogramm für Deutschland: Rechnungen online erstellen, PDF exportieren, Kunden verwalten. Open Source, ohne Abo, ohne versteckte Kosten. Jetzt kostenlos starten.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Rechnungsprogramm kostenlos | Rechly",
-        description:
-            "Kostenloses Open-Source Rechnungsprogramm mit PDF-Rechnungen, Kundenverwaltung und Zahlungserinnerungen. Ohne Abo, ohne Limits.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Kostenloses Open-Source Rechnungsprogramm für Deutschland: Rechnungen online erstellen, PDFs exportieren und Kunden ohne Abo verwalten.",
+    path,
+    type: "article",
+});
 
 export default function RechnungsprogrammKostenlosPage() {
     return (
