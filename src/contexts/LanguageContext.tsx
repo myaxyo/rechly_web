@@ -27,7 +27,7 @@ const translations: Record<Language, Record<string, string>> = {
         "hero.title": "Rechnung erstellen online –",
         "hero.titleHighlight": "kostenlos & einfach",
         "hero.subtitle":
-            "Rechly ist das kostenlose Rechnungsprogramm für Freelancer und Selbstständige. Erstelle professionelle Rechnungen in Sekunden – DSGVO-konform, Open Source, ohne versteckte Kosten.",
+            "Rechly ist ein kostenloses Open-Source Rechnungsprogramm für Freelancer und Selbstständige. Erstelle Rechnungen, Angebote und E-Rechnungen in einem transparenten, selbst hostbaren System.",
         "hero.cta": "Kostenlos starten",
         "hero.secondary": "Auf GitHub ansehen",
 
@@ -37,7 +37,7 @@ const translations: Record<Language, Record<string, string>> = {
         "about.description":
             "Rechly ist ein Nebenprojekt, das ich als Student entwickle. Keine versteckten Kosten, keine Premium-Pläne – einfach ein nützliches Tool, das ich selbst gebraucht habe und jetzt mit euch teile.",
         "about.point1": "100% kostenlos & Open Source",
-        "about.point2": "DSGVO-konform, Server in Deutschland",
+        "about.point2": "Datenschutzfreundlich & selbst hostbar",
         "about.point3": "Entwickelt mit GitHub Student Pack",
         "about.point4": "Aktiv weiterentwickelt",
 
@@ -936,7 +936,7 @@ const translations: Record<Language, Record<string, string>> = {
         "hero.title": "Create invoices online –",
         "hero.titleHighlight": "free & simple",
         "hero.subtitle":
-            "Rechly is the free invoicing software for freelancers and self-employed professionals. Create professional invoices in seconds – GDPR compliant, open source, no hidden costs.",
+            "Rechly is free, open-source invoicing software for freelancers and self-employed professionals. Create invoices, offers, and e-invoices in a transparent, self-hostable system.",
         "hero.cta": "Get Started Free",
         "hero.secondary": "View on GitHub",
 
@@ -946,7 +946,7 @@ const translations: Record<Language, Record<string, string>> = {
         "about.description":
             "Rechly is a side project I'm building as a student. No hidden costs, no premium plans – just a useful tool I needed myself and now share with you.",
         "about.point1": "100% free & Open Source",
-        "about.point2": "GDPR compliant, servers in Germany",
+        "about.point2": "Privacy-friendly and self-hostable",
         "about.point3": "Built with GitHub Student Pack",
         "about.point4": "Actively maintained",
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Space, Typography, Select, Drawer } from "antd";
 import { GithubOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getRepoUrl } from "@/lib/env";
 
@@ -16,14 +16,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ showAuth = true }: NavbarProps) {
-    const router = useRouter();
     const { language, setLanguage, t } = useLanguage();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-    const handleNavigation = (path: string) => {
-        setMobileMenuOpen(false);
-        router.push(path);
-    };
 
     return (
         <nav
@@ -49,21 +43,23 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                 }}
             >
                 {/* Logo */}
-                <div
+                <Link
+                    href="/"
+                    aria-label="Rechly Startseite"
                     style={{
                         display: "flex",
                         alignItems: "center",
                         gap: 10,
-                        cursor: "pointer",
+                        textDecoration: "none",
                     }}
-                    onClick={() => handleNavigation("/")}
                 >
                     <Image
                         src="/logo.png"
-                        alt="Rechly"
+                        alt="Rechly Logo"
                         width={32}
                         height={32}
                         style={{ borderRadius: 6 }}
+                        priority
                     />
                     <Text
                         strong
@@ -71,11 +67,22 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                     >
                         Rechly
                     </Text>
-                </div>
+                </Link>
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:block">
                     <Space size="small">
+                        <Button type="text" href="/features">
+                            {t("nav.features")}
+                        </Button>
+                        {language === "de" ? (
+                            <Button type="text" href="/rechnung-schreiben">
+                                Ratgeber
+                            </Button>
+                        ) : null}
+                        <Button type="text" href="/open-source">
+                            Open Source
+                        </Button>
                         <Select
                             value={language}
                             onChange={setLanguage}
@@ -94,15 +101,12 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                         />
                         {showAuth && (
                             <>
-                                <Button
-                                    type="text"
-                                    onClick={() => router.push("/login")}
-                                >
+                                <Button type="text" href="/login">
                                     {t("nav.login")}
                                 </Button>
                                 <Button
                                     type="primary"
-                                    onClick={() => router.push("/register")}
+                                    href="/register"
                                     style={{ borderRadius: 6 }}
                                 >
                                     {t("nav.register")}
@@ -175,13 +179,45 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                             padding: "8px 24px",
                             borderTop: "1px solid #f0f0f0",
                             marginTop: 8,
+                            display: "flex",
+                            flexDirection: "column",
                         }}
                     >
+                        <Button
+                            type="text"
+                            href="/features"
+                            onClick={() => setMobileMenuOpen(false)}
+                            style={{ justifyContent: "flex-start", height: 44 }}
+                        >
+                            {t("nav.features")}
+                        </Button>
+                        {language === "de" ? (
+                            <Button
+                                type="text"
+                                href="/rechnung-schreiben"
+                                onClick={() => setMobileMenuOpen(false)}
+                                style={{
+                                    justifyContent: "flex-start",
+                                    height: 44,
+                                }}
+                            >
+                                Ratgeber
+                            </Button>
+                        ) : null}
+                        <Button
+                            type="text"
+                            href="/open-source"
+                            onClick={() => setMobileMenuOpen(false)}
+                            style={{ justifyContent: "flex-start", height: 44 }}
+                        >
+                            Open Source
+                        </Button>
                         <Button
                             type="text"
                             icon={<GithubOutlined />}
                             href={repoUrl}
                             target="_blank"
+                            rel="noopener noreferrer"
                             style={{
                                 width: "100%",
                                 justifyContent: "flex-start",
@@ -207,7 +243,8 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                             <Button
                                 block
                                 size="large"
-                                onClick={() => handleNavigation("/login")}
+                                href="/login"
+                                onClick={() => setMobileMenuOpen(false)}
                                 style={{ borderRadius: 8 }}
                             >
                                 {t("nav.login")}
@@ -216,7 +253,8 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                                 type="primary"
                                 block
                                 size="large"
-                                onClick={() => handleNavigation("/register")}
+                                href="/register"
+                                onClick={() => setMobileMenuOpen(false)}
                                 style={{ borderRadius: 8 }}
                             >
                                 {t("nav.register")}

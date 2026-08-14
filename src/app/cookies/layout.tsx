@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
     title: "Cookie-Einstellungen",
     description:
-        "Informationen zu technisch notwendigen Cookies und Cookie-Einstellungen bei Rechly.",
-    alternates: {
-        canonical: "/cookies",
-    },
-};
+        "Informationen zu technisch notwendigen Cookies, Analyse und Cookie-Einstellungen bei Rechly.",
+    path: "/cookies",
+});
 
 export default function CookiesLayout({
     children,

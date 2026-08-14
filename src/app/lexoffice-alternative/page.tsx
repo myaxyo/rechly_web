@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/lexoffice-alternative";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
     title: "lexoffice Alternative – Open Source Rechnungssoftware",
     description:
-        "Beste lexoffice Alternative 2026: Rechly bietet kostenlose Rechnungserstellung, Kundenverwaltung und XRechnung-Export. Open Source, ohne Abo, volle Kontrolle über deine Daten.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "lexoffice Alternative | Rechly",
-        description:
-            "Open-Source Rechnungssoftware als lexoffice Alternative: Rechnungen erstellen, Kunden verwalten, KI-Unterstützung mit eigenem API-Key. Kostenlos.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "lexoffice Alternative für Rechnungen, Kundenverwaltung und XRechnung: Rechly ist Open Source, ohne Abo nutzbar und gibt dir Kontrolle über Software und Daten.",
+    path,
+    type: "article",
+});
 
 export default function LexofficeAlternativePage() {
     return (

@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/zahlungserinnerung-schreiben";
 
-export const metadata: Metadata = {
-    title: "Zahlungserinnerung schreiben",
+export const metadata = createPageMetadata({
+    title: "Zahlungserinnerung schreiben – Muster & Ablauf",
     description:
-        "Zahlungserinnerung schreiben: Wie du offene Rechnungen freundlich, klar und professionell nachverfolgst und dafür einen sauberen Workflow aufbaust.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Zahlungserinnerung schreiben | Rechly",
-        description:
-            "So schreibst du eine Zahlungserinnerung mit klarem Ton, Rechnungsbezug und einem nachvollziehbaren Prozess für offene Forderungen.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Zahlungserinnerung schreiben: offene Rechnungen freundlich und professionell nachverfolgen – mit Formulierungshilfe und nachvollziehbarem Ablauf.",
+    path,
+    type: "article",
+});
 
 export default function ZahlungserinnerungSchreibenPage() {
     return (

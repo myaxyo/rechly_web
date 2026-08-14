@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/sevdesk-alternative";
 
-export const metadata: Metadata = {
-    title: "sevdesk Alternative",
+export const metadata = createPageMetadata({
+    title: "sevdesk Alternative – Open Source Rechnungssoftware",
     description:
-        "sevdesk Alternative: Wann Rechly für Rechnungen, Kundenverwaltung und offene Zahlungen die passendere Wahl sein kann, wenn du ein fokussiertes System suchst.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "sevdesk Alternative | Rechly",
-        description:
-            "Für Nutzer, die eine sevdesk Alternative mit Open-Source-Ansatz, klarer Rechnungslogik und ruhigem Workflow vergleichen wollen.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "sevdesk Alternative mit Open-Source-Ansatz: Rechnungen, Kunden und Zahlungserinnerungen in einem fokussierten, transparenten System organisieren.",
+    path,
+    type: "article",
+});
 
 export default function SevdeskAlternativePage() {
     return (

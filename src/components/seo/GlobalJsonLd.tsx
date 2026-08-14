@@ -19,7 +19,12 @@ export default function GlobalJsonLd() {
                 url: siteUrl,
                 logo: {
                     "@type": "ImageObject",
-                    url: `${siteUrl}/favicon/favicon.svg`,
+                    "@id": `${siteUrl}/#logo`,
+                    url: `${siteUrl}/logo.png`,
+                    contentUrl: `${siteUrl}/logo.png`,
+                    width: 512,
+                    height: 512,
+                    caption: "Rechly",
                 },
                 description:
                     "Open-Source Rechnungssoftware für Deutschland. Entwickelt für Freelancer, Selbstständige und kleine Unternehmen.",

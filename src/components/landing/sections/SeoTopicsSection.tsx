@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const content = {
     de: {
-        eyebrow: "SEO-THEMEN FÜR DEUTSCHLAND",
+        eyebrow: "RATGEBER FÜR DEUTSCHLAND",
         title: "Lösungen für typische Rechnungsfälle in Deutschland",
         subtitle:
             "Diese Seiten beantworten konkrete Suchanfragen von Freelancern, Kleinunternehmern und Teams, die ihre Rechnungsprozesse strukturieren wollen.",

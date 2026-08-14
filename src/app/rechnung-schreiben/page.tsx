@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/rechnung-schreiben";
 
-export const metadata: Metadata = {
-    title: "Rechnung schreiben kostenlos – Anleitung & Pflichtangaben 2026",
+export const metadata = createPageMetadata({
+    title: "Rechnung schreiben – Anleitung & Pflichtangaben 2026",
     description:
-        "Rechnung schreiben in 5 Minuten: alle Pflichtangaben nach §14 UStG, kostenlose Vorlage im Tool, PDF-Export und E-Rechnung. Schritt-für-Schritt-Anleitung für Freelancer und Kleinunternehmer.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Rechnung schreiben kostenlos | Rechly",
-        description:
-            "Schritt-für-Schritt-Anleitung mit allen Pflichtangaben nach §14 UStG – und kostenlosem Tool zum direkten Loslegen.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Rechnung schreiben: Schritt-für-Schritt-Anleitung zu Pflichtangaben nach §14 UStG, PDF-Export und E-Rechnung für Freelancer und Kleinunternehmer.",
+    path,
+    type: "article",
+});
 
 export default function RechnungSchreibenPage() {
     return (

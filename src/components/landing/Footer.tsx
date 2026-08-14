@@ -11,7 +11,7 @@ const { Text } = Typography;
 const repoUrl = getRepoUrl();
 
 export default function Footer() {
-    const { t } = useLanguage();
+    const { language, t } = useLanguage();
 
     const linkStyle = {
         color: "#64748b",
@@ -39,17 +39,20 @@ export default function Footer() {
                 >
                     {/* Brand */}
                     <div>
-                        <div
+                        <Link
+                            href="/"
+                            aria-label="Rechly Startseite"
                             style={{
                                 display: "flex",
                                 alignItems: "center",
                                 gap: 8,
                                 marginBottom: 12,
+                                textDecoration: "none",
                             }}
                         >
                             <Image
                                 src="/logo.png"
-                                alt="Rechly"
+                                alt="Rechly Logo"
                                 width={24}
                                 height={24}
                                 style={{ borderRadius: 4 }}
@@ -57,7 +60,7 @@ export default function Footer() {
                             <Text strong style={{ margin: 0, fontSize: 16 }}>
                                 Rechly
                             </Text>
-                        </div>
+                        </Link>
                         <Text style={{ color: "#64748b", fontSize: 14 }}>
                             {t("footer.tagline")}
                         </Text>
@@ -82,6 +85,9 @@ export default function Footer() {
                             <Link href="/features" style={linkStyle}>
                                 {t("nav.features")}
                             </Link>
+                            <Link href="/open-source" style={linkStyle}>
+                                Open Source
+                            </Link>
                             <a
                                 href={repoUrl}
                                 target="_blank"
@@ -93,8 +99,10 @@ export default function Footer() {
                         </Space>
                     </div>
 
-                    {/* Ratgeber: sitewide links to the SEO landing pages */}
-                    <div>
+                    {language === "de" ? (
+                        <>
+                            {/* Ratgeber: sitewide links to the SEO landing pages */}
+                            <div>
                         <Text
                             strong
                             style={{
@@ -132,6 +140,12 @@ export default function Footer() {
                                 style={linkStyle}
                             >
                                 Kleinunternehmer-Rechnung
+                            </Link>
+                            <Link
+                                href="/rechnung-fuer-kleinunternehmer-erstellen"
+                                style={linkStyle}
+                            >
+                                Rechnung für Kleinunternehmer
                             </Link>
                             <Link
                                 href="/e-rechnung-software"
@@ -182,8 +196,10 @@ export default function Footer() {
                             >
                                 Zahlungserinnerung schreiben
                             </Link>
-                        </Space>
-                    </div>
+                            </Space>
+                        </div>
+                    </>
+                    ) : null}
 
                     {/* Legal */}
                     <div>
@@ -209,6 +225,9 @@ export default function Footer() {
                             </Link>
                             <Link href="/agb" style={linkStyle}>
                                 {t("footer.terms")}
+                            </Link>
+                            <Link href="/cookies" style={linkStyle}>
+                                {t("footer.cookies")}
                             </Link>
                         </Space>
                     </div>

@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/kleinunternehmer-rechnung";
 
-export const metadata: Metadata = {
-    title: "Kleinunternehmer Rechnung erstellen – §19 UStG Vorlage",
+export const metadata = createPageMetadata({
+    title: "Kleinunternehmer-Rechnung – §19 UStG Vorlage",
     description:
-        "Kleinunternehmer Rechnung erstellen: Alle Pflichtangaben nach §19 UStG, korrekte Rechnungsnummern, Kundenverwaltung und PDF-Export. Kostenlos mit Rechly.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Kleinunternehmer Rechnung | Rechly",
-        description:
-            "Rechnungen für Kleinunternehmer mit allen Pflichtangaben nach deutschem Recht. PDF-Export, Kundenverwaltung und Zahlungserinnerungen inklusive.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Kleinunternehmer-Rechnung erstellen: Pflichtangaben, §19-UStG-Hinweis, Rechnungsnummern, Kundenverwaltung und PDF-Export verständlich erklärt.",
+    path,
+    type: "article",
+});
 
 export default function KleinunternehmerPage() {
     return (

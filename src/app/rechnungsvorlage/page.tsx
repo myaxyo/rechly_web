@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/rechnungsvorlage";
 
-export const metadata: Metadata = {
-    title: "Rechnungsvorlage",
+export const metadata = createPageMetadata({
+    title: "Rechnungsvorlage für Deutschland",
     description:
-        "Rechnungsvorlage für Deutschland: Welche Inhalte wichtig sind, wie du Pflichtangaben strukturierst und aus einer Vorlage einen sauberen Prozess machst.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Rechnungsvorlage | Rechly",
-        description:
-            "So wird aus einer Rechnungsvorlage ein nutzbarer deutscher Rechnungsprozess mit klaren Pflichtangaben und PDF-Export.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Rechnungsvorlage für Deutschland: Pflichtangaben richtig strukturieren und aus einer statischen Vorlage einen verlässlichen Rechnungsprozess machen.",
+    path,
+    type: "article",
+});
 
 export default function RechnungsvorlagePage() {
     return (

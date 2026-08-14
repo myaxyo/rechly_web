@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import type { Metadata } from "next";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import HeroSection from "@/components/landing/sections/HeroSection";
@@ -7,30 +6,18 @@ import AuthRedirect from "@/components/landing/AuthRedirect";
 import SeoTopicsSection from "@/components/landing/sections/SeoTopicsSection";
 import ComparisonTopicsSection from "@/components/landing/sections/ComparisonTopicsSection";
 import TransactionalTopicsSection from "@/components/landing/sections/TransactionalTopicsSection";
-import { getRepoUrl, getSiteUrl } from "@/lib/env";
+import { getSiteUrl } from "@/lib/env";
+import { homeFaqsDe } from "@/lib/home-faq";
+import { createPageMetadata } from "@/lib/seo";
 
 const siteUrl = getSiteUrl();
-const repoUrl = getRepoUrl();
 
-export const metadata: Metadata = {
-    title: "Kostenlose Rechnungssoftware für Freelancer & Selbstständige in Deutschland",
+export const metadata = createPageMetadata({
+    title: "Rechly – Kostenlose Open-Source Rechnungssoftware",
     description:
-        "Rechly ist die kostenlose Rechnungssoftware für Deutschland. Online Rechnungen erstellen, XRechnung & ZUGFeRD exportieren, Kunden verwalten, PDF-Rechnungen erzeugen. GoBD-konform, DSGVO-sicher, Open Source.",
-    alternates: {
-        canonical: "/",
-        languages: {
-            "de": "/",
-            "x-default": "/",
-        },
-    },
-    openGraph: {
-        title: "Rechly - Kostenlose Rechnungssoftware für Freelancer & Selbstständige",
-        description:
-            "Online Rechnungen erstellen, XRechnung & ZUGFeRD exportieren, Kunden verwalten und professionelle PDFs erzeugen. GoBD-konform, Open Source, kostenlos.",
-        url: siteUrl,
-        type: "website",
-    },
-};
+        "Rechnungen, Angebote und E-Rechnungen online erstellen: Rechly ist die kostenlose Open-Source Rechnungssoftware für Freelancer und kleine Unternehmen in Deutschland.",
+    path: "/",
+});
 
 // Lazy load non-critical sections
 const FeaturesSection = dynamic(
@@ -64,8 +51,8 @@ const structuredData = {
             url: siteUrl,
             applicationCategory: "BusinessApplication",
             applicationSubCategory: "Rechnungssoftware",
-            operatingSystem: "Web, Android",
-            inLanguage: ["de-DE", "en"],
+            operatingSystem: "Web",
+            inLanguage: "de-DE",
             areaServed: {
                 "@type": "Country",
                 name: "Germany",
@@ -83,19 +70,12 @@ const structuredData = {
             },
             isAccessibleForFree: true,
             description:
-                "Kostenlose deutsche Rechnungssoftware mit XRechnung, ZUGFeRD, PDF-Export, Kundenverwaltung, Angebotserstellung und Zahlungserinnerungen. GoBD-konform und DSGVO-sicher.",
+                "Kostenlose Open-Source Rechnungssoftware für Rechnungen, Angebote, XRechnung, ZUGFeRD, PDF-Export, Kundenverwaltung und Zahlungserinnerungen.",
             author: {
                 "@id": `${siteUrl}/#organization`,
             },
             publisher: {
                 "@id": `${siteUrl}/#organization`,
-            },
-            aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.8",
-                ratingCount: "12",
-                bestRating: "5",
-                worstRating: "1",
             },
             featureList: [
                 "Rechnungen online erstellen",
@@ -108,44 +88,11 @@ const structuredData = {
                 "Ausgabenverwaltung mit Belegerfassung",
                 "Bankabgleich",
                 "Cloud-Synchronisation",
-                "DSGVO-konforme Workflows",
-                "GoBD-konforme Rechnungen",
+                "Transparenter Open-Source-Quellcode",
                 "KI-gestützte Rechnungshilfe (BYOK)",
                 "DATEV-Export",
                 "Open Source & selbst hostbar",
             ],
-            screenshot: `${siteUrl}/opengraph-image`,
-        },
-        {
-            "@type": "Organization",
-            "@id": `${siteUrl}/#organization`,
-            name: "Rechly",
-            url: siteUrl,
-            logo: {
-                "@type": "ImageObject",
-                url: `${siteUrl}/favicon/favicon.svg`,
-            },
-            description:
-                "Open-Source Rechnungssoftware für Deutschland. Entwickelt für Freelancer, Selbstständige und kleine Unternehmen.",
-            sameAs: [repoUrl],
-        },
-        {
-            "@type": "WebSite",
-            "@id": `${siteUrl}/#website`,
-            name: "Rechly - Kostenlose Rechnungssoftware für Deutschland",
-            url: siteUrl,
-            publisher: {
-                "@id": `${siteUrl}/#organization`,
-            },
-            inLanguage: "de-DE",
-            potentialAction: {
-                "@type": "SearchAction",
-                target: {
-                    "@type": "EntryPoint",
-                    urlTemplate: `${siteUrl}/?q={search_term_string}`,
-                },
-                "query-input": "required name=search_term_string",
-            },
         },
         {
             "@type": "WebPage",
@@ -164,7 +111,6 @@ const structuredData = {
             },
             inLanguage: "de-DE",
             datePublished: "2024-09-01",
-            dateModified: "2026-07-10",
         },
         {
             "@type": "BreadcrumbList",
@@ -179,48 +125,14 @@ const structuredData = {
         },
         {
             "@type": "FAQPage",
-            mainEntity: [
-                {
-                    "@type": "Question",
-                    name: "Ist Rechly wirklich kostenlos?",
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Ja, Rechly ist zu 100% kostenlos. Es gibt keine versteckten Kosten, keine Premium-Pläne und keine Werbung. Als Open-Source-Projekt bleibt Rechly für immer kostenlos.",
-                    },
+            mainEntity: homeFaqsDe.map((faq) => ({
+                "@type": "Question",
+                name: faq.question,
+                acceptedAnswer: {
+                    "@type": "Answer",
+                    text: faq.answer,
                 },
-                {
-                    "@type": "Question",
-                    name: "Ist Rechly DSGVO-konform?",
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Ja, Rechly ist vollständig DSGVO-konform. Alle Daten werden auf deutschen Servern (Frankfurt) gespeichert und verarbeitet. Es werden keine Tracking-Cookies verwendet.",
-                    },
-                },
-                {
-                    "@type": "Question",
-                    name: "Kann ich mit Rechly GoBD-konforme Rechnungen erstellen?",
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Ja, alle mit Rechly erstellten Rechnungen enthalten alle gesetzlich erforderlichen Pflichtangaben für deutsche Rechnungen, einschließlich Steuernummer, fortlaufende Rechnungsnummer und ordnungsgemäße Steuerauszeichnung.",
-                    },
-                },
-                {
-                    "@type": "Question",
-                    name: "Für wen ist Rechly geeignet?",
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Rechly ist ideal für Freelancer, Selbstständige, Kleinunternehmer und kleine Unternehmen, die eine einfache und kostenlose Lösung zum Erstellen von Rechnungen suchen.",
-                    },
-                },
-                {
-                    "@type": "Question",
-                    name: "Gibt es eine mobile App?",
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Ja, Rechly bietet eine native Android-App. Eine iOS-App ist in Entwicklung. Deine Daten werden automatisch zwischen Web und App synchronisiert.",
-                    },
-                },
-            ],
+            })),
         },
     ],
 };

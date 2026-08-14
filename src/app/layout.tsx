@@ -1,20 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import {
+    getGoogleSiteVerification,
     getOptionalAnalyticsId,
     getSiteUrl,
     getTwitterHandle,
 } from "@/lib/env";
 import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
+import ConsentAnalytics from "@/components/analytics/ConsentAnalytics";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
 const analyticsId = getOptionalAnalyticsId();
 const twitterHandle = getTwitterHandle();
+const googleSiteVerification = getGoogleSiteVerification();
 
 // Viewport configuration to prevent iOS zoom on input focus
 export const viewport: Viewport = {
@@ -25,42 +26,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
     applicationName: "Rechly",
     title: {
-        default:
-            "Rechly - Rechnungssoftware für Freelancer & Selbstständige in Deutschland",
-        template: "%s | Rechly - Rechnungsprogramm",
+        default: "Rechly – Open-Source Rechnungssoftware",
+        template: "%s | Rechly",
     },
     description:
-        "Kostenlose Rechnungssoftware für Deutschland: Online Rechnungen erstellen, XRechnung & ZUGFeRD exportieren, Kunden verwalten und PDF-Rechnungen erzeugen. GoBD-konform, DSGVO-sicher, Open Source.",
-    keywords: [
-        "Rechnung erstellen online",
-        "Rechnungsprogramm",
-        "Rechnungssoftware",
-        "Online Rechnungssoftware",
-        "Rechnung schreiben online",
-        "Rechnungsvorlage",
-        "Rechnungsgenerator",
-        "Rechnungsprogramm kostenlos",
-        "Freelancer Rechnungsprogramm",
-        "Selbstständige Rechnungssoftware",
-        "Kleinunternehmer Rechnung",
-        "E-Rechnung Software",
-        "E-Rechnung Pflicht 2025",
-        "XRechnung erstellen",
-        "ZUGFeRD Rechnung",
-        "GoBD konforme Rechnung",
-        "DSGVO konforme Rechnungssoftware",
-        "Open Source Rechnungsprogramm",
-        "Rechnungen schreiben Freiberufler",
-        "Rechnungssoftware Deutschland",
-        "Rechnung erstellen für Freelancer",
-        "Rechnung online schreiben kostenlos",
-        "Rechnungsprogramm Kleinunternehmer",
-        "Angebot erstellen online",
-        "Mahnung schreiben",
-        "Zahlungserinnerung erstellen",
-        "invoice software Germany",
-        "free invoicing tool freelancers",
-    ],
+        "Kostenlose Open-Source Rechnungssoftware für Deutschland: Rechnungen, Angebote, XRechnung und ZUGFeRD erstellen, Kunden verwalten und PDFs exportieren.",
     authors: [{ name: "Rechly", url: siteUrl }],
     creator: "Rechly",
     publisher: "Rechly",
@@ -79,12 +49,11 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         locale: "de_DE",
-        alternateLocale: ["en_US"],
         url: siteUrl,
         siteName: "Rechly",
-        title: "Rechly - Kostenlose Rechnungssoftware für Freelancer & Selbstständige",
+        title: "Rechly – Kostenlose Open-Source Rechnungssoftware",
         description:
-            "Rechnungen online erstellen, XRechnung & ZUGFeRD exportieren, Kunden verwalten und professionelle PDFs erzeugen. GoBD-konform, DSGVO-sicher, Open Source.",
+            "Rechnungen, Angebote, XRechnung und ZUGFeRD erstellen. Open Source, selbst hostbar und für Freelancer sowie kleine Unternehmen entwickelt.",
         images: [
             {
                 url: `${siteUrl}/opengraph-image`,
@@ -96,9 +65,9 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "Rechly - Kostenlose Rechnungssoftware für Deutschland",
+        title: "Rechly – Open-Source Rechnungssoftware",
         description:
-            "Rechnungen erstellen, Kunden verwalten, XRechnung exportieren. Open Source, GoBD-konform, DSGVO-sicher. Perfekt für Freelancer und Selbstständige.",
+            "Rechnungen, Angebote und E-Rechnungen erstellen. Kostenlos nutzbar, selbst hostbar und transparent auf GitHub entwickelt.",
         images: [`${siteUrl}/opengraph-image`],
         creator: twitterHandle,
     },
@@ -127,7 +96,9 @@ export const metadata: Metadata = {
         apple: "/favicon/apple-touch-icon.png",
     },
     manifest: "/favicon/site.webmanifest",
-    verification: {},
+    verification: googleSiteVerification
+        ? { google: googleSiteVerification }
+        : undefined,
     category: "business",
 };
 
@@ -142,32 +113,12 @@ export default function RootLayout({
                 <GlobalJsonLd />
             </head>
             <body>
-                {analyticsId ? (
-                    <>
-                        <Script
-                            src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}
-                            strategy="afterInteractive"
-                        />
-                        <Script
-                            id="google-analytics"
-                            strategy="afterInteractive"
-                        >
-                            {`
-                                window.dataLayer = window.dataLayer || [];
-                                function gtag(){dataLayer.push(arguments);}
-                                gtag('js', new Date());
-
-                                gtag('config', '${analyticsId}');
-                            `}
-                        </Script>
-                    </>
-                ) : null}
+                <ConsentAnalytics googleAnalyticsId={analyticsId} />
                 <AntdRegistry>
                     <LanguageProvider>
                         <AuthProvider>{children}</AuthProvider>
                     </LanguageProvider>
                 </AntdRegistry>
-                <Analytics />
             </body>
         </html>
     );

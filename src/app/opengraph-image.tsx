@@ -1,4 +1,7 @@
 import { ImageResponse } from "next/og";
+import { getSiteUrl } from "@/lib/env";
+
+const siteUrl = getSiteUrl();
 
 export const runtime = "edge";
 export const alt = "Rechly - Deutsche Rechnungssoftware";
@@ -31,22 +34,13 @@ export default function OpenGraphImage() {
                     gap: "18px",
                 }}
             >
-                <div
-                    style={{
-                        width: "64px",
-                        height: "64px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "18px",
-                        background: "#2563eb",
-                        color: "#ffffff",
-                        fontSize: "34px",
-                        fontWeight: 700,
-                    }}
-                >
-                    R
-                </div>
+                <img
+                    src={`${siteUrl}/logo.png`}
+                    alt=""
+                    width="64"
+                    height="64"
+                    style={{ borderRadius: "18px" }}
+                />
                 <div
                     style={{
                         display: "flex",
@@ -98,7 +92,7 @@ export default function OpenGraphImage() {
                     }}
                 >
                     Für Freelancer, Selbstständige und kleine Unternehmen.
-                    DSGVO-konform, Open Source und für den deutschen Markt
+                    Open Source, selbst hostbar und für den deutschen Markt
                     entwickelt.
                 </div>
             </div>

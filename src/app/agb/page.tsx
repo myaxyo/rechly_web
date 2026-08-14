@@ -74,7 +74,7 @@ export default function AgbPage() {
         <div style={{ minHeight: "100vh", background: "#fff" }}>
             <Navbar showAuth={false} />
 
-            <section
+            <main
                 style={{
                     paddingTop: 100,
                     paddingBottom: 60,
@@ -89,42 +89,42 @@ export default function AgbPage() {
                         {t.title}
                     </Title>
 
-                    <Title level={4}>{t.section1Title}</Title>
+                    <Title level={2}>{t.section1Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section1Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section2Title}</Title>
+                    <Title level={2}>{t.section2Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section2Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section3Title}</Title>
+                    <Title level={2}>{t.section3Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section3Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section4Title}</Title>
+                    <Title level={2}>{t.section4Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section4Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section5Title}</Title>
+                    <Title level={2}>{t.section5Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section5Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section6Title}</Title>
+                    <Title level={2}>{t.section6Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section6Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section7Title}</Title>
+                    <Title level={2}>{t.section7Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section7Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section8Title}</Title>
+                    <Title level={2}>{t.section8Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section8Text}
                     </Paragraph>
@@ -140,7 +140,7 @@ export default function AgbPage() {
                         {t.lastUpdated}
                     </Text>
                 </Card>
-            </section>
+            </main>
 
             <Footer />
         </div>

@@ -3,54 +3,11 @@
 import { Collapse } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { homeFaqsDe, homeFaqsEn } from "@/lib/home-faq";
 
-// FAQ Data for display
 const faqData = {
-    de: [
-        {
-            question: "Ist Rechly wirklich kostenlos?",
-            answer: "Ja, Rechly ist zu 100% kostenlos. Es gibt keine versteckten Kosten, keine Premium-Pläne und keine Werbung. Als Open-Source-Projekt bleibt Rechly für immer kostenlos.",
-        },
-        {
-            question: "Ist Rechly DSGVO-konform?",
-            answer: "Ja, Rechly ist vollständig DSGVO-konform. Alle Daten werden auf deutschen Servern (Frankfurt) gespeichert und verarbeitet. Es werden keine Tracking-Cookies verwendet.",
-        },
-        {
-            question:
-                "Kann ich mit Rechly rechtskonforme Rechnungen erstellen?",
-            answer: "Ja, alle mit Rechly erstellten Rechnungen enthalten alle gesetzlich erforderlichen Pflichtangaben für deutsche Rechnungen, einschließlich Steuernummer, fortlaufende Rechnungsnummer und ordnungsgemäße Steuerauszeichnung.",
-        },
-        {
-            question: "Für wen ist Rechly geeignet?",
-            answer: "Rechly ist ideal für Freelancer, Selbstständige, Kleinunternehmer und kleine Unternehmen, die eine einfache und kostenlose Lösung zum Erstellen von Rechnungen suchen.",
-        },
-        {
-            question: "Gibt es eine mobile App?",
-            answer: "Ja, Rechly bietet eine native Android-App. Eine iOS-App ist in Entwicklung. Deine Daten werden automatisch zwischen Web und App synchronisiert.",
-        },
-    ],
-    en: [
-        {
-            question: "Is Rechly really free?",
-            answer: "Yes, Rechly is 100% free. There are no hidden costs, no premium plans, and no ads. As an open-source project, Rechly will remain free forever.",
-        },
-        {
-            question: "Is Rechly GDPR compliant?",
-            answer: "Yes, Rechly is fully GDPR compliant. All data is stored and processed on German servers (Frankfurt). No tracking cookies are used.",
-        },
-        {
-            question: "Can I create legally compliant invoices with Rechly?",
-            answer: "Yes, all invoices created with Rechly contain all legally required information for German invoices, including tax number, sequential invoice number, and proper tax labeling.",
-        },
-        {
-            question: "Who is Rechly suitable for?",
-            answer: "Rechly is ideal for freelancers, self-employed individuals, small business owners, and small companies looking for a simple and free invoicing solution.",
-        },
-        {
-            question: "Is there a mobile app?",
-            answer: "Yes, Rechly offers a native Android app. An iOS app is in development. Your data is automatically synced between web and app.",
-        },
-    ],
+    de: homeFaqsDe,
+    en: homeFaqsEn,
 };
 
 export default function FaqSection() {

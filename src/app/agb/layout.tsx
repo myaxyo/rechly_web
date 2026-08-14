@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
     title: "Nutzungsbedingungen",
     description:
-        "Nutzungsbedingungen für Rechly, die kostenlose Open-Source-Rechnungssoftware für Deutschland.",
-    alternates: {
-        canonical: "/agb",
-    },
-};
+        "Nutzungsbedingungen für Rechly, die kostenlose Open-Source Rechnungssoftware für Deutschland.",
+    path: "/agb",
+});
 
 export default function AgbLayout({
     children,

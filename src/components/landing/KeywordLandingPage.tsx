@@ -65,6 +65,8 @@ export default function KeywordLandingPage({
                 ? [
                       {
                           "@type": "HowTo",
+                          "@id": `${siteUrl}${path}#howto`,
+                          url: `${siteUrl}${path}#howto`,
                           name: howTo.title,
                           inLanguage: "de-DE",
                           step: howTo.steps.map((step, index) => ({
@@ -78,6 +80,7 @@ export default function KeywordLandingPage({
                 : []),
             {
                 "@type": "WebPage",
+                "@id": `${siteUrl}${path}#webpage`,
                 name: title,
                 url: `${siteUrl}${path}`,
                 description: summary,
@@ -89,6 +92,7 @@ export default function KeywordLandingPage({
             },
             {
                 "@type": "BreadcrumbList",
+                "@id": `${siteUrl}${path}#breadcrumb`,
                 itemListElement: [
                     {
                         "@type": "ListItem",
@@ -106,6 +110,7 @@ export default function KeywordLandingPage({
             },
             {
                 "@type": "FAQPage",
+                "@id": `${siteUrl}${path}#faq`,
                 mainEntity: faqs.map((faq) => ({
                     "@type": "Question",
                     name: faq.question,
@@ -138,6 +143,23 @@ export default function KeywordLandingPage({
                     }}
                 >
                     <div style={{ maxWidth: 980, margin: "0 auto" }}>
+                        <nav
+                            aria-label="Brotkrümelnavigation"
+                            style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                                marginBottom: 24,
+                                color: "#64748b",
+                                fontSize: 14,
+                            }}
+                        >
+                            <Link href="/" style={{ color: "#1d4ed8" }}>
+                                Startseite
+                            </Link>
+                            <span aria-hidden="true">/</span>
+                            <span aria-current="page">{title}</span>
+                        </nav>
                         <div className="landing-eyebrow">{eyebrow}</div>
                         <h1
                             style={{
@@ -173,6 +195,28 @@ export default function KeywordLandingPage({
                             }}
                         >
                             {summary}
+                        </p>
+
+                        <p
+                            style={{
+                                maxWidth: 760,
+                                fontSize: 14,
+                                lineHeight: 1.65,
+                                color: "#64748b",
+                                marginBottom: 24,
+                            }}
+                        >
+                            Redaktionell aktualisiert: August 2026 · Allgemeine
+                            Information, keine Steuer- oder Rechtsberatung.
+                            Offizielle Grundlagen findest du beim{" "}
+                            <a
+                                href="https://www.gesetze-im-internet.de/ustg_1980/__14.html"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Bundesministerium der Justiz (§ 14 UStG)
+                            </a>
+                            .
                         </p>
 
                         <div

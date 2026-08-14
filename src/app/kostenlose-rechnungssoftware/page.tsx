@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/kostenlose-rechnungssoftware";
 
-export const metadata: Metadata = {
-    title: "Kostenlose Rechnungssoftware – echte Vollversion statt Testphase",
+export const metadata = createPageMetadata({
+    title: "Kostenlose Rechnungssoftware – Vollversion statt Testphase",
     description:
-        "Kostenlose Rechnungssoftware im Vergleich: Warum die meisten Gratis-Angebote Testversionen sind – und wie Rechly als Open-Source-Vollversion ohne Limits funktioniert. Mit E-Rechnung, DATEV-Export und Bankabgleich.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Kostenlose Rechnungssoftware | Rechly",
-        description:
-            "Gratis-Testphase oder echte Vollversion? Der ehrliche Vergleich kostenloser Rechnungssoftware für Deutschland.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Kostenlose Rechnungssoftware im Vergleich: Rechly ist eine Open-Source-Vollversion für Rechnungen, E-Rechnung, DATEV-Export und Bankabgleich.",
+    path,
+    type: "article",
+});
 
 export default function KostenloseRechnungssoftwarePage() {
     return (

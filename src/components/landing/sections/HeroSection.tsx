@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button, Typography } from "antd";
 import { ArrowRightOutlined, GithubOutlined } from "@ant-design/icons";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,7 +9,6 @@ const { Text } = Typography;
 const repoUrl = getRepoUrl();
 
 export default function HeroSection() {
-    const router = useRouter();
     const { t } = useLanguage();
 
     return (
@@ -78,7 +76,7 @@ export default function HeroSection() {
                 <Button
                     type="primary"
                     size="large"
-                    onClick={() => router.push("/register")}
+                    href="/register"
                     className="w-full sm:w-auto"
                     style={{
                         height: 48,

@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button, Typography } from "antd";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const { Text } = Typography;
 
 export default function CtaSection() {
-    const router = useRouter();
     const { t } = useLanguage();
 
     return (
@@ -41,7 +39,7 @@ export default function CtaSection() {
                 <Button
                     type="primary"
                     size="large"
-                    onClick={() => router.push("/register")}
+                    href="/register"
                     style={{
                         height: 48,
                         paddingInline: 32,

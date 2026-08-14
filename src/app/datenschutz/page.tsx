@@ -27,16 +27,16 @@ const content = {
         section4Title: "4. Hosting",
         section4Text:
             "Die Anwendung und Datenbank werden bei Appwrite in deutschen Rechenzentren (Frankfurt) gehostet. Alle Daten bleiben in der EU.",
-        section5Title: "5. Cookies",
+        section5Title: "5. Cookies und optionale Analyse",
         section5Text:
-            "Wir verwenden nur technisch notwendige Cookies für die Authentifizierung. Es werden keine Tracking- oder Analyse-Cookies verwendet.",
+            "Technisch notwendige Cookies werden für Authentifizierung und Grundfunktionen eingesetzt. Nur mit deiner ausdrücklichen Einwilligung nutzen wir Google Analytics (Google Ireland Limited) und Vercel Web Analytics (Vercel Inc.), um Seitenaufrufe und die technische Qualität des Angebots zu messen. Google Analytics kann Geräte- und Browserinformationen, aufgerufene Seiten, gekürzte IP-Informationen und Online-Kennungen verarbeiten. Das _ga-Cookie ist auf höchstens 13 Monate begrenzt; nutzer- und ereignisbezogene Daten werden bei Google Analytics höchstens 14 Monate aufbewahrt. Google-Signale und Werbepersonalisierung sind deaktiviert. Vercel Web Analytics arbeitet laut Anbieter ohne Cookies und ohne dauerhafte Zuordnung zu Personen oder IP-Adressen; der täglich gebildete Besucher-Hash wird nach 24 Stunden verworfen. Rechtsgrundlage ist deine Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG. Du kannst sie jederzeit mit Wirkung für die Zukunft in den Cookie-Einstellungen widerrufen; dann wird die Analyse gestoppt und verfügbare Analyse-Cookies werden gelöscht. Für mögliche Übermittlungen in die USA stützen sich Google und Vercel auf ihre Zertifizierungen nach dem EU-US Data Privacy Framework und, soweit erforderlich, auf EU-Standardvertragsklauseln.",
         section6Title: "6. Deine Rechte",
         section6Text:
             "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Datenübertragbarkeit deiner Daten. Kontaktiere uns über die im Impressum genannte E-Mail-Adresse.",
         section7Title: "7. Datenlöschung",
         section7Text:
             "Du kannst deinen Account und alle zugehörigen Daten jederzeit löschen. Nach der Löschung werden alle Daten innerhalb von 30 Tagen vollständig entfernt.",
-        lastUpdated: "Stand: Dezember 2025",
+        lastUpdated: "Stand: August 2026",
     },
     en: {
         title: "Privacy Policy",
@@ -56,16 +56,16 @@ const content = {
         section4Title: "4. Hosting",
         section4Text:
             "The application and database are hosted by Appwrite in German data centers (Frankfurt). All data remains in the EU.",
-        section5Title: "5. Cookies",
+        section5Title: "5. Cookies and Optional Analytics",
         section5Text:
-            "We only use technically necessary cookies for authentication. No tracking or analytics cookies are used.",
+            "Technically necessary cookies are used for authentication and basic functions. Only with your explicit consent do we use Google Analytics (Google Ireland Limited) and Vercel Web Analytics (Vercel Inc.) to measure page views and the technical quality of the service. Google Analytics may process device and browser information, visited pages, shortened IP information, and online identifiers. The _ga cookie is limited to a maximum of 13 months; user- and event-related Google Analytics data is retained for no longer than 14 months. Google Signals and advertising personalization are disabled. According to Vercel, Web Analytics uses no cookies and does not permanently associate data with individuals or IP addresses; its daily visitor hash is discarded after 24 hours. Processing is based on your consent under Article 6(1)(a) GDPR and applicable cookie law. You can withdraw consent at any time with future effect in Cookie Settings; analytics will then stop and available analytics cookies will be deleted. For potential transfers to the United States, Google and Vercel rely on their EU-US Data Privacy Framework certifications and, where required, EU Standard Contractual Clauses.",
         section6Title: "6. Your Rights",
         section6Text:
             "You have the right to access, rectification, deletion, and data portability of your data. Contact us via the email address listed in the Imprint.",
         section7Title: "7. Data Deletion",
         section7Text:
             "You can delete your account and all associated data at any time. After deletion, all data will be completely removed within 30 days.",
-        lastUpdated: "Last updated: December 2025",
+        lastUpdated: "Last updated: August 2026",
     },
 };
 
@@ -77,7 +77,7 @@ export default function DatenschutzPage() {
         <div style={{ minHeight: "100vh", background: "#fff" }}>
             <Navbar showAuth={false} />
 
-            <section
+            <main
                 style={{
                     paddingTop: 100,
                     paddingBottom: 60,
@@ -92,17 +92,17 @@ export default function DatenschutzPage() {
                         {t.title}
                     </Title>
 
-                    <Title level={4}>{t.section1Title}</Title>
+                    <Title level={2}>{t.section1Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section1Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section2Title}</Title>
+                    <Title level={2}>{t.section2Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section2Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section3Title}</Title>
+                    <Title level={2}>{t.section3Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section3Text}
                     </Paragraph>
@@ -112,22 +112,22 @@ export default function DatenschutzPage() {
                         ))}
                     </ul>
 
-                    <Title level={4}>{t.section4Title}</Title>
+                    <Title level={2}>{t.section4Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section4Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section5Title}</Title>
+                    <Title level={2}>{t.section5Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section5Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section6Title}</Title>
+                    <Title level={2}>{t.section6Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section6Text}
                     </Paragraph>
 
-                    <Title level={4}>{t.section7Title}</Title>
+                    <Title level={2}>{t.section7Title}</Title>
                     <Paragraph style={{ fontSize: 15 }}>
                         {t.section7Text}
                     </Paragraph>
@@ -143,7 +143,7 @@ export default function DatenschutzPage() {
                         {t.lastUpdated}
                     </Text>
                 </Card>
-            </section>
+            </main>
 
             <Footer />
         </div>

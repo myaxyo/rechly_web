@@ -1,25 +1,15 @@
-import type { Metadata } from "next";
 import KeywordLandingPage from "@/components/landing/KeywordLandingPage";
-import { getSiteUrl } from "@/lib/env";
+import { createPageMetadata } from "@/lib/seo";
 
-const siteUrl = getSiteUrl();
 const path = "/rechnung-fuer-kleinunternehmer-erstellen";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
     title: "Rechnung für Kleinunternehmer erstellen",
     description:
-        "Rechnung für Kleinunternehmer erstellen: Wie du Kundendaten, Pflichtangaben und den Hinweis zur Kleinunternehmerregelung in einen sauberen Rechnungsprozess bringst.",
-    alternates: {
-        canonical: path,
-    },
-    openGraph: {
-        title: "Rechnung für Kleinunternehmer erstellen | Rechly",
-        description:
-            "So erstellst du als Kleinunternehmer strukturierte Rechnungen mit klaren Pflichtangaben und wiederverwendbaren Kundendaten.",
-        url: `${siteUrl}${path}`,
-        type: "article",
-    },
-};
+        "Rechnung für Kleinunternehmer erstellen: Kundendaten, Pflichtangaben und den Hinweis zur Kleinunternehmerregelung in einen sauberen Ablauf bringen.",
+    path,
+    type: "article",
+});
 
 export default function RechnungFuerKleinunternehmerErstellenPage() {
     return (
