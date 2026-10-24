@@ -73,6 +73,8 @@ export async function GET(
             country: companyDoc.country || "DE",
             email: companyDoc.email || undefined,
             phone: companyDoc.phone ?? undefined,
+            managing_directors: companyDoc.managingDirectors ?? undefined,
+            is_small_business: companyDoc.isSmallBusiness ?? false,
             website: companyDoc.website ?? undefined,
             vat_id: companyDoc.vatId || undefined,
             tax_number: companyDoc.taxNumber || undefined,
