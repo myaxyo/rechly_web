@@ -1,6 +1,21 @@
 # Rechly
 
-Rechly is an open-source invoicing app for freelancers and small businesses. The repository contains the Next.js web app and an optional Django-based ML service used for forecasting and payment-risk insights.
+Rechly is an open-source invoicing app for freelancers and small businesses. In addition to the Next.js web application, Rechly is available as a standalone 100% offline desktop application: **[Rechly Desktop](https://github.com/myaxyo/rechly_desktop)**.
+
+## Desktop Edition (100 % Offline)
+
+Prefer running everything locally without cloud or account requirements? **[Rechly Desktop](https://github.com/myaxyo/rechly_desktop)** stores all data on-device in a local vault:
+
+- **100% Offline & Privacy-First**: No internet connection, cloud login, or remote server required.
+- **E-Rechnung**: XRechnung 3.0 & ZUGFeRD 2.3 XML export for German B2B e-invoicing compliance (EN 16931).
+- **DATEV Export**: Standard DATEV EXTF format 700 CSV export for tax consultants (*Steuerberater*).
+- **Optional Local AI**: Natural language text-to-invoice quick fill with local Ollama models (e.g. [`jonprompter/Rechly-DE-3B`](https://ollama.com/jonprompter/Rechly-DE-3B)).
+- **Downloads**:
+  - [Windows 10/11 (64-Bit)](https://github.com/myaxyo/rechly_desktop/releases/latest/download/Rechly-Desktop-Setup-win-x64.exe)
+  - [macOS Apple Silicon (M1+)](https://github.com/myaxyo/rechly_desktop/releases/latest/download/Rechly-Desktop-mac-arm64.dmg)
+  - [macOS Intel](https://github.com/myaxyo/rechly_desktop/releases/latest/download/Rechly-Desktop-mac-x64.dmg)
+  - [All Releases & Release Notes](https://github.com/myaxyo/rechly_desktop/releases)
+  - [Source Code](https://github.com/myaxyo/rechly_desktop)
 
 ## Stack
 
@@ -66,7 +81,8 @@ npm run lint
 
 | Repository | Description |
 |---|---|
-| [rechly_web](https://github.com/myaxyo/rechly_web) | Next.js web app (this repo) |
+| [rechly_web](https://github.com/myaxyo/rechly_web) | Next.js web application (this repo) |
+| [rechly_desktop](https://github.com/myaxyo/rechly_desktop) | 100% offline desktop application for Windows and macOS |
 
 ## Current Gaps
 
