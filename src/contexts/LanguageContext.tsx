@@ -20,6 +20,7 @@ const translations: Record<Language, Record<string, string>> = {
         "nav.login": "Anmelden",
         "nav.register": "Registrieren",
         "nav.features": "Funktionen",
+        "nav.download": "Download",
         "nav.github": "GitHub",
 
         // Hero
@@ -943,6 +944,7 @@ const translations: Record<Language, Record<string, string>> = {
         "nav.login": "Sign In",
         "nav.register": "Sign Up",
         "nav.features": "Features",
+        "nav.download": "Download",
         "nav.github": "GitHub",
 
         // Hero

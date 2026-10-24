@@ -5,7 +5,7 @@ import {
     FileTextOutlined,
     TeamOutlined,
     CloudOutlined,
-    MobileOutlined,
+    DesktopOutlined,
     SafetyOutlined,
     CalculatorOutlined,
     DownloadOutlined,
@@ -70,12 +70,12 @@ export default function FeaturesPage() {
                   },
                   {
                       icon: (
-                          <MobileOutlined
-                              style={{ fontSize: 28, color: "#eb2f96" }}
+                          <DesktopOutlined
+                              style={{ fontSize: 28, color: "#1677ff" }}
                           />
                       ),
-                      title: "Mobile App",
-                      desc: "Native Android-App für unterwegs. iOS-App folgt.",
+                      title: "Desktop-App (100 % offline)",
+                      desc: "Alle Daten bleiben lokal auf deinem Rechner. Keine Cloud, kein Login für Windows und Mac.",
                   },
                   {
                       icon: (
@@ -144,12 +144,12 @@ export default function FeaturesPage() {
                   },
                   {
                       icon: (
-                          <MobileOutlined
-                              style={{ fontSize: 28, color: "#eb2f96" }}
+                          <DesktopOutlined
+                              style={{ fontSize: 28, color: "#1677ff" }}
                           />
                       ),
-                      title: "Mobile App",
-                      desc: "Native Android app for on the go. iOS app coming soon.",
+                      title: "Desktop App (100% offline)",
+                      desc: "All data stays locally on your computer. No cloud, no login for Windows and Mac.",
                   },
                   {
                       icon: (
@@ -262,6 +262,31 @@ export default function FeaturesPage() {
                             </Text>
                         </Card>
                     ))}
+                </div>
+
+                <div style={{ textAlign: "center", marginTop: 40 }}>
+                    <a
+                        href="/#download"
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "12px 28px",
+                            backgroundColor: "#1677ff",
+                            color: "#fff",
+                            borderRadius: 8,
+                            fontWeight: 500,
+                            textDecoration: "none",
+                            fontSize: 15,
+                        }}
+                    >
+                        <DesktopOutlined />
+                        <span>
+                            {language === "de"
+                                ? "Desktop-App herunterladen (Windows & Mac)"
+                                : "Download Desktop App (Windows & Mac)"}
+                        </span>
+                    </a>
                 </div>
             </section>
             </main>

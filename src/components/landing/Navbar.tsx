@@ -75,6 +75,9 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                         <Button type="text" href="/features">
                             {t("nav.features")}
                         </Button>
+                        <Button type="text" href="/#download">
+                            {t("nav.download")}
+                        </Button>
                         <Button type="text" href="/tools">
                             Tools
                         </Button>
@@ -193,6 +196,14 @@ export default function Navbar({ showAuth = true }: NavbarProps) {
                             style={{ justifyContent: "flex-start", height: 44 }}
                         >
                             {t("nav.features")}
+                        </Button>
+                        <Button
+                            type="text"
+                            href="/#download"
+                            onClick={() => setMobileMenuOpen(false)}
+                            style={{ justifyContent: "flex-start", height: 44 }}
+                        >
+                            {t("nav.download")}
                         </Button>
                         <Button
                             type="text"

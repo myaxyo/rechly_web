@@ -22,10 +22,11 @@ export const metadata = createPageMetadata({
 // Lazy load non-critical sections
 const FeaturesSection = dynamic(
     () => import("@/components/landing/sections/FeaturesSection"),
-    { ssr: true }, // Keep SSR for SEO, but hydrate later? No, usually false for pure client interaction, but these have text content.
-    // If I use ssr: false, the content won't be in the initial HTML, bad for SEO.
-    // Next.js dynamic imports automatically split the bundle.
-    // Loading priority is managed by Next.js.
+    { ssr: true },
+);
+const DownloadSection = dynamic(
+    () => import("@/components/landing/sections/DownloadSection"),
+    { ssr: true },
 );
 const AboutSection = dynamic(
     () => import("@/components/landing/sections/AboutSection"),
@@ -55,7 +56,7 @@ const structuredData = {
             url: siteUrl,
             applicationCategory: "BusinessApplication",
             applicationSubCategory: "Rechnungssoftware",
-            operatingSystem: "Web",
+            operatingSystem: "Web, Windows, macOS",
             inLanguage: "de-DE",
             areaServed: {
                 "@type": "Country",
@@ -95,6 +96,7 @@ const structuredData = {
                 "Transparenter Open-Source-Quellcode",
                 "KI-gestützte Rechnungshilfe (BYOK)",
                 "DATEV-Export",
+                "Rechly Desktop (100 % offline für Windows & Mac)",
                 "Open Source & selbst hostbar",
             ],
         },
@@ -160,6 +162,7 @@ export default function Home() {
                 <HeroSection />
                 <ToolsSection />
                 <FeaturesSection />
+                <DownloadSection />
                 <SeoTopicsSection />
                 <ComparisonTopicsSection />
                 <TransactionalTopicsSection />
