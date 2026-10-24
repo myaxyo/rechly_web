@@ -7,6 +7,8 @@ import {
     Input,
     Button,
     Select,
+    AutoComplete,
+    Alert,
     Space,
     message,
     Typography,
@@ -61,6 +63,7 @@ export default function SettingsPage() {
         openai: [],
         anthropic: [],
         openrouter: [],
+        ollama: [],
     });
     const [form] = Form.useForm();
     const [aiForm] = Form.useForm();
@@ -98,6 +101,7 @@ export default function SettingsPage() {
                 aiForm.setFieldsValue({
                     provider: data.provider,
                     model: data.model,
+                    base_url: data.base_url || "http://localhost:11434/v1",
                     system_prompt: data.system_prompt,
                 });
                 setAiKeyConfigured(data.api_key_configured);
@@ -197,6 +201,7 @@ export default function SettingsPage() {
     const handleSaveAISettings = async (values: {
         provider: AIProvider;
         model: string;
+        base_url?: string;
         api_key?: string;
         system_prompt?: string;
     }) => {
@@ -252,6 +257,7 @@ export default function SettingsPage() {
     };
 
     const providerOptions = [
+        { value: "ollama", label: t("settings.aiProviderOllama") },
         { value: "openai", label: t("settings.aiProviderOpenAI") },
         { value: "anthropic", label: t("settings.aiProviderAnthropic") },
         { value: "openrouter", label: t("settings.aiProviderOpenRouter") },
@@ -632,9 +638,27 @@ export default function SettingsPage() {
                                             presets[0],
                                         );
                                     }
+                                    if (
+                                        value === "ollama" &&
+                                        !aiForm.getFieldValue("base_url")
+                                    ) {
+                                        aiForm.setFieldValue(
+                                            "base_url",
+                                            "http://localhost:11434/v1",
+                                        );
+                                    }
                                 }}
                             />
                         </Form.Item>
+
+                        {selectedProvider === "ollama" && (
+                            <Alert
+                                type="success"
+                                showIcon
+                                style={{ marginBottom: 16 }}
+                                message={t("settings.aiLocalPrivacyBadge")}
+                            />
+                        )}
 
                         <Form.Item
                             name="model"
@@ -646,20 +670,43 @@ export default function SettingsPage() {
                                 },
                             ]}
                         >
-                            <Select
+                            <AutoComplete
                                 options={modelOptions}
                                 placeholder={t("settings.aiModelPlaceholder")}
-                                showSearch
-                                optionFilterProp="label"
+                                filterOption={(inputValue, option) =>
+                                    (option?.value ?? "")
+                                        .toLowerCase()
+                                        .includes(inputValue.toLowerCase())
+                                }
                             />
                         </Form.Item>
+
+                        {selectedProvider === "ollama" && (
+                            <Form.Item
+                                name="base_url"
+                                label={t("settings.aiBaseUrl")}
+                                extra={t("settings.aiBaseUrlHelp")}
+                            >
+                                <Input placeholder="http://localhost:11434/v1" />
+                            </Form.Item>
+                        )}
 
                         <Form.Item
                             name="api_key"
                             label={t("settings.aiApiKey")}
-                            extra={t("settings.aiApiKeyHelp")}
+                            extra={
+                                selectedProvider === "ollama"
+                                    ? "Optional für lokale Server (Standard: nicht benötigt)"
+                                    : t("settings.aiApiKeyHelp")
+                            }
                         >
-                            <Input.Password placeholder="sk-..." />
+                            <Input.Password
+                                placeholder={
+                                    selectedProvider === "ollama"
+                                        ? "Optional..."
+                                        : "sk-..."
+                                }
+                            />
                         </Form.Item>
 
                         <Text type={aiKeyConfigured ? "success" : "secondary"}>

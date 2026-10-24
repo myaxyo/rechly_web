@@ -71,11 +71,12 @@ export async function POST(request: NextRequest) {
 
         const apiKey =
             typeof body.api_key === "string" ? body.api_key.trim() : "";
+        const isLocalProvider = body.provider === "ollama";
         const providerChanged =
             existingSettings?.provider &&
             existingSettings.provider !== body.provider;
 
-        if (providerChanged && !apiKey) {
+        if (providerChanged && !apiKey && !isLocalProvider) {
             return NextResponse.json(
                 {
                     error: "Please provide a new API key when changing provider",
@@ -87,15 +88,21 @@ export async function POST(request: NextRequest) {
         const nextSettings = buildStoredAISettings({
             provider: body.provider,
             model,
+            base_url:
+                typeof body.base_url === "string" ? body.base_url : undefined,
             system_prompt:
                 typeof body.system_prompt === "string"
                     ? body.system_prompt
                     : undefined,
             api_key: apiKey || undefined,
-            existing: existingSettings,
+            existing: providerChanged && isLocalProvider ? null : existingSettings,
         });
 
-        if (!nextSettings.encrypted_api_key && !nextSettings.api_key) {
+        if (
+            !isLocalProvider &&
+            !nextSettings.encrypted_api_key &&
+            !nextSettings.api_key
+        ) {
             return NextResponse.json(
                 { error: "API key is required for the initial AI setup" },
                 { status: 400 },

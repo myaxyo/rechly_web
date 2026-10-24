@@ -1,21 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSessionClient } from "@/lib/appwrite-server";
+import {
+    AI_PREFS_KEY,
+    DEFAULT_OLLAMA_BASE_URL,
+    resolveAISettings,
+    sanitizeStoredAISettings,
+} from "@/lib/server/ai";
 
 export async function POST(request: NextRequest) {
     try {
         let account;
+        let user;
         try {
             const sessionClient = await createSessionClient();
             account = sessionClient.account;
+            user = await account.get();
         } catch {
             return NextResponse.json(
                 { error: "Not authenticated" },
                 { status: 401 },
             );
         }
-
-        // Verify authentication
-        await account.get();
 
         const body = await request.json();
         const { imageBase64, mimeType } = body;
@@ -27,9 +32,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const prefs = (user.prefs || {}) as Record<string, unknown>;
+        const userSettings = resolveAISettings(
+            sanitizeStoredAISettings(prefs[AI_PREFS_KEY]),
+        );
+
         const apiKey =
-            process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY;
-        if (!apiKey) {
+            userSettings?.api_key ||
+            process.env.OPENAI_API_KEY ||
+            process.env.ANTHROPIC_API_KEY;
+
+        const isOllama = userSettings?.provider === "ollama";
+
+        if (!apiKey && !isOllama) {
             return NextResponse.json(
                 { error: "ai_not_configured" },
                 { status: 422 },
@@ -54,63 +69,19 @@ If any field is unclear, use null. Return only valid JSON.`;
             description?: string;
         } = {};
 
-        if (process.env.OPENAI_API_KEY) {
-            const res = await fetch(
-                "https://api.openai.com/v1/chat/completions",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4o-mini",
-                        messages: [
-                            {
-                                role: "user",
-                                content: [
-                                    { type: "text", text: prompt },
-                                    {
-                                        type: "image_url",
-                                        image_url: {
-                                            url: `data:${mimeType};base64,${imageBase64}`,
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                        max_tokens: 300,
-                    }),
-                },
-            );
+        if (userSettings?.provider === "anthropic" || (!userSettings && process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY)) {
+            const anthropicKey = userSettings?.api_key || process.env.ANTHROPIC_API_KEY!;
+            const anthropicModel = userSettings?.model || "claude-3-haiku-20240307";
 
-            if (!res.ok) {
-                return NextResponse.json(
-                    { error: "ai_not_configured" },
-                    { status: 422 },
-                );
-            }
-
-            const json = await res.json();
-            const content = json.choices?.[0]?.message?.content || "{}";
-            const jsonMatch = content.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                try {
-                    result = JSON.parse(jsonMatch[0]);
-                } catch {
-                    // fall through
-                }
-            }
-        } else if (process.env.ANTHROPIC_API_KEY) {
             const res = await fetch("https://api.anthropic.com/v1/messages", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-key": process.env.ANTHROPIC_API_KEY,
+                    "x-api-key": anthropicKey,
                     "anthropic-version": "2023-06-01",
                 },
                 body: JSON.stringify({
-                    model: "claude-3-haiku-20240307",
+                    model: anthropicModel,
                     max_tokens: 300,
                     messages: [
                         {
@@ -140,6 +111,66 @@ If any field is unclear, use null. Return only valid JSON.`;
 
             const json = await res.json();
             const content = json.content?.[0]?.text || "{}";
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                try {
+                    result = JSON.parse(jsonMatch[0]);
+                } catch {
+                    // fall through
+                }
+            }
+        } else {
+            // OpenAI, OpenRouter, Ollama, or default OpenAI env var
+            let baseUrl = "https://api.openai.com/v1";
+            let effectiveKey = apiKey || "ollama";
+            let model = "gpt-4o-mini";
+
+            if (userSettings?.provider === "ollama") {
+                baseUrl = (userSettings.base_url || DEFAULT_OLLAMA_BASE_URL).replace(/\/+$/, "");
+                if (!baseUrl.endsWith("/v1")) baseUrl = `${baseUrl}/v1`;
+                model = userSettings.model || "qwen2.5-vl:7b";
+            } else if (userSettings?.provider === "openrouter") {
+                baseUrl = "https://openrouter.ai/api/v1";
+                model = userSettings.model || "openai/gpt-4o-mini";
+            } else if (userSettings?.provider === "openai") {
+                model = userSettings.model || "gpt-4o-mini";
+            }
+
+            const res = await fetch(`${baseUrl}/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${effectiveKey}`,
+                },
+                body: JSON.stringify({
+                    model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                { type: "text", text: prompt },
+                                {
+                                    type: "image_url",
+                                    image_url: {
+                                        url: `data:${mimeType};base64,${imageBase64}`,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    max_tokens: 300,
+                }),
+            });
+
+            if (!res.ok) {
+                return NextResponse.json(
+                    { error: "ai_not_configured" },
+                    { status: 422 },
+                );
+            }
+
+            const json = await res.json();
+            const content = json.choices?.[0]?.message?.content || "{}";
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 try {

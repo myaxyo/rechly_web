@@ -225,11 +225,12 @@ export interface DashboardAnalytics {
     generatedAt: string;
 }
 
-export type AIProvider = "openai" | "anthropic" | "openrouter";
+export type AIProvider = "openai" | "anthropic" | "openrouter" | "ollama";
 
 export interface AISettings {
     provider: AIProvider;
     model: string;
+    base_url?: string;
     system_prompt?: string;
     api_key_configured: boolean;
     daily_usage?: {
@@ -243,6 +244,7 @@ export interface AISettings {
 export interface AISettingsUpdate {
     provider: AIProvider;
     model: string;
+    base_url?: string;
     system_prompt?: string;
     api_key?: string;
 }
@@ -255,6 +257,21 @@ export interface AIChatResponse {
     content: string;
     provider: AIProvider;
     model: string;
+}
+
+export interface AIInvoiceDraftParseResult {
+    client_id?: string | null;
+    client_name?: string | null;
+    due_days?: number | null;
+    notes?: string | null;
+    payment_terms?: string | null;
+    items: Array<{
+        description: string;
+        quantity: number;
+        unit_of_measure: string;
+        price: number;
+        tax_rate_percent: number;
+    }>;
 }
 
 // ─── Offers / Quotations ─────────────────────────────────────────────────────

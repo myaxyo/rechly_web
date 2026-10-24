@@ -9,7 +9,14 @@ import type { AIChatResponse, AIProvider, AISettings } from "@/types";
 
 export const AI_PREFS_KEY = "rechly_ai_settings";
 export const AI_USAGE_PREFS_KEY = "rechly_ai_usage";
-const VALID_PROVIDERS: AIProvider[] = ["openai", "anthropic", "openrouter"];
+export const DEFAULT_OLLAMA_BASE_URL =
+    process.env.OLLAMA_BASE_URL?.trim() || "http://localhost:11434/v1";
+const VALID_PROVIDERS: AIProvider[] = [
+    "openai",
+    "anthropic",
+    "openrouter",
+    "ollama",
+];
 const ENCRYPTION_ALGORITHM = "aes-256-gcm";
 const DEFAULT_DAILY_AI_REQUEST_LIMIT = 100;
 export const AI_MODEL_PRESETS: Record<AIProvider, string[]> = {
@@ -25,11 +32,20 @@ export const AI_MODEL_PRESETS: Record<AIProvider, string[]> = {
         "anthropic/claude-3.5-sonnet",
         "google/gemini-2.0-flash-001",
     ],
+    ollama: [
+        "qwen2.5:3b",
+        "qwen2.5:7b",
+        "llama3.2:3b",
+        "gemma3:4b",
+        "mistral:7b",
+        "deepseek-r1:7b",
+    ],
 };
 
 export type StoredAISettings = {
     provider: AIProvider;
     model: string;
+    base_url?: string;
     system_prompt?: string;
     api_key?: string;
     encrypted_api_key?: string;
@@ -40,6 +56,7 @@ export type StoredAISettings = {
 export type ResolvedAISettings = {
     provider: AIProvider;
     model: string;
+    base_url?: string;
     system_prompt?: string;
     api_key: string;
 };
@@ -142,6 +159,10 @@ export function sanitizeStoredAISettings(
     return {
         provider: candidate.provider,
         model,
+        base_url:
+            typeof candidate.base_url === "string"
+                ? candidate.base_url.trim() || undefined
+                : undefined,
         system_prompt:
             typeof candidate.system_prompt === "string"
                 ? candidate.system_prompt.trim() || undefined
@@ -176,8 +197,10 @@ export function toPublicAISettings(
     return {
         provider: settings.provider,
         model: settings.model,
+        base_url: settings.base_url,
         system_prompt: settings.system_prompt,
         api_key_configured: Boolean(
+            settings.provider === "ollama" ||
             settings.api_key ||
             (settings.encrypted_api_key &&
                 settings.encryption_iv &&
@@ -191,6 +214,7 @@ export function toPublicAISettings(
 export function buildStoredAISettings(input: {
     provider: AIProvider;
     model: string;
+    base_url?: string;
     system_prompt?: string;
     api_key?: string;
     existing?: StoredAISettings | null;
@@ -201,6 +225,7 @@ export function buildStoredAISettings(input: {
     const nextSettings: StoredAISettings = {
         provider: input.provider,
         model: input.model.trim(),
+        base_url: input.base_url?.trim() || undefined,
         system_prompt: input.system_prompt?.trim() || undefined,
     };
 
@@ -241,6 +266,8 @@ export function resolveAISettings(
         });
     } else if (settings.api_key) {
         apiKey = settings.api_key;
+    } else if (settings.provider === "ollama") {
+        apiKey = "ollama";
     }
 
     if (!apiKey) {
@@ -250,9 +277,18 @@ export function resolveAISettings(
     return {
         provider: settings.provider,
         model: settings.model,
+        base_url: settings.base_url,
         system_prompt: settings.system_prompt,
         api_key: apiKey,
     };
+}
+
+function normalizeOllamaBaseUrl(rawUrl?: string): string {
+    const base = (rawUrl?.trim() || DEFAULT_OLLAMA_BASE_URL).replace(/\/+$/, "");
+    if (base.endsWith("/v1")) {
+        return base;
+    }
+    return `${base}/v1`;
 }
 
 async function runOpenAICompatibleChat(
@@ -349,6 +385,12 @@ export async function generateAIText(
             settings,
             prompt,
             "https://openrouter.ai/api/v1",
+        );
+    } else if (settings.provider === "ollama") {
+        content = await runOpenAICompatibleChat(
+            settings,
+            prompt,
+            normalizeOllamaBaseUrl(settings.base_url),
         );
     } else {
         content = await runOpenAICompatibleChat(

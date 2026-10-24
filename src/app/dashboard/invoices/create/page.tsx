@@ -32,7 +32,7 @@ import { getAllClients } from "@/lib/clientService";
 import { getAllProducts } from "@/lib/productService";
 import { createInvoice } from "@/lib/invoiceService";
 import { getCompanyInfo } from "@/lib/companyService";
-import { runInvoiceAssistant } from "@/lib/aiService";
+import { runInvoiceAssistant, parseInvoiceDraftWithAI } from "@/lib/aiService";
 import {
     formatCurrency,
     calculateInvoiceTotals,
@@ -84,6 +84,8 @@ export default function InvoiceCreatePage() {
     const [generatingLineItemKey, setGeneratingLineItemKey] = useState<
         string | null
     >(null);
+    const [aiPrompt, setAiPrompt] = useState("");
+    const [parsingPrompt, setParsingPrompt] = useState(false);
 
     const [createdInvoiceId, setCreatedInvoiceId] = useState<string | null>(
         null,
@@ -329,6 +331,81 @@ export default function InvoiceCreatePage() {
             );
         } finally {
             setGeneratingLineItemKey(null);
+        }
+    };
+
+    const handleAiQuickFill = async () => {
+        if (!aiPrompt.trim()) {
+            message.warning(t("invoiceCreate.aiQuickPlaceholder"));
+            return;
+        }
+
+        setParsingPrompt(true);
+        try {
+            const result = await parseInvoiceDraftWithAI({
+                promptText: aiPrompt,
+                isSmallBusiness: company?.is_small_business,
+                availableClients: clients.map((c) => ({
+                    id: c.id || "",
+                    name: c.name,
+                })),
+            });
+
+            const parsed = result.parsed;
+            if (parsed.client_id) {
+                const found = clients.find((c) => c.id === parsed.client_id);
+                if (found) setSelectedClient(found);
+            } else if (parsed.client_name) {
+                const found = clients.find(
+                    (c) =>
+                        c.name.toLowerCase() ===
+                        parsed.client_name?.toLowerCase(),
+                );
+                if (found) setSelectedClient(found);
+            }
+
+            if (parsed.items && parsed.items.length > 0) {
+                const newItems: LineItem[] = parsed.items.map((it, idx) => ({
+                    key: `${Date.now()}-${idx}`,
+                    description: it.description,
+                    service_summary: it.description,
+                    quantity: it.quantity,
+                    unit_of_measure:
+                        it.unit_of_measure || t("invoiceCreate.unitPiece"),
+                    price: it.price,
+                    tax_rate_percent: company?.is_small_business
+                        ? 0
+                        : it.tax_rate_percent,
+                    discount_percent: 0,
+                }));
+                setLineItems(newItems);
+            }
+
+            if (parsed.due_days) {
+                setDueDate(dayjs().add(parsed.due_days, "day"));
+            }
+
+            if (parsed.payment_terms) {
+                setPaymentTerms(parsed.payment_terms);
+            }
+
+            if (parsed.notes) {
+                setNotes(parsed.notes);
+            }
+
+            message.success(t("invoiceCreate.aiQuickSuccess"));
+            if (parsed.client_id || parsed.client_name) {
+                setCurrentStep(1);
+            }
+        } catch (error) {
+            console.error("AI Quick Fill error:", error);
+            message.error(
+                error instanceof Error
+                    ? error.message
+                    : t("invoiceCreate.aiQuickError"),
+            );
+        } finally {
+            setParsingPrompt(false);
         }
     };
 
@@ -802,6 +879,78 @@ export default function InvoiceCreatePage() {
                     { title: t("invoiceCreate.stepDone") },
                 ]}
             />
+
+            {currentStep < 2 && (
+                <Card
+                    size="small"
+                    style={{
+                        marginBottom: 20,
+                        background:
+                            "linear-gradient(135deg, rgba(230, 244, 255, 0.6) 0%, rgba(255, 255, 255, 0.9) 100%)",
+                        border: "1px solid #91caff",
+                        borderRadius: 10,
+                    }}
+                >
+                    <Space
+                        direction="vertical"
+                        style={{ width: "100%" }}
+                        size={8}
+                    >
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                flexWrap: "wrap",
+                                gap: 8,
+                            }}
+                        >
+                            <Space align="center" size={6}>
+                                <RobotOutlined
+                                    style={{
+                                        fontSize: 18,
+                                        color: "#1677ff",
+                                    }}
+                                />
+                                <Text strong style={{ fontSize: 14 }}>
+                                    {t("invoiceCreate.aiQuickTitle")}
+                                </Text>
+                            </Space>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                {t("invoiceCreate.aiQuickDesc")}
+                            </Text>
+                        </div>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: 8,
+                                width: "100%",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Input
+                                value={aiPrompt}
+                                onChange={(e) => setAiPrompt(e.target.value)}
+                                onPressEnter={handleAiQuickFill}
+                                placeholder={t(
+                                    "invoiceCreate.aiQuickPlaceholder",
+                                )}
+                                allowClear
+                                style={{ flex: 1 }}
+                            />
+                            <Button
+                                type="primary"
+                                icon={<RobotOutlined />}
+                                loading={parsingPrompt}
+                                onClick={handleAiQuickFill}
+                            >
+                                {t("invoiceCreate.aiQuickBtn")}
+                            </Button>
+                        </div>
+                    </Space>
+                </Card>
+            )}
 
             {renderStepContent()}
 

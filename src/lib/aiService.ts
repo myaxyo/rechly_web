@@ -1,11 +1,17 @@
-import type { AIChatResponse, AISettings, AISettingsUpdate } from "@/types";
+import type {
+    AIChatResponse,
+    AIInvoiceDraftParseResult,
+    AISettings,
+    AISettingsUpdate,
+} from "@/types";
 
 type InvoiceAssistantAction =
     | "invoice_note"
     | "payment_terms"
     | "payment_reminder"
     | "line_item_description"
-    | "overdue_client_reply";
+    | "overdue_client_reply"
+    | "parse_invoice_draft";
 
 type InvoiceAssistantPayload = {
     action: InvoiceAssistantAction;
@@ -20,6 +26,9 @@ type InvoiceAssistantPayload = {
     notes?: string;
     paymentTerms?: string;
     serviceSummary?: string;
+    promptText?: string;
+    isSmallBusiness?: boolean;
+    availableClients?: Array<{ id: string; name: string }>;
     lineItems?: Array<{
         description: string;
         quantity: number;
@@ -93,6 +102,34 @@ export async function runInvoiceAssistant(
         const error = await response.json();
         throw new Error(
             error.error || "Failed to generate invoice assistant text",
+        );
+    }
+
+    return response.json();
+}
+
+export async function parseInvoiceDraftWithAI(payload: {
+    promptText: string;
+    isSmallBusiness?: boolean;
+    availableClients?: Array<{ id: string; name: string }>;
+}): Promise<{
+    parsed: AIInvoiceDraftParseResult;
+    provider: string;
+    model: string;
+}> {
+    const response = await fetch("/api/ai/invoice-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "parse_invoice_draft",
+            ...payload,
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(
+            error.error || "Failed to parse invoice draft from text",
         );
     }
 

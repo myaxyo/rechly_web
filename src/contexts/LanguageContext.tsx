@@ -412,6 +412,20 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.aiProviderOpenAI": "OpenAI",
         "settings.aiProviderAnthropic": "Anthropic",
         "settings.aiProviderOpenRouter": "OpenRouter",
+        "settings.aiProviderOllama": "Ollama (Lokal / DSGVO-konform)",
+        "settings.aiBaseUrl": "Lokale Server-URL (Ollama / OpenAI-kompatibel)",
+        "settings.aiBaseUrlHelp":
+            "Standard: http://localhost:11434/v1 — funktioniert auch mit LM Studio, vLLM oder eigenem KI-Server.",
+        "settings.aiLocalPrivacyBadge":
+            "100% Lokal & DSGVO-konform: Mit Ollama bleiben Ihre Rechnungsdaten auf Ihrem eigenen Gerät/Server. Kein API-Schlüssel erforderlich.",
+        "invoiceCreate.aiQuickTitle": "KI-Schnellerfassung (Text-zu-Rechnung)",
+        "invoiceCreate.aiQuickDesc":
+            "Beschreiben Sie Ihre Rechnung in einem Satz — Kunde, Positionen, Preise und Zahlungsziel werden automatisch erkannt.",
+        "invoiceCreate.aiQuickPlaceholder":
+            "z. B. Rechnung an Müller GmbH: 8 Std. Webdesign à 110€ und Hosting Pauschal 250€, zahlbar in 14 Tagen mit 2% Skonto",
+        "invoiceCreate.aiQuickBtn": "Aus Text ausfüllen",
+        "invoiceCreate.aiQuickSuccess": "Rechnungsentwurf aus Text übernommen",
+        "invoiceCreate.aiQuickError": "Text konnte nicht verarbeitet werden",
 
         // Invoices page
         "invoices.title": "Rechnungen",
@@ -1315,6 +1329,20 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.aiProviderOpenAI": "OpenAI",
         "settings.aiProviderAnthropic": "Anthropic",
         "settings.aiProviderOpenRouter": "OpenRouter",
+        "settings.aiProviderOllama": "Ollama (Local / GDPR-compliant)",
+        "settings.aiBaseUrl": "Local Server URL (Ollama / OpenAI-compatible)",
+        "settings.aiBaseUrlHelp":
+            "Default: http://localhost:11434/v1 — also works with LM Studio, vLLM, or custom local AI servers.",
+        "settings.aiLocalPrivacyBadge":
+            "100% Local & GDPR-compliant: With Ollama your invoice data stays on your own device/server. No API key required.",
+        "invoiceCreate.aiQuickTitle": "AI Quick Fill (Text-to-Invoice)",
+        "invoiceCreate.aiQuickDesc":
+            "Describe your invoice in one sentence — client, line items, prices, and due date are detected automatically.",
+        "invoiceCreate.aiQuickPlaceholder":
+            "e.g. Invoice for Müller GmbH: 8 hrs web design at 110€ and hosting flat rate 250€, payable in 14 days",
+        "invoiceCreate.aiQuickBtn": "Fill from Text",
+        "invoiceCreate.aiQuickSuccess": "Invoice draft populated from text",
+        "invoiceCreate.aiQuickError": "Could not parse text",
 
         // Invoices page
         "invoices.title": "Invoices",
