@@ -33,6 +33,8 @@ export const AI_MODEL_PRESETS: Record<AIProvider, string[]> = {
         "google/gemini-2.0-flash-001",
     ],
     ollama: [
+        "jonprompter/Rechly-DE-3B",
+        "rechly-de-3b",
         "qwen2.5:3b",
         "qwen2.5:7b",
         "llama3.2:3b",
