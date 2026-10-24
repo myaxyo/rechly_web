@@ -74,3 +74,9 @@ deck
 # Agent/IDE configs
 .agents/
 .claude/
+
+# Local AI training blueprint, datasets & models
+docs/TRAIN_LOCAL_AI_MODEL.md
+*.gguf
+*.jsonl
+
