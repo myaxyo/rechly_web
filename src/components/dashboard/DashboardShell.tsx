@@ -13,6 +13,7 @@ import {
     Alert,
     Select,
     Drawer,
+    Tag,
 } from "antd";
 import {
     CalculatorOutlined,
@@ -34,6 +35,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
+import { AppearanceSelect } from "./DashboardAppearance";
+import { isDesktopRuntime } from "@/lib/runtime";
 
 const { Header, Sider, Content } = Layout;
 
@@ -162,15 +165,19 @@ export default function DashboardLayout({
             label: user?.email || t("settings.guest"),
             disabled: true,
         },
-        {
-            type: "divider" as const,
-        },
-        {
-            key: "logout",
-            icon: <LogoutOutlined />,
-            label: t("auth.logout"),
-            onClick: handleLogout,
-        },
+        ...(!isDesktopRuntime
+            ? [
+                  {
+                      type: "divider" as const,
+                  },
+                  {
+                      key: "logout",
+                      icon: <LogoutOutlined />,
+                      label: t("auth.logout"),
+                      onClick: handleLogout,
+                  },
+              ]
+            : []),
     ];
 
     if (loading) {
@@ -314,13 +321,15 @@ export default function DashboardLayout({
                             ]}
                         />
                     </div>
-                    <Button
-                        block
-                        icon={<LogoutOutlined />}
-                        onClick={handleLogout}
-                    >
-                        {t("auth.logout")}
-                    </Button>
+                    {!isDesktopRuntime && (
+                        <Button
+                            block
+                            icon={<LogoutOutlined />}
+                            onClick={handleLogout}
+                        >
+                            {t("auth.logout")}
+                        </Button>
+                    )}
                     <div style={{ marginTop: 16, textAlign: "center" }}>
                         <a
                             href="mailto:admin@rechly.de"
@@ -386,11 +395,16 @@ export default function DashboardLayout({
                                 style={{
                                     fontWeight: 600,
                                     fontSize: 16,
-                                    color: "#111",
+                                    color: "inherit",
                                 }}
                             >
                                 Rechly
                             </span>
+                        )}
+                        {isDesktopRuntime && (
+                            <Tag color="green" style={{ marginInlineStart: 4 }}>
+                                Offline · Local
+                            </Tag>
                         )}
                     </div>
 
@@ -402,6 +416,7 @@ export default function DashboardLayout({
                         }}
                     >
                         {/* Language selector - desktop only in header */}
+                        <AppearanceSelect />
                         {!isMobile && (
                             <Select
                                 value={language}

@@ -1,3 +1,5 @@
+import { allDocuments } from "@/lib/server/pagination";
+import { eInvoiceWrite, readEInvoiceData, IdentifierValidationError } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
 import { Query, Permission, Role } from "node-appwrite";
 import {
@@ -33,19 +35,12 @@ export async function GET() {
         }
 
         // Get clients filtered by userId
-        const response = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTIONS.CLIENTS,
-            [
-                Query.equal("userId", user.$id),
-                Query.orderDesc("$createdAt"),
-                Query.limit(5000),
-            ]
-        );
+        const documents = await allDocuments(q => databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENTS, q), [Query.equal("userId", user.$id)]);
 
         // Map documents to client format
-        const clients = response.documents.map((doc) => ({
+        const clients = documents.map((doc) => ({
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             client_type: doc.clientType || "company",
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
@@ -65,8 +60,11 @@ export async function GET() {
             updated_at: new Date(doc.$updatedAt).getTime(),
         }));
 
+        // Keep the existing newest-first presentation after stable cursor traversal.
+        clients.sort((a, b) => b.created_at - a.created_at);
         return NextResponse.json(clients);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error fetching clients:", error);
         return NextResponse.json(
             { error: "Failed to fetch clients" },
@@ -106,7 +104,9 @@ export async function POST(request: NextRequest) {
         // Build document data
         const documentData: Record<string, unknown> = {
             userId: user.$id,
-            clientType: body.client_type || "company",
+            ...eInvoiceWrite(body.e_invoice),
+            ...eInvoiceWrite(body.e_invoice),
+                clientType: body.client_type || "company",
             name: body.name,
             contactPerson: body.contact_person || null,
             addressLine1: body.address_line1,
@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
 
         const client = {
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             client_type: doc.clientType || "company",
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
@@ -158,6 +159,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(client);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error creating client:", error);
         const appwriteError = error as {
             code?: number;

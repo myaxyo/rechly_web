@@ -291,6 +291,15 @@
                     "size": 20,
                     "default": null,
                     "encrypt": false
+                },
+                {
+                    "key": "eInvoiceData",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 16000,
+                    "default": null,
+                    "encrypt": false
                 }
             ],
             "indexes": []
@@ -457,6 +466,15 @@
                         "company",
                         "person"
                     ]
+                },
+                {
+                    "key": "eInvoiceData",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 16000,
+                    "default": null,
+                    "encrypt": false
                 }
             ],
             "indexes": [
@@ -736,6 +754,15 @@
                     "size": 36,
                     "default": null,
                     "encrypt": false
+                },
+                {
+                    "key": "eInvoiceData",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 16000,
+                    "default": null,
+                    "encrypt": false
                 }
             ],
             "indexes": [
@@ -889,6 +916,15 @@
                     "required": false,
                     "array": false,
                     "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "gtin",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 14,
                     "default": null,
                     "encrypt": false
                 }

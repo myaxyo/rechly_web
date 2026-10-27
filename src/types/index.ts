@@ -1,6 +1,8 @@
+import type { EInvoiceData } from "@/lib/eRechnung/identifiers";
 // Database entity types - Shared with mobile app
 
 export interface UserCompany {
+    e_invoice?: EInvoiceData;
     id?: string;
     name: string;
     legal_form?: string;
@@ -31,6 +33,7 @@ export interface UserCompany {
 }
 
 export interface Client {
+    e_invoice?: EInvoiceData;
     id?: string;
     client_type?: "company" | "person";
     name: string;
@@ -61,6 +64,7 @@ export interface Product {
 }
 
 export interface Invoice {
+    e_invoice?: EInvoiceData;
     id?: string;
     client_id: string;
     invoice_number: string;
@@ -81,6 +85,7 @@ export interface Invoice {
 }
 
 export interface InvoiceItem {
+    gtin?: string;
     id?: string;
     invoice_id: string;
     product_id?: string;
@@ -107,6 +112,7 @@ export interface InvoiceWithDetails extends Invoice {
 
 // Form input types
 export interface ClientFormData {
+    e_invoice?: EInvoiceData;
     client_type?: "company" | "person";
     name: string;
     contact_person?: string;
@@ -156,6 +162,7 @@ export interface ProductBulkUploadResult {
 }
 
 export interface InvoiceItemFormData {
+    gtin?: string;
     product_id?: string;
     description: string;
     quantity: number;
@@ -166,6 +173,7 @@ export interface InvoiceItemFormData {
 }
 
 export interface InvoiceFormData {
+    e_invoice?: EInvoiceData;
     client_id: string;
     invoice_number: string;
     issue_date: string;

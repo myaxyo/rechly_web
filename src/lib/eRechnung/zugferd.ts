@@ -1,9 +1,12 @@
+import { identifierSummary } from "./identifierSummary";
 /**
- * ZUGFeRD 2.x / Factur-X EN 16931 PDF generation with embedded XML
+ * PDF generation with embedded Factur-X EN 16931 CII XML.
+ * PDF/A-3b container; see docs/COMPLIANCE_VALIDATION.md for tested profiles.
  * Uses pdfkit for PDF generation and embeds the CII XML as a file attachment.
  */
 
 import PDFDocument from "pdfkit";
+import path from "node:path";
 import type { InvoiceWithDetails, UserCompany } from "@/types";
 import {
     generateXRechnungXML,
@@ -24,7 +27,7 @@ function formatDate(dateStr: string): string {
 }
 
 /**
- * Generate a ZUGFeRD-compatible PDF with embedded Factur-X XML.
+ * Generate a PDF/A-3b document with embedded Factur-X XML.
  * Returns a Buffer containing the PDF bytes.
  */
 export async function generateZUGFeRDPDF(
@@ -36,12 +39,15 @@ export async function generateZUGFeRDPDF(
         throw new Error(`Validation failed: ${errors.join("; ")}`);
     }
 
-    const xml = generateXRechnungXML(invoice, company);
+    const xml = generateXRechnungXML(invoice, company, "en16931");
     const xmlBuffer = Buffer.from(xml, "utf-8");
 
     return new Promise((resolve, reject) => {
         const chunks: Buffer[] = [];
         const doc = new PDFDocument({
+            subset: "PDF/A-3b",
+            pdfVersion: "1.7",
+            font: path.join(process.cwd(), "public/fonts/liberation/LiberationSans-Regular.ttf"),
             autoFirstPage: true,
             size: "A4",
             margins: { top: 50, bottom: 50, left: 60, right: 60 },
@@ -50,13 +56,15 @@ export async function generateZUGFeRDPDF(
         doc.on("data", (chunk: Buffer) => chunks.push(chunk));
         doc.on("end", () => resolve(Buffer.concat(chunks)));
         doc.on("error", reject);
+        doc.registerFont("Invoice-Regular", path.join(process.cwd(), "public/fonts/liberation/LiberationSans-Regular.ttf"));
+        doc.registerFont("Invoice-Bold", path.join(process.cwd(), "public/fonts/liberation/LiberationSans-Bold.ttf"));
 
         const client = invoice.client!;
         const pageWidth = doc.page.width - 120; // margins
 
         // Header
-        doc.fontSize(20).font("Helvetica-Bold").text(company.name, 60, 50);
-        doc.fontSize(9).font("Helvetica").fillColor("#666666");
+        doc.fontSize(20).font("Invoice-Bold").text(company.name, 60, 50);
+        doc.fontSize(9).font("Invoice-Regular").fillColor("#666666");
         const companyLine = [
             company.address_line1,
             company.postal_code,
@@ -72,7 +80,7 @@ export async function generateZUGFeRDPDF(
             doc.text(`Steuernummer: ${company.tax_number}`, 60, 105);
 
         // Invoice label
-        doc.fillColor("#000000").fontSize(16).font("Helvetica-Bold");
+        doc.fillColor("#000000").fontSize(16).font("Invoice-Bold");
         const title =
             invoice.correction_type === "credit_note"
                 ? "GUTSCHRIFT"
@@ -82,14 +90,14 @@ export async function generateZUGFeRDPDF(
         doc.text(title, 60, 150);
 
         // Billing info columns
-        doc.fontSize(9).font("Helvetica");
+        doc.fontSize(9).font("Invoice-Regular");
 
         // Left: recipient
         doc.fillColor("#666666").text("An:", 60, 190);
         doc.fillColor("#000000")
-            .font("Helvetica-Bold")
+            .font("Invoice-Bold")
             .text(client.name, 60, 205);
-        doc.font("Helvetica");
+        doc.font("Invoice-Regular");
         if (client.address_line1) doc.text(client.address_line1, 60, 220);
         if (client.address_line2) doc.text(client.address_line2, 60, 235);
         const clientCity =
@@ -102,12 +110,14 @@ export async function generateZUGFeRDPDF(
         );
 
         // Right: invoice details
-        const rightX = 380;
+        const rightX = 340;
         let rightY = 190;
         const addDetail = (label: string, value: string) => {
-            doc.fillColor("#666666").text(label, rightX, rightY);
-            doc.fillColor("#000000").text(value, rightX + 120, rightY);
-            rightY += 15;
+            const valueWidth = doc.page.width - 60 - (rightX + 100);
+            const height = Math.max(15, doc.heightOfString(value, { width: valueWidth }) + 4);
+            doc.fillColor("#666666").text(label, rightX, rightY, { width: 95 });
+            doc.fillColor("#000000").text(value, rightX + 100, rightY, { width: valueWidth });
+            rightY += height;
         };
         addDetail("Rechnungsnummer:", invoice.invoice_number);
         addDetail("Datum:", formatDate(invoice.issue_date));
@@ -116,7 +126,7 @@ export async function generateZUGFeRDPDF(
         if (client.leitweg_id) addDetail("Leitweg-ID:", client.leitweg_id);
 
         // Line items table
-        const tableY = 320;
+        const tableY = Math.max(320, rightY + 25);
         const colPositions = {
             desc: 60,
             qty: 310,
@@ -129,7 +139,7 @@ export async function generateZUGFeRDPDF(
         doc.fillColor("#f0f0f0")
             .rect(60, tableY - 5, pageWidth, 20)
             .fill();
-        doc.fillColor("#000000").font("Helvetica-Bold").fontSize(9);
+        doc.fillColor("#000000").font("Invoice-Bold").fontSize(9);
         doc.text("Beschreibung", colPositions.desc, tableY);
         doc.text("Menge", colPositions.qty, tableY, {
             align: "right",
@@ -149,9 +159,14 @@ export async function generateZUGFeRDPDF(
         });
 
         let itemY = tableY + 25;
-        doc.font("Helvetica").fontSize(9);
+        doc.font("Invoice-Regular").fontSize(9);
 
         for (const item of invoice.items) {
+            const netUnitPrice = item.price * (1 - (item.discount_percent || 0) / 100);
+            const description = [item.description,
+                item.gtin ? `GTIN: ${item.gtin}` : "",
+                item.discount_percent ? `Rabatt: ${item.discount_percent}% (im Einzelpreis enthalten)` : "",
+            ].filter(Boolean).join("\n");
             const lineNet =
                 item.quantity *
                 item.price *
@@ -164,12 +179,12 @@ export async function generateZUGFeRDPDF(
             }
 
             doc.fillColor("#000000").text(
-                item.description,
+                description,
                 colPositions.desc,
                 itemY,
                 { width: 240 },
             );
-            const descHeight = doc.heightOfString(item.description, {
+            const descHeight = doc.heightOfString(description, {
                 width: 240,
             });
             doc.text(
@@ -179,7 +194,7 @@ export async function generateZUGFeRDPDF(
                 { align: "right", width: 60 },
             );
             doc.text(
-                `€ ${formatAmount(item.price)}`,
+                `€ ${formatAmount(netUnitPrice)}`,
                 colPositions.price,
                 itemY,
                 { align: "right", width: 60 },
@@ -207,7 +222,7 @@ export async function generateZUGFeRDPDF(
         const totalsX = 380;
         let totalsY = itemY + 15;
 
-        doc.fillColor("#000000").font("Helvetica").fontSize(9);
+        doc.fillColor("#000000").font("Invoice-Regular").fontSize(9);
         doc.text("Nettobetrag:", totalsX, totalsY);
         doc.text(
             `€ ${formatAmount(invoice.subtotal)}`,
@@ -226,7 +241,7 @@ export async function generateZUGFeRDPDF(
         totalsY += 5;
         doc.fillColor("#e0e0e0").rect(totalsX, totalsY, 175, 1).fill();
         totalsY += 8;
-        doc.fillColor("#000000").font("Helvetica-Bold").fontSize(12);
+        doc.fillColor("#000000").font("Invoice-Bold").fontSize(12);
         doc.text("Gesamtbetrag:", totalsX, totalsY);
         doc.text(
             `€ ${formatAmount(invoice.total_gross)}`,
@@ -238,42 +253,60 @@ export async function generateZUGFeRDPDF(
         // Notes
         if (invoice.notes) {
             totalsY += 40;
-            doc.font("Helvetica-Bold")
+            doc.font("Invoice-Bold")
                 .fontSize(9)
                 .text("Notizen:", 60, totalsY);
-            doc.font("Helvetica").text(invoice.notes, 60, totalsY + 15, {
+            doc.font("Invoice-Regular").text(invoice.notes, 60, totalsY + 15, {
                 width: pageWidth,
             });
         }
 
-        // Footer: Factur-X XMP metadata (prepared for future PDF/A XMP embedding)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const xmpMetadata = `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
-<x:xmpmeta xmlns:x="adobe:ns:meta/">
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <rdf:Description rdf:about=""
-      xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
-      <fx:DocumentType>INVOICE</fx:DocumentType>
-      <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
-      <fx:Version>1.0</fx:Version>
-      <fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>
-    </rdf:Description>
-  </rdf:RDF>
-</x:xmpmeta>
-<?xpacket end="w"?>`;
+        // Print the same immutable identifiers and delivery address as the XML.
+        const identifiers = identifierSummary(invoice.e_invoice);
+        if (identifiers) {
+            doc.addPage();
+            doc.font("Invoice-Bold").fontSize(12).text("E-Rechnungsangaben / E-invoice details", 60, 50);
+            doc.font("Invoice-Regular").fontSize(9).text(identifiers, 60, 80, { width: pageWidth });
+        }
+        // PDFKit adds the PDF/A identification and ICC output intent. Declare the
+        // Factur-X extension schema as well as its values in the XMP packet.
+        const properties = [
+            ["DocumentType", "Invoice document type"],
+            ["DocumentFileName", "Name of the embedded invoice XML"],
+            ["Version", "Factur-X version"],
+            ["ConformanceLevel", "Factur-X conformance level"],
+        ];
+        doc.appendXML(`
+<rdf:Description rdf:about="" xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
+  <fx:DocumentType>INVOICE</fx:DocumentType>
+  <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
+  <fx:Version>1.0</fx:Version>
+  <fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>
+</rdf:Description>
+<rdf:Description rdf:about="" xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"
+  xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#" xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">
+  <pdfaExtension:schemas><rdf:Bag><rdf:li rdf:parseType="Resource">
+    <pdfaSchema:schema>Factur-X PDF/A Extension Schema</pdfaSchema:schema>
+    <pdfaSchema:namespaceURI>urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#</pdfaSchema:namespaceURI>
+    <pdfaSchema:prefix>fx</pdfaSchema:prefix>
+    <pdfaSchema:property><rdf:Seq>${properties.map(([name, description]) => `
+      <rdf:li rdf:parseType="Resource"><pdfaProperty:name>${name}</pdfaProperty:name>
+        <pdfaProperty:valueType>Text</pdfaProperty:valueType><pdfaProperty:category>external</pdfaProperty:category>
+        <pdfaProperty:description>${description}</pdfaProperty:description></rdf:li>`).join("")}
+    </rdf:Seq></pdfaSchema:property>
+  </rdf:li></rdf:Bag></pdfaExtension:schemas>
+</rdf:Description>`);
 
-        // Embed XML as file attachment
-        (
-            doc as unknown as {
-                file: (buf: Buffer, opts: Record<string, unknown>) => void;
-            }
-        ).file(xmlBuffer, {
+        // PDFKit 0.18 supports `relationship`; @types/pdfkit omits it.
+        const attachment = {
             name: "factur-x.xml",
+            type: "text/xml",
             description: "Factur-X/ZUGFeRD Invoice Data",
             creationDate: new Date(),
             modifiedDate: new Date(),
-            AFRelationship: "Alternative",
-        });
+            relationship: "Alternative",
+        };
+        doc.file(xmlBuffer, attachment);
 
         doc.end();
     });

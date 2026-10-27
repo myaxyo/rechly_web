@@ -86,6 +86,7 @@ export async function POST(
             return {
                 productId: item.productId || null,
                 description: item.description,
+                ...(item.gtin ? { gtin: item.gtin } : {}),
                 quantity: qty,
                 unitOfMeasure: item.unitOfMeasure || "Stück",
                 price: item.price,
@@ -104,6 +105,7 @@ export async function POST(
             {
                 userId: user.$id,
                 clientId: original.clientId,
+                ...(original.eInvoiceData ? { eInvoiceData: original.eInvoiceData } : {}),
                 invoiceNumber: newNumber,
                 issueDate: today,
                 dueDate: original.dueDate || null,

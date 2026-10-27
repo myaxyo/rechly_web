@@ -1,4 +1,5 @@
 "use client";
+import { identifierSummary } from "@/lib/eRechnung/identifierSummary";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
@@ -272,6 +273,10 @@ const InvoicePDF = ({ invoice, company, t, girocodeUrl }: InvoicePDFProps) => {
                     </View>
                 </View>
 
+                {/* React PDF's Image is a PDF primitive and has no HTML alt attribute. */}
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                {company?.logo_base64 && /^data:image\/(png|jpeg);base64,/.test(company.logo_base64) && <Image src={company.logo_base64} style={{ width: 100, maxHeight: 60, objectFit: "contain", marginBottom: 12 }} />}
+                {identifierSummary(invoice.e_invoice) && <View style={{ marginBottom: 16 }}><Text>{identifierSummary(invoice.e_invoice)}</Text></View>}
                 {/* Addresses */}
                 <View style={styles.addresses}>
                     <View style={styles.addressBlock}>
@@ -362,7 +367,7 @@ const InvoicePDF = ({ invoice, company, t, girocodeUrl }: InvoicePDFProps) => {
                                 style={styles.tableRow}
                             >
                                 <Text style={styles.colDescription}>
-                                    {item.description}
+                                    {item.description}{item.gtin ? `\nGTIN: ${item.gtin}` : ""}
                                 </Text>
                                 <Text style={styles.colQuantity}>
                                     {item.quantity}

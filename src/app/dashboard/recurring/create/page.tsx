@@ -1,4 +1,6 @@
 "use client";
+import { getCompanyInfo } from "@/lib/companyService";
+import { defaultVatRate } from "@/lib/vatDefaults";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -66,6 +68,7 @@ export default function RecurringCreatePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
+    const [smallBusiness, setSmallBusiness] = useState(false);
     const [clients, setClients] = useState<Client[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -86,11 +89,13 @@ export default function RecurringCreatePage() {
     const loadData = async () => {
         try {
             setLoading(true);
-            const [clientsData, productsData] = await Promise.all([
+            const [clientsData, productsData, companyData] = await Promise.all([
                 getAllClients(),
                 getAllProducts(),
+                getCompanyInfo(),
             ]);
             setClients(clientsData);
+            setSmallBusiness(!!companyData?.is_small_business);
             setProducts(productsData);
         } catch {
             message.error(t("recurring.loadError"));
@@ -108,7 +113,7 @@ export default function RecurringCreatePage() {
                 quantity: 1,
                 unit_of_measure: "Stück",
                 price: 0,
-                tax_rate_percent: 19,
+                tax_rate_percent: defaultVatRate(smallBusiness),
                 discount_percent: 0,
             },
         ]);
@@ -125,7 +130,7 @@ export default function RecurringCreatePage() {
                 quantity: 1,
                 unit_of_measure: product.unit_of_measure,
                 price: product.price,
-                tax_rate_percent: product.tax_rate_percent,
+                tax_rate_percent: defaultVatRate(smallBusiness, product.tax_rate_percent),
                 discount_percent: 0,
             },
         ]);

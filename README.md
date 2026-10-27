@@ -60,7 +60,41 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run test:einvoice
 ```
+
+## Optional E-Invoice Details
+
+Customers can store buyer identifiers and multiple delivery branches; company
+settings support seller identifiers. New invoices allow buyer/delivery overrides
+and optional item GTINs. Advanced fields stay collapsed until needed, with German
+and English labels. Customer retrieval has no fixed record cap.
+
+Before deploying, run the additive Appwrite migration. See
+[setup, field mappings, tests and validation limits](docs/E_INVOICE_IDENTIFIERS.md).
+The export test corpus passes KoSIT XRechnung 3.0.2, veraPDF PDF/A-3b and Mustang
+Factur-X checks. See [validation evidence and reproduction steps](docs/COMPLIANCE_VALIDATION.md).
+
+## Desktop App
+
+The Electron edition runs the existing dashboard against an on-device SQLite
+database. It does not require Appwrite and stores its data in the operating
+system's application-data directory.
+
+```bash
+# Start Next.js and Electron in local desktop mode
+npm run desktop:dev
+
+# Build an unpacked app for the current operating system
+npm run desktop:pack
+
+# Build an installer for the current operating system
+npm run desktop:dist
+```
+
+The desktop File menu can open the local data directory and create a consistent
+SQLite backup. Windows, macOS, and Linux installers are configured; release
+installers still need platform signing before distribution.
 
 ## Related Repositories
 

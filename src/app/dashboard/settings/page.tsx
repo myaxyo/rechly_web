@@ -1,4 +1,5 @@
 "use client";
+import EInvoiceFields from "@/components/dashboard/EInvoiceFields";
 
 import { useEffect, useState } from "react";
 import {
@@ -441,6 +442,7 @@ export default function SettingsPage() {
 
                     <Row gutter={[12, 0]}>
                         <Col xs={24} sm={12}>
+                            <EInvoiceFields seller />
                             <Form.Item
                                 name="vat_id"
                                 label={t("settings.vatId")}

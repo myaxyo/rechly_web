@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-27T20:18:20.665Z",
+  "tools": {
+    "kositSha256": "799e64befca97d4080e03608c80b85dd5a5ecc5f4ae4f35d1116ec2855b9a7c9",
+    "scenariosSha256": "3e8161a39dfaa6aea4d990b279aab848be4f4c6169e820f354a159bda7693fb0",
+    "veraPDF": "veraPDF 1.30.3\nBuilt: Wed Oct 07 13:50:00 UTC 2026\nDeveloped and released by the veraPDF Consortium.\nFunded by the PREFORMA project.\nReleased under the GNU General Public License v3\nand the Mozilla Public License v2 or later.",
+    "mustangSha256": "42d7868cb68264874a7b8cab4c3587b03b23ccc7cd72373da917f66758bb9736"
+  },
+  "results": [
+    {
+      "name": "identifiers",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "4484a45c8deaea4f7dded9c3806a05150b738db979c5ac6b4f807ec5cc8008ac",
+      "xrechnungSha256": "ad47a0652b2749f238c951d0a8a394b5d3a91506b66d75406edaffde9adf5372",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    },
+    {
+      "name": "legacy",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "69dbec4387e68bfa6e268d04bed8a0a5350bd5b9660a87b57a8c403cf0e9f90e",
+      "xrechnungSha256": "ffc4d4f89f5b9b3355dc2f5ec3a4981df8c7c7b0a0dce63dca8b43af67244444",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    },
+    {
+      "name": "exempt",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "d86ca4fac4fd1bfc591bb6a405483e112acd1465514b9df04aa0414a685dfb03",
+      "xrechnungSha256": "fe91f30ac4c003babc4e374e72552bd3e3a4917c4a1f5f124afe22addec9405e",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    },
+    {
+      "name": "mixed",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "290f95e8f5661c34427f58303417377d463ec07da5a15f1519fabf03832f7c80",
+      "xrechnungSha256": "25277971c988a3ff74acae93f6a592c3ec66803dcb2344c02d535860e09d0b9e",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    },
+    {
+      "name": "discount",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "7728c199bea8cd29c822e8f2a8239ae391571f1b0eb713b9b70f191f129abedd",
+      "xrechnungSha256": "104b60fc96d062a89a4dc3330231bd2f7694e0e2b3c7f459dccaa7fc7d14d534",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    },
+    {
+      "name": "credit",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "4e00a24fb0a1efab75b7c5d7c43e06ca3d1f2cbc748b0221a492bf3357723023",
+      "xrechnungSha256": "e459de1b2290bc5c80e583c895e4bbe283f63d0670ed6bc8e2724f892c7122f8",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    },
+    {
+      "name": "multipage",
+      "kosit": "valid and accepted",
+      "pdfa3b": "compliant",
+      "mustang": "valid",
+      "embeddedXmlMatches": true,
+      "pdfSha256": "84e01724e666bc9cd3b6422c645c3aad88c6cf72e2585a931855e78f3cf05604",
+      "xrechnungSha256": "ac58fc7d8b4bb21fd6bd0a1f91011fc5ef3d86fab174668b3a74e7389082b2e3",
+      "notices": [
+        "[BR-DE-21] Das Element \"Specification identifier\" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)"
+      ]
+    }
+  ],
+  "negativeControls": {
+    "missingBuyerReferenceRejected": true,
+    "nonArchivalPdfRejected": true
+  }
+}

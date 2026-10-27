@@ -27,6 +27,23 @@ body {
     "Helvetica Neue", Arial, sans-serif;
 }
 
+.dashboard-appearance[data-appearance="light"] {
+  --background: #f5f7fa;
+  --foreground: #1f2937;
+  background: var(--background);
+  color: var(--foreground);
+}
+.dashboard-appearance[data-appearance="dark"] {
+  --background: #10151c;
+  --foreground: #e5e7eb;
+  background: var(--background);
+  color: var(--foreground);
+}
+.dashboard-appearance :focus-visible {
+  outline: 2px solid #4096ff;
+  outline-offset: 3px;
+}
+
 /* Ant Design overrides for consistent theming */
 .ant-layout {
   background: var(--background);

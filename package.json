@@ -2,7 +2,9 @@
   "name": "rechly",
   "version": "0.1.0",
   "private": true,
+  "main": "desktop/main.cjs",
   "description": "Open-source invoicing app for freelancers and small businesses.",
+  "author": "Rechly contributors",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -13,7 +15,74 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "desktop:dev": "cross-env RECHLY_DESKTOP=1 NEXT_PUBLIC_RECHLY_DESKTOP=1 NEXT_PUBLIC_APPWRITE_ENDPOINT=http://127.0.0.1/desktop NEXT_PUBLIC_APPWRITE_PROJECT_ID=desktop-local RECHLY_DATA_DIR=.desktop-data concurrently -k -s first -n web,desktop \"npm run dev -- --hostname 127.0.0.1\" \"wait-on http://127.0.0.1:3000/api/desktop/health && electron . --dev\"",
+    "desktop:build:web": "cross-env RECHLY_DESKTOP=1 NEXT_PUBLIC_RECHLY_DESKTOP=1 NEXT_PUBLIC_APPWRITE_ENDPOINT=http://127.0.0.1/desktop NEXT_PUBLIC_APPWRITE_PROJECT_ID=desktop-local npm run build",
+    "desktop:pack": "npm run desktop:build:web && electron-builder --dir",
+    "desktop:dist": "npm run desktop:build:web && electron-builder",
+    "test:einvoice": "tsx --test tests/einvoice.test.ts",
+    "migrate:einvoice": "node --env-file=.env.local scripts/migrate-einvoice.mjs"
+  },
+  "build": {
+    "appId": "de.rechly.desktop",
+    "productName": "Rechly",
+    "artifactName": "Rechly-${version}-${os}-${arch}.${ext}",
+    "asar": true,
+    "files": [
+      "desktop/**/*",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "web",
+        "filter": [
+          "server.js",
+          "package.json",
+          ".next/**/*"
+        ]
+      },
+      {
+        "from": ".next/standalone/node_modules",
+        "to": "web/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": ".next/static",
+        "to": "web/.next/static"
+      },
+      {
+        "from": "public",
+        "to": "web/public"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "icon": "public/icon.png",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "public/icon.png",
+      "target": "nsis"
+    },
+    "linux": {
+      "icon": "public/icon.png",
+      "category": "Office",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -39,15 +108,21 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/papaparse": "^5.5.2",
     "@types/pdfkit": "^0.17.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^10.0.6",
+    "cross-env": "^10.1.0",
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "wait-on": "^9.5.1"
   },
   "browserslist": [
     "defaults",

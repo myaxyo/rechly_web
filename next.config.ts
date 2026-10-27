@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     // once bundled.
     serverExternalPackages: ["pdfkit"],
     outputFileTracingIncludes: {
-        "/api/invoices/[id]/zugferd": ["./node_modules/pdfkit/js/data/**"],
+        "/api/invoices/[id]/zugferd": ["./node_modules/pdfkit/js/data/**", "./public/fonts/liberation/**"],
     },
 
     // Disable type checking during build (we run it separately)

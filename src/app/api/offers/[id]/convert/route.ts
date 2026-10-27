@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Query, ID, Permission, Role } from "node-appwrite";
+import { invoiceIdentifierDefaults } from "@/lib/server/invoiceIdentifiers";
 import {
     createSessionClient,
     createAdminClient,
@@ -42,6 +43,9 @@ export async function POST(
             return NextResponse.json({ invoiceId: offerDoc.convertedInvoiceId });
         }
 
+        const identifiers = await invoiceIdentifierDefaults(databases, user.$id, offerDoc.clientId);
+        if (!identifiers) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
         // Fetch offer items
         const itemsRes = await databases.listDocuments(
             DATABASE_ID,
@@ -64,6 +68,7 @@ export async function POST(
 
         // Create invoice document
         const invoiceData: Record<string, unknown> = {
+            ...identifiers,
             userId: user.$id,
             clientId: offerDoc.clientId,
             invoiceNumber,

@@ -1,3 +1,4 @@
+import { IdentifierValidationError, parseGTIN, readEInvoiceData, snapshotIdentifiers } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
 import { Query, ID, Permission, Role } from "node-appwrite";
 import {
@@ -102,6 +103,7 @@ export async function GET() {
 
         return NextResponse.json(invoices);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error fetching invoices:", error);
         if (isCollectionNotFound(error)) {
             return NextResponse.json([]);
@@ -139,6 +141,13 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
+        // Resolve only tenant-owned source records before taking an immutable identifier snapshot.
+        const customer = await databases.getDocument(DATABASE_ID, COLLECTIONS.CLIENTS, body.client_id);
+        if (customer.userId !== user.$id) return NextResponse.json({ error: "Not found" }, { status: 404 });
+        const companies = await databases.listDocuments(DATABASE_ID, COLLECTIONS.COMPANY_INFO, [Query.equal("userId", user.$id), Query.limit(1)]);
+        const identifiers = snapshotIdentifiers(readEInvoiceData(customer.eInvoiceData), readEInvoiceData(companies.documents[0]?.eInvoiceData), body.e_invoice);
+        if (!Array.isArray(body.items)) return NextResponse.json({ error: "Invalid items" }, { status: 400 });
+        for (const item of body.items) item.gtin = parseGTIN(item.gtin);
         const invoiceId = ID.unique();
 
         // Calculate totals
@@ -162,6 +171,7 @@ export async function POST(request: NextRequest) {
         // Build document data, keeping optional/newer attributes separate
         const invoiceData: Record<string, unknown> = {
             userId: user.$id,
+            ...(Object.keys(identifiers).length ? { eInvoiceData: JSON.stringify(identifiers) } : {}),
             clientId: body.client_id,
             invoiceNumber: body.invoice_number,
             issueDate: body.issue_date,
@@ -234,6 +244,7 @@ export async function POST(request: NextRequest) {
                     invoiceId: invoiceId,
                     productId: item.product_id || null,
                     description: item.description,
+                    ...(item.gtin ? { gtin: item.gtin } : {}),
                     quantity: item.quantity,
                     unitOfMeasure: item.unit_of_measure || "Stück",
                     price: item.price,
@@ -253,6 +264,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ id: invoiceId });
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error creating invoice:", error);
         const appwriteError = error as {
             code?: number;

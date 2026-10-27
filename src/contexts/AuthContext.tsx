@@ -10,6 +10,7 @@ import {
     deleteAccount as appwriteDeleteAccount,
 } from "@/lib/appwrite";
 import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
+import { isDesktopRuntime } from "@/lib/runtime";
 
 interface AuthContextType {
     user: Models.User<Models.Preferences> | null;
@@ -161,7 +162,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
             // Logout from client-side Appwrite
-            await appwriteLogout();
+            if (!isDesktopRuntime) {
+                await appwriteLogout();
+            }
 
             // Also clear SSR session cookie
             try {
@@ -186,6 +189,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const deleteAccount = async () => {
         setLoading(true);
         try {
+            if (isDesktopRuntime) {
+                throw new Error(
+                    "Local profile deletion is not available in this desktop preview",
+                );
+            }
             await appwriteDeleteAccount();
             setUser(null);
             setIsAnonymous(false);
@@ -208,8 +216,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             useProductStore.getState().clearCache();
             useInvoiceStore.getState().clearCache();
 
-            await createAnonymousSession();
-            const currentUser = await getCurrentUser();
+            let currentUser;
+            if (isDesktopRuntime) {
+                const response = await fetch("/api/auth/user");
+                if (!response.ok) throw new Error("Local profile is unavailable");
+                currentUser = await response.json();
+            } else {
+                await createAnonymousSession();
+                currentUser = await getCurrentUser();
+            }
             setUser(currentUser);
             setIsAnonymous(true);
             sessionStorage.setItem("guestSession", "true");
@@ -219,6 +234,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const googleLogin = () => {
+        if (isDesktopRuntime) return;
         loginWithGoogle();
     };
 

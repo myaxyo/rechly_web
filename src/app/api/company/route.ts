@@ -1,3 +1,4 @@
+import { eInvoiceWrite, readEInvoiceData, IdentifierValidationError } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
 import { Query, Permission, Role } from "node-appwrite";
 import {
@@ -46,6 +47,7 @@ export async function GET() {
         const doc = response.documents[0];
         const company = {
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             name: doc.name,
             legal_form: doc.legalForm ?? undefined,
             address_line1: doc.addressLine1,
@@ -74,6 +76,7 @@ export async function GET() {
 
         return NextResponse.json(company);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error fetching company:", error);
         return NextResponse.json(
             { error: "Failed to fetch company" },
@@ -119,6 +122,7 @@ export async function POST(request: NextRequest) {
 
         const data = {
             userId: user.$id,
+            ...eInvoiceWrite(body.e_invoice),
             name: body.name,
             legalForm: body.legal_form || null,
             addressLine1: body.address_line1,
@@ -169,6 +173,7 @@ export async function POST(request: NextRequest) {
 
         const company = {
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             name: doc.name,
             legal_form: doc.legalForm ?? undefined,
             address_line1: doc.addressLine1,
@@ -197,6 +202,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(company);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error saving company:", error);
         return NextResponse.json(
             { error: "Failed to save company" },

@@ -1,4 +1,6 @@
 "use client";
+import EInvoiceFields from "@/components/dashboard/EInvoiceFields";
+
 
 import { useEffect, useState } from "react";
 import {
@@ -235,6 +237,7 @@ export default function ClientsPage() {
 
     const openEditModal = (client: Client) => {
         setEditingClient(client);
+        form.resetFields();
         form.setFieldsValue({
             ...client,
             client_type: client.client_type || "company",
@@ -583,6 +586,7 @@ export default function ClientsPage() {
                         <Input placeholder={t("clients.leitwegPlaceholder")} />
                     </Form.Item>
 
+                    <EInvoiceFields />
                     <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
                         <Space>
                             <Button onClick={() => setModalOpen(false)}>

@@ -1,3 +1,4 @@
+import { parseEInvoiceData, parseGTIN, type PartyIdentifier } from "./identifiers";
 /**
  * XRechnung 3.0 / EN 16931 XML generation (UN/CEFACT CII D16B)
  */
@@ -92,6 +93,10 @@ export function validateXRechnung(
         }
     }
 
+    try {
+        parseEInvoiceData(invoice.e_invoice);
+        for (const item of invoice.items || []) parseGTIN(item.gtin);
+    } catch (error) { errors.push(error instanceof Error ? error.message : "Ungültige Kennung"); }
     return errors;
 }
 
@@ -101,7 +106,13 @@ export function validateXRechnung(
 export function generateXRechnungXML(
     invoice: InvoiceWithDetails,
     company: UserCompany,
+    profile: "xrechnung" | "en16931" = "xrechnung",
 ): string {
+    const identifiers = parseEInvoiceData(invoice.e_invoice);
+    const partyId = (id?: PartyIdentifier) => !id ? "" : id.scheme
+        ? `<ram:GlobalID schemeID="${id.scheme}">${escapeXml(id.value)}</ram:GlobalID>`
+        : `<ram:ID>${escapeXml(id.value)}</ram:ID>`;
+    const delivery = identifiers.delivery;
     const client = invoice.client!;
     // Appwrite datetime attributes come back as timestamps
     // (2026-10-09T00:00:00.000+00:00); format 102 needs YYYYMMDD.
@@ -151,12 +162,13 @@ export function generateXRechnungXML(
         <ram:LineID>${index + 1}</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
       <ram:SpecifiedTradeProduct>
+        ${item.gtin ? `<ram:GlobalID schemeID="0160">${escapeXml(parseGTIN(item.gtin)!)}</ram:GlobalID>` : ""}
         <ram:Name>${escapeXml(item.description.split(/\r?\n/)[0])}</ram:Name>
         ${item.description.includes("\n") ? `<ram:Description>${escapeXml(item.description.split(/\r?\n/).slice(1).join("\n"))}</ram:Description>` : ""}
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
         <ram:NetPriceProductTradePrice>
-          <ram:ChargeAmount>${item.price.toFixed(4)}</ram:ChargeAmount>
+          <ram:ChargeAmount>${(item.price * (1 - (item.discount_percent || 0) / 100)).toFixed(4)}</ram:ChargeAmount>
         </ram:NetPriceProductTradePrice>
       </ram:SpecifiedLineTradeAgreement>
       <ram:SpecifiedLineTradeDelivery>
@@ -233,7 +245,7 @@ export function generateXRechnungXML(
       <ram:ID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ram:ID>
     </ram:BusinessProcessSpecifiedDocumentContextParameter>
     <ram:GuidelineSpecifiedDocumentContextParameter>
-      <ram:ID>urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0</ram:ID>
+      <ram:ID>${profile === "xrechnung" ? "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0" : "urn:cen.eu:en16931:2017"}</ram:ID>
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
 
@@ -252,7 +264,8 @@ export function generateXRechnungXML(
       ${buyerReference}
 
       <ram:SellerTradeParty>
-        ${!sellerVatId && sellerTaxNum ? `<ram:ID>${escapeXml(sellerTaxNum)}</ram:ID>` : ""}
+        ${!identifiers.seller_identifier && !sellerVatId && sellerTaxNum ? `<ram:ID>${escapeXml(sellerTaxNum)}</ram:ID>` : ""}
+        ${partyId(identifiers.seller_identifier)}
         <ram:Name>${escapeXml(company.name)}</ram:Name>
         <ram:DefinedTradeContact>
           <ram:PersonName>${escapeXml(company.managing_directors || company.name)}</ram:PersonName>
@@ -273,6 +286,7 @@ export function generateXRechnungXML(
       </ram:SellerTradeParty>
 
       <ram:BuyerTradeParty>
+        ${partyId(identifiers.buyer_identifier)}
         <ram:Name>${escapeXml(client.name)}</ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>${escapeXml(client.postal_code || "")}</ram:PostcodeCode>
@@ -287,6 +301,16 @@ export function generateXRechnungXML(
     </ram:ApplicableHeaderTradeAgreement>
 
     <ram:ApplicableHeaderTradeDelivery>
+      ${delivery ? `<ram:ShipToTradeParty>
+        ${partyId(delivery.identifier)}
+        <ram:Name>${escapeXml(delivery.name)}</ram:Name>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode>${escapeXml(delivery.postal_code)}</ram:PostcodeCode>
+          <ram:LineOne>${escapeXml(delivery.street)}</ram:LineOne>
+          <ram:CityName>${escapeXml(delivery.city)}</ram:CityName>
+          <ram:CountryID>${escapeXml(delivery.country)}</ram:CountryID>
+        </ram:PostalTradeAddress>
+      </ram:ShipToTradeParty>` : ""}
       <ram:ActualDeliverySupplyChainEvent>
         <ram:OccurrenceDateTime>
           <udt:DateTimeString format="102">${deliveryDate}</udt:DateTimeString>

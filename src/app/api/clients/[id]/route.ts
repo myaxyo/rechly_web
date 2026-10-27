@@ -1,3 +1,4 @@
+import { eInvoiceWrite, readEInvoiceData, IdentifierValidationError } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
 import {
     createSessionClient,
@@ -41,8 +42,11 @@ export async function GET(
             id
         );
 
+        if (doc.userId !== user.$id) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
         const client = {
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
             address_line1: doc.addressLine1,
@@ -63,6 +67,7 @@ export async function GET(
 
         return NextResponse.json(client);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error fetching client:", error);
         return NextResponse.json(
             { error: "Failed to fetch client" },
@@ -100,6 +105,8 @@ export async function PUT(
             );
         }
 
+        const existing = await databases.getDocument(DATABASE_ID, COLLECTIONS.CLIENTS, id);
+        if (existing.userId !== user.$id) return NextResponse.json({ error: "Not found" }, { status: 404 });
         const body = await request.json();
 
         // Update document
@@ -108,6 +115,7 @@ export async function PUT(
             COLLECTIONS.CLIENTS,
             id,
             {
+                ...eInvoiceWrite(body.e_invoice),
                 clientType: body.client_type || "company",
                 name: body.name,
                 contactPerson: body.contact_person || null,
@@ -128,6 +136,7 @@ export async function PUT(
 
         const client = {
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             client_type: doc.clientType || "company",
             name: doc.name,
             contact_person: doc.contactPerson ?? undefined,
@@ -149,6 +158,7 @@ export async function PUT(
 
         return NextResponse.json(client);
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error updating client:", error);
         return NextResponse.json(
             { error: "Failed to update client" },
@@ -186,10 +196,13 @@ export async function DELETE(
             );
         }
 
+        const existing = await databases.getDocument(DATABASE_ID, COLLECTIONS.CLIENTS, id);
+        if (existing.userId !== user.$id) return NextResponse.json({ error: "Not found" }, { status: 404 });
         await databases.deleteDocument(DATABASE_ID, COLLECTIONS.CLIENTS, id);
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
         console.error("Error deleting client:", error);
         return NextResponse.json(
             { error: "Failed to delete client" },

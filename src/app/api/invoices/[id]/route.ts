@@ -1,3 +1,4 @@
+import { readEInvoiceData } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
 import { Query } from "node-appwrite";
 import {
@@ -71,6 +72,7 @@ export async function GET(
                     COLLECTIONS.CLIENTS,
                     doc.clientId,
                 );
+                if (clientDoc.userId !== user.$id) throw new Error("Client not owned by user");
                 client = {
                     id: clientDoc.$id,
                     name: clientDoc.name,
@@ -105,6 +107,7 @@ export async function GET(
             invoice_id: item.invoiceId,
             product_id: item.productId ?? undefined,
             description: item.description,
+            gtin: item.gtin || undefined,
             quantity: item.quantity,
             unit_of_measure: item.unitOfMeasure || "Stück",
             price: item.price,
@@ -117,6 +120,7 @@ export async function GET(
 
         const invoice = {
             id: doc.$id,
+            e_invoice: readEInvoiceData(doc.eInvoiceData),
             client_id: doc.clientId,
             invoice_number: doc.invoiceNumber,
             issue_date: doc.issueDate,

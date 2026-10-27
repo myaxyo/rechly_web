@@ -22,6 +22,10 @@ deck/
 
 # production
 /build
+/dist
+/.desktop-data
+/.electron-cache
+/.cache
 
 # misc
 .DS_Store

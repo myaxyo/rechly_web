@@ -11,6 +11,7 @@ import {
     calculateInvoiceTotals,
 } from "@/lib/currencyUtils";
 import dayjs from "dayjs";
+import { invoiceIdentifierDefaults } from "@/lib/server/invoiceIdentifiers";
 
 function getNextDueDate(currentDate: string, interval: string): string {
     const d = dayjs(currentDate);
@@ -63,6 +64,9 @@ export async function POST(
             return NextResponse.json({ error: "Not found" }, { status: 404 });
         }
 
+        const identifiers = await invoiceIdentifierDefaults(databases, user.$id, templateDoc.clientId);
+        if (!identifiers) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
         const items = itemsRes.documents;
         const totals = calculateInvoiceTotals(
             items.map((item) => ({
@@ -91,6 +95,7 @@ export async function POST(
             COLLECTIONS.INVOICES,
             invoiceId,
             {
+                ...identifiers,
                 userId: user.$id,
                 clientId: templateDoc.clientId,
                 invoiceNumber,

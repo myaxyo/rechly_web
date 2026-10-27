@@ -11,6 +11,7 @@ import {
     getAppwriteProjectId,
     getOptionalEnv,
 } from "@/lib/env";
+const isDesktopServer = () => process.env.RECHLY_DESKTOP === "1";
 
 /**
  * Appwrite SSR Server Configuration
@@ -18,8 +19,8 @@ import {
  * Session is stored in httpOnly cookies for security
  */
 
-const APPWRITE_ENDPOINT = getAppwriteEndpoint();
-const APPWRITE_PROJECT_ID = getAppwriteProjectId();
+const APPWRITE_ENDPOINT = isDesktopServer() ? "" : getAppwriteEndpoint();
+const APPWRITE_PROJECT_ID = isDesktopServer() ? "" : getAppwriteProjectId();
 const APPWRITE_API_KEY = getOptionalEnv("APPWRITE_API_KEY") || "";
 
 // Database configuration - Must match client-side appwrite.ts
@@ -53,6 +54,15 @@ export const SESSION_COOKIE_NAME = "appwrite-session";
  * IMPORTANT: Never share this client between requests
  */
 export async function createAdminClient() {
+    if (isDesktopServer()) {
+        const { getDesktopClients } = await import("@/lib/desktop/appwrite-compat");
+        return getDesktopClients() as unknown as {
+            account: Account;
+            databases: Databases;
+            storage: Storage;
+        };
+    }
+
     if (!APPWRITE_API_KEY) {
         throw new Error("APPWRITE_API_KEY is not configured");
     }
@@ -85,6 +95,14 @@ export async function createAdminClient() {
  * IMPORTANT: Never share this client between requests
  */
 export async function createSessionClient() {
+    if (isDesktopServer()) {
+        const { getDesktopClients } = await import("@/lib/desktop/appwrite-compat");
+        return getDesktopClients() as unknown as {
+            account: Account;
+            databases: Databases;
+        };
+    }
+
     const client = new Client()
         .setEndpoint(APPWRITE_ENDPOINT)
         .setProject(APPWRITE_PROJECT_ID);

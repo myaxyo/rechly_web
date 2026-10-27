@@ -1,4 +1,7 @@
 "use client";
+import { InvoiceIdentifierEditor } from "@/components/dashboard/EInvoiceFields";
+import { type EInvoiceData, parseEInvoiceData, parseGTIN } from "@/lib/eRechnung/identifiers";
+import { defaultVatRate } from "@/lib/vatDefaults";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -50,6 +53,7 @@ import type {
 const { Title, Text } = Typography;
 
 interface LineItem {
+    gtin?: string;
     key: string;
     description: string;
     service_summary?: string;
@@ -70,6 +74,7 @@ export default function InvoiceCreatePage() {
 
     const [clients, setClients] = useState<Client[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
+    const [eInvoice, setEInvoice] = useState<EInvoiceData | undefined>();
     const [company, setCompany] = useState<UserCompany | null>(null);
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -133,7 +138,7 @@ export default function InvoiceCreatePage() {
             quantity: 1,
             unit_of_measure: t("invoiceCreate.unitPiece"),
             price: 0,
-            tax_rate_percent: 19,
+            tax_rate_percent: defaultVatRate(company?.is_small_business),
             discount_percent: 0,
         };
         setLineItems([...lineItems, newItem]);
@@ -169,7 +174,7 @@ export default function InvoiceCreatePage() {
             quantity: 1,
             unit_of_measure: product.unit_of_measure || t("invoiceCreate.unitPiece"),
             price: product.price,
-            tax_rate_percent: product.tax_rate_percent || 19,
+            tax_rate_percent: defaultVatRate(company?.is_small_business, product.tax_rate_percent),
             discount_percent: 0,
         };
         setLineItems([...lineItems, newItem]);
@@ -197,6 +202,7 @@ export default function InvoiceCreatePage() {
         setSaving(true);
         try {
             const items: InvoiceItemFormData[] = lineItems.map((item) => ({
+                gtin: parseGTIN(item.gtin),
                 description: item.description,
                 quantity: item.quantity,
                 unit_of_measure: item.unit_of_measure,
@@ -207,6 +213,11 @@ export default function InvoiceCreatePage() {
 
             const invoiceData: InvoiceFormData = {
                 client_id: selectedClient.id,
+                e_invoice: eInvoice === undefined ? undefined : {
+                    ...parseEInvoiceData(eInvoice),
+                    // An explicitly cleared buyer ID must not reapply the customer default.
+                    ...(Object.hasOwn(eInvoice, "buyer_identifier") ? { buyer_identifier: eInvoice.buyer_identifier || { value: "" } } : {}),
+                },
                 invoice_number: invoiceNumber,
                 issue_date: invoiceDate.format("YYYY-MM-DD"),
                 due_date: dueDate.format("YYYY-MM-DD"),
@@ -354,14 +365,20 @@ export default function InvoiceCreatePage() {
             const parsed = result.parsed;
             if (parsed.client_id) {
                 const found = clients.find((c) => c.id === parsed.client_id);
-                if (found) setSelectedClient(found);
+                if (found) {
+                    if (found.id !== selectedClient?.id) setEInvoice(undefined);
+                    setSelectedClient(found);
+                }
             } else if (parsed.client_name) {
                 const found = clients.find(
                     (c) =>
                         c.name.toLowerCase() ===
                         parsed.client_name?.toLowerCase(),
                 );
-                if (found) setSelectedClient(found);
+                if (found) {
+                    if (found.id !== selectedClient?.id) setEInvoice(undefined);
+                    setSelectedClient(found);
+                }
             }
 
             if (parsed.items && parsed.items.length > 0) {
@@ -428,6 +445,7 @@ export default function InvoiceCreatePage() {
                         placeholder={t("invoiceCreate.descriptionPlaceholder")}
                         rows={2}
                     />
+                    <details><summary style={{ cursor: "pointer" }}>{t("einvoice.gtin")}</summary><Input aria-label={t("einvoice.gtin")} maxLength={14} value={record.gtin || ""} onChange={e => updateLineItem(record.key, "gtin", e.target.value)} placeholder={t("einvoice.gtinHelp")} /></details>
                     <Space.Compact style={{ width: "100%" }}>
                         <Input
                             value={record.service_summary}
@@ -576,6 +594,7 @@ export default function InvoiceCreatePage() {
                                     (c) => c.id === value,
                                 );
                                 setSelectedClient(client || null);
+                                setEInvoice(undefined);
                             }}
                             options={clients.map((c) => ({
                                 value: c.id,
@@ -587,6 +606,7 @@ export default function InvoiceCreatePage() {
                             }))}
                             size="large"
                         />
+                        {selectedClient && <InvoiceIdentifierEditor key={selectedClient.id} initial={selectedClient.e_invoice} value={eInvoice} onChange={setEInvoice} />}
                         {selectedClient && (
                             <Card size="small" style={{ marginTop: 16 }}>
                                 <Title level={5}>{selectedClient.name}</Title>
