@@ -52,7 +52,7 @@ export default function KostenloseRechnungssoftwarePage() {
                 {
                     title: "Was in Rechly kostenlos enthalten ist",
                     body: [
-                        "Rechly deckt den kompletten Rechnungsprozess für Freelancer, Selbstständige und kleine Unternehmen ab – auf Deutsch, nach deutschen Regeln, im Web und als Mobile-App mit Offline-Modus.",
+                        "Rechly deckt den kompletten Rechnungsprozess für Freelancer, Selbstständige und kleine Unternehmen ab – auf Deutsch, nach deutschen Regeln, im Web und als Desktop-App mit 100 % Offline-Modus.",
                     ],
                     bullets: [
                         "Rechnungen, Angebote und wiederkehrende Rechnungen mit fortlaufenden Nummern",

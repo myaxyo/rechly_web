@@ -122,7 +122,7 @@ If any field is unclear, use null. Return only valid JSON.`;
         } else {
             // OpenAI, OpenRouter, Ollama, or default OpenAI env var
             let baseUrl = "https://api.openai.com/v1";
-            let effectiveKey = apiKey || "ollama";
+            const effectiveKey = apiKey || "ollama";
             let model = "gpt-4o-mini";
 
             if (userSettings?.provider === "ollama") {

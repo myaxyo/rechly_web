@@ -85,6 +85,9 @@ export default function Footer() {
                             <Link href="/features" style={linkStyle}>
                                 {t("nav.features")}
                             </Link>
+                            <Link href="/#download" style={linkStyle}>
+                                Desktop-App (Download)
+                            </Link>
                             <Link href="/open-source" style={linkStyle}>
                                 Open Source
                             </Link>

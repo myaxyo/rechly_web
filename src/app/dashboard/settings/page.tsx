@@ -654,12 +654,53 @@ export default function SettingsPage() {
                         </Form.Item>
 
                         {selectedProvider === "ollama" && (
-                            <Alert
-                                type="success"
-                                showIcon
-                                style={{ marginBottom: 16 }}
-                                message={t("settings.aiLocalPrivacyBadge")}
-                            />
+                            <>
+                                <Alert
+                                    type="success"
+                                    showIcon
+                                    style={{ marginBottom: 12 }}
+                                    message={t("settings.aiLocalPrivacyBadge")}
+                                />
+                                <Card
+                                    size="small"
+                                    style={{
+                                        marginBottom: 16,
+                                        background: "#f6ffed",
+                                        borderColor: "#b7eb8f",
+                                    }}
+                                >
+                                    <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                                        <Text strong style={{ color: "#389e0d" }}>
+                                            ⭐ Empfohlenes Modell: <code>jonprompter/Rechly-DE-3B</code>
+                                        </Text>
+                                        <Text type="secondary" style={{ fontSize: 12 }}>
+                                            Speziell trainiert für deutsche Rechnungen, GoBD & §19 UStG.
+                                            Terminal-Befehl zum Starten:
+                                        </Text>
+                                        <Text code style={{ fontSize: 12 }}>
+                                            ollama run jonprompter/Rechly-DE-3B
+                                        </Text>
+                                        <Space size={12} style={{ marginTop: 4 }}>
+                                            <a
+                                                href="https://ollama.com/jonprompter/Rechly-DE-3B"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                Ollama Modell-Seite ↗
+                                            </a>
+                                            <a
+                                                href="https://huggingface.co/jonprompter/rechly-de-3b"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                style={{ fontSize: 12 }}
+                                            >
+                                                Hugging Face Repo ↗
+                                            </a>
+                                        </Space>
+                                    </Space>
+                                </Card>
+                            </>
                         )}
 
                         <Form.Item
