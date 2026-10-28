@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
     WindowsOutlined,
     AppleOutlined,
@@ -26,71 +26,47 @@ const DOWNLOAD_URLS = {
 type DetectedOS = "windows" | "mac" | "other" | "unknown";
 type MacArch = "arm64" | "x86";
 
+type PlatformNavigator = Navigator & {
+    userAgentData?: {
+        platform?: string;
+        mobile?: boolean;
+        getHighEntropyValues?: (hints: string[]) => Promise<{ architecture?: string }>;
+    };
+};
+
+// The platform is stable for the lifetime of a browser page. The server uses
+// "unknown" so hydration agrees before reading browser-only information.
+const subscribePlatform = () => () => {};
+const serverPlatform = (): DetectedOS => "unknown";
+function browserPlatform(): DetectedOS {
+    const nav = navigator as PlatformNavigator;
+    const ua = nav.userAgent || "";
+    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
+        || (nav.maxTouchPoints > 1 && /Macintosh/i.test(ua) && !("MSStream" in window))
+        || nav.userAgentData?.mobile === true;
+    if (mobile) return "other";
+    const platform = nav.userAgentData?.platform || nav.platform || "";
+    if (/Windows|Win32|Win64|WOW64/i.test(ua) || /Win/i.test(platform)) return "windows";
+    if (/Macintosh|MacIntel|MacPPC|Mac68K/i.test(ua) || /Mac/i.test(platform)) return "mac";
+    return "other";
+}
+
 export default function DownloadSection() {
-    const [detectedOS, setDetectedOS] = useState<DetectedOS>("unknown");
+    const detectedOS = useSyncExternalStore(subscribePlatform, browserPlatform, serverPlatform);
     const [macArch, setMacArch] = useState<MacArch>("arm64");
 
     useEffect(() => {
-        if (typeof window === "undefined" || !navigator) return;
-
-        const ua = navigator.userAgent || "";
-        const navAny = navigator as unknown as {
-            userAgentData?: {
-                platform?: string;
-                mobile?: boolean;
-                getHighEntropyValues?: (
-                    hints: string[]
-                ) => Promise<{ architecture?: string }>;
-            };
-        };
-
-        const isMobile =
-            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-                ua
-            ) ||
-            (navigator.maxTouchPoints > 1 &&
-                /Macintosh/i.test(ua) &&
-                !("MSStream" in window)) ||
-            navAny.userAgentData?.mobile === true;
-
-        if (isMobile) {
-            setDetectedOS("other");
-            return;
-        }
-
-        const platform =
-            navAny.userAgentData?.platform || navigator.platform || "";
-        const isWin =
-            /Windows|Win32|Win64|WOW64/i.test(ua) || /Win/i.test(platform);
-        const isMac =
-            !isWin &&
-            (/Macintosh|MacIntel|MacPPC|Mac68K/i.test(ua) ||
-                /Mac/i.test(platform));
-
-        if (isWin) {
-            setDetectedOS("windows");
-        } else if (isMac) {
-            setDetectedOS("mac");
-            // Default to Apple Silicon build.
-            // Where the browser supports it, use navigator.userAgentData.getHighEntropyValues(["architecture"])
-            // to pick the Intel build when the architecture is "x86".
-            // Don't rely on the user agent string for Mac architecture, because it always says "Intel".
-            if (navAny.userAgentData?.getHighEntropyValues) {
-                navAny.userAgentData
-                    .getHighEntropyValues(["architecture"])
-                    .then((values) => {
-                        if (values?.architecture === "x86") {
-                            setMacArch("x86");
-                        }
-                    })
-                    .catch(() => {
-                        // Keep Apple Silicon default
-                    });
-            }
-        } else {
-            setDetectedOS("other");
-        }
-    }, []);
+        if (detectedOS !== "mac") return;
+        const data = (navigator as PlatformNavigator).userAgentData;
+        if (!data?.getHighEntropyValues) return;
+        let active = true;
+        // The Mac user agent reports Intel on Apple Silicon too. Prefer the
+        // browser's architecture hint when available.
+        data.getHighEntropyValues(["architecture"]).then(values => {
+            if (active && values.architecture === "x86") setMacArch("x86");
+        }).catch(() => { /* Keep Apple Silicon default. */ });
+        return () => { active = false; };
+    }, [detectedOS]);
 
     const primaryHref =
         detectedOS === "windows"

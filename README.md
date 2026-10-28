@@ -90,11 +90,13 @@ Before deploying, run the additive Appwrite migration. See
 The export test corpus passes KoSIT XRechnung 3.0.2, veraPDF PDF/A-3b and Mustang
 Factur-X checks. See [validation evidence and reproduction steps](docs/COMPLIANCE_VALIDATION.md).
 
-## Desktop App
+## Electron Development Wrapper
 
-The Electron edition runs the existing dashboard against an on-device SQLite
-database. It does not require Appwrite and stores its data in the operating
-system's application-data directory.
+This repository also includes an Electron wrapper for developing the dashboard
+against an on-device SQLite database. It requires Node.js 24 for development,
+does not require Appwrite, and stores data in the operating system's
+application-data directory. The published desktop app and its downloads are
+maintained in the separate [Rechly Desktop repository](https://github.com/myaxyo/rechly_desktop).
 
 ```bash
 # Start Next.js and Electron in local desktop mode

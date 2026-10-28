@@ -147,9 +147,8 @@ and a 390px mobile form without horizontal page overflow. The
 PDF attachment was extracted with `pdfdetach` and byte-compared to the EN 16931
 fixture; `pdftotext` confirmed visible identifiers and GTINs. Unauthenticated web
 API calls returned 401, while the desktop-only health route returned 404 in web
-mode. Changed TypeScript files have no ESLint errors; full-repository lint still
-has an existing `prefer-const` error in `src/app/api/expenses/ocr/route.ts:125`
-and existing warnings.
+mode. The final merge also resolved the remaining lint errors; existing warnings
+are tracked separately from this feature's checks.
 
 The follow-up validation resolved the KoSIT download blocker and corrected the
 PDF/A container and discounted XML unit prices. Seven synthetic export cases

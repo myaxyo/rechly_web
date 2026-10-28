@@ -1,0 +1,4 @@
+# Keep generated validator reports and fixtures byte-identical to the validated
+# artifacts. Their SHA-256 hashes are recorded in docs/validation/summary.json.
+docs/validation/*.xml -text -whitespace
+tests/fixtures/identifiers-*.xml -text -whitespace

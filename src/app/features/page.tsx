@@ -1,6 +1,7 @@
 "use client";
 
 import { Typography, Card } from "antd";
+import Link from "next/link";
 import {
     FileTextOutlined,
     TeamOutlined,
@@ -265,7 +266,7 @@ export default function FeaturesPage() {
                 </div>
 
                 <div style={{ textAlign: "center", marginTop: 40 }}>
-                    <a
+                    <Link
                         href="/#download"
                         style={{
                             display: "inline-flex",
@@ -286,7 +287,7 @@ export default function FeaturesPage() {
                                 ? "Desktop-App herunterladen (Windows & Mac)"
                                 : "Download Desktop App (Windows & Mac)"}
                         </span>
-                    </a>
+                    </Link>
                 </div>
             </section>
             </main>
