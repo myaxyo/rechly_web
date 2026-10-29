@@ -4,11 +4,19 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnungsvorlage";
 
 export const metadata = createPageMetadata({
-    title: "Rechnungsvorlage für Deutschland",
+    title: "Rechnungsvorlage kostenlos – Word, Excel, PDF & Generator",
     description:
-        "Rechnungsvorlage für Deutschland: Pflichtangaben richtig strukturieren und aus einer statischen Vorlage einen verlässlichen Rechnungsprozess machen.",
+        "Kostenlose Rechnungsvorlage für Deutschland (Word, Excel & PDF): Mit allen Pflichtangaben nach § 14 UStG, für Kleinunternehmer & Gewerbe. Jetzt Vorlage laden oder direkt online ausfüllen!",
     path,
     type: "article",
+    keywords: [
+        "Rechnungsvorlage kostenlos",
+        "Rechnung Vorlage",
+        "Rechnungsvorlage Word",
+        "Rechnungsvorlage Excel",
+        "Rechnung Muster PDF",
+        "Rechnungsvordruck kostenlos",
+    ],
 });
 
 export default function RechnungsvorlagePage() {
@@ -16,14 +24,15 @@ export default function RechnungsvorlagePage() {
         <KeywordLandingPage
             path={path}
             eyebrow="RECHNUNGSVORLAGE"
-            title="Rechnungsvorlage: was eine gute deutsche Vorlage wirklich leisten muss"
-            intro="Viele suchen nach einer Rechnungsvorlage, weil sie schnell loslegen wollen. Das Problem ist selten die erste Vorlage, sondern der Moment danach: Kunden wechseln, Positionen ändern sich, offene Zahlungen kommen dazu und aus einer Datei wird plötzlich ein dauernder Prozess."
-            summary="Rechly setzt genau dort an. Statt nur eine statische Rechnungsvorlage zu liefern, hilft dir die Software dabei, Kundendaten, Pflichtangaben, Positionen und PDFs in einen sauberen deutschen Rechnungsablauf zu überführen."
+            title="Rechnungsvorlage kostenlos: Word, Excel oder direkt online erstellen"
+            intro="Viele suchen nach einer Rechnungsvorlage, weil sie schnell und unkompliziert eine Rechnung schreiben wollen. Doch Vorsicht: Eine gute Vorlage muss alle 8 gesetzlichen Pflichtangaben nach § 14 UStG enthalten, damit der Vorsteuerabzug deines Kunden gesichert ist."
+            summary="Rechly liefert dir die perfekte Lösung: Nutze unsere kostenlosen Vorlagen für Word und Excel oder fülle deine Rechnung direkt in unserem kostenlosen Online-Generator aus – mit automatischer Berechnung und fehlerfreiem PDF-Download."
             keywordPills={[
-                "Rechnungsvorlage",
-                "Rechnungsvorlage Deutschland",
-                "Rechnung online erstellen",
-                "Pflichtangaben Rechnung",
+                "Rechnungsvorlage kostenlos",
+                "Rechnung Vorlage Word",
+                "Rechnungsvorlage Excel",
+                "Rechnung Muster PDF",
+                "Rechnungsvordruck",
             ]}
             sections={[
                 {

@@ -4,11 +4,18 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnung-fuer-kleinunternehmer-erstellen";
 
 export const metadata = createPageMetadata({
-    title: "Rechnung für Kleinunternehmer erstellen",
+    title: "Rechnung für Kleinunternehmer online erstellen – Kostenlos",
     description:
-        "Rechnung für Kleinunternehmer erstellen: Kundendaten, Pflichtangaben und den Hinweis zur Kleinunternehmerregelung in einen sauberen Ablauf bringen.",
+        "Rechnung als Kleinunternehmer online erstellen ohne MwSt: Automatische § 19 UStG Klausel, fortlaufende Rechnungsnummer, Kundenverwaltung & PDF-Download.",
     path,
     type: "article",
+    keywords: [
+        "Rechnung für Kleinunternehmer erstellen",
+        "Kleinunternehmer Rechnung schreiben kostenlos",
+        "Kleinunternehmer Rechnung PDF",
+        "Rechnung schreiben Kleinunternehmer",
+        "Rechnungsvorlage Kleinunternehmer",
+    ],
 });
 
 export default function RechnungFuerKleinunternehmerErstellenPage() {

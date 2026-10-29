@@ -13,10 +13,19 @@ import { createPageMetadata } from "@/lib/seo";
 const siteUrl = getSiteUrl();
 
 export const metadata = createPageMetadata({
-    title: "Rechly – Kostenlose Open-Source Rechnungssoftware",
+    title: "Rechly – Kostenloses Open-Source Rechnungsprogramm (Vollversion)",
     description:
-        "Rechnungen, Angebote und E-Rechnungen online erstellen: Rechly ist die kostenlose Open-Source Rechnungssoftware für Freelancer und kleine Unternehmen in Deutschland.",
+        "Kostenloses Open-Source Rechnungsprogramm für Deutschland: Rechnungen, Angebote, E-Rechnung (XRechnung/ZUGFeRD), DATEV & 100% offline Desktop-App ohne Abo.",
     path: "/",
+    keywords: [
+        "Rechnungsprogramm kostenlos",
+        "Open Source Rechnungsprogramm",
+        "kostenlose Rechnungssoftware",
+        "Rechnungsprogramm Vollversion",
+        "E-Rechnung Software",
+        "Rechnungen online schreiben",
+        "Rechly",
+    ],
 });
 
 // Lazy load non-critical sections

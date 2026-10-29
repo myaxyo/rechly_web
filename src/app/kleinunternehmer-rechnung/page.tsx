@@ -4,11 +4,19 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/kleinunternehmer-rechnung";
 
 export const metadata = createPageMetadata({
-    title: "Kleinunternehmer-Rechnung – §19 UStG Vorlage",
+    title: "Kleinunternehmer Rechnung: Kostenlose Vorlage & § 19 UStG",
     description:
-        "Kleinunternehmer-Rechnung erstellen: Pflichtangaben, §19-UStG-Hinweis, Rechnungsnummern, Kundenverwaltung und PDF-Export verständlich erklärt.",
+        "Rechnung für Kleinunternehmer nach § 19 UStG schreiben: Korrekte Formulierung, Pflichtangaben, kostenlose Vorlage als PDF & Word und Online-Generator.",
     path,
     type: "article",
+    keywords: [
+        "Kleinunternehmer Rechnung",
+        "Kleinunternehmerregelung 19 UStG",
+        "Rechnung Kleinunternehmer Vorlage",
+        "Kleinunternehmer Rechnung Muster",
+        "Rechnung ohne Umsatzsteuer",
+        "§19 UStG Formulierung",
+    ],
 });
 
 export default function KleinunternehmerPage() {

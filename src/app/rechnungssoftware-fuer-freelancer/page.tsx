@@ -4,11 +4,18 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnungssoftware-fuer-freelancer";
 
 export const metadata = createPageMetadata({
-    title: "Rechnungssoftware für Freelancer in Deutschland",
+    title: "Rechnungssoftware für Freelancer – Kostenlos & Open Source",
     description:
-        "Rechnungssoftware für Freelancer: Rechnungen schreiben, Kunden verwalten, PDFs exportieren und offene Zahlungen in einem offenen System verfolgen.",
+        "Kostenlose Rechnungssoftware für Freelancer & Freiberufler: Angebote, Rechnungen, E-Rechnung (XRechnung/ZUGFeRD) & DATEV ohne Monatsgebühr. Jetzt starten!",
     path,
     type: "article",
+    keywords: [
+        "Rechnungssoftware für Freelancer",
+        "Freelancer Rechnungsprogramm",
+        "Rechnungen schreiben Freiberufler",
+        "kostenlose Rechnungssoftware",
+        "Open Source Rechnungssoftware",
+    ],
 });
 
 export default function FreelancerPage() {

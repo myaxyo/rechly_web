@@ -4,11 +4,18 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/sevdesk-alternative";
 
 export const metadata = createPageMetadata({
-    title: "sevdesk Alternative – Open Source Rechnungssoftware",
+    title: "sevdesk Alternative kostenlos: Open Source & Vollversion",
     description:
-        "sevdesk Alternative mit Open-Source-Ansatz: Rechnungen, Kunden und Zahlungserinnerungen in einem fokussierten, transparenten System organisieren.",
+        "Kostenlose sevdesk Alternative ohne Monatsabo: XRechnung, ZUGFeRD, DATEV-Export, Kundenverwaltung & 100% offline Desktop-App für Freelancer & Selbstständige.",
     path,
     type: "article",
+    keywords: [
+        "sevdesk Alternative",
+        "sevdesk open source alternative",
+        "Alternative zu sevdesk",
+        "Rechnungssoftware Alternative",
+        "Rechnungsprogramm ohne Abo",
+    ],
 });
 
 export default function SevdeskAlternativePage() {

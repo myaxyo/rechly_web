@@ -206,7 +206,7 @@ export default function KeywordLandingPage({
                                 marginBottom: 24,
                             }}
                         >
-                            Redaktionell aktualisiert: August 2026 · Allgemeine
+                            Redaktionell aktualisiert: Oktober 2026 · Allgemeine
                             Information, keine Steuer- oder Rechtsberatung.
                             Offizielle Grundlagen findest du beim{" "}
                             <a
@@ -455,6 +455,24 @@ export default function KeywordLandingPage({
                                     }}
                                 >
                                     Kostenlos registrieren
+                                </Link>
+                                <Link
+                                    href="/#download"
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        minHeight: 46,
+                                        padding: "0 18px",
+                                        borderRadius: 12,
+                                        background: "rgba(255, 255, 255, 0.12)",
+                                        border: "1px solid rgba(248, 250, 252, 0.28)",
+                                        color: "#f8fafc",
+                                        fontWeight: 600,
+                                        textDecoration: "none",
+                                    }}
+                                >
+                                    Desktop-App (100% Offline)
                                 </Link>
                                 <Link
                                     href="/features"

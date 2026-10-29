@@ -4,11 +4,19 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnungsprogramm-kostenlos";
 
 export const metadata = createPageMetadata({
-    title: "Rechnungsprogramm kostenlos – Open Source",
+    title: "Rechnungsprogramm kostenlos – Freeware Vollversion ohne Limit",
     description:
-        "Kostenloses Open-Source Rechnungsprogramm für Deutschland: Rechnungen online erstellen, PDFs exportieren und Kunden ohne Abo verwalten.",
+        "Kostenloses Rechnungsprogramm & Freeware Vollversion für Deutschland: Rechnungen, E-Rechnung (XRechnung & ZUGFeRD) & Kunden ohne Abo oder versteckte Kosten verwalten.",
     path,
     type: "article",
+    keywords: [
+        "Rechnungsprogramm kostenlos",
+        "Rechnungsprogramme kostenlos Vollversion",
+        "gratis Rechnungsprogramm Vollversion",
+        "Rechnungsprogramm Freeware",
+        "Rechnung online kostenlos",
+        "Open Source Rechnungsprogramm",
+    ],
 });
 
 export default function RechnungsprogrammKostenlosPage() {
@@ -21,7 +29,8 @@ export default function RechnungsprogrammKostenlosPage() {
             summary="Rechly ist hier besonders relevant, weil das Produkt als Open-Source-Projekt kostenlos nutzbar bleibt und trotzdem die Kernaufgaben abdeckt: Rechnungen erstellen, Kundendaten verwalten, PDFs exportieren und offene Zahlungen sauber nachverfolgen."
             keywordPills={[
                 "Rechnungsprogramm kostenlos",
-                "kostenlose Rechnungssoftware",
+                "Rechnungsprogramme kostenlos Vollversion",
+                "Rechnungsprogramm Freeware",
                 "Rechnung online kostenlos",
                 "Open Source Rechnungsprogramm",
             ]}

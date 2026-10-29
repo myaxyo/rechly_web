@@ -4,11 +4,19 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/zahlungserinnerung-schreiben";
 
 export const metadata = createPageMetadata({
-    title: "Zahlungserinnerung schreiben – Muster & Ablauf",
+    title: "Zahlungserinnerung schreiben: Vorlage & freundliche Muster",
     description:
-        "Zahlungserinnerung schreiben: offene Rechnungen freundlich und professionell nachverfolgen – mit Formulierungshilfe und nachvollziehbarem Ablauf.",
+        "Kostenlose Vorlage für Zahlungserinnerung: Freundliche Mahnung formulieren, Fristen setzen, rechtssichere Mustertexte & PDF-Generator für offene Rechnungen.",
     path,
     type: "article",
+    keywords: [
+        "Zahlungserinnerung schreiben",
+        "Zahlungserinnerung Vorlage kostenlos",
+        "Zahlungserinnerung Muster",
+        "Zahlungserinnerung online schreiben",
+        "Mahnung freundlich formulieren",
+        "Zahlungsaufforderung Vorlage",
+    ],
 });
 
 export default function ZahlungserinnerungSchreibenPage() {
@@ -77,6 +85,18 @@ export default function ZahlungserinnerungSchreibenPage() {
                 },
             ]}
             clusterLinks={[
+                {
+                    href: "/tools/mahnung-generator",
+                    title: "Mahnung & Zahlungserinnerung Generator",
+                    description:
+                        "Erstelle in 2 Minuten rechtssichere Zahlungserinnerungen und Mahnungen als PDF.",
+                },
+                {
+                    href: "/tools/verzugszinsen-rechner",
+                    title: "Verzugszinsen-Rechner",
+                    description:
+                        "Berechne tagesgenaue gesetzliche Verzugszinsen und die 40 € B2B-Mahnpauschale.",
+                },
                 {
                     href: "/rechnungsvorlage",
                     title: "Rechnungsvorlage",

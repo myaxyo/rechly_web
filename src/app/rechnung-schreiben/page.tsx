@@ -4,11 +4,21 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnung-schreiben";
 
 export const metadata = createPageMetadata({
-    title: "Rechnung schreiben – Anleitung & Pflichtangaben 2026",
+    title: "Rechnung schreiben kostenlos – Pflichtangaben & Anleitung 2026",
     description:
-        "Rechnung schreiben: Schritt-für-Schritt-Anleitung zu Pflichtangaben nach §14 UStG, PDF-Export und E-Rechnung für Freelancer und Kleinunternehmer.",
+        "Rechnung schreiben nach § 14 UStG & DIN 5008: Schritt-für-Schritt-Anleitung, alle Pflichtangaben, kostenlose Muster-Vorlage & E-Rechnung für Selbstständige.",
     path,
     type: "article",
+    keywords: [
+        "Rechnung schreiben",
+        "Abrechnung schreiben",
+        "Rechnung stellen",
+        "Rechnungen schreiben",
+        "Rechnung nach DIN 5008",
+        "Rechnung schreiben kostenlos",
+        "Rechnung erstellen",
+        "Rechnung online schreiben",
+    ],
 });
 
 export default function RechnungSchreibenPage() {
@@ -21,9 +31,10 @@ export default function RechnungSchreibenPage() {
             summary="Diese Anleitung zeigt Schritt für Schritt, was in jede deutsche Rechnung gehört, welche Sonderfälle für Kleinunternehmer gelten und wie du mit Rechly kostenlos professionelle Rechnungen als PDF oder E-Rechnung erstellst."
             keywordPills={[
                 "Rechnung schreiben kostenlos",
-                "Rechnung erstellen",
+                "Rechnung nach DIN 5008",
+                "Abrechnung schreiben",
                 "Pflichtangaben §14 UStG",
-                "Rechnung online schreiben",
+                "Rechnung online erstellen",
             ]}
             howTo={{
                 title: "Rechnung schreiben in 6 Schritten",
@@ -78,6 +89,26 @@ export default function RechnungSchreibenPage() {
                     ],
                 },
                 {
+                    title: "Rechnung nach DIN 5008: Struktur für Fensterbriefumschläge & PDF",
+                    body: [
+                        "Der Standard DIN 5008 regelt die Schreib- und Gestaltungsregeln für die Textverarbeitung im geschäftlichen Schriftverkehr. Ein sauberes Layout stellt sicher, dass Anschrift, Datum, Betreffzeile und Tabellen auf Anhieb lesbar sind und bei Briefversand exakt in das Adressfenster passen.",
+                        "Rechly baut alle PDF-Dokumente automatisch nach DIN 5008 auf: Absenderzeile, Empfängerfeld, Betreff mit Rechnungsnummer, klare Positionstabelle und rechtssichere Fußzeile mit Bankverbindung und Pflichtangaben.",
+                    ],
+                    bullets: [
+                        "Anschriftfeld mit korrekter Zusatz- und Vermerkzone",
+                        "Hervorgehobene Betreffzeile (ohne das veraltete Wort „Betreff:“)",
+                        "Übersichtliche Positionstabelle mit Einzel- und Gesamtpreisen",
+                        "Dreispaltige Fußzeile: Firmendaten, Bankverbindung (IBAN/BIC), Steuerdaten",
+                    ],
+                },
+                {
+                    title: "Abrechnung schreiben vs. Rechnung stellen: Wo liegt der Unterschied?",
+                    body: [
+                        "Im Alltag werden die Begriffe „Abrechnung schreiben“ und „Rechnung stellen“ oft synonym verwendet. Rechtlich betrachtet ist die Rechnung nach § 14 UStG das Dokument, mit dem der leistende Unternehmer seine Forderung geltend macht.",
+                        "Eine Abrechnung kann dagegen auch vom Auftraggeber als sogenannte Gutschrift nach § 14 Abs. 2 Satz 2 UStG erstellt werden (Self-Billing). Wer selbst Dienstleistungen oder Waren liefert, stellt eine Ausgangsrechnung aus.",
+                    ],
+                },
+                {
                     title: "Rechnung kostenlos schreiben: Vorlage oder Software?",
                     body: [
                         "Word- und Excel-Vorlagen sind der klassische Einstieg, haben aber drei Schwächen: Rechnungsnummern musst du selbst verwalten, Änderungen an alten Rechnungen sind nicht nachvollziehbar, und für die kommende E-Rechnungspflicht im B2B-Geschäft fehlt das Format komplett.",
@@ -110,6 +141,12 @@ export default function RechnungSchreibenPage() {
                 },
             ]}
             clusterLinks={[
+                {
+                    href: "/tools/rechnungsgenerator",
+                    title: "Kostenloser Rechnungsgenerator",
+                    description:
+                        "Erstelle deine Rechnung direkt im Browser ohne Anmeldung als druckfertiges PDF.",
+                },
                 {
                     href: "/rechnungsvorlage",
                     title: "Rechnungsvorlage",

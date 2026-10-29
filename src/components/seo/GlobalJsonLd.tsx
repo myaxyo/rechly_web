@@ -42,7 +42,10 @@ export default function GlobalJsonLd() {
                     "SEPA GiroCode & ISO 20022 XML",
                     "Mahnwesen & Verzugszinsen (§ 288 BGB)",
                 ],
-                sameAs: [repoUrl],
+                sameAs: [
+                    repoUrl,
+                    "https://github.com/myaxyo/rechly_desktop",
+                ],
             },
             {
                 "@type": "WebSite",

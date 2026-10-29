@@ -41,15 +41,17 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "XRechnung (UBL/CII) und ZUGFeRD/Factur-X PDFs direkt im Browser ansehen, Pflichtangaben prüfen, Positionen analysieren, CSV exportieren und GiroCode erzeugen. 100% lokal ohne Upload.",
-        metaTitle: "E-Rechnung Viewer kostenlos – XRechnung & ZUGFeRD öffnen | Rechly",
+        metaTitle: "XRechnung & ZUGFeRD Viewer kostenlos – E-Rechnung öffnen",
         metaDescription:
-            "Kostenloser E-Rechnung Viewer: XRechnung (.xml) und ZUGFeRD (.pdf) direkt im Browser öffnen, Rechnungsdaten prüfen und als CSV exportieren. Ohne Registrierung & DSGVO-sicher.",
+            "Kostenloser XRechnung & ZUGFeRD Viewer: XML-Dateien und hybride PDFs direkt online ohne Upload öffnen, prüfen, visualisieren und exportieren. 100% lokal & DSGVO-sicher.",
         keywords: [
-            "E-Rechnung Viewer",
+            "XRechnung Viewer kostenlos",
+            "E-Rechnung Viewer kostenlos",
             "XRechnung öffnen",
-            "ZUGFeRD Viewer kostenlos",
+            "ZUGFeRD Viewer online",
+            "XRechnung Reader",
             "XML Rechnung ansehen",
-            "E-Rechnung Pflichtangaben",
+            "XRechnung visualisieren",
             "EN 16931 Validator",
         ],
         badge: "E-Rechnung 2025/2026",
@@ -97,14 +99,16 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "Erstelle in Sekunden einen offiziellen SEPA GiroCode (EPC069-12 QR-Code) für deine Rechnungen. Kunden scannen den Code in ihrer Banking-App und überweisen fehlerfrei mit vorausgefüllter IBAN und Betrag.",
-        metaTitle: "GiroCode Generator kostenlos – EPC-QR-Code für Rechnungen erstellen",
+        metaTitle: "GiroCode Generator kostenlos – EPC-QR-Code für Rechnungen | Rechly",
         metaDescription:
-            "Offizieller EPC GiroCode Generator: Erstelle SEPA-QR-Codes für deine Rechnungen. Schneller bezahlt werden, Tippfehler vermeiden. Sofort als PNG herunterladen oder kopieren.",
+            "Offizieller EPC GiroCode Generator: Erstelle SEPA-QR-Codes für Rechnungen & Überweisungen. Schneller bezahlt werden, fehlerfrei überweisen. Kostenloser Download!",
         keywords: [
             "GiroCode erstellen",
+            "Giro Code Generator",
             "EPC QR Code Generator",
             "SEPA QR Code kostenlos",
             "Zahlschein QR Code Rechnung",
+            "QR-Code für Überweisung erstellen",
             "GiroCode Vorlage",
         ],
         badge: "Beliebt",
@@ -145,12 +149,14 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Finanzen & Steuern",
         description:
             "Berechne tagesgenaue gesetzliche Verzugszinsen nach §§ 286, 288 BGB mit den aktuellen Basiszinssätzen der Deutschen Bundesbank. Inklusive 40 € Verzugspauschale für B2B und fertigem Mahnschreiben-Generator.",
-        metaTitle: "Verzugszinsen Rechner 2026 – BGB Verzugszinsen & 40 € Pauschale berechnen",
+        metaTitle: "Verzugszinsen Rechner 2026 – BGB Zinsen & 40 € Pauschale | Rechly",
         metaDescription:
             "Tagesgenauer Verzugszinsen-Rechner nach § 288 BGB mit aktuellen Bundesbank-Zinssätzen. Berechne Verzugszinsen für B2B (+9%) und B2C (+5%) plus 40 € Mahnpauschale & Mahntext.",
         keywords: [
             "Verzugszinsen berechnen",
             "Verzugszinsen Rechner 2026",
+            "Verzugskosten berechnen",
+            "Zahlungsverzug berechnen",
             "Basiszinssatz Bundesbank",
             "40 Euro Verzugspauschale B2B",
             "Mahnung Verzugszinsen Muster",
@@ -279,13 +285,15 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Kalkulation & HR",
         description:
             "Ermittle deinen realistischen Mindest- und Markt-Stundensatz sowie Tagessatz. Berücksichtigt Wunsch-Nettoeinkommen, betriebliche Fixkosten, Vorsorge, Urlaub, Krankheit und die reale fakturierbare Auslastung.",
-        metaTitle: "Stundensatz Rechner – Freelancer & Handwerker Stundensatz kalkulieren",
+        metaTitle: "Stundensatz Rechner – Freelancer & Handwerker Stundensatz | Rechly",
         metaDescription:
-            "Berechne deinen optimalen Stundensatz und Tagessatz als Freelancer oder Handwerker. Mit Kapazitätsrechnung, Betriebskosten, Steuern, Urlaub & realistischer Abrechnungsquote.",
+            "Berechne deinen optimalen Stundensatz und Tagessatz als Freelancer oder Handwerker: Mit Fixkosten, Steuern, Vorsorge, Urlaub und realistischer Auslastung.",
         keywords: [
             "Stundensatz berechnen",
+            "Stundensatzrechner",
             "Stundensatz Rechner Freelancer",
             "Handwerker Stundensatz kalkulieren",
+            "Stundensatz kalkulieren",
             "Tagessatz Rechner",
             "Mindesthonorar Selbstständige",
             "Kalkulation Stundensatz",
@@ -730,16 +738,18 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Recht & Vorlagen",
         description:
             "Erstellen Sie rechtssichere Zahlungserinnerungen, 1. Mahnungen und letzte Mahnungen vor Inkasso nach DIN 5008. Mit automatischer Verzugszins- und 40 € Pauschalen-Berechnung (§ 288 BGB).",
-        metaTitle: "Mahnung & Zahlungserinnerung Vorlage kostenlos erstellen | Rechly",
+        metaTitle: "Mahnung schreiben Vorlage kostenlos (1.–3. Mahnung) | Rechly",
         metaDescription:
-            "Rechtssichere Mahnung und Zahlungserinnerung nach § 286 BGB online erstellen: Automatische Verzugszinsen, 40 € B2B-Verzugspauschale, Zahlungsfrist und DIN 5008 Vorlage als PDF.",
+            "Kostenlose Mahnungsvorlage & Generator: 1., 2. & letzte Mahnung oder Zahlungserinnerung rechtssicher nach § 286 BGB online erstellen. Inkl. 40 € Pauschale & PDF-Download!",
         keywords: [
-            "Mahnung schreiben Vorlage",
+            "Mahnung schreiben Vorlage kostenlos",
+            "Letzte Mahnung Vorlage",
             "Zahlungserinnerung Vorlage kostenlos",
+            "Mahnungs Generator",
+            "Mahnungsvorlagen gratis",
+            "Verzugskosten berechnen",
             "1. Mahnung Muster",
-            "Letzte Mahnung vor Inkasso",
-            "Mahngebühren gesetzlich BGB",
-            "Verzugsschaden geltend machen",
+            "Mahnung online erstellen",
         ],
         badge: "BGB-konform",
         icon: "ExclamationCircleOutlined",
@@ -1055,15 +1065,17 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "Erstellen Sie überzeugende Angebote, freibleibende Angebote und Kostenvoranschläge mit Bindefrist, Eventualpositionen und Unterschriftsfeld zur Auftragsbestätigung – inklusive 1-Klick-Umwandlung in eine Rechnung.",
-        metaTitle: "Angebot schreiben kostenlos – Online Angebotsgenerator & Kostenvoranschlag PDF | Rechly",
+        metaTitle: "Angebot schreiben kostenlos – Angebotsgenerator & Vorlage | Rechly",
         metaDescription:
-            "Kostenloser Angebotsgenerator ohne Anmeldung: Verbindliches Angebot oder Kostenvoranschlag online erstellen, Eventualpositionen ausweisen, als PDF drucken und mit 1 Klick in eine Rechnung umwandeln.",
+            "Kostenlos Angebot oder Kostenvoranschlag online schreiben: Sofort als professionelle PDF herunterladen, mit 1 Klick in Rechnung umwandeln. Ohne Anmeldung!",
         keywords: [
             "Angebot schreiben kostenlos",
+            "Angebot erstellen",
             "Angebotsgenerator online",
             "Kostenvoranschlag erstellen PDF",
             "Angebot Vorlage Handwerk",
-            "Freibleibendes Angebot Muster",
+            "Angebot schreiben Freiberufler",
+            "Angebotsvorlage kostenlos",
         ],
         badge: "PDF + 1-Klick Rechnung",
         icon: "FileProtectOutlined",
