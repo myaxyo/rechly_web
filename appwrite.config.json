@@ -1738,27 +1738,6 @@
     ],
     "buckets": [
         {
-            "$id": "company-logos",
-            "$permissions": [
-                "create(\"any\")",
-                "read(\"any\")",
-                "update(\"any\")",
-                "delete(\"any\")"
-            ],
-            "fileSecurity": false,
-            "name": "Company Logos",
-            "enabled": true,
-            "maximumFileSize": 5000000,
-            "allowedFileExtensions": [
-                "jpg",
-                "png",
-                "jpeg"
-            ],
-            "compression": "none",
-            "encryption": true,
-            "antivirus": true
-        },
-        {
             "$id": "receipts",
             "$permissions": [],
             "fileSecurity": false,
