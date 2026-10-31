@@ -43,7 +43,6 @@ const { Title, Text } = Typography;
 
 export default function SettingsPage() {
     const { user, logout, deleteAccount } = useAuth();
-    const deletionRequest = (user?.prefs as { rechlyDeletionRequest?: { status?: string } } | undefined)?.rechlyDeletionRequest;
     const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -187,17 +186,12 @@ export default function SettingsPage() {
             onOk: async () => {
                 setDeleting(true);
                 try {
-                    const result = await deleteAccount();
-                    if (result === "requested") {
-                        Modal.info({ title: t("settings.deleteRequestedTitle"), content: t("settings.deleteRequested") });
-                        return;
-                    }
+                    await deleteAccount();
                     message.success(t("settings.accountDeleted"));
                     window.location.href = "/";
                 } catch (error) {
                     console.error("Error deleting account:", error);
-                    const code = (error as { code?: string }).code;
-                    message.error(t(code === "RETENTION_REVIEW" ? "settings.deleteRetentionReview" : "settings.deleteError"));
+                    message.error(t("settings.deleteError"));
                     throw error; // Keep confirmation open; do not imply completion on failure.
                 } finally {
                     setDeleting(false);
@@ -893,10 +887,6 @@ export default function SettingsPage() {
                         <Text type="secondary">
                             {t("settings.deleteAccountWarning")}
                         </Text>
-                        {deletionRequest?.status === "pending_review" && (
-                            <Alert style={{ marginTop: 16 }} type="info" showIcon
-                                title={t("settings.deleteRequestedTitle")} description={t("settings.deleteRequested")} />
-                        )}
                         <div style={{ marginTop: 16 }}>
                             <Button
                                 danger

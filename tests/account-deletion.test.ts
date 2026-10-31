@@ -59,14 +59,9 @@ function dependencies() {
     const user={ $id:"owner",prefs:{language:"de"} as Record<string,unknown> };const erased:string[]=[];
     return {user,erased, authenticate:async()=>({user,updatePrefs:async(prefs:Record<string,unknown>)=>{user.prefs=prefs;}}),erase:async(id:string)=>{erased.push(id);}};
 }
-test("default policy durably records a request, preserves preferences and is idempotent",async()=>{
+test("self-service deletion immediately erases only the authenticated identity",async()=>{
     const deps=dependencies();const result=await handleAccountDeletion(request(),deps);
-    assert.equal(result.status,202);assert.deepEqual(await result.json(),{status:"requested"});assert.deepEqual(deps.erased,[]);
-    const first=structuredClone(deps.user.prefs);await handleAccountDeletion(request(),deps);assert.deepEqual(deps.user.prefs,first);assert.equal(first.language,"de");
-});
-test("explicit erasure uses only authenticated identity; retention hold overrides erasure",async()=>{
-    const deps=dependencies();assert.equal((await handleAccountDeletion(request(),{...deps,mode:"erase"})).status,200);assert.deepEqual(deps.erased,["owner"]);
-    assert.equal((await handleAccountDeletion(request(),{...deps,mode:"erase",holds:" owner "})).status,202);assert.deepEqual(deps.erased,["owner"]);
+    assert.equal(result.status,200);assert.deepEqual(await result.json(),{status:"deleted",success:true});assert.deepEqual(deps.erased,["owner"]);
 });
 test("cross-origin, missing confirmation, desktop and unauthenticated requests never erase",async()=>{
     const deps=dependencies();
@@ -76,15 +71,14 @@ test("cross-origin, missing confirmation, desktop and unauthenticated requests n
     assert.equal((await handleAccountDeletion(request(),{...deps,authenticate:async()=>{throw Error("expired");}})).status,401);
     assert.deepEqual(deps.erased,[]);
 });
-test("storage and preference failures never return success",async()=>{
+test("erasure failures never return success or expose secrets",async()=>{
     const deps=dependencies();
-    assert.equal((await handleAccountDeletion(request(),{...deps,mode:"erase",erase:async()=>{throw Error("upstream secret should not be exposed");}})).status,503);
-    const result=await handleAccountDeletion(request(),{...deps,authenticate:async()=>({user:deps.user,updatePrefs:async()=>{throw Error("failed");}})});
+    const result=await handleAccountDeletion(request(),{...deps,erase:async()=>{throw Error("upstream secret should not be exposed");}});
     assert.equal(result.status,503);assert.deepEqual(await result.json(),{code:"DELETION_FAILED"});
 });
 
 test("configured public origin works behind a reverse proxy without allowing other sites", async()=>{
     const deps=dependencies();const req=new Request("http://localhost:3000/api/auth/account",{method:"DELETE",headers:{origin:"https://rechly.test","x-rechly-confirm-delete":"delete-account"}});
-    assert.equal((await handleAccountDeletion(req,{...deps,allowedOrigin:"https://rechly.test"})).status,202);
+    assert.equal((await handleAccountDeletion(req,{...deps,allowedOrigin:"https://rechly.test"})).status,200);
     assert.equal((await handleAccountDeletion(request({origin:"https://other.test"}),{...deps,allowedOrigin:"https://rechly.test"})).status,403);
 });

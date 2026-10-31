@@ -9,7 +9,7 @@ import {
     createAnonymousSession,
     deleteAccount as appwriteDeleteAccount,
 } from "@/lib/appwrite";
-import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
+import { clearAllCaches } from "@/store";
 import { isDesktopRuntime } from "@/lib/runtime";
 
 interface AuthContextType {
@@ -19,7 +19,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, name: string) => Promise<void>;
     logout: () => Promise<void>;
-    deleteAccount: () => Promise<"requested" | "deleted">;
+    deleteAccount: () => Promise<"deleted">;
     loginAnonymously: () => Promise<void>;
     googleLogin: () => void;
 }
@@ -105,9 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
             // Clear cached data from previous session
-            useClientStore.getState().clearCache();
-            useProductStore.getState().clearCache();
-            useInvoiceStore.getState().clearCache();
+            clearAllCaches();
 
             // Use SSR login API to set HTTP-only session cookie
             const response = await fetch("/api/auth/login", {
@@ -178,9 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             sessionStorage.removeItem("guestSession");
             sessionStorage.removeItem("guestHiddenAt");
             // Clear all cached data
-            useClientStore.getState().clearCache();
-            useProductStore.getState().clearCache();
-            useInvoiceStore.getState().clearCache();
+            clearAllCaches();
         } finally {
             setLoading(false);
         }
@@ -193,18 +189,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             );
         }
         const result = await appwriteDeleteAccount();
-        if (result === "requested") {
-            setUser(previous => previous ? { ...previous, prefs: { ...previous.prefs, rechlyDeletionRequest: { status: "pending_review" } } } : previous);
-            return result;
-        }
         setUser(null);
         setIsAnonymous(false);
         sessionStorage.removeItem("guestSession");
         sessionStorage.removeItem("guestHiddenAt");
-        // Clear all cached data
-        useClientStore.getState().clearCache();
-        useProductStore.getState().clearCache();
-        useInvoiceStore.getState().clearCache();
+        clearAllCaches();
         return result;
     };
 
@@ -212,9 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
             // Clear cached data from previous session
-            useClientStore.getState().clearCache();
-            useProductStore.getState().clearCache();
-            useInvoiceStore.getState().clearCache();
+            clearAllCaches();
 
             let currentUser;
             if (isDesktopRuntime) {

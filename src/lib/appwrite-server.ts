@@ -105,6 +105,7 @@ export async function createSessionClient() {
         return getDesktopClients() as unknown as {
             account: Account;
             databases: Databases;
+            storage: Storage;
         };
     }
 
@@ -134,6 +135,9 @@ export async function createSessionClient() {
         },
         get databases() {
             return new Databases(client);
+        },
+        get storage() {
+            return new Storage(client);
         },
     };
 }

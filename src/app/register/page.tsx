@@ -7,6 +7,7 @@ import {
     Input,
     Button,
     Card,
+    Checkbox,
     Typography,
     Divider,
     Space,
@@ -161,6 +162,45 @@ export default function RegisterPage() {
                         />
                     </Form.Item>
 
+                    <Form.Item
+                        name="acceptPolicy"
+                        valuePropName="checked"
+                        rules={[
+                            {
+                                validator: (_, value) =>
+                                    value
+                                        ? Promise.resolve()
+                                        : Promise.reject(
+                                              new Error(
+                                                  t("auth.acceptPolicyRequired")
+                                              )
+                                          ),
+                            },
+                        ]}
+                    >
+                        <Checkbox style={{ fontSize: 13, lineHeight: 1.5 }}>
+                            {t("auth.acceptPolicyPrefix")}{" "}
+                            <Link
+                                href="/agb"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "#1976d2" }}
+                            >
+                                {t("auth.termsLink")}
+                            </Link>{" "}
+                            {t("auth.acceptPolicyAnd")}{" "}
+                            <Link
+                                href="/datenschutz"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "#1976d2" }}
+                            >
+                                {t("auth.privacyLink")}
+                            </Link>
+                            {t("auth.acceptPolicyOpenSource")}
+                        </Checkbox>
+                    </Form.Item>
+
                     <Form.Item>
                         <Button
                             type="primary"
@@ -178,7 +218,7 @@ export default function RegisterPage() {
                 <Space
                     direction="vertical"
                     style={{ width: "100%" }}
-                    size="middle"
+                    size="small"
                 >
                     <Button
                         icon={<GoogleOutlined />}
@@ -188,6 +228,16 @@ export default function RegisterPage() {
                     >
                         {t("auth.registerWithGoogle")}
                     </Button>
+                    <Text
+                        type="secondary"
+                        style={{
+                            fontSize: 12,
+                            display: "block",
+                            textAlign: "center",
+                        }}
+                    >
+                        {t("auth.googlePolicyHint")}
+                    </Text>
                 </Space>
 
                 <div style={{ textAlign: "center", marginTop: 24 }}>

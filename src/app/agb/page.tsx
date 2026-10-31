@@ -22,19 +22,19 @@ const content = {
         section4Title: "4. Verantwortung",
         section4Text:
             "Du bist selbst für die Richtigkeit deiner Rechnungen verantwortlich. Rechly übernimmt keine Haftung für steuerliche oder rechtliche Konsequenzen aus der Nutzung der erstellten Rechnungen.",
-        section5Title: "5. Datenschutz",
+        section5Title: "5. Datenschutz & Kontolöschung",
         section5Text:
-            "Die Verarbeitung deiner Daten erfolgt gemäß unserer Datenschutzerklärung und der DSGVO.",
+            "Die Verarbeitung deiner Daten erfolgt gemäß unserer Datenschutzerklärung und der DSGVO. Du kannst dein Konto und sämtliche gespeicherten Daten jederzeit selbstständig und sofort in den Kontoeinstellungen löschen.",
         section6Title: "6. Verfügbarkeit",
         section6Text:
-            "Als Hobby-Projekt kann keine 100%ige Verfügbarkeit garantiert werden. Wir bemühen uns aber, den Dienst stabil zu halten.",
+            "Als Open-Source-Projekt kann keine 100%ige Verfügbarkeit garantiert werden. Wir bemühen uns aber, den Dienst stabil zu halten.",
         section7Title: "7. Änderungen",
         section7Text:
             "Diese Bedingungen können jederzeit geändert werden. Wesentliche Änderungen werden angekündigt.",
-        section8Title: "8. Open Source",
+        section8Title: "8. Open Source (AGPL-3.0)",
         section8Text:
-            "Der Quellcode ist auf GitHub verfügbar. Beiträge sind willkommen.",
-        lastUpdated: "Stand: Dezember 2025",
+            "Rechly ist freie Open-Source-Software unter der AGPL-3.0-Lizenz. Der Quellcode ist auf GitHub verfügbar und kann auch komplett lokal genutzt werden. Beiträge sind willkommen.",
+        lastUpdated: "Stand: Oktober 2026",
     },
     en: {
         title: "Terms of Use",
@@ -50,19 +50,19 @@ const content = {
         section4Title: "4. Responsibility",
         section4Text:
             "You are responsible for the accuracy of your invoices. Rechly assumes no liability for tax or legal consequences arising from the use of created invoices.",
-        section5Title: "5. Privacy",
+        section5Title: "5. Privacy & Account Deletion",
         section5Text:
-            "Your data is processed in accordance with our privacy policy and GDPR.",
+            "Your data is processed in accordance with our privacy policy and GDPR. You can immediately and permanently delete your account and all stored data yourself at any time in your account settings.",
         section6Title: "6. Availability",
         section6Text:
-            "As a hobby project, 100% availability cannot be guaranteed. However, we strive to keep the service stable.",
+            "As an open-source project, 100% availability cannot be guaranteed. However, we strive to keep the service stable.",
         section7Title: "7. Changes",
         section7Text:
             "These terms may be changed at any time. Significant changes will be announced.",
-        section8Title: "8. Open Source",
+        section8Title: "8. Open Source (AGPL-3.0)",
         section8Text:
-            "The source code is available on GitHub. Contributions are welcome.",
-        lastUpdated: "Last updated: December 2025",
+            "Rechly is free open-source software licensed under AGPL-3.0. The source code is available on GitHub and can also be run completely locally. Contributions are welcome.",
+        lastUpdated: "Last updated: October 2026",
     },
 };
 

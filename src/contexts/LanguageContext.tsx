@@ -190,6 +190,16 @@ const translations: Record<Language, Record<string, string>> = {
         "auth.nameRequired": "Bitte Name eingeben",
         "auth.accountExists":
             "Ein Konto mit dieser E-Mail existiert bereits. Bitte melden Sie sich an.",
+        "auth.acceptPolicyPrefix": "Ich akzeptiere die",
+        "auth.termsLink": "Nutzungsbedingungen",
+        "auth.acceptPolicyAnd": "und die",
+        "auth.privacyLink": "Datenschutzerklärung",
+        "auth.acceptPolicyOpenSource":
+            ". Mir ist bewusst, dass Rechly ein kostenloses Open-Source-Projekt ist (bereitgestellt „as is“ ohne Gewährleistung) und ich für die steuerliche und rechtliche Prüfung meiner Rechnungen selbst verantwortlich bin.",
+        "auth.acceptPolicyRequired":
+            "Bitte bestätigen Sie die Nutzungsbedingungen und Datenschutzerklärung",
+        "auth.googlePolicyHint":
+            "Mit der Registrierung über Google stimmen Sie ebenfalls den Nutzungsbedingungen und der Datenschutzerklärung zu.",
 
         // Guest warning
         "guest.warningTitle": "Warnung: Gastzugang",
@@ -400,16 +410,13 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.deleteAccount": "Konto löschen",
         "settings.deleteAccountTitle": "Konto löschen",
         "settings.deleteAccountConfirm":
-            "Möchten Sie die Löschung Ihres Kontos anfordern?",
+            "Sind Sie sicher, dass Sie Ihr Konto und alle zugehörigen Daten endgültig löschen möchten?",
         "settings.deleteAccountWarning":
-            "Exportieren Sie vorher Rechnungen und Belege, die Sie aufbewahren müssen. Aufbewahrungspflichten werden gegebenenfalls vor der Löschung geprüft. Eine abgeschlossene Löschung kann nicht rückgängig gemacht werden.",
-        "settings.deleteRequestedTitle": "Löschanfrage gespeichert",
-        "settings.deleteRequested": "Ihre Löschanfrage wurde gespeichert und wartet auf Prüfung. Ihr Konto und Ihre Daten sind noch nicht gelöscht. Sie erhalten nach der Bearbeitung eine Bestätigung durch den Support.",
+            "Diese Aktion kann nicht rückgängig gemacht werden. Ihr Konto und alle zugehörigen Daten (Rechnungen, Angebote, Kunden, Produkte, Ausgaben, Belege und Einstellungen) werden sofort und unwiderruflich gelöscht.",
         "settings.deleteAccountButton": "Ja, Konto löschen",
         "settings.deleteAccountCancel": "Abbrechen",
-        "settings.accountDeleted": "Ihr Konto wurde gelöscht",
-        "settings.deleteError": "Die Löschung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support. Bereits gelöschte Daten können nicht wiederhergestellt werden.",
-        "settings.deleteRetentionReview": "Für dieses Konto ist eine Prüfung der Aufbewahrungspflichten erforderlich. Bitte kontaktieren Sie den Support.",
+        "settings.accountDeleted": "Ihr Konto und alle Daten wurden gelöscht",
+        "settings.deleteError": "Fehler beim Löschen des Kontos",
         "settings.ai": "KI",
         "settings.aiTitle": "KI-Provider verbinden",
         "settings.aiDescription":
@@ -1141,6 +1148,16 @@ const translations: Record<Language, Record<string, string>> = {
         "auth.nameRequired": "Please enter your name",
         "auth.accountExists":
             "An account with this email already exists. Please sign in.",
+        "auth.acceptPolicyPrefix": "I accept the",
+        "auth.termsLink": "Terms of Use",
+        "auth.acceptPolicyAnd": "and the",
+        "auth.privacyLink": "Privacy Policy",
+        "auth.acceptPolicyOpenSource":
+            ". I understand that Rechly is a free open-source project provided \"as is\" without warranty, and that I am solely responsible for the tax and legal accuracy of my invoices.",
+        "auth.acceptPolicyRequired":
+            "Please accept the Terms of Use and Privacy Policy",
+        "auth.googlePolicyHint":
+            "By signing up with Google, you also agree to our Terms of Use and Privacy Policy.",
 
         // Guest warning
         "guest.warningTitle": "Warning: Guest Access",
@@ -1344,18 +1361,15 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.logoutDesc":
             "You will be logged out and redirected to the login page.",
         "settings.deleteAccount": "Delete Account",
-        "settings.deleteRetentionReview": "This account requires a retention review. Please contact support.",
         "settings.deleteAccountTitle": "Delete Account",
         "settings.deleteAccountConfirm":
-            "Would you like to request deletion of your account?",
+            "Are you sure you want to permanently delete your account and all associated data?",
         "settings.deleteAccountWarning":
-            "Export invoices and receipts you need to retain first. Retention obligations may require review before deletion. Completed deletion cannot be undone.",
-        "settings.deleteRequestedTitle": "Deletion request saved",
-        "settings.deleteRequested": "Your deletion request has been saved for review. Your account and data have not been deleted yet. Support will confirm completion after processing your request.",
+            "This action cannot be undone. Your account and all associated data (invoices, quotes, clients, products, expenses, receipts, and settings) will be immediately and permanently deleted.",
         "settings.deleteAccountButton": "Yes, delete account",
         "settings.deleteAccountCancel": "Cancel",
-        "settings.accountDeleted": "Your account has been deleted",
-        "settings.deleteError": "Deletion could not be completed. Please retry or contact support. Any data already deleted cannot be restored.",
+        "settings.accountDeleted": "Your account and all data have been deleted",
+        "settings.deleteError": "Error deleting account",
         "settings.ai": "AI",
         "settings.aiTitle": "Connect an AI provider",
         "settings.aiDescription":

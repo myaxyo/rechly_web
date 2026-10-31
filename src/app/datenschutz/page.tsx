@@ -33,10 +33,10 @@ const content = {
         section6Title: "6. Deine Rechte",
         section6Text:
             "Du hast das Recht auf Auskunft, Berichtigung, Löschung und Datenübertragbarkeit deiner Daten. Kontaktiere uns über die im Impressum genannte E-Mail-Adresse.",
-        section7Title: "7. Datenlöschung",
+        section7Title: "7. Selbstständige Konto- und Datenlöschung",
         section7Text:
-            "Du kannst deinen Account und alle zugehörigen Daten jederzeit löschen. Nach der Löschung werden alle Daten innerhalb von 30 Tagen vollständig entfernt.",
-        lastUpdated: "Stand: August 2026",
+            "Du kannst dein Konto und sämtliche zugehörigen Daten (Rechnungen, Angebote, Kunden, Produkte, Ausgaben, Belege und Einstellungen) jederzeit selbstständig in den Kontoeinstellungen („Einstellungen → Konto → Konto löschen“) mit einem Klick sofort und unwiderruflich löschen – ohne manuelle Prüfung oder Wartezeit.",
+        lastUpdated: "Stand: Oktober 2026",
     },
     en: {
         title: "Privacy Policy",
@@ -62,10 +62,10 @@ const content = {
         section6Title: "6. Your Rights",
         section6Text:
             "You have the right to access, rectification, deletion, and data portability of your data. Contact us via the email address listed in the Imprint.",
-        section7Title: "7. Data Deletion",
+        section7Title: "7. Self-Service Account and Data Deletion",
         section7Text:
-            "You can delete your account and all associated data at any time. After deletion, all data will be completely removed within 30 days.",
-        lastUpdated: "Last updated: August 2026",
+            "You can immediately and permanently delete your account and all associated data (invoices, quotes, customers, products, expenses, receipts, and settings) yourself at any time in the account settings (\"Settings → Account → Delete Account\") with a single click, without manual review or waiting period.",
+        lastUpdated: "Last updated: October 2026",
     },
 };
 

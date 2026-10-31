@@ -189,23 +189,32 @@ export const logout = async () => {
  * Authentication: Delete user account
  * The server authenticates the current identity and performs ordered cleanup.
  */
-export const deleteAccount = async () => {
+export const deleteAccount = async (): Promise<"deleted"> => {
     const headers: Record<string, string> = { "x-rechly-confirm-delete": "delete-account" };
     const send = () => fetch("/api/auth/account", { method: "DELETE", headers });
     let response = await send();
     // Support older browser-SDK sessions and anonymous accounts without an SSR cookie.
     if (response.status === 401) {
-        const { jwt } = await account.createJWT();
-        headers.Authorization = `Bearer ${jwt}`;
-        response = await send();
+        try {
+            const { jwt } = await account.createJWT();
+            headers.Authorization = `Bearer ${jwt}`;
+            response = await send();
+        } catch {
+            // Keep original 401 response
+        }
     }
     if (!response.ok) {
         const result = await response.json().catch(() => ({}));
         throw Object.assign(new Error("Account deletion failed"), { code: result.code || "DELETION_FAILED" });
     }
     const result = await response.json();
-    if (result.status !== "requested" && result.status !== "deleted") throw new Error("Invalid deletion response");
-    return result.status as "requested" | "deleted";
+    if (result.status !== "deleted") throw new Error("Invalid deletion response");
+    try {
+        await account.deleteSession("current");
+    } catch {
+        // Session already invalidated on server
+    }
+    return "deleted";
 };
 
 /**

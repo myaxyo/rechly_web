@@ -80,9 +80,9 @@ npm run test:einvoice
 
 ## Account Deletion
 
-Account deletion currently records requests for operator review by default.
-Operators must monitor those requests and decide retention obligations before
-erasing records. See [account deletion operations](docs/ACCOUNT_DELETION.md).
+Users can immediately and permanently delete their account and all associated
+data themselves from Settings (`DELETE /api/auth/account`). See
+[account deletion documentation](docs/ACCOUNT_DELETION.md).
 
 ## Optional E-Invoice Details
 
