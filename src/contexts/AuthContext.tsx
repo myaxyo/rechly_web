@@ -19,7 +19,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, name: string) => Promise<void>;
     logout: () => Promise<void>;
-    deleteAccount: () => Promise<void>;
+    deleteAccount: () => Promise<"requested" | "deleted">;
     loginAnonymously: () => Promise<void>;
     googleLogin: () => void;
 }
@@ -187,25 +187,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const deleteAccount = async () => {
-        setLoading(true);
-        try {
-            if (isDesktopRuntime) {
-                throw new Error(
-                    "Local profile deletion is not available in this desktop preview",
-                );
-            }
-            await appwriteDeleteAccount();
-            setUser(null);
-            setIsAnonymous(false);
-            sessionStorage.removeItem("guestSession");
-            sessionStorage.removeItem("guestHiddenAt");
-            // Clear all cached data
-            useClientStore.getState().clearCache();
-            useProductStore.getState().clearCache();
-            useInvoiceStore.getState().clearCache();
-        } finally {
-            setLoading(false);
+        if (isDesktopRuntime) {
+            throw new Error(
+                "Local profile deletion is not available in this desktop preview",
+            );
         }
+        const result = await appwriteDeleteAccount();
+        if (result === "requested") {
+            setUser(previous => previous ? { ...previous, prefs: { ...previous.prefs, rechlyDeletionRequest: { status: "pending_review" } } } : previous);
+            return result;
+        }
+        setUser(null);
+        setIsAnonymous(false);
+        sessionStorage.removeItem("guestSession");
+        sessionStorage.removeItem("guestHiddenAt");
+        // Clear all cached data
+        useClientStore.getState().clearCache();
+        useProductStore.getState().clearCache();
+        useInvoiceStore.getState().clearCache();
+        return result;
     };
 
     const loginAnonymously = async () => {

@@ -78,6 +78,12 @@ npm run lint
 npm run test:einvoice
 ```
 
+## Account Deletion
+
+Account deletion currently records requests for operator review by default.
+Operators must monitor those requests and decide retention obligations before
+erasing records. See [account deletion operations](docs/ACCOUNT_DELETION.md).
+
 ## Optional E-Invoice Details
 
 Customers can store buyer identifiers and multiple delivery branches; company

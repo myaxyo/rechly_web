@@ -400,13 +400,16 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.deleteAccount": "Konto löschen",
         "settings.deleteAccountTitle": "Konto löschen",
         "settings.deleteAccountConfirm":
-            "Sind Sie sicher, dass Sie Ihr Konto löschen möchten?",
+            "Möchten Sie die Löschung Ihres Kontos anfordern?",
         "settings.deleteAccountWarning":
-            "Diese Aktion kann nicht rückgängig gemacht werden. Alle Ihre Daten werden unwiderruflich gelöscht.",
+            "Exportieren Sie vorher Rechnungen und Belege, die Sie aufbewahren müssen. Aufbewahrungspflichten werden gegebenenfalls vor der Löschung geprüft. Eine abgeschlossene Löschung kann nicht rückgängig gemacht werden.",
+        "settings.deleteRequestedTitle": "Löschanfrage gespeichert",
+        "settings.deleteRequested": "Ihre Löschanfrage wurde gespeichert und wartet auf Prüfung. Ihr Konto und Ihre Daten sind noch nicht gelöscht. Sie erhalten nach der Bearbeitung eine Bestätigung durch den Support.",
         "settings.deleteAccountButton": "Ja, Konto löschen",
         "settings.deleteAccountCancel": "Abbrechen",
         "settings.accountDeleted": "Ihr Konto wurde gelöscht",
-        "settings.deleteError": "Fehler beim Löschen des Kontos",
+        "settings.deleteError": "Die Löschung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support. Bereits gelöschte Daten können nicht wiederhergestellt werden.",
+        "settings.deleteRetentionReview": "Für dieses Konto ist eine Prüfung der Aufbewahrungspflichten erforderlich. Bitte kontaktieren Sie den Support.",
         "settings.ai": "KI",
         "settings.aiTitle": "KI-Provider verbinden",
         "settings.aiDescription":
@@ -1341,15 +1344,18 @@ const translations: Record<Language, Record<string, string>> = {
         "settings.logoutDesc":
             "You will be logged out and redirected to the login page.",
         "settings.deleteAccount": "Delete Account",
+        "settings.deleteRetentionReview": "This account requires a retention review. Please contact support.",
         "settings.deleteAccountTitle": "Delete Account",
         "settings.deleteAccountConfirm":
-            "Are you sure you want to delete your account?",
+            "Would you like to request deletion of your account?",
         "settings.deleteAccountWarning":
-            "This action cannot be undone. All your data will be permanently deleted.",
+            "Export invoices and receipts you need to retain first. Retention obligations may require review before deletion. Completed deletion cannot be undone.",
+        "settings.deleteRequestedTitle": "Deletion request saved",
+        "settings.deleteRequested": "Your deletion request has been saved for review. Your account and data have not been deleted yet. Support will confirm completion after processing your request.",
         "settings.deleteAccountButton": "Yes, delete account",
         "settings.deleteAccountCancel": "Cancel",
         "settings.accountDeleted": "Your account has been deleted",
-        "settings.deleteError": "Error deleting account",
+        "settings.deleteError": "Deletion could not be completed. Please retry or contact support. Any data already deleted cannot be restored.",
         "settings.ai": "AI",
         "settings.aiTitle": "Connect an AI provider",
         "settings.aiDescription":

@@ -3,6 +3,7 @@ import {
     Account,
     Databases,
     Storage,
+    Users,
     OAuthProvider,
 } from "node-appwrite";
 import { cookies, headers } from "next/headers";
@@ -60,6 +61,7 @@ export async function createAdminClient() {
             account: Account;
             databases: Databases;
             storage: Storage;
+            users: Users;
         };
     }
 
@@ -81,6 +83,9 @@ export async function createAdminClient() {
         },
         get storage() {
             return new Storage(client);
+        },
+        get users() {
+            return new Users(client);
         },
     };
 }
@@ -259,19 +264,4 @@ export async function createSessionFromOAuth(userId: string, secret: string) {
     await setSessionCookie(session.secret, session.expire);
 
     return { success: true, userId: session.userId };
-}
-
-/**
- * Delete account
- */
-export async function deleteAccountSSR() {
-    try {
-        const { account } = await createSessionClient();
-        await account.deleteSessions();
-        await account.updateStatus();
-    } catch (error) {
-        console.error("Error deleting account:", error);
-        throw error;
-    }
-    await deleteSessionCookie();
 }
