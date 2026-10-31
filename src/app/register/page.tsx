@@ -21,6 +21,8 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
 import Link from "next/link";
 
 const { Title, Text } = Typography;
@@ -53,202 +55,216 @@ export default function RegisterPage() {
     };
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)",
-                padding: 20,
-            }}
-        >
-            <Card
+        <div style={{ minHeight: "100vh", background: "#fff" }}>
+            <Navbar showAuth={false} />
+
+            <main
                 style={{
-                    width: "100%",
-                    maxWidth: 420,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+                    maxWidth: 1000,
+                    margin: "0 auto",
+                    padding: "120px 24px 64px",
                 }}
             >
-                <div style={{ textAlign: "center", marginBottom: 32 }}>
-                    <Title
-                        level={2}
-                        style={{ marginBottom: 8, color: "#1976d2" }}
-                    >
-                        {t("auth.createAccount")}
-                    </Title>
-                    <Text type="secondary">{t("auth.startWithRechly")}</Text>
-                </div>
-
-                <Form
-                    name="register"
-                    onFinish={onFinish}
-                    layout="vertical"
-                    size="large"
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        minHeight: "calc(100vh - 260px)",
+                    }}
                 >
-                    <Form.Item
-                        name="name"
-                        rules={[
-                            { required: true, message: t("auth.nameRequired") },
-                        ]}
-                    >
-                        <Input
-                            prefix={<UserOutlined />}
-                            placeholder={t("auth.fullName")}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="email"
-                        rules={[
-                            {
-                                required: true,
-                                message: t("auth.emailRequired"),
-                            },
-                            {
-                                type: "email",
-                                message: t("auth.emailInvalid"),
-                            },
-                        ]}
-                    >
-                        <Input
-                            prefix={<MailOutlined />}
-                            placeholder={t("auth.email")}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="password"
-                        rules={[
-                            {
-                                required: true,
-                                message: t("auth.passwordRequired"),
-                            },
-                            { min: 8, message: t("auth.passwordMin") },
-                        ]}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined />}
-                            placeholder={t("auth.password")}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="confirmPassword"
-                        dependencies={["password"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: t("auth.confirmPasswordRequired"),
-                            },
-                            ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                    if (
-                                        !value ||
-                                        getFieldValue("password") === value
-                                    ) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(
-                                        new Error(t("auth.passwordMismatch"))
-                                    );
-                                },
-                            }),
-                        ]}
-                    >
-                        <Input.Password
-                            prefix={<LockOutlined />}
-                            placeholder={t("auth.confirmPassword")}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="acceptPolicy"
-                        valuePropName="checked"
-                        rules={[
-                            {
-                                validator: (_, value) =>
-                                    value
-                                        ? Promise.resolve()
-                                        : Promise.reject(
-                                              new Error(
-                                                  t("auth.acceptPolicyRequired")
-                                              )
-                                          ),
-                            },
-                        ]}
-                    >
-                        <Checkbox style={{ fontSize: 13, lineHeight: 1.5 }}>
-                            {t("auth.acceptPolicyPrefix")}{" "}
-                            <Link
-                                href="/agb"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "#1976d2" }}
-                            >
-                                {t("auth.termsLink")}
-                            </Link>{" "}
-                            {t("auth.acceptPolicyAnd")}{" "}
-                            <Link
-                                href="/datenschutz"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: "#1976d2" }}
-                            >
-                                {t("auth.privacyLink")}
-                            </Link>
-                            {t("auth.acceptPolicyOpenSource")}
-                        </Checkbox>
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            block
-                            loading={loading}
-                        >
-                            {t("auth.register")}
-                        </Button>
-                    </Form.Item>
-                </Form>
-
-                <Divider>{t("auth.or")}</Divider>
-
-                <Space
-                    direction="vertical"
-                    style={{ width: "100%" }}
-                    size="small"
-                >
-                    <Button
-                        icon={<GoogleOutlined />}
-                        block
-                        size="large"
-                        href="/api/auth/google"
-                    >
-                        {t("auth.registerWithGoogle")}
-                    </Button>
-                    <Text
-                        type="secondary"
+                    <Card
                         style={{
-                            fontSize: 12,
-                            display: "block",
-                            textAlign: "center",
+                            width: "100%",
+                            maxWidth: 420,
+                            borderRadius: 12,
+                            border: "1px solid #f0f0f0",
+                            boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
                         }}
                     >
-                        {t("auth.googlePolicyHint")}
-                    </Text>
-                </Space>
+                        <div style={{ textAlign: "center", marginBottom: 32 }}>
+                            <Title
+                                level={2}
+                                style={{ marginBottom: 8, color: "#111" }}
+                            >
+                                {t("auth.createAccount")}
+                            </Title>
+                            <Text type="secondary">{t("auth.startWithRechly")}</Text>
+                        </div>
 
-                <div style={{ textAlign: "center", marginTop: 24 }}>
-                    <Text type="secondary">
-                        {t("auth.hasAccount")}{" "}
-                        <Link href="/login" style={{ color: "#1976d2" }}>
-                            {t("auth.signInNow")}
-                        </Link>
-                    </Text>
+                        <Form
+                            name="register"
+                            onFinish={onFinish}
+                            layout="vertical"
+                            size="large"
+                        >
+                            <Form.Item
+                                name="name"
+                                rules={[
+                                    { required: true, message: t("auth.nameRequired") },
+                                ]}
+                            >
+                                <Input
+                                    prefix={<UserOutlined />}
+                                    placeholder={t("auth.fullName")}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="email"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("auth.emailRequired"),
+                                    },
+                                    {
+                                        type: "email",
+                                        message: t("auth.emailInvalid"),
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    prefix={<MailOutlined />}
+                                    placeholder={t("auth.email")}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="password"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("auth.passwordRequired"),
+                                    },
+                                    { min: 8, message: t("auth.passwordMin") },
+                                ]}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    placeholder={t("auth.password")}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="confirmPassword"
+                                dependencies={["password"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t("auth.confirmPasswordRequired"),
+                                    },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (
+                                                !value ||
+                                                getFieldValue("password") === value
+                                            ) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(
+                                                new Error(t("auth.passwordMismatch"))
+                                            );
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <Input.Password
+                                    prefix={<LockOutlined />}
+                                    placeholder={t("auth.confirmPassword")}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="acceptPolicy"
+                                valuePropName="checked"
+                                rules={[
+                                    {
+                                        validator: (_, value) =>
+                                            value
+                                                ? Promise.resolve()
+                                                : Promise.reject(
+                                                      new Error(
+                                                          t("auth.acceptPolicyRequired")
+                                                      )
+                                                  ),
+                                    },
+                                ]}
+                            >
+                                <Checkbox style={{ fontSize: 13, lineHeight: 1.5 }}>
+                                    {t("auth.acceptPolicyPrefix")}{" "}
+                                    <Link
+                                        href="/agb"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: "#1976d2" }}
+                                    >
+                                        {t("auth.termsLink")}
+                                    </Link>{" "}
+                                    {t("auth.acceptPolicyAnd")}{" "}
+                                    <Link
+                                        href="/datenschutz"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: "#1976d2" }}
+                                    >
+                                        {t("auth.privacyLink")}
+                                    </Link>
+                                    {t("auth.acceptPolicyOpenSource")}
+                                </Checkbox>
+                            </Form.Item>
+
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    block
+                                    loading={loading}
+                                >
+                                    {t("auth.register")}
+                                </Button>
+                            </Form.Item>
+                        </Form>
+
+                        <Divider>{t("auth.or")}</Divider>
+
+                        <Space
+                            direction="vertical"
+                            style={{ width: "100%" }}
+                            size="small"
+                        >
+                            <Button
+                                icon={<GoogleOutlined />}
+                                block
+                                size="large"
+                                href="/api/auth/google"
+                            >
+                                {t("auth.registerWithGoogle")}
+                            </Button>
+                            <Text
+                                type="secondary"
+                                style={{
+                                    fontSize: 12,
+                                    display: "block",
+                                    textAlign: "center",
+                                }}
+                            >
+                                {t("auth.googlePolicyHint")}
+                            </Text>
+                        </Space>
+
+                        <div style={{ textAlign: "center", marginTop: 24 }}>
+                            <Text type="secondary">
+                                {t("auth.hasAccount")}{" "}
+                                <Link href="/login" style={{ color: "#1976d2" }}>
+                                    {t("auth.signInNow")}
+                                </Link>
+                            </Text>
+                        </div>
+                    </Card>
                 </div>
-            </Card>
+            </main>
+
+            <Footer />
         </div>
     );
 }
