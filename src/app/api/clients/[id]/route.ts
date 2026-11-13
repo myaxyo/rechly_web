@@ -1,3 +1,4 @@
+import { writeClientWithMetadata, ClientMetadataUnavailableError } from "@/lib/server/clientMetadata";
 import { eInvoiceWrite, readEInvoiceData, IdentifierValidationError } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -109,30 +110,28 @@ export async function PUT(
         if (existing.userId !== user.$id) return NextResponse.json({ error: "Not found" }, { status: 404 });
         const body = await request.json();
 
-        // Update document
-        const doc = await databases.updateDocument(
-            DATABASE_ID,
-            COLLECTIONS.CLIENTS,
-            id,
-            {
-                ...eInvoiceWrite(body.e_invoice),
-                clientType: body.client_type || "company",
-                name: body.name,
-                contactPerson: body.contact_person || null,
-                addressLine1: body.address_line1,
-                addressLine2: body.address_line2 || null,
-                postalCode: body.postal_code,
-                city: body.city,
-                country: body.country || "Deutschland",
-                email: body.email || null,
-                phone: body.phone || null,
-                vatId: body.vat_id || null,
-                taxNumber: body.tax_number || null,
-                leitwegId: body.leitweg_id || null,
-                registrationDate: body.registration_date || null,
-                status: body.status || "active",
-            }
-        );
+        // Ownership is checked before any write or schema repair.
+        const data = {
+            ...eInvoiceWrite(body.e_invoice),
+            clientType: body.client_type || "company",
+            name: body.name,
+            contactPerson: body.contact_person || null,
+            addressLine1: body.address_line1,
+            addressLine2: body.address_line2 || null,
+            postalCode: body.postal_code,
+            city: body.city,
+            country: body.country || "Deutschland",
+            email: body.email || null,
+            phone: body.phone || null,
+            vatId: body.vat_id || null,
+            taxNumber: body.tax_number || null,
+            leitwegId: body.leitweg_id || null,
+            registrationDate: body.registration_date || null,
+            status: body.status || "active",
+        };
+        const doc = await writeClientWithMetadata(databases, data, (values) => databases.updateDocument(
+            DATABASE_ID, COLLECTIONS.CLIENTS, id, values,
+        ));
 
         const client = {
             id: doc.$id,
@@ -159,6 +158,10 @@ export async function PUT(
         return NextResponse.json(client);
     } catch (error) {
         if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
+        if (error instanceof ClientMetadataUnavailableError) {
+            console.error("Customer metadata schema unavailable: verify clients.eInvoiceData or run scripts/migrate-einvoice.mjs with an operator key.");
+            return NextResponse.json({ error: error.message, code: "client_metadata_unavailable" }, { status: 503, headers: { "Retry-After": "5" } });
+        }
         console.error("Error updating client:", error);
         return NextResponse.json(
             { error: "Failed to update client" },

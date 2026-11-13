@@ -1,3 +1,4 @@
+import { writeClientWithMetadata, ClientMetadataUnavailableError } from "@/lib/server/clientMetadata";
 import { allDocuments } from "@/lib/server/pagination";
 import { eInvoiceWrite, readEInvoiceData, IdentifierValidationError } from "@/lib/eRechnung/identifiers";
 import { NextRequest, NextResponse } from "next/server";
@@ -105,8 +106,7 @@ export async function POST(request: NextRequest) {
         const documentData: Record<string, unknown> = {
             userId: user.$id,
             ...eInvoiceWrite(body.e_invoice),
-            ...eInvoiceWrite(body.e_invoice),
-                clientType: body.client_type || "company",
+            clientType: body.client_type || "company",
             name: body.name,
             contactPerson: body.contact_person || null,
             addressLine1: body.address_line1,
@@ -123,17 +123,18 @@ export async function POST(request: NextRequest) {
             status: body.status || "active",
         };
 
-        const doc = await databases.createDocument(
+        const documentId = ID.unique();
+        const doc = await writeClientWithMetadata(databases, documentData, (data) => databases.createDocument(
             DATABASE_ID,
             COLLECTIONS.CLIENTS,
-            ID.unique(),
-            documentData,
+            documentId,
+            data,
             [
                 Permission.read(Role.user(user.$id)),
                 Permission.update(Role.user(user.$id)),
                 Permission.delete(Role.user(user.$id)),
             ]
-        );
+        ));
 
         const client = {
             id: doc.$id,
@@ -160,6 +161,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(client);
     } catch (error) {
         if (error instanceof IdentifierValidationError) return NextResponse.json({ error: error.message }, { status: 400 });
+        if (error instanceof ClientMetadataUnavailableError) {
+            console.error("Customer metadata schema unavailable: verify clients.eInvoiceData or run scripts/migrate-einvoice.mjs with an operator key.");
+            return NextResponse.json({ error: error.message, code: "client_metadata_unavailable" }, { status: 503, headers: { "Retry-After": "5" } });
+        }
         console.error("Error creating client:", error);
         const appwriteError = error as {
             code?: number;

@@ -156,3 +156,25 @@ now pass the full KoSIT XRechnung 3.0.2 scenario, veraPDF PDF/A-3b and Mustang
 Factur-X checks. See [validation evidence, exact scope and reproduction steps](COMPLIANCE_VALIDATION.md).
 These fixture results do not certify arbitrary customer data or every possible
 invoice. Validate actual output against the recipient's applicable rules.
+
+## Repairing customer saves on older Appwrite schemas
+
+The customer create/update API retries a write only when Appwrite explicitly
+rejects the fixed `clients.eInvoiceData` attribute as unknown. For nonempty
+metadata it creates the optional string attribute (16000 characters), waits
+briefly for `available`, and retries the same customer write once. Authentication
+and, for updates, ownership are checked first. It never alters an existing
+attribute or discards a delivery address to make a save succeed. Normal writes
+do not perform schema requests. Empty metadata can be omitted on old schemas.
+
+This repair requires the server key to read and create attributes. If that key
+has only document permissions, run the existing operator migration instead:
+`node scripts/migrate-einvoice.mjs` with the intended project's endpoint, project
+ID and operator API key supplied securely through the environment. Do not grant
+end users schema permissions. A pending, incompatible or inaccessible field
+returns HTTP 503 with the form inputs preserved; operator logs identify the
+migration. Existing fields and customer documents are never deleted.
+
+Regression test: `npx tsx --test tests/clientMetadata.test.ts`. These tests
+simulate Appwrite's missing-field, processing, conflict and permission errors;
+production schema readiness still needs verification on the deployed project.
