@@ -102,7 +102,7 @@ test("replaceDraftItems swaps the items after the invoice update succeeded", asy
     const w = await lib;
     const { db, records } = backend(draftSeed());
     await w.replaceDraftItems(db, "alice", "inv1", w.buildItemDocuments("inv1", [item("Neu 1"), item("Neu 2"), item("Neu 3")]), () =>
-        db.updateDocument("rechly-db", "invoices", "inv1", { totalGross: 357 }),
+        db.updateDocument("rechly-db", "invoices", "inv1", { totalGross: 357 } as never),
     );
     const own = records.invoice_items.filter((r) => r.invoiceId === "inv1").map((r) => r.description).sort();
     assert.deepEqual(own, ["Neu 1", "Neu 2", "Neu 3"]);
@@ -129,7 +129,7 @@ test("replaceDraftItems rolls back created items when the invoice update fails",
     fail.update = new Error("update failed");
     await assert.rejects(
         w.replaceDraftItems(db, "alice", "inv1", w.buildItemDocuments("inv1", [item("Neu 1")]), () =>
-            db.updateDocument("rechly-db", "invoices", "inv1", { totalGross: 119 }),
+            db.updateDocument("rechly-db", "invoices", "inv1", { totalGross: 119 } as never),
         ),
         /update failed/,
     );
