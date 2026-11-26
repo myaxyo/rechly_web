@@ -1,5 +1,5 @@
 import type { BankTransaction } from "@/types";
-import { apiGet, apiPost } from "./apiClient";
+import { ApiError, apiGet, apiPost } from "./apiClient";
 import { logger } from "./logger";
 
 export async function getAllBankTransactions(status?: string): Promise<BankTransaction[]> {
@@ -15,12 +15,38 @@ export async function getAllBankTransactions(status?: string): Promise<BankTrans
 export async function importBankTransactions(
     csvText: string,
     format: string,
-    xmlFiles?: string[],
+    camtFile?: File,
 ): Promise<{ imported: number; duplicates: number; skippedPending?: number }> {
     try {
+        if (format === "camt") {
+            // Send the raw .xml/.zip as multipart FormData and let the
+            // server inflate it: posting the decompressed XML as JSON
+            // (up to ~25 MB) is rejected by common reverse-proxy body
+            // limits with 413 before Next.js ever sees the request.
+            if (!camtFile) throw new Error("CAMT file required");
+            const formData = new FormData();
+            formData.append("format", format);
+            formData.append("file", camtFile);
+            const res = await fetch("/api/bank-transactions/import", {
+                method: "POST",
+                body: formData,
+            });
+            if (!res.ok) {
+                let message = "Failed to import bank transactions";
+                try {
+                    const data = await res.json();
+                    if (typeof data?.error === "string" && data.error)
+                        message = data.error;
+                } catch {
+                    // keep the fallback message
+                }
+                throw new ApiError(message, res.status);
+            }
+            return await res.json();
+        }
         return await apiPost(
             "/api/bank-transactions/import",
-            format === "camt" ? { format, xmlFiles } : { csvText, format },
+            { csvText, format },
             "Failed to import bank transactions",
         );
     } catch (error) {

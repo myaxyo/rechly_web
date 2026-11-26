@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { strToU8, zipSync } from "fflate";
 import { CamtParseError, parseCamt } from "../src/lib/bank/camt";
 import { CAMT_LIMITS, CamtFileError, decodeXml, extractCamtDocuments } from "../src/lib/bank/camtFile";
-import { planBankImport } from "../src/lib/bank/importPlan";
+import { planBankImport, scopedBankReference } from "../src/lib/bank/importPlan";
+import { normalizeBookingDate } from "../src/lib/bank/dates";
+import { findAutoMatchInvoice } from "../src/lib/bank/autoMatch";
 
 const fixture = (name: string) => readFileSync(join(__dirname, "fixtures", "camt", name), "utf8");
 
@@ -26,6 +28,7 @@ test("camt.052 V2 (Sparkasse layout): booked entries, signs, parties, remittance
         counterpartName: "Max Mustermann",
         counterpartIban: "DE02120300000000202051",
         bankReference: "2026111700012345",
+        accountIban: "DE89370400440532013000",
         reversal: false,
     });
     assert.equal(debit.amount, -49.9);
@@ -138,4 +141,92 @@ test("overlapping re-imports: bank reference first, legacy key as fallback", () 
     // CSV rows without reference keep the previous date/amount/text behaviour
     const csv = [{ bookingDate: "2026-11-01", amount: -5, description: "Gebühr" }];
     assert.equal(planBankImport([], [...csv, ...csv]).duplicates, 1);
+});
+
+test("NOTPROVIDED batch refs never become dedup keys; repeated parent refs are uniquified", () => {
+    const { transactions } = parseCamt(fixture("camt053_v08_notprovided_batch.xml"));
+    assert.equal(transactions.length, 4);
+    // Entry 1: NOTPROVIDED at <Ntry> level, no per-detail refs. Previously
+    // this produced "NOTPROVIDED#1"/"#2", dropping every later batch.
+    assert.equal(transactions[0].bankReference, undefined);
+    assert.equal(transactions[1].bankReference, undefined);
+    // Entry 2: parent ref repeated verbatim in every TxDtls.
+    assert.equal(transactions[2].bankReference, "PARENT-4711#1");
+    assert.equal(transactions[3].bankReference, "PARENT-4711#2");
+
+    // Both batches import completely, and a second import of the same
+    // statement is still recognised (legacy key for ref-less parts).
+    const plan = planBankImport([], transactions);
+    assert.equal(plan.toCreate.length, 4);
+    assert.equal(plan.duplicates, 0);
+});
+
+test("bank references are scoped by account IBAN, legacy rows still match", () => {
+    assert.equal(
+        scopedBankReference("DE89 3704 0044 0532 0130 00", "REF-1"),
+        "DE89370400440532013000:REF-1",
+    );
+    assert.equal(scopedBankReference(undefined, "REF-1"), "REF-1");
+    assert.equal(scopedBankReference("DE89370400440532013000", undefined), undefined);
+    assert.ok((scopedBankReference("DE89370400440532013000", "x".repeat(300)) ?? "").length <= 128);
+
+    const scoped = (iban: string) => ({
+        bookingDate: "2026-11-17",
+        amount: 10,
+        description: "x",
+        bankReference: scopedBankReference(iban, "SEQ-1"),
+    });
+    // Same statement-local reference on two different accounts: both kept.
+    const plan = planBankImport([], [scoped("DE89370400440532013000"), scoped("DE02120300000000202051")]);
+    assert.equal(plan.toCreate.length, 2);
+    // Same account again: duplicate.
+    assert.equal(planBankImport(plan.toCreate, [scoped("DE89370400440532013000")]).duplicates, 1);
+    // Row imported before scoping (raw reference) still dedups a scoped re-import.
+    const legacy = [{ bookingDate: "2026-11-17", amount: 10, description: "x", bankReference: "SEQ-1" }];
+    assert.equal(planBankImport(legacy, [scoped("DE89370400440532013000")]).duplicates, 1);
+});
+
+test("booking dates from generic CSVs normalize to YYYY-MM-DD", () => {
+    assert.equal(normalizeBookingDate("2026-11-17 10:30:00"), "2026-11-17");
+    assert.equal(normalizeBookingDate("2026-11-17T10:30:00Z"), "2026-11-17");
+    assert.equal(normalizeBookingDate("17.11.2026"), "2026-11-17");
+    assert.equal(normalizeBookingDate("17/11/2026"), "2026-11-17");
+    assert.equal(normalizeBookingDate("2026-02-31"), undefined);
+    assert.equal(normalizeBookingDate("not a date"), undefined);
+    assert.equal(normalizeBookingDate(undefined), undefined);
+});
+
+test("numeric character references in the surrogate range stay literal", () => {
+    const xml = fixture("camt054_v08_notification.xml").replace(
+        "Miete November Praxisraeume",
+        "A&#xD800;B&#55296;C",
+    );
+    assert.equal(parseCamt(xml).transactions[0].description, "A&#xD800;B&#55296;C");
+});
+
+test("auto-match: outgoing debits and foreign currency never pay an invoice", () => {
+    const invoices = [
+        { id: "inv1", status: "sent", total_gross: 119, invoice_number: "RE-2026-0001" },
+        { id: "inv2", status: "sent", total_gross: 119, invoice_number: "RE-2026-0002" },
+    ];
+    // -119.00 supplier debit must not "pay" the +119.00 customer invoice.
+    assert.equal(findAutoMatchInvoice({ amount: -119, currency: "EUR" }, invoices), undefined);
+    // Non-EUR credit must not match.
+    assert.equal(findAutoMatchInvoice({ amount: 119, currency: "USD", description: "RE-2026-0001" }, invoices), undefined);
+    // Amount alone is ambiguous between inv1/inv2: no match.
+    assert.equal(findAutoMatchInvoice({ amount: 119, currency: "EUR" }, invoices), undefined);
+    // Amount + invoice number disambiguates.
+    assert.equal(findAutoMatchInvoice({ amount: 119, currency: "EUR", description: "Zahlung RE-2026-0002 danke" }, invoices)?.id, "inv2");
+    // Unambiguous amount matches; paid/cancelled invoices are ignored.
+    assert.equal(findAutoMatchInvoice({ amount: 119 }, [invoices[0], { ...invoices[1], status: "paid" }])?.id, "inv1");
+    // Credit note (negative total) can be settled by an outgoing debit.
+    assert.equal(
+        findAutoMatchInvoice({ amount: -50, currency: "EUR" }, [{ id: "cn1", status: "sent", total_gross: -50, invoice_number: "GS-1" }])?.id,
+        "cn1",
+    );
+    // Empty invoice number must not match via includes("").
+    assert.equal(
+        findAutoMatchInvoice({ amount: 119, description: "anything" }, invoices.map((i) => ({ ...i, invoice_number: "" }))),
+        undefined,
+    );
 });

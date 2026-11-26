@@ -21,5 +21,11 @@ export function isCollectionNotFound(error: unknown): boolean {
 export function isUnknownAttribute(error: unknown): boolean {
     const msg =
         (error as { message?: string })?.message || String(error);
-    return msg.includes("Unknown attribute") || msg.includes("Invalid document structure");
+    return (
+        msg.includes("Unknown attribute") ||
+        msg.includes("Invalid document structure") ||
+        // Query/order errors against a not-yet-migrated schema.
+        msg.includes("not found in schema") ||
+        msg.includes("Attribute not found")
+    );
 }

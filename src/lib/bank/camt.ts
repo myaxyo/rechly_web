@@ -28,6 +28,8 @@ export interface CamtTransaction {
     counterpartIban?: string;
     /** Unique bank reference of the entry (AcctSvcrRef, "#n" per batch part) */
     bankReference?: string;
+    /** IBAN of the statement's own account (Acct/Id/IBAN), when present */
+    accountIban?: string;
     /** The entry reverses an earlier booking (RvslInd) */
     reversal: boolean;
 }
@@ -89,7 +91,11 @@ const decodeEntities = (value: string): string =>
                 name[1] === "x"
                     ? Number.parseInt(name.slice(2), 16)
                     : Number.parseInt(name.slice(1), 10);
-            return code > 0 && code <= 0x10ffff
+            // Reject lone surrogate code points: they cannot be encoded
+            // as valid UTF-16/UTF-8 and would corrupt stored strings.
+            return code > 0 &&
+                code <= 0x10ffff &&
+                (code < 0xd800 || code > 0xdfff)
                 ? String.fromCodePoint(code)
                 : match;
         },
@@ -154,8 +160,13 @@ const isBooked = (entry: unknown): boolean => {
     return !status || status === "BOOK";
 };
 
-const usableRef = (value: string | undefined) =>
-    value && value.toUpperCase() !== "NOTPROVIDED" ? value : undefined;
+const usableRef = (value: string | undefined) => {
+    if (!value) return undefined;
+    // German banks emit NOTPROVIDED (occasionally spaced/hyphenated) when
+    // there is no reference; it must never become a dedup key.
+    const compact = value.toUpperCase().replace(/[\s-]+/g, "");
+    return compact === "NOTPROVIDED" ? undefined : value;
+};
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -188,7 +199,8 @@ export function parseCamt(xml: string): CamtResult {
     let accountIban: string | undefined;
 
     for (const report of reports) {
-        accountIban ??= ibanOf(at(report, "Acct"));
+        const reportIban = ibanOf(at(report, "Acct"));
+        accountIban ??= reportIban;
         for (const entry of list(at(report, "Ntry"))) {
             if (!isBooked(entry)) {
                 skippedPending++;
@@ -201,7 +213,10 @@ export function parseCamt(xml: string): CamtResult {
             if (!entryAmount || !entryDirection || !bookingDate) continue;
             const valueDate = dateOf(at(entry, "ValDt"));
             const reversal = text(at(entry, "RvslInd")) === "true";
-            const entryRef = text(at(entry, "AcctSvcrRef"));
+            // NOTPROVIDED at the <Ntry> level must be dropped here too:
+            // otherwise batch parts would dedup on "NOTPROVIDED#n" and
+            // every later batch from that bank would vanish as duplicate.
+            const entryRef = usableRef(text(at(entry, "AcctSvcrRef")));
             const entryInfo = text(at(entry, "AddtlNtryInf"));
 
             const details = list(at(entry, "NtryDtls")).flatMap((group) =>
@@ -214,6 +229,10 @@ export function parseCamt(xml: string): CamtResult {
                 details.length > 1 &&
                 details.every((detail) => detailAmount(detail));
             const parts = split ? details : [details[0]];
+            // References already used inside this batch entry. Some banks
+            // repeat the parent AcctSvcrRef verbatim in every TxDtls, so
+            // per-part references must be made unique within the entry.
+            const usedRefs = new Set<string>();
 
             parts.forEach((detail, index) => {
                 const amount = split ? detailAmount(detail)! : entryAmount;
@@ -247,6 +266,32 @@ export function parseCamt(xml: string): CamtResult {
                 const detailRef = usableRef(
                     text(at(detail, "Refs", "AcctSvcrRef")),
                 );
+                let bankReference: string | undefined;
+                if (split) {
+                    // A per-detail reference is only usable as-is when it
+                    // distinguishes this part: not the repeated parent
+                    // reference and not already used by an earlier part.
+                    if (
+                        detailRef &&
+                        detailRef !== entryRef &&
+                        !usedRefs.has(detailRef)
+                    ) {
+                        bankReference = detailRef;
+                    } else {
+                        const base = detailRef ?? entryRef;
+                        if (base) {
+                            bankReference = `${base}#${index + 1}`;
+                            let suffix = index + 1;
+                            while (usedRefs.has(bankReference)) {
+                                suffix++;
+                                bankReference = `${base}#${suffix}`;
+                            }
+                        }
+                    }
+                } else {
+                    bankReference = entryRef ?? detailRef;
+                }
+                if (bankReference) usedRefs.add(bankReference);
 
                 transactions.push({
                     bookingDate,
@@ -260,11 +305,8 @@ export function parseCamt(xml: string): CamtResult {
                         usableRef(text(at(detail, "Refs", "MndtId"))),
                     ...(counterpartName ? { counterpartName } : {}),
                     ...(counterpartIban ? { counterpartIban } : {}),
-                    // Per-detail reference when the bank sends one, else the entry's with the part index.
-                    bankReference: split
-                        ? (detailRef ??
-                          (entryRef ? `${entryRef}#${index + 1}` : undefined))
-                        : (usableRef(entryRef) ?? detailRef),
+                    ...(bankReference ? { bankReference } : {}),
+                    ...(reportIban ? { accountIban: reportIban } : {}),
                     reversal,
                 });
             });

@@ -32,6 +32,7 @@ import { useInvoiceStore } from "@/store/invoiceStore";
 import { importBankTransactions } from "@/lib/bankService";
 import { ApiError } from "@/lib/apiClient";
 import { CamtFileError, extractCamtDocuments } from "@/lib/bank/camtFile";
+import { findAutoMatchInvoice } from "@/lib/bank/autoMatch";
 import { formatCurrency } from "@/lib/currencyUtils";
 import type { BankTransaction, InvoiceWithClient } from "@/types";
 
@@ -52,8 +53,10 @@ export default function BankPage() {
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [importFormat, setImportFormat] = useState("dkb");
     const [csvText, setCsvText] = useState("");
-    /** CAMT: XML documents of the selected .xml/.zip */
-    const [xmlFiles, setXmlFiles] = useState<string[]>([]);
+    /** CAMT: raw .xml/.zip file, uploaded as-is (inflated server-side) */
+    const [camtFile, setCamtFile] = useState<File | null>(null);
+    /** CAMT: number of XML documents inside the selected file */
+    const [camtDocCount, setCamtDocCount] = useState(0);
     const [importing, setImporting] = useState(false);
     const [matchModalOpen, setMatchModalOpen] = useState(false);
     const [selectedTx, setSelectedTx] = useState<BankTransaction | null>(null);
@@ -67,20 +70,19 @@ export default function BankPage() {
     const handleAutoMatch = () => {
         const unmatched = transactions.filter((t) => t.status === "unmatched");
         let matchCount = 0;
+        // An invoice matched in this pass must not match a second time.
+        const usedInvoiceIds = new Set<string>();
 
         for (const tx of unmatched) {
-            // Match by amount and invoice number reference
-            const candidate = (invoices as InvoiceWithClient[]).find((inv) => {
-                if (inv.status === "paid") return false;
-                const amountMatch =
-                    Math.abs(inv.total_gross - Math.abs(tx.amount)) < 0.02;
-                const refMatch = tx.description
-                    ?.toLowerCase()
-                    .includes(inv.invoice_number?.toLowerCase() ?? "");
-                return amountMatch || refMatch;
-            });
+            const candidate = findAutoMatchInvoice(
+                tx,
+                (invoices as InvoiceWithClient[]).filter(
+                    (inv) => !inv.id || !usedInvoiceIds.has(inv.id),
+                ),
+            );
 
             if (candidate) {
+                if (candidate.id) usedInvoiceIds.add(candidate.id);
                 matchTx(tx.id!, candidate.id!).catch(() => {});
                 matchCount++;
             }
@@ -97,7 +99,7 @@ export default function BankPage() {
 
     const handleImport = async () => {
         const isCamt = importFormat === "camt";
-        if (isCamt ? !xmlFiles.length : !csvText.trim()) {
+        if (isCamt ? !camtFile : !csvText.trim()) {
             message.error(t("bank.importEmpty"));
             return;
         }
@@ -106,7 +108,7 @@ export default function BankPage() {
             const result = await importBankTransactions(
                 csvText,
                 importFormat,
-                isCamt ? xmlFiles : undefined,
+                isCamt ? (camtFile ?? undefined) : undefined,
             );
             const skipped = result.skippedPending
                 ? ` · ${t("bank.skippedPending").replace("{0}", String(result.skippedPending))}`
@@ -119,7 +121,8 @@ export default function BankPage() {
             fetchTransactions(true);
             setImportModalOpen(false);
             setCsvText("");
-            setXmlFiles([]);
+            setCamtFile(null);
+            setCamtDocCount(0);
         } catch (error) {
             // Client errors (e.g. no CAMT document) carry a useful reason
             const detail =
@@ -376,7 +379,8 @@ export default function BankPage() {
                             onChange={(value: string) => {
                                 setImportFormat(value);
                                 setCsvText("");
-                                setXmlFiles([]);
+                                setCamtFile(null);
+                                setCamtDocCount(0);
                             }}
                             style={{ width: 320 }}
                             options={[
@@ -414,16 +418,22 @@ export default function BankPage() {
                             showUploadList={false}
                             beforeUpload={(file) => {
                                 if (importFormat === "camt") {
+                                    // Validate/count the documents locally
+                                    // for instant feedback, but upload the
+                                    // raw file: the server inflates it, so
+                                    // the request body stays compressed.
                                     file.arrayBuffer()
-                                        .then((buffer) =>
-                                            setXmlFiles(
+                                        .then((buffer) => {
+                                            const documents =
                                                 extractCamtDocuments(
                                                     new Uint8Array(buffer),
-                                                ),
-                                            ),
-                                        )
+                                                );
+                                            setCamtFile(file as unknown as File);
+                                            setCamtDocCount(documents.length);
+                                        })
                                         .catch((error) => {
-                                            setXmlFiles([]);
+                                            setCamtFile(null);
+                                            setCamtDocCount(0);
                                             message.error(
                                                 error instanceof CamtFileError
                                                     ? error.message
@@ -447,11 +457,11 @@ export default function BankPage() {
                                     : t("bank.uploadHint")}
                             </p>
                         </Upload.Dragger>
-                        {importFormat === "camt" && xmlFiles.length > 0 && (
+                        {importFormat === "camt" && camtDocCount > 0 && (
                             <Text type="secondary" style={{ fontSize: 12 }}>
                                 {t("bank.camtDocuments").replace(
                                     "{0}",
-                                    String(xmlFiles.length),
+                                    String(camtDocCount),
                                 )}
                             </Text>
                         )}

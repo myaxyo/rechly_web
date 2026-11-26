@@ -30,7 +30,8 @@
     "test:all": "npm test && echo 'integration requires running server on :3102 — run npm run test:integration separately'",
     "test:girocode": "tsx --test tests/girocode.test.ts",
     "test:einvoice": "tsx --test tests/einvoice.test.ts",
-    "migrate:einvoice": "node --env-file=.env.local scripts/migrate-einvoice.mjs"
+    "migrate:einvoice": "node --env-file=.env.local scripts/migrate-einvoice.mjs",
+    "migrate:bank": "node --env-file=.env.local scripts/migrate-bank.mjs"
   },
   "build": {
     "appId": "de.rechly.desktop",

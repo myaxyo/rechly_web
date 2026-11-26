@@ -1069,14 +1069,15 @@ export async function POST(request: NextRequest) {
                     ),
             ],
             [
-                // CAMT AcctSvcrRef: recognises re-imported entries
+                // CAMT AcctSvcrRef, IBAN-scoped: recognises re-imported
+                // entries ("<IBAN>:<AcctSvcrRef>#n" needs more than 64)
                 "bank.bankReference",
                 () =>
                     databases.createStringAttribute(
                         DATABASE_ID,
                         "bank_transactions",
                         "bankReference",
-                        64,
+                        128,
                         false,
                     ),
             ],
@@ -1095,6 +1096,20 @@ export async function POST(request: NextRequest) {
                         ["ASC"],
                     ),
                 "index:bank_transactions.userId",
+            ),
+        );
+        results.push(
+            await safeCreate(
+                () =>
+                    databases.createIndex(
+                        DATABASE_ID,
+                        "bank_transactions",
+                        "userId_bookingDate_idx",
+                        IndexType.Key,
+                        ["userId", "bookingDate"],
+                        ["ASC", "DESC"],
+                    ),
+                "index:bank_transactions.userId_bookingDate",
             ),
         );
 

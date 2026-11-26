@@ -6,7 +6,10 @@ import {
     DATABASE_ID,
     COLLECTIONS,
 } from "@/lib/appwrite-server";
-import { isCollectionNotFound } from "@/lib/appwrite-errors";
+import {
+    isCollectionNotFound,
+    isUnknownAttribute,
+} from "@/lib/appwrite-errors";
 
 export async function GET(request: NextRequest) {
     try {
@@ -27,18 +30,27 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const status = searchParams.get("status");
 
-        const filters = [
-            Query.equal("userId", user.$id),
-            Query.orderDesc("bookingDate"),
-            Query.limit(1000),
-        ];
-        if (status) filters.push(Query.equal("status", status));
+        const scoped = [Query.equal("userId", user.$id), Query.limit(1000)];
+        if (status) scoped.push(Query.equal("status", status));
 
-        const res = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTIONS.BANK_TRANSACTIONS,
-            filters,
-        );
+        let res;
+        try {
+            res = await databases.listDocuments(
+                DATABASE_ID,
+                COLLECTIONS.BANK_TRANSACTIONS,
+                [...scoped, Query.orderDesc("bookingDate")],
+            );
+        } catch (error) {
+            // Legacy databases without a bookingDate attribute (rows only
+            // carry transactionDate): ordering by it fails against the
+            // schema. Retry unordered and sort in memory below.
+            if (!isUnknownAttribute(error)) throw error;
+            res = await databases.listDocuments(
+                DATABASE_ID,
+                COLLECTIONS.BANK_TRANSACTIONS,
+                scoped,
+            );
+        }
 
         const transactions = res.documents.map((doc) => ({
             id: doc.$id,
