@@ -3,10 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Models } from "appwrite";
 import {
-    getCurrentUser,
     logout as appwriteLogout,
     loginWithGoogle,
-    createAnonymousSession,
     deleteAccount as appwriteDeleteAccount,
 } from "@/lib/appwrite";
 import { clearAllCaches } from "@/store";
@@ -38,44 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkAuth();
     }, []);
 
-    // Auto-logout anonymous users when tab closes
-    useEffect(() => {
-        if (!isAnonymous || !user) return;
-
-        const handleBeforeUnload = async () => {
-            // Mark session for cleanup
-            sessionStorage.setItem("guestSession", "true");
-        };
-
-        const handleVisibilityChange = async () => {
-            if (document.visibilityState === "hidden" && isAnonymous) {
-                // Store timestamp when tab becomes hidden
-                sessionStorage.setItem("guestHiddenAt", Date.now().toString());
-            }
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange
-            );
-        };
-    }, [isAnonymous, user]);
-
-    // Check if returning from a closed tab (guest session should be cleared)
-    useEffect(() => {
-        const wasGuest = sessionStorage.getItem("guestSession");
-        if (wasGuest && isAnonymous) {
-            // Clear guest session on page load if it was a guest
-            sessionStorage.removeItem("guestSession");
-            sessionStorage.removeItem("guestHiddenAt");
-            logout();
-        }
-    }, [isAnonymous]);
+    // Guest lifetime is the browser session: /api/auth/anonymous sets
+    // a session cookie (no maxAge), so closing the browser ends guest
+    // access. There is deliberately no storage-flag bookkeeping here —
+    // the previous "guestSession" flag was set by loginAnonymously
+    // itself and an effect keyed on isAnonymous then logged the guest
+    // out immediately, bouncing every guest back to /login.
 
     const checkAuth = async () => {
         try {
@@ -174,8 +140,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             setUser(null);
             setIsAnonymous(false);
-            sessionStorage.removeItem("guestSession");
-            sessionStorage.removeItem("guestHiddenAt");
             // Clear all cached data
             clearAllCaches();
         } finally {
@@ -192,8 +156,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await appwriteDeleteAccount();
         setUser(null);
         setIsAnonymous(false);
-        sessionStorage.removeItem("guestSession");
-        sessionStorage.removeItem("guestHiddenAt");
         clearAllCaches();
         return result;
     };
@@ -204,18 +166,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Clear cached data from previous session
             clearAllCaches();
 
-            let currentUser;
-            if (isDesktopRuntime) {
-                const response = await fetch("/api/auth/user");
-                if (!response.ok) throw new Error("Local profile is unavailable");
-                currentUser = await response.json();
-            } else {
-                await createAnonymousSession();
-                currentUser = await getCurrentUser();
+            if (!isDesktopRuntime) {
+                // SSR anonymous login: sets the httpOnly session cookie
+                // that /api/auth/user and all API routes authenticate
+                // with. A client-SDK-only anonymous session leaves
+                // every server route at 401.
+                const response = await fetch("/api/auth/anonymous", {
+                    method: "POST",
+                });
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.error || "Guest login failed");
+                }
             }
+
+            const userResponse = await fetch("/api/auth/user");
+            if (!userResponse.ok) {
+                throw new Error(
+                    isDesktopRuntime
+                        ? "Local profile is unavailable"
+                        : "Guest login failed",
+                );
+            }
+            const currentUser = await userResponse.json();
             setUser(currentUser);
             setIsAnonymous(true);
-            sessionStorage.setItem("guestSession", "true");
         } finally {
             setLoading(false);
         }

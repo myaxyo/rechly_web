@@ -270,6 +270,15 @@
     backdrop-filter: blur(14px);
 }
 
+/* AntD's Layout.Header sets line-height to its 64px header height.
+   Custom header controls inherit that value, so their line boxes can
+   become taller than the sticky header itself (the search control was
+   85px and the account control 74px inside a 64px header). Resetting
+   the inherited line-height keeps centering in flex layout's hands. */
+.dashboard-appearance .dashboard-header {
+    line-height: normal;
+}
+
 .dashboard-header-left,
 .dashboard-header-actions {
     display: flex;
@@ -325,9 +334,11 @@
     display: flex;
     align-items: center;
     gap: 9px;
+    height: 42px;
     min-width: 0;
     max-width: 230px;
     padding: 4px 8px 4px 4px;
+    line-height: 1.25;
     border: 1px solid var(--dash-border);
     border-radius: 10px;
     background: var(--dash-surface);
@@ -1298,9 +1309,11 @@ li.is-done .dashboard-step-state {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    height: 36px;
     flex: 0 1 168px;
     min-width: 0;
     padding: 7px 10px 7px 12px;
+    line-height: 1.25;
     border: 1px solid var(--dash-border);
     border-radius: 9px;
     background: var(--dash-surface);
@@ -1330,6 +1343,7 @@ li.is-done .dashboard-step-state {
     font-family: inherit;
     font-size: 11px;
     font-weight: 600;
+    line-height: 1.35;
     color: var(--dash-muted);
 }
 /* Staged compaction keyed to the main area's own width (not the

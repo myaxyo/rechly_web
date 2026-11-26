@@ -45,6 +45,8 @@ export const AUTH_LIMITS = {
     login: { max: 10, windowMs: 60_000 },
     register: { max: 5, windowMs: 60_000 },
     recovery: { max: 5, windowMs: 60_000 },
+    // Each guest login creates a real (anonymous) user row.
+    anonymous: { max: 5, windowMs: 60_000 },
 } as const;
 
 // ---------------------------------------------------------------------------

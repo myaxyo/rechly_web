@@ -85,6 +85,25 @@ test("header search and account boxes shrink instead of overflowing", () => {
     assert.match(css, /@container \(max-width: 860px\) \{[\s\S]{0,400}?\.dashboard-user-email \{ display: none; \}/);
 });
 
+test("header controls cannot inherit AntD's 64px line height and overflow vertically", () => {
+    // Regression measured in a browser: AntD Layout.Header's inherited
+    // 64px line-height made the custom search control 85px tall and
+    // the account control 74px tall inside a 64px header.
+    assert.match(
+        rule(".dashboard-appearance .dashboard-header"),
+        /line-height\s*:\s*normal/,
+    );
+
+    const trigger = rule(".dashboard-palette-trigger");
+    assert.match(trigger, /height\s*:\s*36px/);
+    assert.match(trigger, /line-height\s*:\s*1\.25/);
+    assert.match(rule(".dashboard-palette-trigger kbd"), /line-height\s*:\s*1\.35/);
+
+    const account = rule(".dashboard-user-button");
+    assert.match(account, /height\s*:\s*42px/);
+    assert.match(account, /line-height\s*:\s*1\.25/);
+});
+
 test("dashboard brand uses the real logo image, not a letter placeholder", () => {
     const shell = readFileSync("src/components/dashboard/DashboardShell.tsx", "utf8");
     assert.doesNotMatch(shell, /dashboard-brand-mark">R</);
