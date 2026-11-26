@@ -70,18 +70,17 @@
     color: #fff;
 }
 
+/* Real app logo (public/logo.png, white app-icon tile) */
 .dashboard-brand-mark {
     width: 36px;
     height: 36px;
     flex: 0 0 36px;
-    display: grid;
-    place-items: center;
+    box-sizing: border-box;
+    padding: 3px;
     border-radius: 10px;
-    background: linear-gradient(145deg, #4f75ee, #3154c6);
+    background: #fff;
+    object-fit: contain;
     box-shadow: 0 6px 16px rgba(54, 95, 214, 0.35);
-    font-size: 19px;
-    font-weight: 800;
-    letter-spacing: -0.04em;
 }
 
 .dashboard-brand-name {
@@ -115,11 +114,23 @@
     min-height: 0;
 }
 
+/* Brand, create button and footer keep their natural height; the menu
+   below is the only region that shrinks and scrolls. */
+.dashboard-sider .ant-layout-sider-children > * {
+    flex-shrink: 0;
+}
+
+.dashboard-sider .ant-layout-sider-children > .dashboard-menu {
+    flex-shrink: 1;
+}
+
 .dashboard-menu {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    padding: 0 12px 118px;
+    /* No clearance padding: the footer is in normal flow (see
+       .dashboard-sider-footer), so it can never overlap menu items. */
+    padding: 0 12px 8px;
     background: #101a2e !important;
     border-inline-end: none !important;
 }
@@ -174,11 +185,14 @@
     width: auto;
 }
 
+/* MUST stay in normal flow (no position: absolute/fixed). As a flex
+   item of .ant-layout-sider-children it always reserves exactly its own
+   height, so adding footer rows (help, GitHub star, ...) shrinks the
+   scrolling menu above instead of overlapping its last items. The old
+   absolute footer + hardcoded menu clearance padding broke on every
+   added row. Guarded by tests/dashboardLayout.test.ts. */
 .dashboard-sider-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -188,6 +202,7 @@
 }
 
 .dashboard-sider-settings {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -263,7 +278,25 @@
     min-width: 0;
 }
 
+/* Shrink-safe header: the title group gives way first, the actions
+   group may shrink, and no child may force the header wider than the
+   viewport. Rigid min-widths/fixed widths on children previously
+   pushed the search and account boxes off the right edge. Guarded by
+   tests/dashboardLayout.test.ts. */
+.dashboard-header-left {
+    flex: 1 1 auto;
+}
+
+.dashboard-header-actions {
+    flex: 0 1 auto;
+}
+
+.dashboard-header-actions > * {
+    min-width: 0;
+}
+
 .dashboard-icon-button {
+    flex-shrink: 0;
     width: 36px;
     height: 36px;
     color: var(--dash-muted);
@@ -271,6 +304,10 @@
 }
 
 .dashboard-page-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     color: var(--dash-text);
     font-size: 15px;
     font-weight: 650;
@@ -288,6 +325,7 @@
     display: flex;
     align-items: center;
     gap: 9px;
+    min-width: 0;
     max-width: 230px;
     padding: 4px 8px 4px 4px;
     border: 1px solid var(--dash-border);
@@ -302,10 +340,16 @@
 }
 
 .dashboard-avatar {
+    flex-shrink: 0;
     background: linear-gradient(145deg, #4f75ee, #3154c6) !important;
 }
 
+/* min-width: 0 is what actually enables the ellipsis on a flex item;
+   without it a long e-mail address forces the account box (and the
+   whole header) wider than the viewport. */
 .dashboard-user-email {
+    flex: 0 1 auto;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1247,12 +1291,15 @@ li.is-done .dashboard-step-state {
     }
 }
 
-/* Command palette trigger (Cmd/Ctrl+K) */
+/* Command palette trigger (Cmd/Ctrl+K). Width is a flexible basis,
+   never a rigid min-width: the box shrinks (label ellipsizes) instead
+   of pushing the account box off-screen. */
 .dashboard-palette-trigger {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    min-width: 168px;
+    flex: 0 1 168px;
+    min-width: 0;
     padding: 7px 10px 7px 12px;
     border: 1px solid var(--dash-border);
     border-radius: 9px;
@@ -1266,7 +1313,14 @@ li.is-done .dashboard-step-state {
     border-color: var(--dash-primary);
     color: var(--dash-text);
 }
+.dashboard-palette-trigger-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .dashboard-palette-trigger kbd {
+    flex-shrink: 0;
     margin-left: auto;
     padding: 1px 6px;
     border: 1px solid var(--dash-border);
@@ -1278,8 +1332,18 @@ li.is-done .dashboard-step-state {
     font-weight: 600;
     color: var(--dash-muted);
 }
+/* Staged compaction keyed to the main area's own width (not the
+   viewport), so it is correct with the sider expanded or collapsed. */
+.dashboard-main {
+    container-type: inline-size;
+}
+@container (max-width: 860px) {
+    .dashboard-palette-trigger-label { display: none; }
+    .dashboard-palette-trigger { flex-basis: auto; }
+    .dashboard-user-email { display: none; }
+    .dashboard-header { padding: 0 16px !important; }
+}
 @media (max-width: 900px) {
-    .dashboard-palette-trigger { min-width: 0; }
     .dashboard-palette-trigger-label { display: none; }
 }
 

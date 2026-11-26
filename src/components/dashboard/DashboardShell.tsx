@@ -41,6 +41,7 @@ import {
     GithubOutlined,
     StarOutlined,
 } from "@ant-design/icons";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
@@ -385,7 +386,14 @@ export default function DashboardShell({
 
     const brand = (
         <div className="dashboard-brand">
-            <span className="dashboard-brand-mark">R</span>
+            <Image
+                src="/logo.png"
+                alt=""
+                width={36}
+                height={36}
+                priority
+                className="dashboard-brand-mark"
+            />
             {!collapsed && <span className="dashboard-brand-name">Rechly</span>}
         </div>
     );
@@ -452,7 +460,13 @@ export default function DashboardShell({
             <Drawer
                 title={
                     <div className="dashboard-brand dashboard-brand--drawer">
-                        <span className="dashboard-brand-mark">R</span>
+                        <Image
+                            src="/logo.png"
+                            alt=""
+                            width={36}
+                            height={36}
+                            className="dashboard-brand-mark"
+                        />
                         <span className="dashboard-brand-name">Rechly</span>
                     </div>
                 }

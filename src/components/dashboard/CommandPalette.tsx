@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Modal, Input } from "antd";
+import { Modal, Input, theme } from "antd";
 import type { InputRef } from "antd";
 import {
     DashboardOutlined,
@@ -42,6 +42,10 @@ export default function CommandPalette({
     onClose: () => void;
 }) {
     const router = useRouter();
+    // All colors come from the AntD theme tokens (DashboardAppearance
+    // switches them per light/dark). Hardcoded light hex values here
+    // rendered near-black text on the dark modal surface.
+    const { token } = theme.useToken();
     const { language } = useLanguage();
     const l = (de: string, en: string) => (language === "de" ? de : en);
     const [query, setQuery] = useState("");
@@ -118,16 +122,16 @@ export default function CommandPalette({
                     ref={inputRef}
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setActive(0); }}
-                    prefix={<SearchOutlined style={{ color: "#8494ab" }} />}
+                    prefix={<SearchOutlined style={{ color: token.colorTextTertiary }} />}
                     placeholder={l("Seite oder Aktion suchen …", "Search a page or action …")}
                     size="large"
                     variant="borderless"
-                    style={{ padding: "14px 16px", fontSize: 16, borderBottom: "1px solid #e5eaf1", borderRadius: 0 }}
+                    style={{ padding: "14px 16px", fontSize: 16, color: token.colorText, borderBottom: `1px solid ${token.colorBorderSecondary}`, borderRadius: 0 }}
                     aria-label={l("Befehl suchen", "Search command")}
                 />
                 <div ref={listRef} role="listbox" style={{ maxHeight: 380, overflowY: "auto", padding: 8 }}>
                     {filtered.length === 0 && (
-                        <p style={{ padding: "18px 12px", color: "#64748b", fontSize: 14, margin: 0 }}>
+                        <p style={{ padding: "18px 12px", color: token.colorTextSecondary, fontSize: 14, margin: 0 }}>
                             {l("Nichts gefunden.", "Nothing found.")}
                         </p>
                     )}
@@ -149,21 +153,21 @@ export default function CommandPalette({
                                 padding: "10px 12px",
                                 border: "none",
                                 borderRadius: 8,
-                                background: index === active ? "#eef3fd" : "transparent",
-                                color: "#162033",
+                                background: index === active ? token.colorPrimaryBg : "transparent",
+                                color: token.colorText,
                                 fontSize: 14.5,
                                 fontWeight: index === active ? 600 : 500,
                                 cursor: "pointer",
                             }}
                         >
-                            <span style={{ color: "#365fd6", display: "inline-flex" }}>{command.icon}</span>
+                            <span style={{ color: token.colorPrimary, display: "inline-flex" }}>{command.icon}</span>
                             <span style={{ flex: 1 }}>{command.label}</span>
                             {command.hint && (
-                                <span style={{ fontSize: 11, fontWeight: 700, color: "#365fd6", background: "#dbe7fd", padding: "2px 7px", borderRadius: 999 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: token.colorPrimary, background: token.colorPrimaryBg, padding: "2px 7px", borderRadius: 999 }}>
                                     {command.hint}
                                 </span>
                             )}
-                            <span style={{ fontSize: 11, color: "#94a3b8" }}>{command.path.replace("/dashboard", "") || "/"}</span>
+                            <span style={{ fontSize: 11, color: token.colorTextTertiary }}>{command.path.replace("/dashboard", "") || "/"}</span>
                         </button>
                     ))}
                 </div>
@@ -172,9 +176,9 @@ export default function CommandPalette({
                         display: "flex",
                         gap: 16,
                         padding: "9px 16px",
-                        borderTop: "1px solid #e5eaf1",
+                        borderTop: `1px solid ${token.colorBorderSecondary}`,
                         fontSize: 12,
-                        color: "#8494ab",
+                        color: token.colorTextTertiary,
                     }}
                 >
                     <span>↑↓ {l("Navigieren", "Navigate")}</span>
