@@ -253,19 +253,21 @@ export async function POST(request: NextRequest) {
                 ID.unique(),
                 {
                     userId: user.$id,
-                    bookingDate: tx.bookingDate,
-                    ...(tx.valueDate ? { valueDate: tx.valueDate } : {}),
+                    // Clamp to the declared attribute sizes so one long
+                    // remittance text cannot abort the whole import midway.
+                    bookingDate: tx.bookingDate.slice(0, 10),
+                    ...(tx.valueDate ? { valueDate: tx.valueDate.slice(0, 10) } : {}),
                     amount: tx.amount,
-                    currency: tx.currency || "EUR",
-                    description: tx.description || "",
-                    reference: tx.reference || null,
-                    counterpartName: tx.counterpartName || null,
-                    counterpartIban: tx.counterpartIban || null,
+                    currency: (tx.currency || "EUR").slice(0, 3),
+                    description: (tx.description || "").slice(0, 500),
+                    reference: tx.reference?.slice(0, 500) || null,
+                    counterpartName: tx.counterpartName?.slice(0, 200) || null,
+                    counterpartIban: tx.counterpartIban?.slice(0, 34) || null,
                     status: "unmatched",
                     matchedInvoiceId: null,
                     importBatchId,
                     ...(tx.bankReference
-                        ? { bankReference: tx.bankReference }
+                        ? { bankReference: tx.bankReference.slice(0, 64) }
                         : {}),
                 },
                 permissions,
