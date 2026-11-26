@@ -1070,6 +1070,12 @@ export const en = {
         "bank.noMatches": "No matching invoices found",
         "bank.total": "Total",
         "bank.uploadHint": "Drop a CSV file here or click",
+        "bank.format.camt": "CAMT XML (ISO 20022)",
+        "bank.camtHint":
+            "Drop a CAMT file (.xml or .zip) here or click – e.g. \"XML (CAMT V8 – booked transactions)\" in online banking",
+        "bank.camtDocuments": "{0} statement(s)",
+        "bank.skippedPending": "{0} pending transactions skipped",
+        "bank.fileReadError": "The file could not be read",
         "dashboard.migration": "Data Migration & Import",
         "clients.importData": "Import Clients",
 };

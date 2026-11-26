@@ -1087,6 +1087,12 @@ export const de = {
         "bank.noMatches": "Keine passenden Rechnungen gefunden",
         "bank.total": "Gesamt",
         "bank.uploadHint": "CSV-Datei hierher ziehen oder klicken",
+        "bank.format.camt": "CAMT-XML (ISO 20022, z. B. Sparkasse)",
+        "bank.camtHint":
+            "CAMT-Datei (.xml oder .zip) hierher ziehen oder klicken – im Online-Banking z. B. „XML (CAMT V8 – gebuchte Umsätze)“",
+        "bank.camtDocuments": "{0} Kontoauszug/-auszüge",
+        "bank.skippedPending": "{0} vorgemerkte Umsätze übersprungen",
+        "bank.fileReadError": "Datei konnte nicht gelesen werden",
         "dashboard.migration": "Daten-Umzug & Import",
         "clients.importData": "Kunden importieren",
 };
