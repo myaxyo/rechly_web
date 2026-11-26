@@ -133,6 +133,7 @@ export const de = {
         "footer.privacy": "Datenschutz",
         "footer.terms": "AGB",
         "footer.cookies": "Cookies",
+        "footer.starOnGithub": "Projekt auf GitHub mit Stern unterstützen",
         "footer.copyright": "Open-Source-Projekt",
         "footer.madeBy": "Entwickelt von einem Studenten",
 
@@ -235,6 +236,7 @@ export const de = {
         "dashboard.guestModeRegister": "Jetzt registrieren",
         "dashboard.guestModeSuffix": ", um deine Daten zu speichern.",
         "dashboard.feedbackCta": "Feedback? admin@rechly.de",
+        "dashboard.starOnGithub": "Stern auf GitHub",
         "verify.bannerTitle": "Bitte bestätige deine E-Mail-Adresse",
         "verify.bannerDesc": "Wir haben dir einen Bestätigungslink geschickt. Eine bestätigte E-Mail schützt dein Konto (Passwort-Wiederherstellung) und schaltet Termine frei.",
         "verify.resend": "E-Mail erneut senden",

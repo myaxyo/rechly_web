@@ -1,5 +1,9 @@
 # Rechly
 
+[![GitHub stars](https://img.shields.io/github/stars/myaxyo/rechly_web?style=social)](https://github.com/myaxyo/rechly_web/stargazers)
+
+⭐ **If Rechly helps you, [star the project on GitHub](https://github.com/myaxyo/rechly_web)** — it helps others find it.
+
 Rechly is an open-source invoicing app for freelancers and small businesses. In addition to the Next.js web application, Rechly is available as a standalone 100% offline desktop application: **[Rechly Desktop](https://github.com/myaxyo/rechly_desktop)**.
 
 ## Desktop Edition (100 % Offline)

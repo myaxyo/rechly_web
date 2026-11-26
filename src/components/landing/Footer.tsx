@@ -1,6 +1,6 @@
 "use client";
 
-import { GithubOutlined } from "@ant-design/icons";
+import { GithubOutlined, StarOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -90,6 +90,9 @@ export default function Footer() {
                         <a href={repoUrl} target="_blank" rel="noopener noreferrer" className={s.github}>
                             <GithubOutlined aria-hidden="true" /> GitHub
                             <span className={s.srOnly}>{l(" (neuer Tab)", " (new tab)")}</span>
+                        </a>
+                        <a href={repoUrl} target="_blank" rel="noopener noreferrer" className={s.github} aria-label={`${t("footer.starOnGithub")}${l(" (neuer Tab)", " (new tab)")}`}>
+                            <StarOutlined aria-hidden="true" /> {t("footer.starOnGithub")}
                         </a>
                     </div>
                 </div>

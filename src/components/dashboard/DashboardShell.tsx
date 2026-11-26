@@ -38,6 +38,8 @@ import {
     ProjectOutlined,
     ClockCircleOutlined,
     ScheduleOutlined,
+    GithubOutlined,
+    StarOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -49,6 +51,7 @@ import WorkspaceActivity from "@/components/workspace/WorkspaceActivity";
 import CommandPalette from "@/components/dashboard/CommandPalette";
 import UpdateBanner from "@/components/dashboard/UpdateBanner";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmail";
+import { getRepoUrl } from "@/lib/env";
 
 const { Header, Sider, Content } = Layout;
 
@@ -433,6 +436,9 @@ export default function DashboardShell({
                         <Link href="/hilfe" target="_blank" rel="noopener noreferrer" className="dashboard-sider-settings" aria-label={language === "de" ? "Hilfe & Anleitungen (neuer Tab)" : "Help in German (new tab)"}>
                             <QuestionCircleOutlined />{!collapsed && <span>{language === "de" ? "Hilfe & Anleitungen" : "Help (German)"}</span>}
                         </Link>
+                        <a href={getRepoUrl()} target="_blank" rel="noopener noreferrer" className="dashboard-sider-settings" aria-label={`${t("dashboard.starOnGithub")}${language === "de" ? " (neuer Tab)" : " (new tab)"}`} title={t("dashboard.starOnGithub")}>
+                            <GithubOutlined /><StarOutlined />{!collapsed && <span>{t("dashboard.starOnGithub")}</span>}
+                        </a>
                         <a
                             href="mailto:admin@rechly.de"
                             className="dashboard-sider-feedback"
@@ -487,6 +493,9 @@ export default function DashboardShell({
                     </Button>
                     <Button block href="/hilfe" target="_blank" rel="noopener noreferrer" icon={<QuestionCircleOutlined />}>
                         {language === "de" ? "Hilfe & Anleitungen ↗" : "Help (German) ↗"}
+                    </Button>
+                    <Button block href={getRepoUrl()} target="_blank" rel="noopener noreferrer" icon={<><GithubOutlined /> <StarOutlined /></>}>
+                        {t("dashboard.starOnGithub")} ↗
                     </Button>
                     <div className="dashboard-language-mobile">
                         <GlobalOutlined />
