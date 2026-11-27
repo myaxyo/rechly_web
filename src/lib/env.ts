@@ -4,6 +4,7 @@ type RequiredEnvKey =
 
 const PRODUCTION_SITE_URL = "https://rechly.de";
 const PRODUCTION_REPOSITORY_URL = "https://github.com/myaxyo/rechly_web";
+const PRODUCTION_CONTACT_EMAIL = "admin@rechly.de";
 
 function trimTrailingSlashes(value: string): string {
     return value.replace(/\/+$/, "");
@@ -86,7 +87,7 @@ export function getRepoUrl(): string {
 }
 
 export function getContactEmail(): string {
-    return getOptionalEnv("NEXT_PUBLIC_CONTACT_EMAIL") || "contact@example.com";
+    return getOptionalEnv("NEXT_PUBLIC_CONTACT_EMAIL") || PRODUCTION_CONTACT_EMAIL;
 }
 
 export function getOptionalLinkedInUrl(): string | undefined {
