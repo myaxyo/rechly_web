@@ -17,7 +17,7 @@ const content = {
         title: "Impressum",
         aboutTitle: "Über das Projekt",
         aboutText:
-            "Rechly ist ein privates, nicht-kommerzielles Open-Source-Projekt. Es wird als Hobbyprojekt von einem Studenten entwickelt und ist kostenlos nutzbar.",
+            "Rechly ist ein privates, kostenloses, nicht-kommerzielles Open-Source-Hobbyprojekt unter der AGPL. Es gibt keine kostenpflichtigen Tarife, keine Spenden, keine Werbung und kein Sponsoring. Es werden keine Einnahmen erzielt.",
         aboutNote:
             "Da es sich um ein rein privates Projekt ohne geschäftsmäßige Absichten handelt, besteht keine Impressumspflicht gemäß § 5 DDG.",
         contactTitle: "Kontakt",
@@ -27,13 +27,13 @@ const content = {
         liabilityLinksTitle: "Haftung für Links",
         liabilityLinksText:
             "Diese Website enthält Links zu externen Websites Dritter, auf deren Inhalte kein Einfluss besteht. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter verantwortlich.",
-        lastUpdated: "Stand: Dezember 2025",
+        lastUpdated: "Stand: November 2026",
     },
     en: {
         title: "Imprint",
         aboutTitle: "About the Project",
         aboutText:
-            "Rechly is a private, non-commercial open-source project. It is developed as a hobby project by a student and is free to use.",
+            "Rechly is a private, free, non-commercial open-source hobby project under the AGPL. There are no paid plans, no donations, no advertising, and no sponsorship. No income is generated.",
         aboutNote:
             "As this is a purely private project without commercial intent, there is no legal imprint requirement under German law (§ 5 DDG).",
         contactTitle: "Contact",
@@ -43,7 +43,7 @@ const content = {
         liabilityLinksTitle: "Liability for Links",
         liabilityLinksText:
             "This website contains links to external third-party websites over whose content we have no influence. The respective provider is always responsible for the content of linked pages.",
-        lastUpdated: "Last updated: December 2025",
+        lastUpdated: "Last updated: November 2026",
     },
 };
 

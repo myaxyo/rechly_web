@@ -44,10 +44,10 @@ export const de = {
         "about.badge": "ÜBER DAS PROJEKT",
         "about.title": "Open Source Rechnungssoftware",
         "about.description":
-            "Rechly ist ein Nebenprojekt, das ich als Student entwickle. Keine versteckten Kosten, keine Premium-Pläne – einfach ein nützliches Tool, das ich selbst gebraucht habe und jetzt mit euch teile.",
+            "Rechly ist ein privates, kostenloses, nicht-kommerzielles Open-Source-Hobbyprojekt unter der AGPL. Keine kostenpflichtigen Tarife, keine Spenden, keine Werbung und kein Sponsoring – es werden keine Einnahmen erzielt. Einfach ein nützliches Tool, das ich selbst gebraucht habe und jetzt mit euch teile.",
         "about.point1": "100% kostenlos & Open Source",
         "about.point2": "Datenschutzfreundlich & selbst hostbar",
-        "about.point3": "Entwickelt mit GitHub Student Pack",
+        "about.point3": "Keine Spenden, Werbung oder Sponsoring",
         "about.point4": "Aktiv weiterentwickelt",
 
         // Features
@@ -135,7 +135,7 @@ export const de = {
         "footer.cookies": "Cookies",
         "footer.starOnGithub": "Projekt auf GitHub mit Stern unterstützen",
         "footer.copyright": "Open-Source-Projekt",
-        "footer.madeBy": "Entwickelt von einem Studenten",
+        "footer.madeBy": "Privates Open-Source-Hobbyprojekt (AGPL)",
 
         // Legal pages
         "legal.backToHome": "Zurück zur Startseite",

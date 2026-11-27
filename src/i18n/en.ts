@@ -44,10 +44,10 @@ export const en = {
         "about.badge": "ABOUT THE PROJECT",
         "about.title": "Open Source Invoicing Software",
         "about.description":
-            "Rechly is a side project I'm building as a student. No hidden costs, no premium plans – just a useful tool I needed myself and now share with you.",
+            "Rechly is a private, free, non-commercial open-source hobby project under the AGPL. No paid plans, no donations, no advertising, and no sponsorship – no income is generated. Just a useful tool I needed myself and now share with you.",
         "about.point1": "100% free & Open Source",
         "about.point2": "Privacy-friendly and self-hostable",
-        "about.point3": "Built with GitHub Student Pack",
+        "about.point3": "No donations, advertising, or sponsorship",
         "about.point4": "Actively maintained",
 
         // Features
@@ -134,7 +134,7 @@ export const en = {
         "footer.cookies": "Cookies",
         "footer.starOnGithub": "Star the project on GitHub",
         "footer.copyright": "Open Source Project",
-        "footer.madeBy": "Built by a student",
+        "footer.madeBy": "Private open-source hobby project (AGPL)",
 
         // Legal pages
         "legal.backToHome": "Back to Home",
