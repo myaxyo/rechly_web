@@ -1,9 +1,21 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import type { FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Form, Input, Button, Divider, message, Space, Modal, Spin } from "antd";
-import { MailOutlined, LockOutlined, GoogleOutlined, UserOutlined, WarningOutlined } from "@ant-design/icons";
+import { AlertTriangle, Globe, Loader2, Lock, Mail, User } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isDesktopRuntime } from "@/lib/runtime";
@@ -20,6 +32,9 @@ function LoginForm() {
     const [loading, setLoading] = useState(false);
     const [guestLoading, setGuestLoading] = useState(false);
     const [guestModalVisible, setGuestModalVisible] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
     useEffect(() => {
         const allParams = Object.fromEntries(searchParams.entries());
@@ -34,9 +49,9 @@ function LoginForm() {
                 try {
                     const error = JSON.parse(decodedError);
                     if (error.type === "user_already_exists") {
-                        message.info(t("auth.accountExists"));
+                        toast.info(t("auth.accountExists"));
                     } else {
-                        message.error(error.message || t("auth.loginFailed"));
+                        toast.error(error.message || t("auth.loginFailed"));
                     }
                 } catch {
                     const lowerError = decodedError.toLowerCase();
@@ -45,13 +60,13 @@ function LoginForm() {
                         lowerError.includes("already exists") ||
                         lowerError.includes("existiert bereits")
                     ) {
-                        message.info(t("auth.accountExists"));
+                        toast.info(t("auth.accountExists"));
                     } else {
-                        message.error(decodedError || t("auth.loginFailed"));
+                        toast.error(decodedError || t("auth.loginFailed"));
                     }
                 }
             } catch {
-                message.error(t("auth.loginFailed"));
+                toast.error(t("auth.loginFailed"));
             }
             router.replace("/login");
         }
@@ -61,23 +76,39 @@ function LoginForm() {
         setLoading(true);
         try {
             await login(values.email, values.password);
-            message.success(t("auth.loginSuccess"));
+            toast.success(t("auth.loginSuccess"));
             router.push("/dashboard");
         } catch (error: unknown) {
-            message.error(error instanceof Error ? error.message : t("auth.loginFailed"));
+            toast.error(error instanceof Error ? error.message : t("auth.loginFailed"));
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const nextErrors: { email?: string; password?: string } = {};
+        if (!email) {
+            nextErrors.email = t("auth.emailRequired");
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            nextErrors.email = t("auth.emailInvalid");
+        }
+        if (!password) {
+            nextErrors.password = t("auth.passwordRequired");
+        }
+        setErrors(nextErrors);
+        if (Object.keys(nextErrors).length > 0) return;
+        void onFinish({ email, password });
     };
 
     const handleGuestLogin = async () => {
         setGuestLoading(true);
         try {
             await loginAnonymously();
-            message.success(t("auth.guestSuccess"));
+            toast.success(t("auth.guestSuccess"));
             router.push("/dashboard");
         } catch (error: unknown) {
-            message.error(error instanceof Error ? error.message : t("auth.guestFailed"));
+            toast.error(error instanceof Error ? error.message : t("auth.guestFailed"));
         } finally {
             setGuestLoading(false);
             setGuestModalVisible(false);
@@ -93,88 +124,115 @@ function LoginForm() {
                 "Log in to continue managing invoices, clients and appointments.",
             )}
             footer={
-                <p style={{ textAlign: "center", marginTop: 22, fontSize: 14, color: "#5b6b82" }}>
+                <p className="mt-[22px] text-center text-sm text-[#5b6b82]">
                     {t("auth.noAccount")}{" "}
-                    <Link href="/register" style={{ fontWeight: 600 }}>
+                    <Link href="/register" className="font-semibold">
                         {t("auth.signUpNow")}
                     </Link>
                 </p>
             }
         >
-            <Form name="login" onFinish={onFinish} layout="vertical" size="large" requiredMark={false}>
-                <Form.Item
-                    name="email"
-                    label={t("auth.email")}
-                    rules={[
-                        { required: true, message: t("auth.emailRequired") },
-                        { type: "email", message: t("auth.emailInvalid") },
-                    ]}
-                >
-                    <Input prefix={<MailOutlined />} placeholder="name@firma.de" autoComplete="email" />
-                </Form.Item>
+            <form name="login" onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="login-email">{t("auth.email")}</Label>
+                    <div className="relative">
+                        <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            id="login-email"
+                            className="h-11 pl-10"
+                            placeholder="name@firma.de"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            aria-invalid={!!errors.email}
+                        />
+                    </div>
+                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                </div>
 
-                <Form.Item
-                    name="password"
-                    label={t("auth.password")}
-                    rules={[{ required: true, message: t("auth.passwordRequired") }]}
-                >
-                    <Input.Password prefix={<LockOutlined />} placeholder="••••••••" autoComplete="current-password" />
-                </Form.Item>
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="login-password">{t("auth.password")}</Label>
+                    <div className="relative">
+                        <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            id="login-password"
+                            type="password"
+                            className="h-11 pl-10"
+                            placeholder="••••••••"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            aria-invalid={!!errors.password}
+                        />
+                    </div>
+                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                </div>
 
                 {!isDesktopRuntime && (
-                    <div style={{ textAlign: "right", marginTop: -8, marginBottom: 16 }}>
-                        <Link href="/forgot-password" style={{ fontSize: 13.5, fontWeight: 550 }}>
+                    <div className="-mt-2 text-right">
+                        <Link href="/forgot-password" className="text-[13.5px] font-semibold">
                             {l("Passwort vergessen?", "Forgot your password?")}
                         </Link>
                     </div>
                 )}
 
-                <Form.Item style={{ marginBottom: 0 }}>
-                    <Button type="primary" htmlType="submit" block loading={loading} style={{ height: 46 }}>
-                        {t("auth.login")}
-                    </Button>
-                </Form.Item>
-            </Form>
+                <Button type="submit" className="h-[46px] w-full" disabled={loading}>
+                    {loading && <Loader2 className="animate-spin" />}
+                    {t("auth.login")}
+                </Button>
+            </form>
 
             {!isDesktopRuntime && (
                 <>
-                    <Divider style={{ color: "#8494ab", fontSize: 13 }}>{t("auth.or")}</Divider>
-                    <Space direction="vertical" style={{ width: "100%" }} size="middle">
-                        <Button icon={<GoogleOutlined />} block size="large" href="/api/auth/google">
-                            {t("auth.withGoogle")}
+                    <div className="flex items-center gap-3 py-4">
+                        <Separator className="flex-1" />
+                        <span className="text-[13px] text-[#8494ab]">{t("auth.or")}</span>
+                        <Separator className="flex-1" />
+                    </div>
+                    <div className="flex w-full flex-col gap-4">
+                        <Button variant="outline" size="lg" asChild className="w-full">
+                            <a href="/api/auth/google">
+                                <Globe />
+                                {t("auth.withGoogle")}
+                            </a>
                         </Button>
-                        <Button icon={<UserOutlined />} block size="large" onClick={() => setGuestModalVisible(true)} loading={guestLoading}>
+                        <Button variant="outline" size="lg" className="w-full" onClick={() => setGuestModalVisible(true)} disabled={guestLoading}>
+                            {guestLoading ? <Loader2 className="animate-spin" /> : <User />}
                             {t("auth.asGuest")}
                         </Button>
-                    </Space>
+                    </div>
                 </>
             )}
 
-            <Modal
-                title={
-                    <span>
-                        <WarningOutlined style={{ color: "#faad14", marginRight: 8 }} />
-                        {t("guest.warningTitle")}
-                    </span>
-                }
-                open={guestModalVisible}
-                onOk={handleGuestLogin}
-                onCancel={() => setGuestModalVisible(false)}
-                okText={t("guest.continue")}
-                cancelText={t("guest.cancel")}
-                okButtonProps={{ loading: guestLoading, danger: true }}
-            >
-                <div style={{ padding: "16px 0" }}>
-                    <p style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>{t("guest.warningMain")}</p>
-                    <p style={{ color: "#666" }}>{t("guest.warningIntro")}</p>
-                    <ul style={{ marginTop: 8, color: "#666" }}>
-                        <li>{t("guest.warningPoint1")}</li>
-                        <li>{t("guest.warningPoint2")}</li>
-                        <li>{t("guest.warningPoint3")}</li>
-                    </ul>
-                    <p style={{ color: "#666", marginTop: 12 }}>{t("guest.warningNote")}</p>
-                </div>
-            </Modal>
+            <Dialog open={guestModalVisible} onOpenChange={(open) => { if (!open) setGuestModalVisible(false); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="text-[#faad14]" />
+                            {t("guest.warningTitle")}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <p className="mb-3 text-[15px] font-semibold">{t("guest.warningMain")}</p>
+                        <p className="text-muted-foreground">{t("guest.warningIntro")}</p>
+                        <ul className="mt-2 list-disc pl-5 text-muted-foreground">
+                            <li>{t("guest.warningPoint1")}</li>
+                            <li>{t("guest.warningPoint2")}</li>
+                            <li>{t("guest.warningPoint3")}</li>
+                        </ul>
+                        <p className="mt-3 text-muted-foreground">{t("guest.warningNote")}</p>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setGuestModalVisible(false)}>
+                            {t("guest.cancel")}
+                        </Button>
+                        <Button variant="destructive" onClick={handleGuestLogin} disabled={guestLoading}>
+                            {guestLoading && <Loader2 className="animate-spin" />}
+                            {t("guest.continue")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AuthShell>
     );
 }
@@ -183,8 +241,8 @@ export default function LoginPage() {
     return (
         <Suspense
             fallback={
-                <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Spin size="large" />
+                <div className="flex min-h-screen items-center justify-center">
+                    <Loader2 className="size-8 animate-spin" />
                 </div>
             }
         >

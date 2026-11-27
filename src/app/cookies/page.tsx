@@ -1,12 +1,13 @@
 "use client";
 
-import { Typography, Card, Switch, Button, Space } from "antd";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-const { Title, Paragraph, Text } = Typography;
 
 const content = {
     de: {
@@ -90,11 +91,12 @@ export default function CookiesPage() {
                 }}
             >
                 <Card className="legal-prose" style={{ borderRadius: 10 }}>
-                    <Title level={1} style={{ marginBottom: 24 }}>
+                    <CardContent>
+                    <h1 className="text-3xl font-bold" style={{ marginBottom: 24 }}>
                         {t.title}
-                    </Title>
+                    </h1>
 
-                    <Paragraph style={{ fontSize: 15 }}>{t.intro}</Paragraph>
+                    <p style={{ fontSize: 15 }}>{t.intro}</p>
 
                     <Card
                         style={{
@@ -104,6 +106,7 @@ export default function CookiesPage() {
                             border: "1px solid #f0f0f0",
                         }}
                     >
+                        <CardContent>
                         <div
                             style={{
                                 display: "flex",
@@ -112,17 +115,16 @@ export default function CookiesPage() {
                             }}
                         >
                             <div>
-                                <Title level={5} style={{ marginBottom: 4 }}>
+                                <h3 style={{ marginBottom: 4 }}>
                                     {t.essentialTitle}
-                                </Title>
-                                <Text
-                                    style={{ color: "#64748b", fontSize: 14 }}
-                                >
+                                </h3>
+                                <span style={{ color: "#64748b", fontSize: 14 }}>
                                     {t.essentialDesc}
-                                </Text>
+                                </span>
                             </div>
                             <Switch checked disabled />
                         </div>
+                        </CardContent>
                     </Card>
 
                     <Card
@@ -132,6 +134,7 @@ export default function CookiesPage() {
                             border: "1px solid #f0f0f0",
                         }}
                     >
+                        <CardContent>
                         <div
                             style={{
                                 display: "flex",
@@ -140,46 +143,42 @@ export default function CookiesPage() {
                             }}
                         >
                             <div>
-                                <Title level={5} style={{ marginBottom: 4 }}>
+                                <h3 style={{ marginBottom: 4 }}>
                                     {t.analyticsTitle}
-                                </Title>
-                                <Text
-                                    style={{ color: "#64748b", fontSize: 14 }}
-                                >
+                                </h3>
+                                <span style={{ color: "#64748b", fontSize: 14 }}>
                                     {t.analyticsDesc}
-                                </Text>
+                                </span>
                             </div>
                             <Switch
                                 checked={analyticsCookies}
                                 disabled={!preferencesLoaded}
-                                onChange={setAnalyticsCookies}
+                                onCheckedChange={setAnalyticsCookies}
                             />
                         </div>
+                        </CardContent>
                     </Card>
 
-                    <Space direction="vertical" style={{ width: "100%" }}>
+                    <div className="flex flex-col w-full">
                         <Button
-                            type="primary"
-                            size="large"
+                            size="lg"
                             onClick={handleSave}
                             disabled={!preferencesLoaded}
-                            block
+                            className="w-full"
                             style={{ borderRadius: 8 }}
                         >
                             {t.saveButton}
                         </Button>
-                    </Space>
+                    </div>
 
-                    <Text
-                        type="secondary"
-                        style={{
+                    <span className="text-muted-foreground" style={{
                             fontSize: 13,
                             marginTop: 24,
                             display: "block",
-                        }}
-                    >
+                        }}>
                         {t.lastUpdated}
-                    </Text>
+                    </span>
+                </CardContent>
                 </Card>
             </main>
 

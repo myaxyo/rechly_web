@@ -1,9 +1,7 @@
 "use client";
 
-import { Button, Typography } from "antd";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const { Text } = Typography;
 
 export default function CtaSection() {
     const { t } = useLanguage();
@@ -37,9 +35,8 @@ export default function CtaSection() {
                     {t("cta.subtitle")}
                 </p>
                 <Button
-                    type="primary"
-                    size="large"
-                    href="/register"
+                    asChild
+                    size="lg"
                     style={{
                         height: 48,
                         paddingInline: 32,
@@ -47,14 +44,18 @@ export default function CtaSection() {
                         borderRadius: 8,
                         fontWeight: 500,
                     }}
-                    aria-label="Kostenlos registrieren und Rechnung erstellen"
                 >
-                    {t("cta.button")}
+                    <a
+                        href="/register"
+                        aria-label="Kostenlos registrieren und Rechnung erstellen"
+                    >
+                        {t("cta.button")}
+                    </a>
                 </Button>
                 <div style={{ marginTop: 16 }}>
-                    <Text style={{ color: "#64748b", fontSize: 13 }}>
+                    <span style={{ color: "#64748b", fontSize: 13 }}>
                         {t("cta.note")}
-                    </Text>
+                    </span>
                 </div>
             </div>
         </section>

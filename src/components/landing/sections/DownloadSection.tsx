@@ -2,15 +2,15 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
-    WindowsOutlined,
-    AppleOutlined,
-    DownloadOutlined,
-    GithubOutlined,
-    SafetyCertificateOutlined,
-    CloudSyncOutlined,
-    FileProtectOutlined,
-    InfoCircleOutlined,
-} from "@ant-design/icons";
+    Monitor,
+    Command,
+    Download,
+    Code2,
+    ShieldCheck,
+    CloudOff,
+    FileCheck,
+    Info,
+} from "lucide-react";
 
 const DOWNLOAD_URLS = {
     windows:
@@ -150,15 +150,15 @@ export default function DownloadSection() {
                 {/* Feature highlight chips */}
                 <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mb-8">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] border border-[#e3e9f1] text-xs font-semibold text-[#33475e]">
-                        <SafetyCertificateOutlined style={{ color: "#1c6b4a" }} />
+                        <ShieldCheck size={14} style={{ color: "#1c6b4a" }} />
                         100 % offline & DSGVO-konform
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] border border-[#e3e9f1] text-xs font-semibold text-[#33475e]">
-                        <CloudSyncOutlined style={{ color: "#2855d9" }} />
+                        <CloudOff size={14} style={{ color: "#2855d9" }} />
                         Keine Cloud, kein Login nötig
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f8fafc] border border-[#e3e9f1] text-xs font-semibold text-[#33475e]">
-                        <FileProtectOutlined style={{ color: "#2855d9" }} />
+                        <FileCheck size={14} style={{ color: "#2855d9" }} />
                         E-Rechnung (XRechnung & ZUGFeRD)
                     </span>
                 </div>
@@ -178,12 +178,12 @@ export default function DownloadSection() {
                                 aria-label={primaryButtonLabel!}
                             >
                                 {detectedOS === "windows" ? (
-                                    <WindowsOutlined style={{ fontSize: 24 }} />
+                                    <Monitor size={24} />
                                 ) : (
-                                    <AppleOutlined style={{ fontSize: 24 }} />
+                                    <Command size={24} />
                                 )}
                                 <span>{primaryButtonLabel}</span>
-                                <DownloadOutlined className="ml-1 text-sm" />
+                                <Download size={14} className="ml-1" />
                             </a>
                             <div className="mt-2 text-xs text-[#526174] font-medium">
                                 {primarySubtext}
@@ -193,7 +193,7 @@ export default function DownloadSection() {
                         /* Other or unknown OS (Linux, mobile, or JS disabled) */
                         <div className="w-full max-w-md mx-auto">
                             <div className="mb-5 p-3 rounded-[10px] bg-[#f2f6fd] border border-[#e3e9f1] text-xs sm:text-sm text-[#152438] leading-relaxed text-center">
-                                <InfoCircleOutlined className="mr-1.5" style={{ color: "#2855d9" }} />
+                                <Info size={14} className="mr-1.5 inline" style={{ color: "#2855d9" }} />
                                 Hinweis: Die Rechly Desktop-App läuft derzeit
                                 nativ auf <strong>Windows</strong> und{" "}
                                 <strong>macOS</strong>.
@@ -208,7 +208,7 @@ export default function DownloadSection() {
                                     }}
                                     aria-label="Rechly Desktop für Windows (64-Bit) herunterladen"
                                 >
-                                    <WindowsOutlined style={{ fontSize: 20 }} />
+                                    <Monitor size={20} />
                                     <span>Für Windows herunterladen</span>
                                 </a>
                                 <a
@@ -220,7 +220,7 @@ export default function DownloadSection() {
                                     }}
                                     aria-label="Rechly Desktop für Mac herunterladen"
                                 >
-                                    <AppleOutlined style={{ fontSize: 20 }} />
+                                    <Command size={20} />
                                     <span>Für Mac herunterladen</span>
                                 </a>
                             </div>
@@ -240,7 +240,7 @@ export default function DownloadSection() {
                                 detectedOS === "windows" ? "font-semibold" : ""
                             }`}
                         >
-                            <WindowsOutlined style={{ color: "#2855d9" }} />
+                            <Monitor size={14} style={{ color: "#2855d9" }} />
                             <span>Windows 10/11 (64-Bit)</span>
                         </a>
                         <span className="text-[#cbd5e1] hidden sm:inline">·</span>
@@ -252,7 +252,7 @@ export default function DownloadSection() {
                                     : ""
                             }`}
                         >
-                            <AppleOutlined style={{ color: "#152438" }} />
+                            <Command size={14} style={{ color: "#152438" }} />
                             <span>Mac (Apple Silicon M1+)</span>
                         </a>
                         <span className="text-[#cbd5e1] hidden sm:inline">·</span>
@@ -264,7 +264,7 @@ export default function DownloadSection() {
                                     : ""
                             }`}
                         >
-                            <AppleOutlined style={{ color: "#152438" }} />
+                            <Command size={14} style={{ color: "#152438" }} />
                             <span>Mac mit Intel-Prozessor</span>
                         </a>
                         <span className="text-[#cbd5e1] hidden sm:inline">·</span>
@@ -287,7 +287,7 @@ export default function DownloadSection() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs text-[#526174] hover:text-[#152438] transition-colors underline-offset-2 hover:underline"
                     >
-                        <GithubOutlined />
+                        <Code2 size={14} />
                         <span>Open Source (AGPL-3.0) · Quellcode auf GitHub</span>
                     </a>
                 </div>
@@ -301,7 +301,7 @@ export default function DownloadSection() {
                         <details className="group bg-white rounded-[10px] border border-[#e3e9f1] p-3.5 text-sm">
                             <summary className="font-medium text-[#152438] cursor-pointer flex items-center justify-between select-none list-none">
                                 <span className="flex items-center gap-2">
-                                    <WindowsOutlined style={{ color: "#2855d9" }} />
+                                    <Monitor size={14} style={{ color: "#2855d9" }} />
                                     <span>Hinweis für Windows (SmartScreen)</span>
                                 </span>
                                 <span className="text-xs text-[#8494ab] group-open:rotate-180 transition-transform">
@@ -317,7 +317,7 @@ export default function DownloadSection() {
                         <details className="group bg-white rounded-[10px] border border-[#e3e9f1] p-3.5 text-sm">
                             <summary className="font-medium text-[#152438] cursor-pointer flex items-center justify-between select-none list-none">
                                 <span className="flex items-center gap-2">
-                                    <AppleOutlined style={{ color: "#152438" }} />
+                                    <Command size={14} style={{ color: "#152438" }} />
                                     <span>Hinweis für macOS (DMG & Gatekeeper)</span>
                                 </span>
                                 <span className="text-xs text-[#8494ab] group-open:rotate-180 transition-transform">

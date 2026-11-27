@@ -2,12 +2,10 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Spin, Typography } from "antd";
+import { Loader2 } from "lucide-react";
 import { getCompanyInfo } from "@/lib/companyService";
 import { useClientStore, useProductStore, useInvoiceStore } from "@/store";
 import { logger } from "@/lib/logger";
-
-const { Text } = Typography;
 
 /**
  * OAuth Callback Handler Content
@@ -111,21 +109,11 @@ function CallbackContent() {
     }, [router, searchParams]);
 
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh",
-                background: "#152438",
-                gap: 16,
-            }}
-        >
-            <Spin size="large" />
-            <Text style={{ color: "white", fontSize: 16 }}>
+        <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[#152438]">
+            <Loader2 className="size-8 animate-spin text-white" />
+            <span className="text-base text-white">
                 {error || status}
-            </Text>
+            </span>
         </div>
     );
 }
@@ -138,17 +126,8 @@ export default function AuthCallbackPage() {
     return (
         <Suspense
             fallback={
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100vh",
-                        background:
-                            "#152438",
-                    }}
-                >
-                    <Spin size="large" />
+                <div className="flex h-screen items-center justify-center bg-[#152438]">
+                    <Loader2 className="size-8 animate-spin text-white" />
                 </div>
             }
         >

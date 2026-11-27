@@ -2,11 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { Card, Tag, Button } from "antd";
-import {
-    AppstoreOutlined,
-    ArrowRightOutlined,
-    CheckCircleOutlined } from "@ant-design/icons";
+import { LayoutGrid, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { TOOLS_CATALOG } from "@/lib/tools/catalog";
 
 
@@ -52,7 +51,7 @@ export default function ToolsSection() {
                             fontSize: 13,
                             marginBottom: 16 }}
                     >
-                        <AppstoreOutlined />
+                        <LayoutGrid size={14} />
                         KOSTENLOSE BUSINESS-SUPERAPP
                     </div>
 
@@ -89,13 +88,13 @@ export default function ToolsSection() {
                             flexWrap: "wrap" }}
                     >
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                            <CheckCircleOutlined /> Sofort startklar
+                            <CheckCircle2 size={14} /> Sofort startklar
                         </span>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                            <CheckCircleOutlined /> Keine Kreditkarte
+                            <CheckCircle2 size={14} /> Keine Kreditkarte
                         </span>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                            <CheckCircleOutlined /> DSGVO-konform
+                            <CheckCircle2 size={14} /> DSGVO-konform
                         </span>
                     </div>
                 </div>
@@ -115,7 +114,7 @@ export default function ToolsSection() {
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
                             <Card
-                                hoverable
+                                className="h-full transition-shadow hover:shadow-md"
                                 style={{
                                     height: "100%",
                                     borderRadius: 14,
@@ -124,14 +123,15 @@ export default function ToolsSection() {
                                     display: "flex",
                                     flexDirection: "column",
                                     justifyContent: "space-between" }}
-                                styles={{
-                                    body: {
+                            >
+                                <CardContent
+                                    style={{
                                         padding: 24,
                                         height: "100%",
                                         display: "flex",
                                         flexDirection: "column",
-                                        justifyContent: "space-between" } }}
-                            >
+                                        justifyContent: "space-between" }}
+                                >
                                 <div>
                                     <div
                                         style={{
@@ -144,9 +144,9 @@ export default function ToolsSection() {
                                             {tool.category}
                                         </span>
                                         {tool.badge && (
-                                            <Tag color="cyan" style={{ fontWeight: 700, borderRadius: 8, margin: 0 }}>
+                                            <Badge variant="secondary" className="bg-cyan-100 text-cyan-800 border-cyan-200" style={{ fontWeight: 700, borderRadius: 8, margin: 0 }}>
                                                 {tool.badge}
-                                            </Tag>
+                                            </Badge>
                                         )}
                                     </div>
 
@@ -172,8 +172,9 @@ export default function ToolsSection() {
                                         fontSize: 13,
                                         gap: 4 }}
                                 >
-                                    Kostenlos nutzen <ArrowRightOutlined style={{ fontSize: 11 }} />
+                                    Kostenlos nutzen <ArrowRight size={11} />
                                 </div>
+                                </CardContent>
                             </Card>
                         </Link>
                     ))}
@@ -181,49 +182,53 @@ export default function ToolsSection() {
 
                 {/* View All Tools, Vorlagen & Lexikon CTA Buttons */}
                 <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
-                    <Link href="/tools">
-                        <Button
-                            type="primary"
-                            size="large"
-                            icon={<AppstoreOutlined />}
-                            style={{
-                                background: "#2855d9",
-                                height: 48,
-                                padding: "0 28px",
-                                fontSize: 15,
-                                fontWeight: 700,
-                                borderRadius: 8,
-                                boxShadow: "0 4px 14px rgba(37,99,235,0.3)" }}
-                        >
+                    <Button
+                        asChild
+                        size="lg"
+                        style={{
+                            background: "#2855d9",
+                            height: 48,
+                            padding: "0 28px",
+                            fontSize: 15,
+                            fontWeight: 700,
+                            borderRadius: 8,
+                            boxShadow: "0 4px 14px rgba(37,99,235,0.3)" }}
+                    >
+                        <Link href="/tools">
+                            <LayoutGrid size={16} />
                             Alle {TOOLS_CATALOG.length} kostenlosen Tools & Rechner ansehen
-                        </Button>
-                    </Link>
-                    <Link href="/vorlagen">
-                        <Button
-                            size="large"
-                            style={{
-                                height: 48,
-                                padding: "0 22px",
-                                fontSize: 14,
-                                fontWeight: 700,
-                                borderRadius: 8 }}
-                        >
+                        </Link>
+                    </Button>
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="lg"
+                        style={{
+                            height: 48,
+                            padding: "0 22px",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            borderRadius: 8 }}
+                    >
+                        <Link href="/vorlagen">
                             14 Branchen-Rechnungsvorlagen
-                        </Button>
-                    </Link>
-                    <Link href="/lexikon">
-                        <Button
-                            size="large"
-                            style={{
-                                height: 48,
-                                padding: "0 22px",
-                                fontSize: 14,
-                                fontWeight: 700,
-                                borderRadius: 8 }}
-                        >
+                        </Link>
+                    </Button>
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="lg"
+                        style={{
+                            height: 48,
+                            padding: "0 22px",
+                            fontSize: 14,
+                            fontWeight: 700,
+                            borderRadius: 8 }}
+                    >
+                        <Link href="/lexikon">
                             Steuer- & Rechnungs-Lexikon
-                        </Button>
-                    </Link>
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </section>

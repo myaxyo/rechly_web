@@ -1,16 +1,12 @@
 "use client";
 
-import { Button, Typography } from "antd";
-import {
-    HomeOutlined,
-    SearchOutlined,
-} from "@ant-design/icons";
+import { Home, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-const { Title, Text } = Typography;
 
 export default function NotFound() {
     const router = useRouter();
@@ -47,31 +43,31 @@ export default function NotFound() {
                     >
                         404
                     </div>
-                    <Title level={2} style={{ marginBottom: 8 }}>
+                    <h2 className="text-3xl font-semibold" style={{ marginBottom: 8 }}>
                         {isDe ? "Seite nicht gefunden" : "Page not found"}
-                    </Title>
-                    <Text
-                        type="secondary"
+                    </h2>
+                    <span
+                        className="text-muted-foreground"
                         style={{ display: "block", fontSize: 15, marginBottom: 32 }}
                     >
                         {isDe
                             ? "Diese Seite existiert nicht oder wurde verschoben. Vielleicht finden Sie über die Suche oder die Startseite, was Sie suchen."
                             : "This page does not exist or has moved. Try the search or the homepage to find what you need."}
-                    </Text>
+                    </span>
                     <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
                         <Button
-                            type="primary"
-                            size="large"
-                            icon={<HomeOutlined />}
+                            size="lg"
                             onClick={() => router.push("/")}
                         >
+                            <Home size={16} />
                             {isDe ? "Zur Startseite" : "Go to homepage"}
                         </Button>
                         <Button
-                            size="large"
-                            icon={<SearchOutlined />}
+                            variant="outline"
+                            size="lg"
                             onClick={() => router.push("/tools")}
                         >
+                            <Search size={16} />
                             {isDe ? "Rechner & Tools" : "Calculators & tools"}
                         </Button>
                     </div>

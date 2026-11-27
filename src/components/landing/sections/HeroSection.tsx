@@ -1,11 +1,10 @@
 "use client";
 
-import { Button, Typography } from "antd";
-import { ArrowRightOutlined, GithubOutlined } from "@ant-design/icons";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Code2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getRepoUrl } from "@/lib/env";
 
-const { Text } = Typography;
 const repoUrl = getRepoUrl();
 
 export default function HeroSection() {
@@ -33,7 +32,7 @@ export default function HeroSection() {
                     marginBottom: 24,
                 }}
             >
-                <Text
+                <span
                     style={{
                         color: "#0369a1",
                         fontSize: 13,
@@ -41,7 +40,7 @@ export default function HeroSection() {
                     }}
                 >
                     {t("hero.badge")}
-                </Text>
+                </span>
             </div>
 
             {/* SEO-optimized H1 with target keywords */}
@@ -76,9 +75,8 @@ export default function HeroSection() {
 
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                 <Button
-                    type="primary"
-                    size="large"
-                    href="/register"
+                    asChild
+                    size="lg"
                     className="w-full sm:w-auto"
                     style={{
                         height: 48,
@@ -87,17 +85,19 @@ export default function HeroSection() {
                         borderRadius: 8,
                         fontWeight: 500,
                     }}
-                    aria-label="Jetzt kostenlos Rechnung erstellen"
                 >
-                    {t("hero.cta")}
-                    <ArrowRightOutlined />
+                    <a
+                        href="/register"
+                        aria-label="Jetzt kostenlos Rechnung erstellen"
+                    >
+                        {t("hero.cta")}
+                        <ArrowRight />
+                    </a>
                 </Button>
                 <Button
-                    size="large"
-                    icon={<GithubOutlined />}
-                    href={repoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    asChild
+                    variant="outline"
+                    size="lg"
                     className="w-full sm:w-auto"
                     style={{
                         height: 48,
@@ -106,7 +106,14 @@ export default function HeroSection() {
                         borderRadius: 8,
                     }}
                 >
-                    {t("hero.secondary")}
+                    <a
+                        href={repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Code2 />
+                        {t("hero.secondary")}
+                    </a>
                 </Button>
             </div>
         </section>

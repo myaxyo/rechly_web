@@ -1,11 +1,10 @@
 "use client";
 
-import { Typography, Card } from "antd";
+import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-const { Title, Paragraph, Text } = Typography;
 
 const content = {
     de: {
@@ -85,60 +84,59 @@ export default function AgbPage() {
                 }}
             >
                 <Card className="legal-prose" style={{ borderRadius: 10 }}>
-                    <Title level={1} style={{ marginBottom: 24 }}>
+                    <CardContent>
+                    <h1 className="text-3xl font-bold" style={{ marginBottom: 24 }}>
                         {t.title}
-                    </Title>
+                    </h1>
 
-                    <Title level={2}>{t.section1Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section1Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section1Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section2Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section2Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section2Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section3Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section3Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section3Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section4Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section4Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section4Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section5Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section5Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section5Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section6Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section6Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section6Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section7Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section7Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section7Text}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.section8Title}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.section8Title}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.section8Text}
-                    </Paragraph>
+                    </p>
 
-                    <Text
-                        type="secondary"
-                        style={{
+                    <span className="text-muted-foreground" style={{
                             fontSize: 13,
                             marginTop: 24,
                             display: "block",
-                        }}
-                    >
+                        }}>
                         {t.lastUpdated}
-                    </Text>
+                    </span>
+                </CardContent>
                 </Card>
             </main>
 

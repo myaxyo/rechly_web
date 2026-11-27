@@ -1,17 +1,13 @@
 "use client";
 
-import { Typography, Card, Space, Button } from "antd";
-import {
-    GithubOutlined,
-    LinkedinOutlined,
-    MailOutlined,
-} from "@ant-design/icons";
+import { Mail, Code2, Globe } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { getContactEmail, getOptionalLinkedInUrl, getRepoUrl } from "@/lib/env";
 
-const { Title, Paragraph, Text } = Typography;
 const contactEmail = getContactEmail();
 const linkedInUrl = getOptionalLinkedInUrl();
 const repoUrl = getRepoUrl();
@@ -70,75 +66,62 @@ export default function ImpressumPage() {
                 }}
             >
                 <Card className="legal-prose" style={{ borderRadius: 10 }}>
-                    <Title level={1} style={{ marginBottom: 24 }}>
+                    <CardContent>
+                    <h1 className="text-3xl font-bold" style={{ marginBottom: 24 }}>
                         {t.title}
-                    </Title>
+                    </h1>
 
-                    <Title level={2}>{t.aboutTitle}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.aboutTitle}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.aboutText}
-                    </Paragraph>
+                    </p>
 
-                    <Paragraph style={{ fontSize: 15, color: "#64748b" }}>
+                    <p style={{ fontSize: 15, color: "#64748b" }}>
                         {t.aboutNote}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.contactTitle}</Title>
-                    <Space
-                        direction="vertical"
-                        size="small"
-                        style={{ marginBottom: 24 }}
-                    >
-                        <Button
-                            type="link"
-                            icon={<MailOutlined />}
-                            href={`mailto:${contactEmail}`}
-                            style={{ padding: 0, height: "auto" }}
-                        >
-                            {contactEmail}
+                    <h2>{t.contactTitle}</h2>
+                    <div className="flex flex-col items-start gap-2" style={{ marginBottom: 24 }}>
+                        <Button asChild variant="link" style={{ padding: 0, height: "auto" }}>
+                            <a href={`mailto:${contactEmail}`}>
+                                <Mail size={14} />
+                                {contactEmail}
+                            </a>
                         </Button>
-                        <Button
-                            type="link"
-                            icon={<GithubOutlined />}
-                            href={repoUrl}
-                            target="_blank"
-                            style={{ padding: 0, height: "auto" }}
-                        >
-                            {repoUrl.replace(/^https?:\/\//, "")}
+                        <Button asChild variant="link" style={{ padding: 0, height: "auto" }}>
+                            <a href={repoUrl} target="_blank" rel="noreferrer">
+                                <Code2 size={14} />
+                                {repoUrl.replace(/^https?:\/\//, "")}
+                            </a>
                         </Button>
                         {linkedInUrl ? (
-                            <Button
-                                type="link"
-                                icon={<LinkedinOutlined />}
-                                href={linkedInUrl}
-                                target="_blank"
-                                style={{ padding: 0, height: "auto" }}
-                            >
-                                {linkedInUrl.replace(/^https?:\/\//, "")}
+                            <Button asChild variant="link" style={{ padding: 0, height: "auto" }}>
+                                <a href={linkedInUrl} target="_blank" rel="noreferrer">
+                                    <Globe size={14} />
+                                    {linkedInUrl.replace(/^https?:\/\//, "")}
+                                </a>
                             </Button>
                         ) : null}
-                    </Space>
+                    </div>
 
-                    <Title level={2}>{t.liabilityContentTitle}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.liabilityContentTitle}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.liabilityContentText}
-                    </Paragraph>
+                    </p>
 
-                    <Title level={2}>{t.liabilityLinksTitle}</Title>
-                    <Paragraph style={{ fontSize: 15 }}>
+                    <h2>{t.liabilityLinksTitle}</h2>
+                    <p style={{ fontSize: 15 }}>
                         {t.liabilityLinksText}
-                    </Paragraph>
+                    </p>
 
-                    <Text
-                        type="secondary"
-                        style={{
+                    <span className="text-muted-foreground" style={{
                             fontSize: 13,
                             marginTop: 24,
                             display: "block",
-                        }}
-                    >
+                        }}>
                         {t.lastUpdated}
-                    </Text>
+                    </span>
+                </CardContent>
                 </Card>
             </main>
 

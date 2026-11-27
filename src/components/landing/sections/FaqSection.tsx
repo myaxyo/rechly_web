@@ -1,7 +1,13 @@
 "use client";
 
-import { Collapse } from "antd";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { HelpCircle } from "lucide-react";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { homeFaqsDe, homeFaqsEn } from "@/lib/home-faq";
 
@@ -12,6 +18,7 @@ const faqData = {
 
 export default function FaqSection() {
     const { t, language } = useLanguage();
+    const [openItem, setOpenItem] = useState<string | undefined>(undefined);
 
     return (
         <section
@@ -44,40 +51,60 @@ export default function FaqSection() {
                     {t("faq.subtitle")}
                 </p>
 
-                <Collapse
-                    ghost
-                    expandIcon={({ isActive }) => (
-                        <QuestionCircleOutlined
-                            rotate={isActive ? 90 : 0}
-                            style={{ fontSize: 18, color: "#2855d9" }}
-                        />
-                    )}
-                    items={faqData[language].map((faq, i) => ({
-                        key: i,
-                        label: (
-                            <span
-                                style={{
-                                    fontWeight: 500,
-                                    fontSize: 16,
-                                    color: "#1f2937",
-                                }}
+                <Accordion
+                    type="single"
+                    collapsible
+                    value={openItem}
+                    onValueChange={setOpenItem}
+                >
+                    {faqData[language].map((faq, i) => {
+                        const isActive = openItem === String(i);
+                        return (
+                            <AccordionItem
+                                key={i}
+                                value={String(i)}
+                                className="border-none"
                             >
-                                {faq.question}
-                            </span>
-                        ),
-                        children: (
-                            <p
-                                style={{
-                                    color: "#64748b",
-                                    lineHeight: 1.7,
-                                    margin: 0,
-                                }}
-                            >
-                                {faq.answer}
-                            </p>
-                        ),
-                    }))}
-                />
+                                <AccordionTrigger>
+                                    <span className="flex items-center gap-2">
+                                        <HelpCircle
+                                            size={18}
+                                            style={{
+                                                color: "#2855d9",
+                                                transform: isActive
+                                                    ? "rotate(90deg)"
+                                                    : "rotate(0deg)",
+                                                transition:
+                                                    "transform 0.2s ease",
+                                                flexShrink: 0,
+                                            }}
+                                        />
+                                        <span
+                                            style={{
+                                                fontWeight: 500,
+                                                fontSize: 16,
+                                                color: "#1f2937",
+                                            }}
+                                        >
+                                            {faq.question}
+                                        </span>
+                                    </span>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <p
+                                        style={{
+                                            color: "#64748b",
+                                            lineHeight: 1.7,
+                                            margin: 0,
+                                        }}
+                                    >
+                                        {faq.answer}
+                                    </p>
+                                </AccordionContent>
+                            </AccordionItem>
+                        );
+                    })}
+                </Accordion>
             </div>
         </section>
     );

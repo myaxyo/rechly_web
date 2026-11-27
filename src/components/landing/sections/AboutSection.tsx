@@ -1,10 +1,7 @@
 "use client";
 
-import { Space, Typography } from "antd";
-import { CheckOutlined } from "@ant-design/icons";
+import { Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const { Text } = Typography;
 
 export default function AboutSection() {
     const { t } = useLanguage();
@@ -34,7 +31,7 @@ export default function AboutSection() {
                     marginBottom: 16,
                 }}
             >
-                <Text
+                <span
                     style={{
                         color: "#166534",
                         fontSize: 12,
@@ -43,7 +40,7 @@ export default function AboutSection() {
                     }}
                 >
                     {t("about.badge")}
-                </Text>
+                </span>
             </div>
 
             <h2
@@ -68,7 +65,7 @@ export default function AboutSection() {
                 {t("about.description")}
             </p>
 
-            <Space direction="vertical" size={12}>
+            <div className="flex flex-col gap-3">
                 {aboutPoints.map((point, i) => (
                     <div
                         key={i}
@@ -78,15 +75,13 @@ export default function AboutSection() {
                             gap: 12,
                         }}
                     >
-                        <CheckOutlined
-                            style={{ color: "#22c55e", fontSize: 16 }}
-                        />
-                        <Text style={{ color: "#374151", fontSize: 15 }}>
+                        <Check size={16} style={{ color: "#22c55e" }} />
+                        <span style={{ color: "#374151", fontSize: 15 }}>
                             {point}
-                        </Text>
+                        </span>
                     </div>
                 ))}
-            </Space>
+            </div>
         </section>
     );
 }

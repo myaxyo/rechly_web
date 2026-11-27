@@ -1,14 +1,8 @@
 "use client";
 
-import { Card, Typography } from "antd";
-import {
-    CheckCircleOutlined,
-    SendOutlined,
-    BarChartOutlined,
-} from "@ant-design/icons";
+import { CheckCircle2, Send, BarChart3 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const { Text } = Typography;
 
 export default function WorkflowSection() {
     const { t } = useLanguage();
@@ -16,21 +10,22 @@ export default function WorkflowSection() {
     const steps = [
         {
             icon: (
-                <CheckCircleOutlined
-                    style={{ fontSize: 22, color: "#0f766e" }}
+                <CheckCircle2
+                    size={22}
+                    style={{ color: "#0f766e" }}
                 />
             ),
             title: t("workflow.step1.title"),
             desc: t("workflow.step1.desc"),
         },
         {
-            icon: <SendOutlined style={{ fontSize: 22, color: "#b45309" }} />,
+            icon: <Send size={22} style={{ color: "#b45309" }} />,
             title: t("workflow.step2.title"),
             desc: t("workflow.step2.desc"),
         },
         {
             icon: (
-                <BarChartOutlined style={{ fontSize: 22, color: "#7c3aed" }} />
+                <BarChart3 size={22} style={{ color: "#7c3aed" }} />
             ),
             title: t("workflow.step3.title"),
             desc: t("workflow.step3.desc"),
@@ -107,8 +102,8 @@ export default function WorkflowSection() {
                                         boxShadow:
                                             "0 14px 30px rgba(15, 23, 42, 0.05)",
                                     }}
-                                    styles={{ body: { padding: 24 } }}
                                 >
+                                    <CardContent style={{ padding: 24 }}>
                                     <div
                                         style={{
                                             width: 46,
@@ -133,7 +128,7 @@ export default function WorkflowSection() {
                                     >
                                         {step.title}
                                     </div>
-                                    <Text
+                                    <span
                                         style={{
                                             color: "#5f6b7a",
                                             fontSize: 14,
@@ -141,7 +136,8 @@ export default function WorkflowSection() {
                                         }}
                                     >
                                         {step.desc}
-                                    </Text>
+                                    </span>
+                                    </CardContent>
                                 </Card>
                             ))}
                         </div>
@@ -157,8 +153,8 @@ export default function WorkflowSection() {
                             border: "none",
                             boxShadow: "0 30px 60px rgba(15, 23, 42, 0.16)",
                         }}
-                        styles={{ body: { padding: 28 } }}
                     >
+                        <CardContent style={{ padding: 28 }}>
                         <div
                             style={{
                                 color: "#f8fafc",
@@ -194,11 +190,12 @@ export default function WorkflowSection() {
                                         border: "1px solid rgba(255,255,255,0.08)",
                                     }}
                                 >
-                                    <CheckCircleOutlined
+                                    <CheckCircle2
+                                        size={16}
                                         style={{
                                             color: "#fbbf24",
                                             marginTop: 3,
-                                            fontSize: 16,
+                                            flexShrink: 0,
                                         }}
                                     />
                                     <span
@@ -213,6 +210,7 @@ export default function WorkflowSection() {
                                 </div>
                             ))}
                         </div>
+                        </CardContent>
                     </Card>
                 </div>
             </div>

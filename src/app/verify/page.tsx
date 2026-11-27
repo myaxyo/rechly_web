@@ -2,7 +2,8 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Result, Spin } from "antd";
+import { AlertTriangle, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthShell from "@/components/auth/AuthShell";
@@ -57,7 +58,7 @@ function VerifyContent() {
                     "This link is invalid or incomplete. Just request a new one from your settings.",
                 )}
             >
-                <Link href="/login" style={{ fontWeight: 600 }}>
+                <Link href="/login" className="font-semibold">
                     {l("Zur Anmeldung", "Go to login")}
                 </Link>
             </AuthShell>
@@ -74,59 +75,62 @@ function VerifyContent() {
             )}
         >
             {state === "loading" && (
-                <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
-                    <Spin size="large" />
+                <div className="flex justify-center py-6">
+                    <Loader2 className="size-8 animate-spin" />
                 </div>
             )}
             {state === "success" && (
-                <Result
-                    status="success"
-                    title={l("E-Mail bestätigt", "Email verified")}
-                    subTitle={l(
-                        "Vielen Dank! Deine E-Mail-Adresse ist jetzt bestätigt — alle Funktionen, inklusive Termine, sind freigeschaltet.",
-                        "Thank you! Your email address is now verified — all features, including Termine (bookings), are unlocked.",
-                    )}
-                    extra={
-                        <Button
-                            type="primary"
-                            size="large"
-                            onClick={() => router.push(user ? "/dashboard" : "/login")}
-                        >
-                            {user
-                                ? l("Zum Dashboard", "Go to dashboard")
-                                : l("Jetzt anmelden", "Log in now")}
-                        </Button>
-                    }
-                />
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <CheckCircle2 className="size-12 text-emerald-500" />
+                    <h2 className="text-xl font-semibold">{l("E-Mail bestätigt", "Email verified")}</h2>
+                    <p className="text-sm text-muted-foreground">
+                        {l(
+                            "Vielen Dank! Deine E-Mail-Adresse ist jetzt bestätigt — alle Funktionen, inklusive Termine, sind freigeschaltet.",
+                            "Thank you! Your email address is now verified — all features, including Termine (bookings), are unlocked.",
+                        )}
+                    </p>
+                    <Button
+                        size="lg"
+                        onClick={() => router.push(user ? "/dashboard" : "/login")}
+                    >
+                        {user
+                            ? l("Zum Dashboard", "Go to dashboard")
+                            : l("Jetzt anmelden", "Log in now")}
+                    </Button>
+                </div>
             )}
             {(state === "error" || state === "rate_limited") && (
-                <Result
-                    status="warning"
-                    title={state === "rate_limited"
-                        ? l("Bitte kurz warten", "Please wait")
-                        : l("Bestätigung derzeit nicht möglich", "Verification currently unavailable")}
-                    subTitle={state === "rate_limited"
-                        ? l("Zu viele Versuche. Warte mindestens eine Minute und versuche diesen Link erneut.", "Too many attempts. Wait at least a minute and try this link again.")
-                        : l("Die Verbindung oder der Bestätigungsdienst ist derzeit nicht verfügbar. Versuche diesen Link später erneut. Das bedeutet nicht, dass er abgelaufen ist.", "The connection or verification service is currently unavailable. Try this link again later. This does not mean it has expired.")}
-                    extra={<Button type="primary" size="large" onClick={() => { setState("loading"); setAttempt(value => value + 1); }}>
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <AlertTriangle className="size-12 text-amber-500" />
+                    <h2 className="text-xl font-semibold">
+                        {state === "rate_limited"
+                            ? l("Bitte kurz warten", "Please wait")
+                            : l("Bestätigung derzeit nicht möglich", "Verification currently unavailable")}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                        {state === "rate_limited"
+                            ? l("Zu viele Versuche. Warte mindestens eine Minute und versuche diesen Link erneut.", "Too many attempts. Wait at least a minute and try this link again.")
+                            : l("Die Verbindung oder der Bestätigungsdienst ist derzeit nicht verfügbar. Versuche diesen Link später erneut. Das bedeutet nicht, dass er abgelaufen ist.", "The connection or verification service is currently unavailable. Try this link again later. This does not mean it has expired.")}
+                    </p>
+                    <Button size="lg" onClick={() => { setState("loading"); setAttempt(value => value + 1); }}>
                         {l("Erneut versuchen", "Try again")}
-                    </Button>}
-                />
+                    </Button>
+                </div>
             )}
             {state === "expired" && (
-                <Result
-                    status="error"
-                    title={l("Link nicht mehr gültig", "Link no longer valid")}
-                    subTitle={l(
-                        "Dieser Bestätigungslink ist ungültig, abgelaufen oder wurde bereits verwendet. Melde dich an und fordere in den Einstellungen einen neuen an.",
-                        "This verification link is invalid, expired or has already been used. Log in and request a new one from your settings.",
-                    )}
-                    extra={
-                        <Button type="primary" size="large" onClick={() => router.push("/login")}>
-                            {l("Zur Anmeldung", "Go to login")}
-                        </Button>
-                    }
-                />
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <XCircle className="size-12 text-destructive" />
+                    <h2 className="text-xl font-semibold">{l("Link nicht mehr gültig", "Link no longer valid")}</h2>
+                    <p className="text-sm text-muted-foreground">
+                        {l(
+                            "Dieser Bestätigungslink ist ungültig, abgelaufen oder wurde bereits verwendet. Melde dich an und fordere in den Einstellungen einen neuen an.",
+                            "This verification link is invalid, expired or has already been used. Log in and request a new one from your settings.",
+                        )}
+                    </p>
+                    <Button size="lg" onClick={() => router.push("/login")}>
+                        {l("Zur Anmeldung", "Go to login")}
+                    </Button>
+                </div>
             )}
         </AuthShell>
     );
@@ -136,8 +140,8 @@ export default function VerifyPage() {
     return (
         <Suspense
             fallback={
-                <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Spin size="large" />
+                <div className="flex min-h-screen items-center justify-center">
+                    <Loader2 className="size-8 animate-spin" />
                 </div>
             }
         >

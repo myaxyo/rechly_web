@@ -1,55 +1,47 @@
 "use client";
 
-import { Card, Typography } from "antd";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-    FileTextOutlined,
-    TeamOutlined,
-    RobotOutlined,
-    RiseOutlined,
-    SafetyCertificateOutlined,
-    MailOutlined,
-} from "@ant-design/icons";
+    FileText,
+    Users,
+    Bot,
+    TrendingUp,
+    ShieldCheck,
+    Mail,
+} from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const { Text } = Typography;
 
 export default function FeaturesSection() {
     const { t } = useLanguage();
 
     const features = [
         {
-            icon: (
-                <FileTextOutlined style={{ fontSize: 24, color: "#0f766e" }} />
-            ),
+            icon: <FileText size={24} style={{ color: "#0f766e" }} />,
             title: t("features.invoices.title"),
             desc: t("features.invoices.desc"),
         },
         {
-            icon: <TeamOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
+            icon: <Users size={24} style={{ color: "#2855d9" }} />,
             title: t("features.clients.title"),
             desc: t("features.clients.desc"),
         },
         {
-            icon: <MailOutlined style={{ fontSize: 24, color: "#b45309" }} />,
+            icon: <Mail size={24} style={{ color: "#b45309" }} />,
             title: t("features.reminders.title"),
             desc: t("features.reminders.desc"),
         },
         {
-            icon: <RobotOutlined style={{ fontSize: 24, color: "#7c3aed" }} />,
+            icon: <Bot size={24} style={{ color: "#7c3aed" }} />,
             title: t("features.ai.title"),
             desc: t("features.ai.desc"),
         },
         {
-            icon: <RiseOutlined style={{ fontSize: 24, color: "#dc2626" }} />,
+            icon: <TrendingUp size={24} style={{ color: "#dc2626" }} />,
             title: t("features.analytics.title"),
             desc: t("features.analytics.desc"),
         },
         {
-            icon: (
-                <SafetyCertificateOutlined
-                    style={{ fontSize: 24, color: "#166534" }}
-                />
-            ),
+            icon: <ShieldCheck size={24} style={{ color: "#166534" }} />,
             title: t("features.opensource.title"),
             desc: t("features.opensource.desc"),
         },
@@ -119,50 +111,51 @@ export default function FeaturesSection() {
                     {features.map((feature, i) => (
                         <Card
                             key={i}
-                            className="feature-card"
+                            className="feature-card py-0"
                             style={{
                                 borderRadius: 20,
                                 border: "1px solid rgba(15, 23, 42, 0.08)",
                                 background: "rgba(255,255,255,0.9)",
                                 boxShadow: "0 18px 40px rgba(15, 23, 42, 0.06)",
                             }}
-                            styles={{ body: { padding: 28 } }}
                         >
-                            <div
-                                style={{
-                                    marginBottom: 18,
-                                    width: 52,
-                                    height: 52,
-                                    borderRadius: 16,
-                                    background: "rgba(255,255,255,0.92)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    boxShadow:
-                                        "inset 0 0 0 1px rgba(15, 23, 42, 0.04)",
-                                }}
-                            >
-                                {feature.icon}
-                            </div>
-                            <h3
-                                style={{
-                                    marginBottom: 10,
-                                    fontWeight: 700,
-                                    fontSize: 18,
-                                    color: "#111827",
-                                }}
-                            >
-                                {feature.title}
-                            </h3>
-                            <Text
-                                style={{
-                                    color: "#5f6b7a",
-                                    fontSize: 14,
-                                    lineHeight: 1.7,
-                                }}
-                            >
-                                {feature.desc}
-                            </Text>
+                            <CardContent style={{ padding: 28 }}>
+                                <div
+                                    style={{
+                                        marginBottom: 18,
+                                        width: 52,
+                                        height: 52,
+                                        borderRadius: 16,
+                                        background: "rgba(255,255,255,0.92)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        boxShadow:
+                                            "inset 0 0 0 1px rgba(15, 23, 42, 0.04)",
+                                    }}
+                                >
+                                    {feature.icon}
+                                </div>
+                                <h3
+                                    style={{
+                                        marginBottom: 10,
+                                        fontWeight: 700,
+                                        fontSize: 18,
+                                        color: "#111827",
+                                    }}
+                                >
+                                    {feature.title}
+                                </h3>
+                                <span
+                                    style={{
+                                        color: "#5f6b7a",
+                                        fontSize: 14,
+                                        lineHeight: 1.7,
+                                    }}
+                                >
+                                    {feature.desc}
+                                </span>
+                            </CardContent>
                         </Card>
                     ))}
                 </div>

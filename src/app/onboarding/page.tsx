@@ -2,39 +2,71 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Card,
-    Form,
-    Input,
-    Button,
-    Typography,
-    Steps,
-    Select,
-    message,
-    Spin,
-} from "antd";
-import {
-    BankOutlined,
-    UserOutlined,
-    EnvironmentOutlined,
-    CheckCircleOutlined,
-} from "@ant-design/icons";
+import { toast } from "sonner";
+import { Landmark, User, MapPin, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCompanyInfo, saveCompanyInfo } from "@/lib/companyService";
 import { euCountryOptions } from "@/lib/euCountries";
 import { ApiError } from "@/lib/apiClient";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Steps } from "@/components/ui/steps";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
-const { Title, Text, Paragraph } = Typography;
+type FormValues = {
+    company_name: string;
+    owner_name: string;
+    street: string;
+    postal_code: string;
+    city: string;
+    country: string;
+    email: string;
+    phone: string;
+    tax_id: string;
+    vat_id: string;
+    bank_name: string;
+    iban: string;
+    bic: string;
+};
+
+const initialValues: FormValues = {
+    company_name: "",
+    owner_name: "",
+    street: "",
+    postal_code: "",
+    city: "",
+    country: "Deutschland",
+    email: "",
+    phone: "",
+    tax_id: "",
+    vat_id: "",
+    bank_name: "",
+    iban: "",
+    bic: "",
+};
 
 export default function OnboardingPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
     const { language } = useLanguage();
-    const [form] = Form.useForm();
+    const [values, setValues] = useState<FormValues>(initialValues);
+    const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
+
+    const setField = (field: keyof FormValues, value: string) => {
+        setValues((prev) => ({ ...prev, [field]: value }));
+    };
 
     const content = {
         de: {
@@ -162,13 +194,18 @@ export default function OnboardingPage() {
     };
 
     const handleNext = async () => {
-        try {
-            await form.validateFields();
-            if (currentStep < 2) {
-                setCurrentStep(currentStep + 1);
-            }
-        } catch {
+        const newErrors: Partial<Record<keyof FormValues, string>> = {};
+        if (!values.company_name) newErrors.company_name = t.companyNameRequired;
+        if (!values.street) newErrors.street = t.streetRequired;
+        if (!values.postal_code) newErrors.postal_code = t.postalCodeRequired;
+        if (!values.city) newErrors.city = t.cityRequired;
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
             // Validation failed
+            return;
+        }
+        if (currentStep < 2) {
+            setCurrentStep(currentStep + 1);
         }
     };
 
@@ -179,7 +216,6 @@ export default function OnboardingPage() {
     const handleFinish = async () => {
         setSaving(true);
         try {
-            const values = form.getFieldsValue(true);
             await saveCompanyInfo({
                 name: values.company_name,
                 managing_directors: values.owner_name,
@@ -200,7 +236,7 @@ export default function OnboardingPage() {
             setCurrentStep(2);
         } catch (error) {
             console.error("Error saving company info:", error);
-            message.error(error instanceof ApiError ? error.message : "Fehler beim Speichern. Bitte die Verbindung prüfen und erneut versuchen.");
+            toast.error(error instanceof ApiError ? error.message : "Fehler beim Speichern. Bitte die Verbindung prüfen und erneut versuchen.");
         } finally {
             setSaving(false);
         }
@@ -212,255 +248,246 @@ export default function OnboardingPage() {
 
     if (authLoading || loading) {
         return (
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100vh",
-                    background: "#f5f5f5",
-                }}
-            >
-                <Spin size="large" />
+            <div className="flex h-screen items-center justify-center bg-[#f5f5f5]">
+                <Loader2 className="size-8 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                background: "#152438",
-                padding: "40px 20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
-            <Card
-                style={{
-                    width: "100%",
-                    maxWidth: 600,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-                }}
-            >
-                <div style={{ textAlign: "center", marginBottom: 32 }}>
-                    <Title
-                        level={2}
-                        style={{ marginBottom: 8, color: "#152438" }}
-                    >
-                        {t.title}
-                    </Title>
-                    <Text type="secondary">{t.subtitle}</Text>
-                </div>
+        <div className="flex min-h-screen items-center justify-center bg-[#152438] px-5 py-10">
+            <Card className="w-full max-w-[600px] shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
+                <CardContent>
+                    <div className="mb-8 text-center">
+                        <h2 className="mb-2 text-2xl font-semibold text-[#152438]">{t.title}</h2>
+                        <p className="text-sm text-muted-foreground">{t.subtitle}</p>
+                    </div>
 
-                <Steps
-                    current={currentStep}
-                    style={{ marginBottom: 32 }}
-                    items={[
-                        { title: t.step1, icon: <BankOutlined /> },
-                        { title: t.step2, icon: <UserOutlined /> },
-                        { title: t.step3, icon: <CheckCircleOutlined /> },
-                    ]}
-                />
+                    <Steps
+                        current={currentStep}
+                        className="mb-8"
+                        items={[{ title: t.step1 }, { title: t.step2 }, { title: t.step3 }]}
+                    />
 
-                <Form form={form} layout="vertical" size="large">
-                    {/* Step 1: Company Info */}
-                    {currentStep === 0 && (
-                        <div>
-                            <Form.Item
-                                name="company_name"
-                                label={t.companyName}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t.companyNameRequired,
-                                    },
-                                ]}
-                            >
-                                <Input
-                                    prefix={<BankOutlined />}
-                                    placeholder={t.companyNamePlaceholder}
-                                />
-                            </Form.Item>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        {/* Step 1: Company Info */}
+                        {currentStep === 0 && (
+                            <div className="flex flex-col gap-6">
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="company_name">{t.companyName}</Label>
+                                    <div className="relative">
+                                        <Landmark className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="company_name"
+                                            value={values.company_name}
+                                            onChange={(e) => setField("company_name", e.target.value)}
+                                            placeholder={t.companyNamePlaceholder}
+                                            className="pl-10 h-11"
+                                            aria-invalid={!!errors.company_name}
+                                        />
+                                    </div>
+                                    {errors.company_name && <p className="text-sm text-destructive">{errors.company_name}</p>}
+                                </div>
 
-                            <Form.Item name="owner_name" label={t.ownerName}>
-                                <Input
-                                    prefix={<UserOutlined />}
-                                    placeholder={t.ownerNamePlaceholder}
-                                />
-                            </Form.Item>
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="owner_name">{t.ownerName}</Label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="owner_name"
+                                            value={values.owner_name}
+                                            onChange={(e) => setField("owner_name", e.target.value)}
+                                            placeholder={t.ownerNamePlaceholder}
+                                            className="pl-10 h-11"
+                                        />
+                                    </div>
+                                </div>
 
-                            <Form.Item
-                                name="street"
-                                label={t.street}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t.streetRequired,
-                                    },
-                                ]}
-                            >
-                                <Input
-                                    prefix={<EnvironmentOutlined />}
-                                    placeholder={t.streetPlaceholder}
-                                />
-                            </Form.Item>
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="street">{t.street}</Label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="street"
+                                            value={values.street}
+                                            onChange={(e) => setField("street", e.target.value)}
+                                            placeholder={t.streetPlaceholder}
+                                            className="pl-10 h-11"
+                                            aria-invalid={!!errors.street}
+                                        />
+                                    </div>
+                                    {errors.street && <p className="text-sm text-destructive">{errors.street}</p>}
+                                </div>
 
-                            <div style={{ display: "flex", gap: 16 }}>
-                                <Form.Item
-                                    name="postal_code"
-                                    label={t.postalCode}
-                                    style={{ flex: 1 }}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: t.postalCodeRequired,
-                                        },
-                                    ]}
-                                >
+                                <div className="flex gap-4">
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label htmlFor="postal_code">{t.postalCode}</Label>
+                                        <Input
+                                            id="postal_code"
+                                            value={values.postal_code}
+                                            onChange={(e) => setField("postal_code", e.target.value)}
+                                            placeholder={t.postalCodePlaceholder}
+                                            className="h-11"
+                                            aria-invalid={!!errors.postal_code}
+                                        />
+                                        {errors.postal_code && <p className="text-sm text-destructive">{errors.postal_code}</p>}
+                                    </div>
+
+                                    <div className="flex flex-[2] flex-col gap-2">
+                                        <Label htmlFor="city">{t.city}</Label>
+                                        <Input
+                                            id="city"
+                                            value={values.city}
+                                            onChange={(e) => setField("city", e.target.value)}
+                                            placeholder={t.cityPlaceholder}
+                                            className="h-11"
+                                            aria-invalid={!!errors.city}
+                                        />
+                                        {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="country">{t.country}</Label>
+                                    <Select value={values.country} onValueChange={(v) => setField("country", v)}>
+                                        <SelectTrigger id="country" className="w-full h-11">
+                                            <SelectValue placeholder={t.countryPlaceholder} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {euCountryOptions(language).map((opt) => (
+                                                <SelectItem key={opt.value} value={opt.value}>
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 2: Contact & Bank Info */}
+                        {currentStep === 1 && (
+                            <div className="flex flex-col gap-6">
+                                <div className="flex gap-4">
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label htmlFor="email">{t.email}</Label>
+                                        <Input
+                                            id="email"
+                                            value={values.email}
+                                            onChange={(e) => setField("email", e.target.value)}
+                                            placeholder={t.emailPlaceholder}
+                                            className="h-11"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label htmlFor="phone">{t.phone}</Label>
+                                        <Input
+                                            id="phone"
+                                            value={values.phone}
+                                            onChange={(e) => setField("phone", e.target.value)}
+                                            placeholder={t.phonePlaceholder}
+                                            className="h-11"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4">
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label htmlFor="tax_id">{t.taxId}</Label>
+                                        <Input
+                                            id="tax_id"
+                                            value={values.tax_id}
+                                            onChange={(e) => setField("tax_id", e.target.value)}
+                                            placeholder={t.taxIdPlaceholder}
+                                            className="h-11"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-1 flex-col gap-2">
+                                        <Label htmlFor="vat_id">{t.vatId}</Label>
+                                        <Input
+                                            id="vat_id"
+                                            value={values.vat_id}
+                                            onChange={(e) => setField("vat_id", e.target.value)}
+                                            placeholder={t.vatIdPlaceholder}
+                                            className="h-11"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="bank_name">{t.bankName}</Label>
                                     <Input
-                                        placeholder={t.postalCodePlaceholder}
+                                        id="bank_name"
+                                        value={values.bank_name}
+                                        onChange={(e) => setField("bank_name", e.target.value)}
+                                        placeholder={t.bankNamePlaceholder}
+                                        className="h-11"
                                     />
-                                </Form.Item>
+                                </div>
 
-                                <Form.Item
-                                    name="city"
-                                    label={t.city}
-                                    style={{ flex: 2 }}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: t.cityRequired,
-                                        },
-                                    ]}
-                                >
-                                    <Input placeholder={t.cityPlaceholder} />
-                                </Form.Item>
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="iban">{t.iban}</Label>
+                                    <Input
+                                        id="iban"
+                                        value={values.iban}
+                                        onChange={(e) => setField("iban", e.target.value)}
+                                        placeholder={t.ibanPlaceholder}
+                                        className="h-11"
+                                    />
+                                    <p className="text-sm text-muted-foreground">{t.ibanHelp}</p>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="bic">{t.bic}</Label>
+                                    <Input
+                                        id="bic"
+                                        value={values.bic}
+                                        onChange={(e) => setField("bic", e.target.value)}
+                                        placeholder={t.bicPlaceholder}
+                                        className="h-11"
+                                    />
+                                </div>
                             </div>
+                        )}
 
-                            <Form.Item name="country" label={t.country} initialValue="Deutschland">
-                                <Select showSearch options={euCountryOptions(language)} placeholder={t.countryPlaceholder} />
-                            </Form.Item>
-                        </div>
-                    )}
-
-                    {/* Step 2: Contact & Bank Info */}
-                    {currentStep === 1 && (
-                        <div>
-                            <div style={{ display: "flex", gap: 16 }}>
-                                <Form.Item
-                                    name="email"
-                                    label={t.email}
-                                    style={{ flex: 1 }}
-                                >
-                                    <Input placeholder={t.emailPlaceholder} />
-                                </Form.Item>
-
-                                <Form.Item
-                                    name="phone"
-                                    label={t.phone}
-                                    style={{ flex: 1 }}
-                                >
-                                    <Input placeholder={t.phonePlaceholder} />
-                                </Form.Item>
+                        {/* Step 3: Success */}
+                        {currentStep === 2 && (
+                            <div className="py-10 text-center">
+                                <CheckCircle2 className="mx-auto mb-6 size-16 text-[#52c41a]" />
+                                <h3 className="text-xl font-semibold">{t.successTitle}</h3>
+                                <p className="text-sm text-muted-foreground">{t.successText}</p>
                             </div>
+                        )}
+                    </form>
 
-                            <div style={{ display: "flex", gap: 16 }}>
-                                <Form.Item
-                                    name="tax_id"
-                                    label={t.taxId}
-                                    style={{ flex: 1 }}
-                                >
-                                    <Input placeholder={t.taxIdPlaceholder} />
-                                </Form.Item>
+                    {/* Navigation Buttons */}
+                    <div className="mt-6 flex justify-between">
+                        {currentStep === 0 && (
+                            <>
+                                <Button variant="outline" onClick={handleSkip}>{t.skip}</Button>
+                                <Button onClick={handleNext}>{t.next}</Button>
+                            </>
+                        )}
 
-                                <Form.Item
-                                    name="vat_id"
-                                    label={t.vatId}
-                                    style={{ flex: 1 }}
-                                >
-                                    <Input placeholder={t.vatIdPlaceholder} />
-                                </Form.Item>
-                            </div>
+                        {currentStep === 1 && (
+                            <>
+                                <Button variant="outline" onClick={handleBack}>{t.back}</Button>
+                                <Button onClick={handleFinish} disabled={saving}>
+                                    {saving && <Loader2 className="animate-spin" />}
+                                    {t.finish}
+                                </Button>
+                            </>
+                        )}
 
-                            <Form.Item name="bank_name" label={t.bankName}>
-                                <Input placeholder={t.bankNamePlaceholder} />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="iban"
-                                label={t.iban}
-                                extra={t.ibanHelp}
-                            >
-                                <Input placeholder={t.ibanPlaceholder} />
-                            </Form.Item>
-
-                            <Form.Item name="bic" label={t.bic}>
-                                <Input placeholder={t.bicPlaceholder} />
-                            </Form.Item>
-                        </div>
-                    )}
-
-                    {/* Step 3: Success */}
-                    {currentStep === 2 && (
-                        <div style={{ textAlign: "center", padding: "40px 0" }}>
-                            <CheckCircleOutlined
-                                style={{
-                                    fontSize: 64,
-                                    color: "#52c41a",
-                                    marginBottom: 24,
-                                }}
-                            />
-                            <Title level={3}>{t.successTitle}</Title>
-                            <Paragraph type="secondary">
-                                {t.successText}
-                            </Paragraph>
-                        </div>
-                    )}
-                </Form>
-
-                {/* Navigation Buttons */}
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: 24,
-                    }}
-                >
-                    {currentStep === 0 && (
-                        <>
-                            <Button onClick={handleSkip}>{t.skip}</Button>
-                            <Button type="primary" onClick={handleNext}>
-                                {t.next}
+                        {currentStep === 2 && (
+                            <Button className="w-full" size="lg" onClick={() => router.push("/dashboard")}>
+                                {t.gotoDashboard}
                             </Button>
-                        </>
-                    )}
-
-                    {currentStep === 1 && (
-                        <>
-                            <Button onClick={handleBack}>{t.back}</Button>
-                            <Button
-                                type="primary"
-                                onClick={handleFinish}
-                                loading={saving}
-                            >
-                                {t.finish}
-                            </Button>
-                        </>
-                    )}
-
-                    {currentStep === 2 && (
-                        <Button
-                            type="primary"
-                            block
-                            size="large"
-                            onClick={() => router.push("/dashboard")}
-                        >
-                            {t.gotoDashboard}
-                        </Button>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </CardContent>
             </Card>
         </div>
     );
