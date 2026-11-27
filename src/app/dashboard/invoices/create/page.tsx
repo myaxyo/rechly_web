@@ -21,34 +21,32 @@ import { defaultVatRate, VAT_RATE_OPTIONS } from "@/lib/vatDefaults";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-    Card,
-    Form,
-    Input,
-    Button,
-    Space,
-    message,
-    Typography,
-    Divider,
-    Select,
-    Table,
-    DatePicker,
-    Steps,
-    Result,
-    Modal,
-    Tooltip,
-} from "antd";
+    ArrowLeft, ArrowRight, Bot, Check, CircleCheck, Copy, FileText, Loader2, Plus,
+    RefreshCw, Save, Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-    PlusOutlined,
-    DeleteOutlined,
-    CopyOutlined,
-    ArrowLeftOutlined,
-    ArrowRightOutlined,
-    CheckOutlined,
-    FileTextOutlined,
-    RobotOutlined,
-    ReloadOutlined,
-    SaveOutlined,
-} from "@ant-design/icons";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { DatePicker, DateRangePicker } from "@/components/ui/date-picker";
+import { Steps } from "@/components/ui/steps";
 import dayjs, { type Dayjs } from "dayjs";
 import { getAllClients, createClient } from "@/lib/clientService";
 import { getAllProducts, createProduct } from "@/lib/productService";
@@ -67,8 +65,6 @@ import type {
     Product,
     UserCompany,
 } from "@/types";
-
-const { Title, Text } = Typography;
 
 export default function InvoiceCreatePage() {
     const router = useRouter();
@@ -99,7 +95,7 @@ export default function InvoiceCreatePage() {
     const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
     const [templateModalOpen, setTemplateModalOpen] = useState(false);
     const [templateSaving, setTemplateSaving] = useState(false);
-    const [templateForm] = Form.useForm();
+    const [templateName, setTemplateName] = useState("");
     const [generatingNotes, setGeneratingNotes] = useState(false);
     const [generatingPaymentTerms, setGeneratingPaymentTerms] = useState(false);
     const [generatingLineItemKey, setGeneratingLineItemKey] = useState<
@@ -114,10 +110,13 @@ export default function InvoiceCreatePage() {
 
     const [clientModalOpen, setClientModalOpen] = useState(false);
     const [clientSaving, setClientSaving] = useState(false);
-    const [clientForm] = Form.useForm();
+    const [clientValues, setClientValues] = useState({ name: "", email: "", phone: "", address_line1: "", postal_code: "", city: "", country: "Deutschland" });
+    const emptyClientValues = { name: "", email: "", phone: "", address_line1: "", postal_code: "", city: "", country: "Deutschland" };
     const [productModalOpen, setProductModalOpen] = useState(false);
     const [productSaving, setProductSaving] = useState(false);
-    const [productForm] = Form.useForm();
+    const [productValues, setProductValues] = useState<{ name: string; description: string; price: number; unit_of_measure: string; tax_rate_percent: number }>({
+        name: "", description: "", price: 0, unit_of_measure: "", tax_rate_percent: 19,
+    });
 
     const loadData = useCallback(async () => {
         try {
@@ -136,7 +135,7 @@ export default function InvoiceCreatePage() {
             setTemplates(templatesData);
         } catch (error) {
             console.error("Error loading data:", error);
-            message.error(t("invoiceCreate.loadError"));
+            toast.error(t("invoiceCreate.loadError"));
         } finally {
             setLoading(false);
         }
@@ -231,7 +230,7 @@ export default function InvoiceCreatePage() {
                     service_date_end: item.serviceDateEnd,
                 })),
             });
-            message.success(t("invoiceCreate.templateApplied"));
+            toast.success(t("invoiceCreate.templateApplied"));
         },
         [applyDraftData, t],
     );
@@ -240,12 +239,12 @@ export default function InvoiceCreatePage() {
     const prefillDraftForEdit = useCallback(async (id: string) => {
         const source = await getInvoiceById(id);
         if (!source) {
-            message.error(t("invoiceCreate.duplicateNotFound"));
+            toast.error(t("invoiceCreate.duplicateNotFound"));
             router.replace("/dashboard/invoices");
             return;
         }
         if (source.status !== "draft") {
-            message.warning(t("invoiceEdit.onlyDrafts"));
+            toast.warning(t("invoiceEdit.onlyDrafts"));
             router.replace(`/dashboard/invoices/${id}`);
             return;
         }
@@ -289,7 +288,7 @@ export default function InvoiceCreatePage() {
             if (duplicateId) {
                 const source = await getInvoiceById(duplicateId);
                 if (!source) {
-                    message.error(t("invoiceCreate.duplicateNotFound"));
+                    toast.error(t("invoiceCreate.duplicateNotFound"));
                     return;
                 }
                 applyDraftData({
@@ -310,11 +309,11 @@ export default function InvoiceCreatePage() {
                         service_date_end: item.service_date_end,
                     })),
                 });
-                message.success(t("invoiceCreate.duplicatedNotice"));
+                toast.success(t("invoiceCreate.duplicatedNotice"));
             } else if (templateId) {
                 const tpl = templates.find((item) => item.id === templateId);
                 if (!tpl) {
-                    message.error(t("invoiceCreate.templateNotFound"));
+                    toast.error(t("invoiceCreate.templateNotFound"));
                     return;
                 }
                 applyTemplate(tpl);
@@ -407,7 +406,7 @@ export default function InvoiceCreatePage() {
         const next = [...lineItems];
         next.splice(index + 1, 0, copy);
         setLineItems(next);
-        message.success(t("invoiceCreate.lineItemDuplicated"));
+        toast.success(t("invoiceCreate.lineItemDuplicated"));
     };
 
     /** Duplicate all selected line items, appended in their current order. */
@@ -421,7 +420,7 @@ export default function InvoiceCreatePage() {
             ...selected.map((item) => ({ ...item, key: makeItemKey() })),
         ]);
         setSelectedRowKeys([]);
-        message.success(
+        toast.success(
             t("invoiceCreate.selectedDuplicated").replace(
                 "{count}",
                 String(selected.length),
@@ -437,7 +436,7 @@ export default function InvoiceCreatePage() {
             lineItems.filter((item) => !selectedRowKeys.includes(item.key)),
         );
         setSelectedRowKeys([]);
-        message.success(
+        toast.success(
             t("invoiceCreate.selectedDeleted").replace("{count}", String(count)),
         );
     };
@@ -460,8 +459,9 @@ export default function InvoiceCreatePage() {
     };
 
     const handleCreateClient = async () => {
+        const values = clientValues;
+        if (!values.name.trim()) return;
         try {
-            const values = await clientForm.validateFields();
             setClientSaving(true);
             const newClient = await createClient({
                 name: values.name.trim(),
@@ -476,11 +476,11 @@ export default function InvoiceCreatePage() {
             setSelectedClient(newClient);
             setEInvoice(undefined);
             setClientModalOpen(false);
-            clientForm.resetFields();
-            message.success(t("invoiceCreate.createdClient"));
+            setClientValues(emptyClientValues);
+            toast.success(t("invoiceCreate.createdClient"));
         } catch (error) {
             if (error instanceof Error && error.message) {
-                message.error(error.message);
+                toast.error(error.message);
             }
         } finally {
             setClientSaving(false);
@@ -488,8 +488,9 @@ export default function InvoiceCreatePage() {
     };
 
     const handleCreateProduct = async () => {
+        const values = productValues;
+        if (!values.name.trim()) return;
         try {
-            const values = await productForm.validateFields();
             setProductSaving(true);
             const newProduct = await createProduct({
                 name: values.name.trim(),
@@ -500,14 +501,14 @@ export default function InvoiceCreatePage() {
             });
             setProducts((prev) => [...prev, newProduct]);
             setProductModalOpen(false);
-            productForm.resetFields();
-            message.success(t("invoiceCreate.createdProduct"));
+            setProductValues({ name: "", description: "", price: 0, unit_of_measure: t("invoiceCreate.unitPiece"), tax_rate_percent: defaultVatRate(company?.is_small_business, null, company?.is_flat_rate_farming) });
+            toast.success(t("invoiceCreate.createdProduct"));
             if (newProduct.id) {
                 addProductAsLineItem(newProduct.id);
             }
         } catch (error) {
             if (error instanceof Error && error.message) {
-                message.error(error.message);
+                toast.error(error.message);
             }
         } finally {
             setProductSaving(false);
@@ -532,20 +533,20 @@ export default function InvoiceCreatePage() {
             })),
         );
         if (!summary) {
-            message.info(t("invoiceCreate.noServiceDates"));
+            toast.info(t("invoiceCreate.noServiceDates"));
             return;
         }
         setDeliveryDateStart(dayjs(summary.start));
         setDeliveryDateEnd(dayjs(summary.end));
-        message.success(t("invoiceCreate.servicePeriodAdopted"));
+        toast.success(t("invoiceCreate.servicePeriodAdopted"));
     };
 
     /** Save the current draft as a reusable template. */
     const handleSaveTemplate = async () => {
         try {
-            const name = (templateForm.getFieldValue("name") as string | undefined)?.trim();
+            const name = templateName.trim();
             if (!name) {
-                message.warning(t("invoiceCreate.templateNameRequired"));
+                toast.warning(t("invoiceCreate.templateNameRequired"));
                 return;
             }
             setTemplateSaving(true);
@@ -572,11 +573,11 @@ export default function InvoiceCreatePage() {
             });
             setTemplates((prev) => [tpl, ...prev]);
             setTemplateModalOpen(false);
-            templateForm.resetFields();
-            message.success(t("invoiceCreate.templateSaved"));
+            setTemplateName("");
+            toast.success(t("invoiceCreate.templateSaved"));
         } catch (error) {
             console.error("Error saving template:", error);
-            message.error(error instanceof Error ? error.message : t("invoiceCreate.createError"));
+            toast.error(error instanceof Error ? error.message : t("invoiceCreate.createError"));
         } finally {
             setTemplateSaving(false);
         }
@@ -585,15 +586,15 @@ export default function InvoiceCreatePage() {
     const handleCreateInvoice = async () => {
         const draftError = validateInvoiceDraft(selectedClient?.id, lineItems.length);
         if (draftError === "missing-client") {
-            message.error(t("invoiceCreate.selectClientError"));
+            toast.error(t("invoiceCreate.selectClientError"));
             return;
         }
         if (draftError === "missing-items") {
-            message.error(t("invoiceCreate.addItemsError"));
+            toast.error(t("invoiceCreate.addItemsError"));
             return;
         }
         if (deliveryDateStart && deliveryDateEnd && deliveryDateStart.isAfter(deliveryDateEnd, "day")) {
-            message.error(t("invoiceCreate.servicePeriodInvalid"));
+            toast.error(t("invoiceCreate.servicePeriodInvalid"));
             return;
         }
         const hasInvalidItemPeriod = lineItems.some(
@@ -603,7 +604,7 @@ export default function InvoiceCreatePage() {
                 item.service_date_start > item.service_date_end,
         );
         if (hasInvalidItemPeriod) {
-            message.error(t("invoiceCreate.itemServicePeriodInvalid"));
+            toast.error(t("invoiceCreate.itemServicePeriodInvalid"));
             return;
         }
 
@@ -628,7 +629,7 @@ export default function InvoiceCreatePage() {
 
             if (editId) {
                 await updateDraftInvoice(editId, invoiceData);
-                message.success(t("invoiceEdit.saved"));
+                toast.success(t("invoiceEdit.saved"));
                 router.push(`/dashboard/invoices/${editId}`);
                 return;
             }
@@ -641,16 +642,16 @@ export default function InvoiceCreatePage() {
 
             setCreatedInvoiceId(created.id);
             setCurrentStep(3);
-            message.success(t("invoiceCreate.created"));
+            toast.success(t("invoiceCreate.created"));
         } catch (error) {
             console.error("Error creating invoice:", error);
             const status = (error as { status?: number } | null)?.status;
             // In edit mode a 409 can also mean "no longer a draft"; show the server message.
             if (status === 409 && !editId) {
-                message.error(t("invoiceCreate.numberTaken"));
+                toast.error(t("invoiceCreate.numberTaken"));
             } else {
                 const errorMsg = error instanceof Error ? error.message : t("invoiceCreate.createError");
-                message.error(errorMsg);
+                toast.error(errorMsg);
             }
         } finally {
             setSaving(false);
@@ -678,7 +679,7 @@ export default function InvoiceCreatePage() {
 
     const handleGenerateNotes = async () => {
         if (!selectedClient) {
-            message.warning(t("invoiceCreate.selectClientFirst"));
+            toast.warning(t("invoiceCreate.selectClientFirst"));
             return;
         }
 
@@ -689,10 +690,10 @@ export default function InvoiceCreatePage() {
                 ...buildAssistantPayload(),
             });
             setNotes(result.content);
-            message.success(t("invoiceCreate.notesAiCreated"));
+            toast.success(t("invoiceCreate.notesAiCreated"));
         } catch (error) {
             console.error("Error generating invoice notes:", error);
-            message.error(
+            toast.error(
                 error instanceof Error
                     ? error.message
                     : t("invoiceCreate.notesAiError"),
@@ -704,7 +705,7 @@ export default function InvoiceCreatePage() {
 
     const handleGeneratePaymentTerms = async () => {
         if (!selectedClient) {
-            message.warning(t("invoiceCreate.selectClientFirst"));
+            toast.warning(t("invoiceCreate.selectClientFirst"));
             return;
         }
 
@@ -715,10 +716,10 @@ export default function InvoiceCreatePage() {
                 ...buildAssistantPayload(),
             });
             setPaymentTerms(result.content);
-            message.success(t("invoiceCreate.paymentTermsAiCreated"));
+            toast.success(t("invoiceCreate.paymentTermsAiCreated"));
         } catch (error) {
             console.error("Error generating payment terms:", error);
-            message.error(
+            toast.error(
                 error instanceof Error
                     ? error.message
                     : t("invoiceCreate.paymentTermsAiError"),
@@ -732,7 +733,7 @@ export default function InvoiceCreatePage() {
         const serviceSummary =
             item.service_summary?.trim() || item.description.trim();
         if (!serviceSummary) {
-            message.warning(
+            toast.warning(
                 t("invoiceCreate.serviceSummaryHint"),
             );
             return;
@@ -749,10 +750,10 @@ export default function InvoiceCreatePage() {
             if (!item.service_summary?.trim()) {
                 updateLineItem(item.key, "service_summary", serviceSummary);
             }
-            message.success(t("invoiceCreate.lineItemAiCreated"));
+            toast.success(t("invoiceCreate.lineItemAiCreated"));
         } catch (error) {
             console.error("Error generating line item description:", error);
-            message.error(
+            toast.error(
                 error instanceof Error
                     ? error.message
                     : t("invoiceCreate.lineItemAiError"),
@@ -764,7 +765,7 @@ export default function InvoiceCreatePage() {
 
     const handleAiQuickFill = async () => {
         if (!aiPrompt.trim()) {
-            message.warning(t("invoiceCreate.aiQuickPlaceholder"));
+            toast.warning(t("invoiceCreate.aiQuickPlaceholder"));
             return;
         }
 
@@ -828,13 +829,13 @@ export default function InvoiceCreatePage() {
                 setNotes(parsed.notes);
             }
 
-            message.success(t("invoiceCreate.aiQuickSuccess"));
+            toast.success(t("invoiceCreate.aiQuickSuccess"));
             if (parsed.client_id || parsed.client_name) {
                 setCurrentStep(1);
             }
         } catch (error) {
             console.error("AI Quick Fill error:", error);
-            message.error(
+            toast.error(
                 error instanceof Error
                     ? error.message
                     : t("invoiceCreate.aiQuickError"),
@@ -844,584 +845,432 @@ export default function InvoiceCreatePage() {
         }
     };
 
-    const columns = [
-        {
-            title: t("invoiceCreate.description"),
-            dataIndex: "description",
-            key: "description",
-            render: (_: unknown, record: LineItem) => (
-                <Space direction="vertical" style={{ width: "100%" }} size={8}>
-                    <Input.TextArea
-                        value={record.description}
-                        onChange={(e) =>
-                            updateLineItem(
-                                record.key,
-                                "description",
-                                e.target.value,
-                            )
-                        }
-                        placeholder={t("invoiceCreate.descriptionPlaceholder")}
-                        rows={2}
-                    />
-                    <details><summary style={{ cursor: "pointer" }}>{t("einvoice.gtin")}</summary><Input aria-label={t("einvoice.gtin")} maxLength={14} value={record.gtin || ""} onChange={e => updateLineItem(record.key, "gtin", e.target.value)} placeholder={t("einvoice.gtinHelp")} /></details>
-                    <Space.Compact style={{ width: "100%" }}>
-                        <Input
-                            value={record.service_summary}
-                            onChange={(e) =>
-                                updateLineItem(
-                                    record.key,
-                                    "service_summary",
-                                    e.target.value,
-                                )
-                            }
-                            placeholder={t("invoiceCreate.serviceSummaryPlaceholder")}
-                        />
-                        <Button
-                            icon={<RobotOutlined />}
-                            loading={generatingLineItemKey === record.key}
-                            onClick={() =>
-                                void handleGenerateLineItemDescription(record)
-                            }
-                        >
-                            {t("invoiceCreate.ai")}
-                        </Button>
-                    </Space.Compact>
-                </Space>
-            ),
-        },
-        {
-            title: t("invoiceCreate.quantity"),
-            dataIndex: "quantity",
-            key: "quantity",
-            width: 100,
-            render: (_: unknown, record: LineItem) => (
-                <DecimalInput
-                    value={record.quantity}
-                    min={0}
-                    onChange={(val) =>
-                        updateLineItem(record.key, "quantity", val || 0)
-                    }
-                    style={{ width: "100%" }}
-                />
-            ),
-        },
-        {
-            title: t("invoiceDetail.unit"),
-            dataIndex: "unit_of_measure",
-            key: "unit_of_measure",
-            width: 100,
-            render: (_: unknown, record: LineItem) => (
-                <Select
-                    value={record.unit_of_measure}
-                    onChange={(val) =>
-                        updateLineItem(record.key, "unit_of_measure", val)
-                    }
-                    style={{ width: "100%" }}
-                    options={[
-                        { value: t("invoiceCreate.unitPiece"), label: t("invoiceCreate.unitPiece") },
-                        { value: t("invoiceCreate.unitHour"), label: t("invoiceCreate.unitHour") },
-                        { value: t("invoiceCreate.unitDay"), label: t("invoiceCreate.unitDay") },
-                        { value: t("invoiceCreate.unitMonth"), label: t("invoiceCreate.unitMonth") },
-                        { value: t("invoiceCreate.unitFlatRate"), label: t("invoiceCreate.unitFlatRate") },
-                        { value: "m²", label: "m²" },
-                        { value: "kg", label: "kg" },
-                    ]}
-                />
-            ),
-        },
-        {
-            title: t("invoiceCreate.unitPrice"),
-            dataIndex: "price",
-            key: "price",
-            width: 120,
-            render: (_: unknown, record: LineItem) => (
-                <Space.Compact style={{ width: "100%" }}>
-                    <DecimalInput
-                        value={record.price}
-                        min={0}
-                        step={0.01}
-                        precision={2}
-                        onChange={(val) =>
-                            updateLineItem(record.key, "price", val || 0)
-                        }
-                        style={{ width: "100%" }}
-                    />
-                    <Button disabled style={{ pointerEvents: "none" }}>
-                        €
-                    </Button>
-                </Space.Compact>
-            ),
-        },
-        {
-            title: t("invoiceCreate.vat"),
-            dataIndex: "tax_rate_percent",
-            key: "tax_rate_percent",
-            width: 100,
-            render: (_: unknown, record: LineItem) => (
-                <Select
-                    value={record.tax_rate_percent}
-                    onChange={(val) =>
-                        updateLineItem(record.key, "tax_rate_percent", val)
-                    }
-                    style={{ width: "100%" }}
-                    options={VAT_RATE_OPTIONS}
-                />
-            ),
-        },
-        {
-            title: t("invoiceCreate.itemServicePeriod"),
-            key: "service_period",
-            width: 210,
-            render: (_: unknown, record: LineItem) => (
-                <DatePicker.RangePicker
-                    size="small"
-                    format="DD.MM.YYYY"
-                    value={[
-                        record.service_date_start ? dayjs(record.service_date_start) : null,
-                        record.service_date_end ? dayjs(record.service_date_end) : null,
-                    ]}
-                    allowEmpty={[true, true]}
-                    onChange={(dates) => {
-                        const [start, end] = dates ?? [null, null];
-                        updateLineItem(record.key, "service_date_start", start ? start.format("YYYY-MM-DD") : undefined);
-                        updateLineItem(record.key, "service_date_end", end ? end.format("YYYY-MM-DD") : undefined);
-                    }}
-                    style={{ width: "100%" }}
-                />
-            ),
-        },
-        {
-            title: t("invoiceCreate.lineTotal"),
-            key: "line_total",
-            width: 100,
-            render: (_: unknown, record: LineItem) => {
-                const lineTotal = record.quantity * record.price;
-                return <Text strong>{formatCurrency(lineTotal)}</Text>;
-            },
-        },
-        {
-            title: "",
-            key: "actions",
-            width: 96,
-            render: (_: unknown, record: LineItem) => (
-                <Space size={0}>
-                    <Tooltip title={t("invoiceCreate.duplicateLineItem")}>
-                        <Button
-                            type="text"
-                            icon={<CopyOutlined />}
-                            onClick={() => duplicateLineItem(record.key)}
-                        />
-                    </Tooltip>
-                    <Tooltip title={t("invoiceCreate.deleteLineItem")}>
-                        <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => removeLineItem(record.key)}
-                        />
-                    </Tooltip>
-                </Space>
-            ),
-        },
+    const unitOptions = [
+        t("invoiceCreate.unitPiece"),
+        t("invoiceCreate.unitHour"),
+        t("invoiceCreate.unitDay"),
+        t("invoiceCreate.unitMonth"),
+        t("invoiceCreate.unitFlatRate"),
+        "m²",
+        "kg",
     ];
 
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
                 return (
-                    <Card title={t("invoiceCreate.selectClientCard")}>
-                        {templates.length > 0 && (
-                            <div style={{ marginBottom: 16 }}>
+                    <Card>
+                        <CardHeader><CardTitle>{t("invoiceCreate.selectClientCard")}</CardTitle></CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            {templates.length > 0 && (
                                 <Select
-                                    style={{ width: "100%" }}
-                                    placeholder={t("invoiceCreate.fromTemplate")}
                                     value={undefined}
-                                    onChange={(id: string) => {
-                                        const tpl = templates.find((item) => item.id === id);
+                                    onValueChange={(tplId) => {
+                                        const tpl = templates.find((item) => item.id === tplId);
                                         if (tpl) applyTemplate(tpl);
                                     }}
-                                    options={templates.map((tpl) => ({ value: tpl.id, label: tpl.name }))}
-                                    allowClear
-                                />
+                                >
+                                    <SelectTrigger aria-label={t("invoiceCreate.fromTemplate")}><SelectValue placeholder={t("invoiceCreate.fromTemplate")} /></SelectTrigger>
+                                    <SelectContent>
+                                        {templates.map((tpl) => (
+                                            <SelectItem key={tpl.id} value={tpl.id}>{tpl.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                                <div className="min-w-0 flex-1 basis-52">
+                                    <Select
+                                        value={selectedClient?.id}
+                                        onValueChange={(value) => {
+                                            const client = clients.find((c) => c.id === value);
+                                            setSelectedClient(client || null);
+                                            setEInvoice(undefined);
+                                        }}
+                                    >
+                                        <SelectTrigger className="h-10 w-full" aria-label={t("invoiceCreate.clientSearch")}><SelectValue placeholder={t("invoiceCreate.clientSearch")} /></SelectTrigger>
+                                        <SelectContent>
+                                            {clients.map((c) => (
+                                                <SelectItem key={c.id} value={c.id ?? ""}>
+                                                    {`${c.name} ${c.contact_person ? `(${c.contact_person})` : ""}`}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button type="button" size="lg" variant="outline" onClick={() => setClientModalOpen(true)}>
+                                    <Plus />
+                                    {t("invoiceCreate.newClientBtn")}
+                                </Button>
                             </div>
-                        )}
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <Select
-                                showSearch
-                                style={{ flex: "1 1 200px", minWidth: 0 }}
-                                placeholder={t("invoiceCreate.clientSearch")}
-                                optionFilterProp="label"
-                                value={selectedClient?.id}
-                                onChange={(value) => {
-                                    const client = clients.find(
-                                        (c) => c.id === value,
-                                    );
-                                    setSelectedClient(client || null);
-                                    setEInvoice(undefined);
-                                }}
-                                options={clients.map((c) => ({
-                                    value: c.id,
-                                    label: `${c.name} ${
-                                        c.contact_person
-                                            ? `(${c.contact_person})`
-                                            : ""
-                                    }`,
-                                }))}
-                                size="large"
-                            />
-                            <Button
-                                icon={<PlusOutlined />}
-                                size="large"
-                                onClick={() => setClientModalOpen(true)}
-                            >
-                                {t("invoiceCreate.newClientBtn")}
-                            </Button>
-                        </div>
-                        {selectedClient && <InvoiceIdentifierEditor key={selectedClient.id} initial={selectedClient.e_invoice} value={eInvoice} onChange={setEInvoice} />}
-                        {selectedClient && (
-                            <Card size="small" style={{ marginTop: 16 }}>
-                                <Title level={5}>{selectedClient.name}</Title>
-                                {selectedClient.contact_person && (
-                                    <Text>{selectedClient.contact_person}</Text>
-                                )}
-                                <br />
-                                <Text type="secondary">
-                                    {selectedClient.address_line1}
-                                    <br />
-                                    {selectedClient.postal_code}{" "}
-                                    {selectedClient.city}
-                                </Text>
-                                <br />
-                                <Text type="secondary">
-                                    {selectedClient.email}
-                                </Text>
-                            </Card>
-                        )}
+                            {selectedClient && <InvoiceIdentifierEditor key={selectedClient.id} initial={selectedClient.e_invoice} value={eInvoice} onChange={setEInvoice} />}
+                            {selectedClient && (
+                                <Card>
+                                    <CardContent>
+                                        <h3 className="text-base font-semibold">{selectedClient.name}</h3>
+                                        {selectedClient.contact_person && <p className="text-sm">{selectedClient.contact_person}</p>}
+                                        <p className="text-sm text-muted-foreground">
+                                            {selectedClient.address_line1}
+                                            <br />
+                                            {selectedClient.postal_code} {selectedClient.city}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">{selectedClient.email}</p>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </CardContent>
                     </Card>
                 );
 
             case 1:
                 return (
-                    <Card title={t("invoiceCreate.addPositions")}>
-                        <Space style={{ marginBottom: 16 }} wrap>
-                            <Select
-                                style={{ width: 300, maxWidth: "100%" }}
-                                placeholder={t("invoiceCreate.addProduct")}
-                                onChange={addProductAsLineItem}
-                                value={undefined}
-                                options={products.map((p) => ({
-                                    value: p.id,
-                                    label: `${p.name} - ${formatCurrency(
-                                        p.price,
-                                    )}`,
-                                }))}
-                            />
-                            <Button
-                                icon={<PlusOutlined />}
-                                onClick={() => setProductModalOpen(true)}
-                            >
-                                {t("invoiceCreate.newProductBtn")}
-                            </Button>
-                            <Button
-                                icon={<PlusOutlined />}
-                                onClick={addLineItem}
-                            >
-                                {t("invoiceCreate.freePosition")}
-                            </Button>
-                        </Space>
-
-                        <Table
-                            columns={columns}
-                            dataSource={lineItems}
-                            pagination={false}
-                            rowKey="key"
-                            scroll={{ x: 1000 }}
-                            rowSelection={{
-                                selectedRowKeys,
-                                onChange: (keys) =>
-                                    setSelectedRowKeys(keys as string[]),
-                            }}
-                            locale={{ emptyText: t("invoiceDetail.noPositions") }}
-                        />
-
-                        {selectedRowKeys.length > 0 && (
-                            <Space style={{ marginTop: 12 }} wrap>
-                                <Text type="secondary">
-                                    {t("invoiceCreate.selectedCount").replace(
-                                        "{count}",
-                                        String(selectedRowKeys.length),
-                                    )}
-                                </Text>
-                                <Button
-                                    icon={<CopyOutlined />}
-                                    onClick={duplicateSelectedItems}
-                                >
-                                    {t("invoiceCreate.duplicateSelected")}
+                    <Card>
+                        <CardHeader><CardTitle>{t("invoiceCreate.addPositions")}</CardTitle></CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            <div className="flex flex-wrap gap-2">
+                                <div className="w-full sm:w-[300px]">
+                                    <Select value={undefined} onValueChange={addProductAsLineItem}>
+                                        <SelectTrigger aria-label={t("invoiceCreate.addProduct")}><SelectValue placeholder={t("invoiceCreate.addProduct")} /></SelectTrigger>
+                                        <SelectContent>
+                                            {products.map((prod) => (
+                                                <SelectItem key={prod.id} value={prod.id ?? ""}>
+                                                    {`${prod.name} - ${formatCurrency(prod.price)}`}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button type="button" variant="outline" onClick={() => {
+                                    setProductValues({ name: "", description: "", price: 0, unit_of_measure: t("invoiceCreate.unitPiece"), tax_rate_percent: defaultVatRate(company?.is_small_business, null, company?.is_flat_rate_farming) });
+                                    setProductModalOpen(true);
+                                }}>
+                                    <Plus />
+                                    {t("invoiceCreate.newProductBtn")}
                                 </Button>
-                                <Button
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={removeSelectedItems}
-                                >
-                                    {t("invoiceCreate.deleteSelected")}
+                                <Button type="button" variant="outline" onClick={addLineItem}>
+                                    <Plus />
+                                    {t("invoiceCreate.freePosition")}
                                 </Button>
-                            </Space>
-                        )}
+                            </div>
 
-                        <Divider />
-
-                        <div style={{ textAlign: "right" }}>
-                            <Space direction="vertical" align="end">
-                                <Text>
-                                    {t("invoiceCreate.subtotal")}:{" "}
-                                    <Text strong>
-                                        {formatCurrency(
-                                            totals.netAfterDiscount,
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[40px]">
+                                                <Checkbox
+                                                    checked={lineItems.length > 0 && selectedRowKeys.length === lineItems.length}
+                                                    onCheckedChange={(checked) => setSelectedRowKeys(checked ? lineItems.map((i) => i.key) : [])}
+                                                    aria-label="Select all"
+                                                />
+                                            </TableHead>
+                                            <TableHead>{t("invoiceCreate.description")}</TableHead>
+                                            <TableHead className="w-[110px]">{t("invoiceCreate.quantity")}</TableHead>
+                                            <TableHead className="w-[110px]">{t("invoiceDetail.unit")}</TableHead>
+                                            <TableHead className="w-[130px]">{t("invoiceCreate.unitPrice")}</TableHead>
+                                            <TableHead className="w-[110px]">{t("invoiceCreate.vat")}</TableHead>
+                                            <TableHead className="w-[230px]">{t("invoiceCreate.itemServicePeriod")}</TableHead>
+                                            <TableHead className="w-[110px] text-right">{t("invoiceCreate.lineTotal")}</TableHead>
+                                            <TableHead className="w-[96px]"><span className="sr-only">Actions</span></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {lineItems.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                                                    {t("invoiceDetail.noPositions")}
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            lineItems.map((record) => (
+                                                <TableRow key={record.key}>
+                                                    <TableCell>
+                                                        <Checkbox
+                                                            checked={selectedRowKeys.includes(record.key)}
+                                                            onCheckedChange={(checked) =>
+                                                                setSelectedRowKeys((keys) => checked ? [...keys, record.key] : keys.filter((k) => k !== record.key))
+                                                            }
+                                                            aria-label="Select row"
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="min-w-[220px]">
+                                                        <div className="flex flex-col gap-2">
+                                                            <Textarea
+                                                                value={record.description}
+                                                                onChange={(e) => updateLineItem(record.key, "description", e.target.value)}
+                                                                placeholder={t("invoiceCreate.descriptionPlaceholder")}
+                                                                rows={2}
+                                                            />
+                                                            <details>
+                                                                <summary className="cursor-pointer text-sm">{t("einvoice.gtin")}</summary>
+                                                                <Input aria-label={t("einvoice.gtin")} maxLength={14} value={record.gtin || ""}
+                                                                    onChange={(e) => updateLineItem(record.key, "gtin", e.target.value)} placeholder={t("einvoice.gtinHelp")} />
+                                                            </details>
+                                                            <div className="flex gap-2">
+                                                                <Input
+                                                                    value={record.service_summary}
+                                                                    onChange={(e) => updateLineItem(record.key, "service_summary", e.target.value)}
+                                                                    placeholder={t("invoiceCreate.serviceSummaryPlaceholder")}
+                                                                    className="min-w-0 flex-1"
+                                                                />
+                                                                <Button type="button" variant="outline" size="sm" className="shrink-0" disabled={generatingLineItemKey === record.key}
+                                                                    onClick={() => void handleGenerateLineItemDescription(record)}>
+                                                                    {generatingLineItemKey === record.key ? <Loader2 className="animate-spin" /> : <Bot />}
+                                                                    {t("invoiceCreate.ai")}
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DecimalInput value={record.quantity} min={0}
+                                                            onChange={(val) => updateLineItem(record.key, "quantity", val || 0)} style={{ width: "100%" }} />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Select value={record.unit_of_measure} onValueChange={(val) => updateLineItem(record.key, "unit_of_measure", val)}>
+                                                            <SelectTrigger aria-label={t("invoiceDetail.unit")}><SelectValue /></SelectTrigger>
+                                                            <SelectContent>
+                                                                {unitOptions.map((u) => (
+                                                                    <SelectItem key={u} value={u}>{u}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DecimalInput value={record.price} min={0} step={0.01} precision={2} addonAfter="€"
+                                                            onChange={(val) => updateLineItem(record.key, "price", val || 0)} style={{ width: "100%" }} />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Select value={String(record.tax_rate_percent)} onValueChange={(val) => updateLineItem(record.key, "tax_rate_percent", Number(val))}>
+                                                            <SelectTrigger aria-label={t("invoiceCreate.vat")}><SelectValue /></SelectTrigger>
+                                                            <SelectContent>
+                                                                {VAT_RATE_OPTIONS.map((o) => (
+                                                                    <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DateRangePicker
+                                                            value={[record.service_date_start ? dayjs(record.service_date_start) : null, record.service_date_end ? dayjs(record.service_date_end) : null]}
+                                                            onChange={(range) => {
+                                                                const [start, end] = range ?? [null, null];
+                                                                updateLineItem(record.key, "service_date_start", start ? start.format("YYYY-MM-DD") : undefined);
+                                                                updateLineItem(record.key, "service_date_end", end ? end.format("YYYY-MM-DD") : undefined);
+                                                            }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-medium">{formatCurrency(record.quantity * record.price)}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button type="button" variant="ghost" size="icon" onClick={() => duplicateLineItem(record.key)} aria-label={t("invoiceCreate.duplicateLineItem")}>
+                                                                        <Copy />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>{t("invoiceCreate.duplicateLineItem")}</TooltipContent>
+                                                            </Tooltip>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => removeLineItem(record.key)} aria-label={t("invoiceCreate.deleteLineItem")}>
+                                                                        <Trash2 />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>{t("invoiceCreate.deleteLineItem")}</TooltipContent>
+                                                            </Tooltip>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
                                         )}
-                                    </Text>
-                                </Text>
-                                <Text>
-                                    {t("invoiceCreate.vat")}:{" "}
-                                    <Text strong>
-                                        {formatCurrency(totals.totalVAT)}
-                                    </Text>
-                                </Text>
-                                <Title level={4} style={{ margin: 0 }}>
-                                    {t("invoiceCreate.total")}: {formatCurrency(totals.totalGross)}
-                                </Title>
-                            </Space>
-                        </div>
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {selectedRowKeys.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-sm text-muted-foreground">
+                                        {t("invoiceCreate.selectedCount").replace("{count}", String(selectedRowKeys.length))}
+                                    </span>
+                                    <Button type="button" variant="outline" size="sm" onClick={duplicateSelectedItems}>
+                                        <Copy />
+                                        {t("invoiceCreate.duplicateSelected")}
+                                    </Button>
+                                    <Button type="button" variant="destructive" size="sm" onClick={removeSelectedItems}>
+                                        <Trash2 />
+                                        {t("invoiceCreate.deleteSelected")}
+                                    </Button>
+                                </div>
+                            )}
+
+                            <Separator />
+
+                            <div className="flex flex-col items-end gap-1 text-sm">
+                                <span>{t("invoiceCreate.subtotal")}: <strong>{formatCurrency(totals.netAfterDiscount)}</strong></span>
+                                <span>{t("invoiceCreate.vat")}: <strong>{formatCurrency(totals.totalVAT)}</strong></span>
+                                <span className="text-lg font-semibold">{t("invoiceCreate.total")}: {formatCurrency(totals.totalGross)}</span>
+                            </div>
+                        </CardContent>
                     </Card>
                 );
 
             case 2:
                 return (
-                    <Card
-                        title={t("invoiceCreate.invoiceDetails")}
-                        extra={
-                            <Button
-                                icon={<SaveOutlined />}
-                                onClick={() => setTemplateModalOpen(true)}
-                            >
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t("invoiceCreate.invoiceDetails")}</CardTitle>
+                            <Button type="button" variant="outline" size="sm" onClick={() => setTemplateModalOpen(true)}>
+                                <Save />
                                 {t("invoiceCreate.saveAsTemplate")}
                             </Button>
-                        }
-                    >
-                        <Form layout="vertical">
-                            <Space style={{ width: "100%" }}>
-                                <Form.Item
-                                    label={t("invoiceCreate.invoiceNumber")}
-                                    style={{ flex: 1 }}
-                                >
-                                    <Space.Compact style={{ width: "100%" }}>
-                                        <Input
-                                            value={invoiceNumber}
-                                            onChange={(e) => {
-                                                setInvoiceNumber(e.target.value);
-                                                setNumberTouched(true);
-                                            }}
-                                            placeholder={t("invoiceCreate.invoiceNumberPlaceholder")}
-                                        />
-                                        <Tooltip title={t("invoiceCreate.newNumberTooltip")}>
-                                            <Button
-                                                icon={<ReloadOutlined />}
-                                                onClick={() => void generateInvoiceNumber()}
-                                            />
-                                        </Tooltip>
-                                    </Space.Compact>
-                                </Form.Item>
-                            </Space>
-                            {!numberTouched && invoiceNumber && (
-                                <Text type="secondary" style={{ display: "block", marginTop: -12, marginBottom: 16, fontSize: 12 }}>
-                                    {t("invoiceCreate.autoNumberHint")}
-                                </Text>
-                            )}
-
-                            <Form.Item
-                                label={t("invoiceCreate.deliveryPeriod")}
-                                extra={t("invoiceCreate.deliveryPeriodHelp")}
-                            >
-                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                                    <DatePicker.RangePicker
-                                        format="DD.MM.YYYY"
-                                        value={[deliveryDateStart, deliveryDateEnd]}
-                                        onChange={(dates) => {
-                                            const [start, end] = dates ?? [null, null];
-                                            setDeliveryDateStart(start);
-                                            setDeliveryDateEnd(end);
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <Label htmlFor="inv-number">{t("invoiceCreate.invoiceNumber")}</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="inv-number"
+                                        value={invoiceNumber}
+                                        onChange={(e) => {
+                                            setInvoiceNumber(e.target.value);
+                                            setNumberTouched(true);
                                         }}
-                                        allowEmpty={[true, true]}
-                                        style={{ flex: "1 1 260px", minWidth: 0 }}
+                                        placeholder={t("invoiceCreate.invoiceNumberPlaceholder")}
+                                        className="min-w-0 flex-1"
                                     />
-                                    <Button onClick={handleAdoptServicePeriod}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button type="button" variant="outline" size="icon" onClick={() => void generateInvoiceNumber()} aria-label={t("invoiceCreate.newNumberTooltip")}>
+                                                <RefreshCw />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>{t("invoiceCreate.newNumberTooltip")}</TooltipContent>
+                                    </Tooltip>
+                                </div>
+                                {!numberTouched && invoiceNumber && (
+                                    <p className="text-xs text-muted-foreground">{t("invoiceCreate.autoNumberHint")}</p>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <Label>{t("invoiceCreate.deliveryPeriod")}</Label>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <div className="min-w-0 flex-1 basis-64">
+                                        <DateRangePicker
+                                            value={[deliveryDateStart, deliveryDateEnd]}
+                                            onChange={(range) => {
+                                                const [start, end] = range ?? [null, null];
+                                                setDeliveryDateStart(start);
+                                                setDeliveryDateEnd(end);
+                                            }}
+                                        />
+                                    </div>
+                                    <Button type="button" variant="outline" onClick={handleAdoptServicePeriod}>
                                         {t("invoiceCreate.deliveryPeriodAuto")}
                                     </Button>
                                 </div>
-                            </Form.Item>
+                                <p className="text-xs text-muted-foreground">{t("invoiceCreate.deliveryPeriodHelp")}</p>
+                            </div>
 
-                            <Space style={{ width: "100%" }}>
-                                <Form.Item
-                                    label={t("invoiceCreate.invoiceDate")}
-                                    style={{ flex: 1 }}
-                                >
-                                    <DatePicker
-                                        value={invoiceDate}
-                                        onChange={(date) =>
-                                            date && setInvoiceDate(date)
-                                        }
-                                        format="DD.MM.YYYY"
-                                        style={{ width: "100%" }}
-                                    />
-                                </Form.Item>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="flex flex-col gap-1.5">
+                                    <Label>{t("invoiceCreate.invoiceDate")}</Label>
+                                    <DatePicker value={invoiceDate} onChange={(date) => date && setInvoiceDate(date)} format="DD.MM.YYYY" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <Label>{t("invoiceCreate.dueDate")}</Label>
+                                    <DatePicker value={dueDate} onChange={(date) => date && setDueDate(date)} format="DD.MM.YYYY" />
+                                </div>
+                            </div>
 
-                                <Form.Item
-                                    label={t("invoiceCreate.dueDate")}
-                                    style={{ flex: 1 }}
-                                >
-                                    <DatePicker
-                                        value={dueDate}
-                                        onChange={(date) =>
-                                            date && setDueDate(date)
-                                        }
-                                        format="DD.MM.YYYY"
-                                        style={{ width: "100%" }}
-                                    />
-                                </Form.Item>
-                            </Space>
-
-                            <Form.Item label={t("invoiceCreate.notesLabel")}>
-                                <Space style={{ marginBottom: 8 }}>
-                                    <Button
-                                        icon={<RobotOutlined />}
-                                        loading={generatingNotes}
-                                        onClick={handleGenerateNotes}
-                                    >
+                            <div className="flex flex-col gap-1.5">
+                                <Label htmlFor="inv-notes">{t("invoiceCreate.notesLabel")}</Label>
+                                <div>
+                                    <Button type="button" variant="outline" size="sm" disabled={generatingNotes} onClick={() => void handleGenerateNotes()}>
+                                        {generatingNotes ? <Loader2 className="animate-spin" /> : <Bot />}
                                         {t("invoiceCreate.generateWithAi")}
                                     </Button>
-                                </Space>
-                                <Input.TextArea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    rows={3}
-                                    placeholder={t("invoiceCreate.notesPlaceholderLong")}
-                                />
-                            </Form.Item>
+                                </div>
+                                <Textarea id="inv-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
+                                    placeholder={t("invoiceCreate.notesPlaceholderLong")} />
+                            </div>
 
-                            <Form.Item label={t("invoiceCreate.paymentTermsLabel")}>
-                                <Space style={{ marginBottom: 8 }}>
-                                    <Button
-                                        icon={<RobotOutlined />}
-                                        loading={generatingPaymentTerms}
-                                        onClick={handleGeneratePaymentTerms}
-                                    >
+                            <div className="flex flex-col gap-1.5">
+                                <Label htmlFor="inv-terms">{t("invoiceCreate.paymentTermsLabel")}</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button type="button" variant="outline" size="sm" disabled={generatingPaymentTerms} onClick={() => void handleGeneratePaymentTerms()}>
+                                        {generatingPaymentTerms ? <Loader2 className="animate-spin" /> : <Bot />}
                                         {t("invoiceCreate.generateWithAi")}
                                     </Button>
                                     {company?.payment_terms_default ? (
-                                        <Button
-                                            onClick={() =>
-                                                setPaymentTerms(
-                                                    company.payment_terms_default,
-                                                )
-                                            }
-                                        >
+                                        <Button type="button" variant="outline" size="sm" onClick={() => setPaymentTerms(company.payment_terms_default)}>
                                             {t("invoiceCreate.restoreDefault")}
                                         </Button>
                                     ) : null}
-                                </Space>
-                                <Input.TextArea
-                                    value={paymentTerms}
-                                    onChange={(e) =>
-                                        setPaymentTerms(e.target.value)
-                                    }
-                                    rows={3}
-                                    placeholder={t("invoiceCreate.paymentTermsPlaceholderLong")}
-                                />
-                            </Form.Item>
-                        </Form>
+                                </div>
+                                <Textarea id="inv-terms" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} rows={3}
+                                    placeholder={t("invoiceCreate.paymentTermsPlaceholderLong")} />
+                            </div>
 
-                        <Divider>{t("invoiceCreate.summary")}</Divider>
+                            <div className="flex items-center gap-3">
+                                <Separator className="flex-1" />
+                                <span className="text-sm font-medium text-muted-foreground">{t("invoiceCreate.summary")}</span>
+                                <Separator className="flex-1" />
+                            </div>
 
-                        <Card size="small" className="dashboard-subpanel">
-                            <Space
-                                direction="vertical"
-                                style={{ width: "100%" }}
-                            >
-                                <div>
-                                    <Text type="secondary">{t("invoiceCreate.client")}</Text>
-                                    <br />
-                                    <Text strong>{selectedClient?.name}</Text>
-                                </div>
-                                <div>
-                                    <Text type="secondary">{t("invoiceCreate.positionsCount")}</Text>
-                                    <br />
-                                    <Text strong>{lineItems.length}</Text>
-                                </div>
-                                <div>
-                                    <Text type="secondary">{t("invoiceCreate.totalAmount")}</Text>
-                                    <br />
-                                    <Title level={4} style={{ margin: 0 }}>
-                                        {formatCurrency(totals.totalGross)}
-                                    </Title>
-                                </div>
-                                <div style={{ paddingTop: 8, borderTop: "1px solid #e5e7eb" }}>
-                                    {company?.bank_iban ? (
-                                        <Text type="secondary" style={{ fontSize: 12 }}>
-                                            <span style={{ color: "#16a34a", fontWeight: 600 }}>✓ GiroCode: </span>
-                                            {language === "en"
-                                                ? "SEPA QR code will be generated on invoice"
-                                                : "SEPA-QR-Code wird auf Rechnung generiert"}
-                                        </Text>
-                                    ) : (
-                                        <Text type="secondary" style={{ fontSize: 12 }}>
-                                            <span style={{ color: "#d97706", fontWeight: 600 }}>ℹ GiroCode: </span>
-                                            {language === "en"
-                                                ? "Add IBAN in Settings to enable payment QR code"
-                                                : "IBAN in Einstellungen hinterlegen für Zahlungs-QR-Code"}
-                                        </Text>
-                                    )}
-                                </div>
-                            </Space>
-                        </Card>
+                            <Card className="dashboard-subpanel">
+                                <CardContent className="flex flex-col gap-3">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">{t("invoiceCreate.client")}</p>
+                                        <p className="font-semibold">{selectedClient?.name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">{t("invoiceCreate.positionsCount")}</p>
+                                        <p className="font-semibold">{lineItems.length}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">{t("invoiceCreate.totalAmount")}</p>
+                                        <p className="text-xl font-semibold">{formatCurrency(totals.totalGross)}</p>
+                                    </div>
+                                    <div className="border-t border-border pt-2 text-xs text-muted-foreground">
+                                        {company?.bank_iban ? (
+                                            <span>
+                                                <span className="font-semibold text-emerald-600">✓ GiroCode: </span>
+                                                {language === "en" ? "SEPA QR code will be generated on invoice" : "SEPA-QR-Code wird auf Rechnung generiert"}
+                                            </span>
+                                        ) : (
+                                            <span>
+                                                <span className="font-semibold text-amber-600">ℹ GiroCode: </span>
+                                                {language === "en" ? "Add IBAN in Settings to enable payment QR code" : "IBAN in Einstellungen hinterlegen für Zahlungs-QR-Code"}
+                                            </span>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </CardContent>
                     </Card>
                 );
 
             case 3:
                 return (
-                    <Result
-                        status="success"
-                        icon={<FileTextOutlined style={{ color: "#2855d9" }} />}
-                        title={t("invoiceCreate.successTitle")}
-                        subTitle={`${t("invoiceCreate.successSubtitle")} ${invoiceNumber}`}
-                        extra={[
-                            <Button
-                                type="primary"
-                                key="view"
-                                onClick={() =>
-                                    router.push(
-                                        `/dashboard/invoices/${createdInvoiceId}`,
-                                    )
-                                }
-                            >
-                                {t("invoiceCreate.viewInvoiceBtn")}
-                            </Button>,
-                            <Button
-                                key="pdf"
-                                onClick={() =>
-                                    router.push(
-                                        `/dashboard/invoices/${createdInvoiceId}/pdf`,
-                                    )
-                                }
-                            >
-                                {t("invoiceCreate.createPdf")}
-                            </Button>,
-                            <Button
-                                key="new"
-                                onClick={() => window.location.reload()}
-                            >
-                                {t("invoiceCreate.newInvoice")}
-                            </Button>,
-                        ]}
-                    />
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
+                            <CircleCheck className="size-12 text-primary" />
+                            <h3 className="text-lg font-semibold">{t("invoiceCreate.successTitle")}</h3>
+                            <p className="text-sm text-muted-foreground">{`${t("invoiceCreate.successSubtitle")} ${invoiceNumber}`}</p>
+                            <div className="flex flex-wrap justify-center gap-2">
+                                <Button type="button" onClick={() => router.push(`/dashboard/invoices/${createdInvoiceId}`)}>
+                                    {t("invoiceCreate.viewInvoiceBtn")}
+                                </Button>
+                                <Button type="button" variant="outline" onClick={() => router.push(`/dashboard/invoices/${createdInvoiceId}/pdf`)}>
+                                    {t("invoiceCreate.createPdf")}
+                                </Button>
+                                <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+                                    {t("invoiceCreate.newInvoice")}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 );
 
             default:
@@ -1445,27 +1294,33 @@ export default function InvoiceCreatePage() {
     };
 
     if (loading) {
-        return <Card loading />;
+        return (
+            <Card>
+                <CardContent className="flex flex-col gap-3">
+                    <Skeleton className="h-6 w-56" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                </CardContent>
+            </Card>
+        );
     }
 
     return (
-        <div>
-            <Space style={{ marginBottom: 16 }}>
-                <Button
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => router.push(editId ? `/dashboard/invoices/${editId}` : "/dashboard/invoices")}
-                >
+        <TooltipProvider>
+        <div className="flex flex-col gap-5">
+            <div className="flex flex-wrap items-center gap-3">
+                <Button type="button" variant="outline" onClick={() => router.push(editId ? `/dashboard/invoices/${editId}` : "/dashboard/invoices")}>
+                    <ArrowLeft />
                     {t("invoiceCreate.backBtn")}
                 </Button>
-                <Title level={4} style={{ margin: 0 }}>
+                <h2 className="text-xl font-semibold">
                     {editId ? t("invoiceEdit.title") : t("invoiceCreate.newInvoiceTitle")}
-                </Title>
+                </h2>
                 <HelpLink href="/hilfe/rechnungen-und-angebote" label="Hilfe zur Rechnungserstellung" />
-            </Space>
+            </div>
 
             <Steps
                 current={currentStep}
-                style={{ marginBottom: 24 }}
                 items={[
                     { title: t("invoiceCreate.stepClient") },
                     { title: t("invoiceCreate.stepPositions") },
@@ -1475,243 +1330,208 @@ export default function InvoiceCreatePage() {
             />
 
             {currentStep < 2 && (
-                <Card
-                    size="small"
-                    className="dashboard-ai-card"
-                    style={{
-                        marginBottom: 20,
-                    }}
-                >
-                    <Space
-                        direction="vertical"
-                        style={{ width: "100%" }}
-                        size={8}
-                    >
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                flexWrap: "wrap",
-                                gap: 8,
-                            }}
-                        >
-                            <Space align="center" size={6}>
-                                <RobotOutlined
-                                    style={{
-                                        fontSize: 18,
-                                        color: "#2855d9",
-                                    }}
-                                />
-                                <Text strong style={{ fontSize: 14 }}>
-                                    {t("invoiceCreate.aiQuickTitle")}
-                                </Text>
-                            </Space>
-                            <Text type="secondary" style={{ fontSize: 12 }}>
-                                {t("invoiceCreate.aiQuickDesc")}
-                            </Text>
+                <Card className="dashboard-ai-card">
+                    <CardContent className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="flex items-center gap-1.5">
+                                <Bot className="size-[18px] text-primary" />
+                                <strong className="text-sm">{t("invoiceCreate.aiQuickTitle")}</strong>
+                            </span>
+                            <span className="text-xs text-muted-foreground">{t("invoiceCreate.aiQuickDesc")}</span>
                         </div>
-
-                        <div
-                            style={{
-                                display: "flex",
-                                gap: 8,
-                                width: "100%",
-                                alignItems: "center",
-                            }}
-                        >
+                        <div className="flex w-full items-center gap-2">
                             <Input
                                 value={aiPrompt}
                                 onChange={(e) => setAiPrompt(e.target.value)}
-                                onPressEnter={handleAiQuickFill}
-                                placeholder={t(
-                                    "invoiceCreate.aiQuickPlaceholder",
-                                )}
-                                allowClear
-                                style={{ flex: 1 }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") void handleAiQuickFill();
+                                }}
+                                placeholder={t("invoiceCreate.aiQuickPlaceholder")}
+                                className="min-w-0 flex-1"
                             />
-                            <Button
-                                type="primary"
-                                icon={<RobotOutlined />}
-                                loading={parsingPrompt}
-                                onClick={handleAiQuickFill}
-                            >
+                            <Button type="button" disabled={parsingPrompt} onClick={() => void handleAiQuickFill()}>
+                                {parsingPrompt ? <Loader2 className="animate-spin" /> : <Bot />}
                                 {t("invoiceCreate.aiQuickBtn")}
                             </Button>
                         </div>
-                    </Space>
+                    </CardContent>
                 </Card>
             )}
 
             {renderStepContent()}
 
-            <Modal
-                title={t("invoiceCreate.newClientTitle")}
+            {/* New client dialog */}
+            <Dialog
                 open={clientModalOpen}
-                onOk={handleCreateClient}
-                onCancel={() => {
-                    setClientModalOpen(false);
-                    clientForm.resetFields();
+                onOpenChange={(open) => {
+                    setClientModalOpen(open);
+                    if (!open) setClientValues(emptyClientValues);
                 }}
-                okText={t("clients.create")}
-                cancelText={t("clients.cancel")}
-                confirmLoading={clientSaving}
-                destroyOnHidden
             >
-                <Form form={clientForm} layout="vertical" preserve={false}>
-                    <Form.Item
-                        label={t("clients.name")}
-                        name="name"
-                        rules={[{ required: true }]}
-                    >
-                        <Input autoFocus />
-                    </Form.Item>
-                    <Form.Item label={t("clients.email")} name="email">
-                        <Input type="email" />
-                    </Form.Item>
-                    <Form.Item label={t("clients.phone")} name="phone">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label={t("clients.address")} name="address_line1">
-                        <Input />
-                    </Form.Item>
-                    <div style={{ display: "flex", gap: 8 }}>
-                        <Form.Item
-                            label={t("clients.postalCode")}
-                            name="postal_code"
-                            style={{ flex: "0 0 110px" }}
-                        >
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            label={t("clients.city")}
-                            name="city"
-                            style={{ flex: 1 }}
-                        >
-                            <Input />
-                        </Form.Item>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t("invoiceCreate.newClientTitle")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="nc-name">{t("clients.name")}</Label>
+                            <Input id="nc-name" autoFocus value={clientValues.name} onChange={(e) => setClientValues((v) => ({ ...v, name: e.target.value }))} />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="nc-email">{t("clients.email")}</Label>
+                            <Input id="nc-email" type="email" value={clientValues.email} onChange={(e) => setClientValues((v) => ({ ...v, email: e.target.value }))} />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="nc-phone">{t("clients.phone")}</Label>
+                            <Input id="nc-phone" value={clientValues.phone} onChange={(e) => setClientValues((v) => ({ ...v, phone: e.target.value }))} />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="nc-address">{t("clients.address")}</Label>
+                            <Input id="nc-address" value={clientValues.address_line1} onChange={(e) => setClientValues((v) => ({ ...v, address_line1: e.target.value }))} />
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="flex w-[110px] shrink-0 flex-col gap-1.5">
+                                <Label htmlFor="nc-postal">{t("clients.postalCode")}</Label>
+                                <Input id="nc-postal" value={clientValues.postal_code} onChange={(e) => setClientValues((v) => ({ ...v, postal_code: e.target.value }))} />
+                            </div>
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <Label htmlFor="nc-city">{t("clients.city")}</Label>
+                                <Input id="nc-city" value={clientValues.city} onChange={(e) => setClientValues((v) => ({ ...v, city: e.target.value }))} />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("clients.country")}</Label>
+                            <Select value={clientValues.country} onValueChange={(v) => setClientValues((prev) => ({ ...prev, country: v }))}>
+                                <SelectTrigger aria-label={t("clients.country")}><SelectValue placeholder="Deutschland" /></SelectTrigger>
+                                <SelectContent>
+                                    {euCountryOptions(language, clientValues.country).map((o) => (
+                                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <Form.Item label={t("clients.country")} name="country" initialValue="Deutschland">
-                        <Select showSearch options={euCountryOptions(language)} placeholder="Deutschland" />
-                    </Form.Item>
-                </Form>
-            </Modal>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => { setClientModalOpen(false); setClientValues(emptyClientValues); }}>
+                            {t("clients.cancel")}
+                        </Button>
+                        <Button type="button" disabled={clientSaving} onClick={() => void handleCreateClient()}>
+                            {clientSaving && <Loader2 className="animate-spin" />}
+                            {t("clients.create")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
-            <Modal
-                title={t("invoiceCreate.newProductTitle")}
+            {/* New product dialog */}
+            <Dialog
                 open={productModalOpen}
-                onOk={handleCreateProduct}
-                onCancel={() => {
-                    setProductModalOpen(false);
-                    productForm.resetFields();
+                onOpenChange={(open) => {
+                    setProductModalOpen(open);
                 }}
-                okText={t("products.create")}
-                cancelText={t("products.cancel")}
-                confirmLoading={productSaving}
-                destroyOnHidden
             >
-                <Form
-                    form={productForm}
-                    layout="vertical"
-                    preserve={false}
-                    initialValues={{
-                        unit_of_measure: t("invoiceCreate.unitPiece"),
-                    }}
-                >
-                    <Form.Item
-                        label={t("products.name")}
-                        name="name"
-                        rules={[{ required: true }]}
-                    >
-                        <Input autoFocus />
-                    </Form.Item>
-                    <Form.Item label={t("products.description")} name="description">
-                        <Input.TextArea rows={2} />
-                    </Form.Item>
-                    <div style={{ display: "flex", gap: 8 }}>
-                        <Form.Item
-                            label={t("products.price")}
-                            name="price"
-                            rules={[{ required: true }]}
-                            style={{ flex: 1 }}
-                        >
-                            <DecimalInput min={0} step={0.01} precision={2} style={{ width: "100%" }} addonAfter="€" />
-                        </Form.Item>
-                        <Form.Item label={t("products.unit")} name="unit_of_measure" style={{ flex: 1 }}>
-                            <Input />
-                        </Form.Item>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t("invoiceCreate.newProductTitle")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="np-name">{t("products.name")}</Label>
+                            <Input id="np-name" autoFocus value={productValues.name} onChange={(e) => setProductValues((v) => ({ ...v, name: e.target.value }))} />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="np-desc">{t("products.description")}</Label>
+                            <Textarea id="np-desc" rows={2} value={productValues.description} onChange={(e) => setProductValues((v) => ({ ...v, description: e.target.value }))} />
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <Label>{t("products.price")}</Label>
+                                <DecimalInput min={0} step={0.01} precision={2} style={{ width: "100%" }} addonAfter="€" value={productValues.price}
+                                    onChange={(v) => setProductValues((prev) => ({ ...prev, price: v ?? 0 }))} />
+                            </div>
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <Label htmlFor="np-unit">{t("products.unit")}</Label>
+                                <Input id="np-unit" value={productValues.unit_of_measure} onChange={(e) => setProductValues((v) => ({ ...v, unit_of_measure: e.target.value }))} />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("products.vat")}</Label>
+                            <Select value={String(productValues.tax_rate_percent)} onValueChange={(v) => setProductValues((prev) => ({ ...prev, tax_rate_percent: Number(v) }))}>
+                                <SelectTrigger aria-label={t("products.vat")}><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {VAT_RATE_OPTIONS.map((o) => (
+                                        <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <Form.Item label={t("products.vat")} name="tax_rate_percent">
-                        <Select
-                            options={VAT_RATE_OPTIONS}
-                        />
-                    </Form.Item>
-                </Form>
-            </Modal>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setProductModalOpen(false)}>
+                            {t("products.cancel")}
+                        </Button>
+                        <Button type="button" disabled={productSaving} onClick={() => void handleCreateProduct()}>
+                            {productSaving && <Loader2 className="animate-spin" />}
+                            {t("products.create")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
-            <Modal
-                title={t("invoiceCreate.saveAsTemplateTitle")}
+            {/* Save as template dialog */}
+            <Dialog
                 open={templateModalOpen}
-                onOk={handleSaveTemplate}
-                onCancel={() => {
-                    setTemplateModalOpen(false);
-                    templateForm.resetFields();
+                onOpenChange={(open) => {
+                    setTemplateModalOpen(open);
+                    if (!open) setTemplateName("");
                 }}
-                okText={t("invoiceCreate.saveAsTemplate")}
-                cancelText={t("clients.cancel")}
-                confirmLoading={templateSaving}
-                destroyOnHidden
             >
-                <Form form={templateForm} layout="vertical" preserve={false}>
-                    <Form.Item
-                        label={t("invoiceCreate.templateName")}
-                        name="name"
-                        rules={[{ required: true }]}
-                    >
-                        <Input
-                            autoFocus
-                            maxLength={120}
-                            placeholder={t("invoiceCreate.templateNamePlaceholder")}
-                        />
-                    </Form.Item>
-                    <Text type="secondary">
-                        {t("invoiceCreate.saveAsTemplateHint")}
-                    </Text>
-                </Form>
-            </Modal>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t("invoiceCreate.saveAsTemplateTitle")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="tpl-name">{t("invoiceCreate.templateName")}</Label>
+                            <Input id="tpl-name" autoFocus maxLength={120} value={templateName}
+                                onChange={(e) => setTemplateName(e.target.value)}
+                                placeholder={t("invoiceCreate.templateNamePlaceholder")} />
+                        </div>
+                        <p className="text-sm text-muted-foreground">{t("invoiceCreate.saveAsTemplateHint")}</p>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => { setTemplateModalOpen(false); setTemplateName(""); }}>
+                            {t("clients.cancel")}
+                        </Button>
+                        <Button type="button" disabled={templateSaving} onClick={() => void handleSaveTemplate()}>
+                            {templateSaving && <Loader2 className="animate-spin" />}
+                            {t("invoiceCreate.saveAsTemplate")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {currentStep < 3 && (
-                <div style={{ marginTop: 24, textAlign: "right" }}>
-                    <Space>
-                        {currentStep > 0 && (
-                            <Button
-                                onClick={() => setCurrentStep(currentStep - 1)}
-                            >
-                                <ArrowLeftOutlined /> {t("invoiceCreate.backBtn")}
-                            </Button>
-                        )}
-                        {currentStep < 2 && (
-                            <Button
-                                type="primary"
-                                onClick={() => setCurrentStep(currentStep + 1)}
-                                disabled={!canProceed()}
-                            >
-                                {t("invoiceCreate.nextBtn")} <ArrowRightOutlined />
-                            </Button>
-                        )}
-                        {currentStep === 2 && (
-                            <Button
-                                type="primary"
-                                onClick={handleCreateInvoice}
-                                loading={saving}
-                                disabled={!canProceed()}
-                            >
-                                <CheckOutlined /> {editId ? t("invoiceEdit.saveBtn") : t("invoiceCreate.createBtn")}
-                            </Button>
-                        )}
-                    </Space>
+                <div className="flex justify-end gap-2">
+                    {currentStep > 0 && (
+                        <Button type="button" variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
+                            <ArrowLeft /> {t("invoiceCreate.backBtn")}
+                        </Button>
+                    )}
+                    {currentStep < 2 && (
+                        <Button type="button" onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()}>
+                            {t("invoiceCreate.nextBtn")} <ArrowRight />
+                        </Button>
+                    )}
+                    {currentStep === 2 && (
+                        <Button type="button" onClick={() => void handleCreateInvoice()} disabled={saving || !canProceed()}>
+                            {saving ? <Loader2 className="animate-spin" /> : <Check />}
+                            {editId ? t("invoiceEdit.saveBtn") : t("invoiceCreate.createBtn")}
+                        </Button>
+                    )}
                 </div>
             )}
         </div>
+        </TooltipProvider>
     );
 }
