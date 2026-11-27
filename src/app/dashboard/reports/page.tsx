@@ -2,30 +2,24 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { CalendarDays, Euro, FolderKanban, Info, Loader2, TriangleAlert } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Alert,
-    Button,
-    Card,
-    Col,
-    Row,
-    Segmented,
-    Select,
-    Space,
-    Spin,
-    Statistic,
-    Table,
-    Tabs,
-    Tag,
-    Typography,
-} from "antd";
-import { CalendarOutlined, EuroOutlined, ProjectOutlined } from "@ant-design/icons";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { isTermineEnabled, isWorkspaceEnabled } from "@/lib/features";
 import ProjectReports from "@/components/workspace/ProjectReports";
 import type { UstvaReport, EuerReport } from "@/lib/taxReports";
-
-const { Title, Paragraph, Text } = Typography;
 
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4"] as const;
 
@@ -170,269 +164,222 @@ export default function ReportsPage() {
     }
     const serviceBreakdown = [...serviceBreakdownMap.values()].sort((a, b) => b.revenue - a.revenue);
 
+    const stat = (label: string, value: string) => (
+        <Card key={label}>
+            <CardContent className="pt-1">
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="mt-1 text-2xl font-semibold">{value}</p>
+            </CardContent>
+        </Card>
+    );
+
     return (
-        <div style={{ maxWidth: 1200 }}>
-            <Title level={3}>{l("Berichte, Steuern & Controlling", "Reports, Tax & Controlling")}</Title>
-            <Paragraph type="secondary">
-                {l(
-                    "Steuerauswertungen (UStVA & EÜR), Projektcontrolling und Terminbuchungs-Auswertungen an einem zentralen Ort.",
-                    "Tax reports (VAT & EÜR), project profitability and appointment booking analytics in one place.",
+        <div className="flex max-w-[1200px] flex-col gap-4">
+            <div>
+                <h2 className="text-2xl font-semibold">{l("Berichte, Steuern & Controlling", "Reports, Tax & Controlling")}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    {l(
+                        "Steuerauswertungen (UStVA & EÜR), Projektcontrolling und Terminbuchungs-Auswertungen an einem zentralen Ort.",
+                        "Tax reports (VAT & EÜR), project profitability and appointment booking analytics in one place.",
+                    )}
+                </p>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="flex-wrap">
+                    <TabsTrigger value="tax"><Euro />{l("Steuern (UStVA & EÜR)", "Tax (UStVA & EÜR)")}</TabsTrigger>
+                    {isWorkspaceEnabled() && (
+                        <TabsTrigger value="projects"><FolderKanban />{l("Projektcontrolling", "Project Controlling")}</TabsTrigger>
+                    )}
+                    {isTermineEnabled() && (
+                        <TabsTrigger value="bookings"><CalendarDays />{l("Termin-Auswertung", "Booking Analytics")}</TabsTrigger>
+                    )}
+                </TabsList>
+
+                <TabsContent value="tax" className="flex flex-col gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+                            <SelectTrigger className="w-[110px]" aria-label="Year"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {[year - 1, year, year + 1]
+                                    .filter((y) => y <= now.getFullYear())
+                                    .map((y) => (
+                                        <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                                    ))}
+                            </SelectContent>
+                        </Select>
+                        <div className="inline-flex rounded-lg bg-muted p-1" role="group" aria-label="Quarter">
+                            {QUARTERS.map((q) => (
+                                <button
+                                    key={q}
+                                    type="button"
+                                    onClick={() => setPart(q)}
+                                    aria-pressed={part === q}
+                                    className={cn(
+                                        "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                                        part === q ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
+                                    )}
+                                >
+                                    {q}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <Loader2 className="size-8 animate-spin text-primary" />
+                        </div>
+                    ) : (
+                        <div className="grid gap-4 lg:grid-cols-2">
+                            <Card>
+                                <CardHeader><CardTitle>{`Umsatzsteuervoranmeldung ${part}/${year}`}</CardTitle></CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[60px]">KZ</TableHead>
+                                                <TableHead>Position</TableHead>
+                                                <TableHead className="text-right">Betrag</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {ustvaRows.map((row) => (
+                                                <TableRow key={row.key}>
+                                                    <TableCell>{row.kz}</TableCell>
+                                                    <TableCell>{row.label}</TableCell>
+                                                    <TableCell className={cn("text-right", row.value === ustva?.kz83Zahllast && "font-semibold")}>
+                                                        {formatCurrency(row.value, "de")}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader><CardTitle>{`EÜR ${year} (vereinfacht)`}</CardTitle></CardHeader>
+                                <CardContent>
+                                    {euer && (
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Position</TableHead>
+                                                    <TableHead className="text-right">Betrag</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {[
+                                                    ...euer.incomeByRate.map((item) => ({
+                                                        key: `in-${item.rate}`,
+                                                        label: `Einnahmen ${item.rate} % (netto)`,
+                                                        value: item.net,
+                                                    })),
+                                                    { key: "vat-in", label: "Vereinnahmte Umsatzsteuer", value: euer.collectedVat },
+                                                    { key: "sum-in", label: "Summe Betriebseinnahmen", value: euer.totalIncome },
+                                                    ...euer.expenseGroups.map((group) => ({
+                                                        key: `ex-${group.category}`,
+                                                        label: `Ausgaben: ${group.category}`,
+                                                        value: -group.net,
+                                                    })),
+                                                    { key: "vat-out", label: "Gezahlte Vorsteuer", value: -euer.paidVorsteuer },
+                                                    { key: "profit", label: "Gewinn / Verlust", value: euer.profit },
+                                                ].map((row) => (
+                                                    <TableRow key={row.key}>
+                                                        <TableCell>{row.label}</TableCell>
+                                                        <TableCell className={cn("text-right", (row.key === "profit" || row.key === "sum-in") && "font-semibold")}>
+                                                            {formatCurrency(row.value, "de")}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    )}
+                                </CardContent>
+                            </Card>
+                            <Alert className="lg:col-span-2">
+                                <Info />
+                                <AlertTitle>Direkt in ELSTER übertragen</AlertTitle>
+                                <AlertDescription>
+                                    Die Kennzahlen (KZ) entsprechen den Feldern der Umsatzsteuervoranmeldung in ELSTER. Eine direkte Übermittlung ist mit Open-Source-Software derzeit nicht möglich (die ELSTER-Schnittstelle ERiC ist proprietär) – kopieren Sie die Werte in Ihr ELSTER-Formular.
+                                </AlertDescription>
+                            </Alert>
+                        </div>
+                    )}
+                </TabsContent>
+
+                {isWorkspaceEnabled() && (
+                    <TabsContent value="projects">
+                        <ProjectReports embedded />
+                    </TabsContent>
                 )}
-            </Paragraph>
 
-            <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
-                items={[
-                    {
-                        key: "tax",
-                        label: (
-                            <span>
-                                <EuroOutlined /> {l("Steuern (UStVA & EÜR)", "Tax (UStVA & EÜR)")}
-                            </span>
-                        ),
-                        children: (
-                            <>
-                                <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-                                    <Col>
-                                        <Select
-                                            value={year}
-                                            onChange={setYear}
-                                            options={[year - 1, year, year + 1]
-                                                .filter((y) => y <= now.getFullYear())
-                                                .map((y) => ({ value: y, label: String(y) }))}
-                                            style={{ width: 100 }}
-                                        />
-                                    </Col>
-                                    <Col>
-                                        <Segmented
-                                            value={part}
-                                            onChange={(value) => setPart(String(value))}
-                                            options={[...QUARTERS]}
-                                        />
-                                    </Col>
-                                </Row>
+                {isTermineEnabled() && (
+                    <TabsContent value="bookings" className="flex flex-col gap-4">
+                        <div className="grid gap-3 min-[480px]:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+                            {stat(l("Abgeschlossene Termine", "Completed bookings"), String(completedBookings.length))}
+                            {stat(l("Leistungswert abgeschlossen", "Completed service value"), formatCurrency(completedValueEur, "de"))}
+                            {stat(l("Noch nicht abgerechnet", "Unbilled completed"), `${unbilledBookings.length} (${formatCurrency(unbilledValueEur, "de")})`)}
+                            {stat(l("Storno / Nicht erschienen", "Cancelled / No-show"), String(cancelledOrNoShowCount))}
+                        </div>
 
-                                {loading ? (
-                                    <Spin size="large" />
-                                ) : (
-                                    <Row gutter={[16, 16]}>
-                                        <Col xs={24} lg={12}>
-                                            <Card title={`Umsatzsteuervoranmeldung ${part}/${year}`}>
-                                                <Table
-                                                    size="small"
-                                                    pagination={false}
-                                                    dataSource={ustvaRows}
-                                                    columns={[
-                                                        {
-                                                            title: "KZ",
-                                                            dataIndex: "kz",
-                                                            width: 60,
-                                                        },
-                                                        { title: "Position", dataIndex: "label" },
-                                                        {
-                                                            title: "Betrag",
-                                                            dataIndex: "value",
-                                                            align: "right" as const,
-                                                            render: (value: number) => (
-                                                                <Text strong={value === ustva?.kz83Zahllast}>
-                                                                    {formatCurrency(value, "de")}
-                                                                </Text>
-                                                            ),
-                                                        },
-                                                    ]}
-                                                />
-                                            </Card>
-                                        </Col>
-                                        <Col xs={24} lg={12}>
-                                            <Card title={`EÜR ${year} (vereinfacht)`}>
-                                                {euer && (
-                                                    <Table
-                                                        size="small"
-                                                        pagination={false}
-                                                        dataSource={[
-                                                            ...euer.incomeByRate.map((item) => ({
-                                                                key: `in-${item.rate}`,
-                                                                label: `Einnahmen ${item.rate} % (netto)`,
-                                                                value: item.net,
-                                                            })),
-                                                            {
-                                                                key: "vat-in",
-                                                                label: "Vereinnahmte Umsatzsteuer",
-                                                                value: euer.collectedVat,
-                                                            },
-                                                            {
-                                                                key: "sum-in",
-                                                                label: "Summe Betriebseinnahmen",
-                                                                value: euer.totalIncome,
-                                                            },
-                                                            ...euer.expenseGroups.map((group) => ({
-                                                                key: `ex-${group.category}`,
-                                                                label: `Ausgaben: ${group.category}`,
-                                                                value: -group.net,
-                                                            })),
-                                                            {
-                                                                key: "vat-out",
-                                                                label: "Gezahlte Vorsteuer",
-                                                                value: -euer.paidVorsteuer,
-                                                            },
-                                                            {
-                                                                key: "profit",
-                                                                label: "Gewinn / Verlust",
-                                                                value: euer.profit,
-                                                            },
-                                                        ]}
-                                                        columns={[
-                                                            {
-                                                                title: "Position",
-                                                                dataIndex: "label",
-                                                            },
-                                                            {
-                                                                title: "Betrag",
-                                                                dataIndex: "value",
-                                                                align: "right" as const,
-                                                                render: (value: number, record: { key: string }) => (
-                                                                    <Text
-                                                                        strong={
-                                                                            record.key === "profit" ||
-                                                                            record.key === "sum-in"
-                                                                        }
-                                                                    >
-                                                                        {formatCurrency(value, "de")}
-                                                                    </Text>
-                                                                ),
-                                                            },
-                                                        ]}
-                                                    />
-                                                )}
-                                            </Card>
-                                        </Col>
-                                        <Col span={24}>
-                                            <Alert
-                                                type="info"
-                                                showIcon
-                                                title="Direkt in ELSTER übertragen"
-                                                description="Die Kennzahlen (KZ) entsprechen den Feldern der Umsatzsteuervoranmeldung in ELSTER. Eine direkte Übermittlung ist mit Open-Source-Software derzeit nicht möglich (die ELSTER-Schnittstelle ERiC ist proprietär) – kopieren Sie die Werte in Ihr ELSTER-Formular."
-                                            />
-                                        </Col>
-                                    </Row>
-                                )}
-                            </>
-                        ),
-                    },
-                    ...(isWorkspaceEnabled()
-                        ? [
-                              {
-                                  key: "projects",
-                                  label: (
-                                      <span>
-                                          <ProjectOutlined /> {l("Projektcontrolling", "Project Controlling")}
-                                      </span>
-                                  ),
-                                  children: <ProjectReports embedded />,
-                              },
-                          ]
-                        : []),
-                    ...(isTermineEnabled()
-                        ? [
-                              {
-                                  key: "bookings",
-                                  label: (
-                                      <span>
-                                          <CalendarOutlined /> {l("Termin-Auswertung", "Booking Analytics")}
-                                      </span>
-                                  ),
-                                  children: (
-                                      <div>
-                                          <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
-                                              <Col xs={24} sm={12} lg={6}>
-                                                  <Card>
-                                                      <Statistic
-                                                          title={l("Abgeschlossene Termine", "Completed bookings")}
-                                                          value={completedBookings.length}
-                                                      />
-                                                  </Card>
-                                              </Col>
-                                              <Col xs={24} sm={12} lg={6}>
-                                                  <Card>
-                                                      <Statistic
-                                                          title={l("Leistungswert abgeschlossen", "Completed service value")}
-                                                          value={formatCurrency(completedValueEur, "de")}
-                                                      />
-                                                  </Card>
-                                              </Col>
-                                              <Col xs={24} sm={12} lg={6}>
-                                                  <Card>
-                                                      <Statistic
-                                                          title={l("Noch nicht abgerechnet", "Unbilled completed")}
-                                                          value={`${unbilledBookings.length} (${formatCurrency(unbilledValueEur, "de")})`}
-                                                      />
-                                                  </Card>
-                                              </Col>
-                                              <Col xs={24} sm={12} lg={6}>
-                                                  <Card>
-                                                      <Statistic
-                                                          title={l("Storno / Nicht erschienen", "Cancelled / No-show")}
-                                                          value={cancelledOrNoShowCount}
-                                                      />
-                                                  </Card>
-                                              </Col>
-                                          </Row>
+                        {unbilledBookings.length > 0 && (
+                            <Alert>
+                                <TriangleAlert />
+                                <AlertTitle>
+                                    {l(
+                                        `${unbilledBookings.length} abgeschlossene(r) Termin(e) noch ohne Rechnung (${formatCurrency(unbilledValueEur, "de")})`,
+                                        `${unbilledBookings.length} completed appointment(s) not yet billed (${formatCurrency(unbilledValueEur, "de")})`,
+                                    )}
+                                </AlertTitle>
+                                <AlertDescription>
+                                    <Button type="button" size="sm" className="mt-2" asChild>
+                                        <Link href="/dashboard/termine/buchungen?status=COMPLETED">
+                                            {l("Jetzt abrechnen →", "Bill now →")}
+                                        </Link>
+                                    </Button>
+                                </AlertDescription>
+                            </Alert>
+                        )}
 
-                                          {unbilledBookings.length > 0 && (
-                                              <Alert
-                                                  type="warning"
-                                                  showIcon
-                                                  style={{ marginBottom: 16 }}
-                                                  title={l(
-                                                      `${unbilledBookings.length} abgeschlossene(r) Termin(e) noch ohne Rechnung (${formatCurrency(unbilledValueEur, "de")})`,
-                                                      `${unbilledBookings.length} completed appointment(s) not yet billed (${formatCurrency(unbilledValueEur, "de")})`,
-                                                  )}
-                                                  action={
-                                                      <Link href="/dashboard/termine/buchungen?status=COMPLETED">
-                                                          <Button type="primary" size="small">
-                                                              {l("Jetzt abrechnen →", "Bill now →")}
-                                                          </Button>
-                                                      </Link>
-                                                  }
-                                              />
-                                          )}
-
-                                          <Card title={l("Umsatz nach Leistung (abgeschlossen)", "Completed value by service")}>
-                                              <Table
-                                                  rowKey="service"
-                                                  size="small"
-                                                  pagination={false}
-                                                  dataSource={serviceBreakdown}
-                                                  columns={[
-                                                      { title: l("Leistung", "Service"), dataIndex: "service" },
-                                                      { title: l("Termine", "Appointments"), dataIndex: "count", width: 120 },
-                                                      {
-                                                          title: l("Wert", "Value"),
-                                                          dataIndex: "revenue",
-                                                          align: "right" as const,
-                                                          render: (v: number) => (
-                                                              <Space>
-                                                                  <Tag color="green">{formatCurrency(v, "de")}</Tag>
-                                                              </Space>
-                                                          ),
-                                                      },
-                                                  ]}
-                                                  locale={{
-                                                      emptyText: l(
-                                                          "Noch keine abgeschlossenen Termine.",
-                                                          "No completed bookings yet.",
-                                                      ),
-                                                  }}
-                                              />
-                                          </Card>
-                                      </div>
-                                  ),
-                              },
-                          ]
-                        : []),
-                ]}
-            />
+                        <Card>
+                            <CardHeader><CardTitle>{l("Umsatz nach Leistung (abgeschlossen)", "Completed value by service")}</CardTitle></CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>{l("Leistung", "Service")}</TableHead>
+                                            <TableHead className="w-[120px]">{l("Termine", "Appointments")}</TableHead>
+                                            <TableHead className="text-right">{l("Wert", "Value")}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {serviceBreakdown.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
+                                                    {l("Noch keine abgeschlossenen Termine.", "No completed bookings yet.")}
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            serviceBreakdown.map((row) => (
+                                                <TableRow key={row.service}>
+                                                    <TableCell>{row.service}</TableCell>
+                                                    <TableCell>{row.count}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                                                            {formatCurrency(row.revenue, "de")}
+                                                        </Badge>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                )}
+            </Tabs>
         </div>
     );
 }
