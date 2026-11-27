@@ -3,47 +3,43 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Card,
-    Table,
-    Button,
-    Input,
-    Tag,
-    Dropdown,
-    message,
-    Typography,
-    Row,
-    Col,
-    Statistic,
-    Modal,
-} from "antd";
-import {
-    PlusOutlined,
-    SearchOutlined,
-    MoreOutlined,
-    EyeOutlined,
-    CheckOutlined,
-    CloseOutlined,
-    SwapOutlined,
-    DeleteOutlined,
-    SendOutlined,
-} from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
+    ArrowLeftRight, Check, EllipsisVertical, Eye, Loader2, Plus, Search, Send, Trash2, X,
+} from "lucide-react";
+import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOfferStore } from "@/store/offerStore";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { convertOfferToInvoice } from "@/lib/offerService";
 import type { OfferWithClient, OfferStatus } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
-const { Title } = Typography;
-
-const statusColorMap: Record<OfferStatus, string> = {
-    draft: "default",
-    sent: "blue",
-    accepted: "success",
-    rejected: "error",
-    expired: "warning",
-    converted: "purple",
+const statusBadgeClass: Record<OfferStatus, string> = {
+    draft: "bg-secondary text-secondary-foreground",
+    sent: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    accepted: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    rejected: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
+    expired: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+    converted: "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
 };
+
+type ConfirmState =
+    | { kind: "delete"; id: string }
+    | { kind: "convert"; id: string }
+    | null;
 
 export default function OffersPage() {
     const router = useRouter();
@@ -53,6 +49,9 @@ export default function OffersPage() {
 
     const [search, setSearch] = useState("");
     const [converting, setConverting] = useState<string | null>(null);
+    const [confirm, setConfirm] = useState<ConfirmState>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
 
     useEffect(() => {
         fetchOffers();
@@ -64,14 +63,17 @@ export default function OffersPage() {
             o.offer_number?.toLowerCase().includes(search.toLowerCase()) ||
             o.client?.name?.toLowerCase().includes(search.toLowerCase()),
     );
+    const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+    const safePage = Math.min(page, pageCount);
+    const pageOffers = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
     const handleStatusUpdate = useCallback(
         async (id: string, status: OfferStatus) => {
             try {
                 await updateStatus(id, status);
-                message.success(t("offers.statusUpdated"));
+                toast.success(t("offers.statusUpdated"));
             } catch {
-                message.error(t("offers.updateError"));
+                toast.error(t("offers.updateError"));
             }
         },
         [updateStatus, t],
@@ -81,9 +83,9 @@ export default function OffersPage() {
         async (id: string) => {
             try {
                 await removeOffer(id);
-                message.success(t("offers.deleted"));
+                toast.success(t("offers.deleted"));
             } catch {
-                message.error(t("offers.deleteError"));
+                toast.error(t("offers.deleteError"));
             }
         },
         [removeOffer, t],
@@ -91,25 +93,17 @@ export default function OffersPage() {
 
     const handleConvert = useCallback(
         async (id: string) => {
-            Modal.confirm({
-                title: t("offerDetail.convertTitle"),
-                content: t("offerDetail.convertDesc"),
-                okText: t("offerDetail.confirm"),
-                cancelText: t("offers.cancel"),
-                onOk: async () => {
-                    setConverting(id);
-                    try {
-                        const invoiceId = await convertOfferToInvoice(id);
-                        message.success(t("offers.converted"));
-                        fetchOffers(true);
-                        router.push(`/dashboard/invoices/${invoiceId}`);
-                    } catch {
-                        message.error(t("offers.convertError"));
-                    } finally {
-                        setConverting(null);
-                    }
-                },
-            });
+            setConverting(id);
+            try {
+                const invoiceId = await convertOfferToInvoice(id);
+                toast.success(t("offers.converted"));
+                fetchOffers(true);
+                router.push(`/dashboard/invoices/${invoiceId}`);
+            } catch {
+                toast.error(t("offers.convertError"));
+            } finally {
+                setConverting(null);
+            }
         },
         [t, fetchOffers, router],
     );
@@ -119,209 +113,177 @@ export default function OffersPage() {
     const acceptedOffers = offers.filter((o) => o.status === "accepted").length;
     const expiredOffers = offers.filter((o) => o.status === "expired").length;
 
-    const columns: ColumnsType<OfferWithClient> = [
-        {
-            title: t("offers.number"),
-            dataIndex: "offer_number",
-            key: "offer_number",
-            sorter: (a, b) => a.offer_number.localeCompare(b.offer_number),
-        },
-        {
-            title: t("offers.client"),
-            key: "client",
-            render: (_, record) => record.client?.name || "—",
-        },
-        {
-            title: t("offers.date"),
-            dataIndex: "issue_date",
-            key: "issue_date",
-            sorter: (a, b) => a.issue_date.localeCompare(b.issue_date),
-        },
-        {
-            title: t("offers.validUntil"),
-            dataIndex: "valid_until",
-            key: "valid_until",
-            render: (val) => val || "—",
-        },
-        {
-            title: t("offers.amount"),
-            key: "amount",
-            align: "right",
-            render: (_, record) => formatCurrency(record.total_gross),
-            sorter: (a, b) => a.total_gross - b.total_gross,
-        },
-        {
-            title: t("offers.status"),
-            key: "status",
-            render: (_, record) => (
-                <Tag color={statusColorMap[record.status]}>
-                    {t(`status.${record.status}`) || record.status}
-                </Tag>
-            ),
-        },
-        {
-            title: t("offers.actions"),
-            key: "actions",
-            align: "right",
-            render: (_, record) => {
-                const menuItems = [
-                    {
-                        key: "view",
-                        icon: <EyeOutlined />,
-                        label: t("offers.view"),
-                        onClick: () =>
-                            router.push(`/dashboard/offers/${record.id}`),
-                    },
-                    record.status === "draft" && {
-                        key: "markSent",
-                        icon: <SendOutlined />,
-                        label: t("offers.markSent"),
-                        onClick: () => handleStatusUpdate(record.id!, "sent"),
-                    },
-                    (record.status === "sent" || record.status === "draft") && {
-                        key: "markAccepted",
-                        icon: <CheckOutlined />,
-                        label: t("offers.markAccepted"),
-                        onClick: () =>
-                            handleStatusUpdate(record.id!, "accepted"),
-                    },
-                    record.status === "sent" && {
-                        key: "markRejected",
-                        icon: <CloseOutlined />,
-                        label: t("offers.markRejected"),
-                        onClick: () =>
-                            handleStatusUpdate(record.id!, "rejected"),
-                    },
-                    (record.status === "accepted" ||
-                        record.status === "sent") && {
-                        key: "convert",
-                        icon: <SwapOutlined />,
-                        label:
-                            converting === record.id
-                                ? t("offers.converting")
-                                : t("offers.convertToInvoice"),
-                        onClick: () => handleConvert(record.id!),
-                        disabled: converting === record.id,
-                    },
-                    { type: "divider" as const },
-                    {
-                        key: "delete",
-                        icon: <DeleteOutlined />,
-                        label: t("offers.delete"),
-                        danger: true,
-                        onClick: () =>
-                            Modal.confirm({
-                                title: t("offers.deleteConfirm"),
-                                content: t("offers.deleteDesc"),
-                                okText: t("offers.delete"),
-                                okType: "danger",
-                                cancelText: t("offers.cancel"),
-                                onOk: () => handleDelete(record.id!),
-                            }),
-                    },
-                ].filter(Boolean);
-
-                return (
-                    <div onClick={(e) => e.stopPropagation()}>
-                        <Dropdown
-                            menu={{ items: menuItems as [] }}
-                            trigger={["click"]}
-                        >
-                            <Button type="text" icon={<MoreOutlined />} />
-                        </Dropdown>
-                    </div>
-                );
-            },
-        },
+    const stats = [
+        { label: t("offers.total"), value: String(totalOffers), className: "" },
+        { label: t("offers.sent"), value: String(sentOffers), className: "" },
+        { label: t("offers.accepted"), value: String(acceptedOffers), className: "text-emerald-500" },
+        { label: t("offers.expired"), value: String(expiredOffers), className: "text-amber-500" },
     ];
 
     return (
-        <div>
-            <Title level={4}>{t("offers.title")}</Title>
+        <div className="flex flex-col gap-4">
+            <h2 className="text-xl font-semibold">{t("offers.title")}</h2>
 
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("offers.total")}
-                            value={totalOffers}
-                        />
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                {stats.map((stat) => (
+                    <Card key={stat.label}>
+                        <CardContent className="pt-1">
+                            <p className="text-sm text-muted-foreground">{stat.label}</p>
+                            <p className={cn("mt-1 text-2xl font-semibold", stat.className)}>{stat.value}</p>
+                        </CardContent>
                     </Card>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("offers.sent")}
-                            value={sentOffers}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("offers.accepted")}
-                            value={acceptedOffers}
-                            valueStyle={{ color: "#52c41a" }}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("offers.expired")}
-                            value={expiredOffers}
-                            valueStyle={{ color: "#faad14" }}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+                ))}
+            </div>
 
-            <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-                <Col xs={24} sm={16} md={12}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative w-full sm:max-w-md">
+                    <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        prefix={<SearchOutlined />}
                         placeholder={t("offers.search")}
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        allowClear
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        className="pl-9"
+                        aria-label={t("offers.search")}
                     />
-                </Col>
-                <Col
-                    xs={24}
-                    sm={8}
-                    md={12}
-                    style={{ display: "flex", justifyContent: "flex-end" }}
-                >
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => router.push("/dashboard/offers/create")}
-                    >
+                </div>
+                <div className="sm:ml-auto">
+                    <Button type="button" onClick={() => router.push("/dashboard/offers/create")} className="w-full sm:w-auto">
+                        <Plus />
                         {t("offers.new")}
                     </Button>
-                </Col>
-            </Row>
+                </div>
+            </div>
 
-            <Table
-                columns={columns}
-                dataSource={filtered}
-                rowKey="id"
-                loading={loading}
-                onRow={(record) => ({
-                    onClick: () =>
-                        router.push(`/dashboard/offers/${record.id}`),
-                    style: { cursor: "pointer" },
-                })}
-                pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showTotal: (total, range) =>
-                        t("offers.pagination")
-                            .replace("{0}", String(range[0]))
-                            .replace("{1}", String(range[1]))
-                            .replace("{2}", String(total)),
-                }}
-            />
+            <Card>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t("offers.number")}</TableHead>
+                                <TableHead>{t("offers.client")}</TableHead>
+                                <TableHead>{t("offers.date")}</TableHead>
+                                <TableHead>{t("offers.validUntil")}</TableHead>
+                                <TableHead className="text-right">{t("offers.amount")}</TableHead>
+                                <TableHead>{t("offers.status")}</TableHead>
+                                <TableHead className="text-right">{t("offers.actions")}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {loading && pageOffers.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                                        <Loader2 className="mr-2 inline size-4 animate-spin" />…
+                                    </TableCell>
+                                </TableRow>
+                            ) : pageOffers.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                                        {t("offers.title")}
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                pageOffers.map((record) => (
+                                    <TableRow key={record.id} className="cursor-pointer" onClick={() => router.push(`/dashboard/offers/${record.id}`)}>
+                                        <TableCell className="font-medium">{record.offer_number}</TableCell>
+                                        <TableCell>{record.client?.name || "—"}</TableCell>
+                                        <TableCell>{record.issue_date}</TableCell>
+                                        <TableCell>{record.valid_until || "—"}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(record.total_gross)}</TableCell>
+                                        <TableCell>
+                                            <Badge className={statusBadgeClass[record.status]}>
+                                                {t(`status.${record.status}`) || record.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex justify-end">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button type="button" variant="ghost" size="icon" aria-label={t("offers.actions")}>
+                                                            <EllipsisVertical />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-56">
+                                                        <DropdownMenuItem onClick={() => router.push(`/dashboard/offers/${record.id}`)}>
+                                                            <Eye />{t("offers.view")}
+                                                        </DropdownMenuItem>
+                                                        {record.status === "draft" && (
+                                                            <DropdownMenuItem onClick={() => void handleStatusUpdate(record.id!, "sent")}>
+                                                                <Send />{t("offers.markSent")}
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        {(record.status === "sent" || record.status === "draft") && (
+                                                            <DropdownMenuItem onClick={() => void handleStatusUpdate(record.id!, "accepted")}>
+                                                                <Check />{t("offers.markAccepted")}
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        {record.status === "sent" && (
+                                                            <DropdownMenuItem onClick={() => void handleStatusUpdate(record.id!, "rejected")}>
+                                                                <X />{t("offers.markRejected")}
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        {(record.status === "accepted" || record.status === "sent") && (
+                                                            <DropdownMenuItem disabled={converting === record.id} onClick={() => setConfirm({ kind: "convert", id: record.id! })}>
+                                                                <ArrowLeftRight />
+                                                                {converting === record.id ? t("offers.converting") : t("offers.convertToInvoice")}
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem variant="destructive" onClick={() => setConfirm({ kind: "delete", id: record.id! })}>
+                                                            <Trash2 />{t("offers.delete")}
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+                <div className="flex items-center justify-between border-t border-border px-4 py-3">
+                    <p className="text-sm text-muted-foreground">
+                        {filtered.length === 0
+                            ? t("offers.pagination").replace("{0}", "0").replace("{1}", "0").replace("{2}", "0")
+                            : t("offers.pagination")
+                                  .replace("{0}", String((safePage - 1) * pageSize + 1))
+                                  .replace("{1}", String(Math.min(safePage * pageSize, filtered.length)))
+                                  .replace("{2}", String(filtered.length))}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button type="button" variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>‹</Button>
+                        <span className="text-sm">{safePage} / {pageCount}</span>
+                        <Button type="button" variant="outline" size="sm" disabled={safePage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>›</Button>
+                    </div>
+                </div>
+            </Card>
+
+            <AlertDialog open={confirm !== null} onOpenChange={(open) => { if (!open) setConfirm(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {confirm?.kind === "convert" ? t("offerDetail.convertTitle") : t("offers.deleteConfirm")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {confirm?.kind === "convert" ? t("offerDetail.convertDesc") : t("offers.deleteDesc")}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t("offers.cancel")}</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant={confirm?.kind === "delete" ? "destructive" : "default"}
+                            onClick={() => {
+                                if (!confirm) return;
+                                if (confirm.kind === "delete") void handleDelete(confirm.id);
+                                else void handleConvert(confirm.id);
+                                setConfirm(null);
+                            }}
+                        >
+                            {confirm?.kind === "convert" ? t("offerDetail.confirm") : t("offers.delete")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
