@@ -102,11 +102,7 @@
 /* Header */
 
 
-/* AntD's Layout.Header sets line-height to its 64px header height.
- Custom header controls inherit that value, so their line boxes can
- become taller than the sticky header itself (the search control was
- 85px and the account control 74px inside a 64px header). Resetting
- the inherited line-height keeps centering in flex layout's hands. */
+/* Keep header control line boxes from exceeding the sticky header height. */
 .dashboard-appearance .dashboard-header {
  line-height: normal;
 }
@@ -750,14 +746,14 @@ li.is-done .dashboard-step-state {
 
 
 /* Theme refinements across all dashboard pages */
-.dashboard-appearance {
+.dashboard-appearance [data-slot="card"] {
  border-color: var(--dash-border);
  border-radius: 12px;
  background: var(--dash-surface);
  box-shadow: var(--dash-shadow);
 }
 
-.dashboard-appearance -head {
+.dashboard-appearance [data-slot="card-header"] {
  border-bottom-color: var(--dash-border);
 }
 
@@ -787,7 +783,7 @@ li.is-done .dashboard-step-state {
  color: var(--dash-text);
 }
 
-.dashboard-appearance -secondary {
+.dashboard-appearance .text-muted-foreground {
  color: var(--dash-muted) !important;
 }
 
@@ -908,7 +904,7 @@ li.is-done .dashboard-step-state {
  display: none;
  }
 
- .dashboard-panel > -body {
+ .dashboard-panel [data-slot="card-content"] {
  padding: 16px;
  }
 
@@ -980,13 +976,13 @@ li.is-done .dashboard-step-state {
  font-size: 15px;
  font-weight: 650;
 }
-.dashboard-appearance {
+.dashboard-appearance [data-slot="card"] {
  border: 1px solid var(--dash-border);
  border-radius: 10px;
  background: var(--dash-surface);
  box-shadow: var(--dash-shadow);
 }
-.dashboard-appearance -head {
+.dashboard-appearance [data-slot="card-header"] {
  border-bottom: 1px solid var(--dash-border);
  font-weight: 650;
  color: var(--dash-text);

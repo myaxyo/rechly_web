@@ -31,6 +31,9 @@ import {
     Undo2,
     Clock,
     TrendingUp,
+    CircleAlert,
+    BookOpen,
+    Globe,
     X } from "lucide-react";
 import { TOOLS_CATALOG } from "@/lib/tools/catalog";
 import s from "@/components/tools/tool.module.css";
@@ -60,7 +63,10 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     CarOutlined: <Car style={{ width: 24, height: 24, color: "#2855d9" }} />,
     RollbackOutlined: <Undo2 style={{ width: 24, height: 24, color: "#2855d9" }} />,
     ClockCircleOutlined: <Clock style={{ width: 24, height: 24, color: "#2855d9" }} />,
-    LineChartOutlined: <TrendingUp style={{ width: 24, height: 24, color: "#2855d9" }} /> };
+    LineChartOutlined: <TrendingUp style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    ExclamationCircleOutlined: <CircleAlert style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    AccountBookOutlined: <BookOpen style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    GlobalOutlined: <Globe style={{ width: 24, height: 24, color: "#2855d9" }} /> };
 
 const CATEGORIES = [
     "Alle",

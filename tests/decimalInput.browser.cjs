@@ -46,8 +46,8 @@ const origin = process.env.RECHLY_DECIMAL_URL || 'http://127.0.0.1:3121';
         for (const kind of ['invoices','offers','recurring']) {
             console.log('Checking',kind);
             await page.goto(origin + '/dashboard/' + kind + '/create');
-            await page.locator('.ant-select').filter({hasText:/Kunden? suchen/}).getByRole('combobox').click();
-            await page.locator('.ant-select-item-option-content').filter({hasText:clientName}).click();
+            await page.getByRole('combobox',{name:/Kunden? suchen/}).click();
+            await page.getByRole('option',{name:clientName}).click();
             await page.getByRole('heading',{level:4}).first().click();
             await page.getByRole('button',{name:/Weiter/}).click();
             await page.getByRole('button',{name:kind === 'invoices' ? /Freie Position/ : /Leere Zeile/}).click();
@@ -58,7 +58,8 @@ const origin = process.env.RECHLY_DECIMAL_URL || 'http://127.0.0.1:3121';
             await numbers.nth(1).fill(''); await numbers.nth(1).pressSequentially('1,25'); await numbers.nth(1).press('Tab');
             assert.equal(Number((await numbers.nth(1).inputValue()).replace(',','.')),1.25);
             await page.getByRole('button',{name:/Weiter/}).click();
-            await page.locator('.ant-card input.ant-input').first().fill('DECIMAL-' + kind + '-' + Date.now());
+            const numberField = kind === 'invoices' ? '#inv-number' : kind === 'offers' ? '#offer-number' : '#rec-template';
+            await page.locator(numberField).fill('DECIMAL-' + kind + '-' + Date.now());
             const [response] = await Promise.all([
                 page.waitForResponse(r => r.url().endsWith('/api/' + kind) && r.request().method() === 'POST'),
                 page.getByRole('button',{name: kind === 'invoices' ? /Rechnung erstellen/ : kind === 'offers' ? /Angebot erstellen/ : /Vorlage speichern|recurringCreate.create/}).click(),

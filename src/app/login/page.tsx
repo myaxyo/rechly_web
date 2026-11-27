@@ -204,11 +204,11 @@ function LoginForm() {
                 </>
             )}
 
-            <Dialog open={guestModalVisible} onOpenChange={(open) => { if (!open) setGuestModalVisible(false); }}>
+            <Dialog open={guestModalVisible} onOpenChange={setGuestModalVisible}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="text-[#faad14]" />
+                            <AlertTriangle className="text-amber-500" />
                             {t("guest.warningTitle")}
                         </DialogTitle>
                     </DialogHeader>

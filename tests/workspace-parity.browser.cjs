@@ -15,10 +15,10 @@ const origin = 'http://127.0.0.1:3104';
     }
     async function choose(label, name, scope = page) {
         await scope.getByRole('combobox', { name: new RegExp('^(?:\\* )?' + label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }).click();
-        await page.locator('.ant-select-dropdown:visible').getByTitle(name, { exact: true }).click();
+        await page.getByRole('option', { name, exact: true }).click();
         // Dismiss the popup by moving focus outside the select before the next action.
-        const modalTitle = page.locator('.ant-modal-title:visible');
-        if (await modalTitle.count()) await modalTitle.click();
+        const dialog = page.getByRole('dialog');
+        if (await dialog.count()) await dialog.getByRole('heading').first().click();
         else await page.getByRole('heading', { level: 2 }).first().click();
     }
     const suffix = String(Date.now()), projectName = 'Portal ' + suffix, work = 'Design review ' + suffix, timerWork = 'Implementation ' + suffix, meeting = 'Planning ' + suffix;

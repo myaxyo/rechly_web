@@ -30,8 +30,8 @@ const nextConfig: NextConfig = {
         return [
             {
                 // Baseline hardening for every route. CSP is intentionally
-                // limited to frame-ancestors: a full script/style policy needs
-                // nonce plumbing for Ant Design's inline styles first.
+                // limited to frame-ancestors until a full script/style policy
+                // with nonce plumbing is wired up.
                 source: "/:path*",
                 headers: [
                     { key: "X-Content-Type-Options", value: "nosniff" },
@@ -70,10 +70,9 @@ const nextConfig: NextConfig = {
     // Optimizations
     experimental: {
         optimizePackageImports: [
-            "antd",
-            "@ant-design/icons",
             "dayjs",
-            "@ant-design/nextjs-registry",
+            "lucide-react",
+            "radix-ui",
         ],
     },
 

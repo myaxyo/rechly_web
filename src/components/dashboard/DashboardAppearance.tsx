@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
     Select as UiSelect, SelectContent as UiSelectContent, SelectItem as UiSelectItem,
@@ -43,6 +43,17 @@ export default function DashboardAppearance({ children }: { children: React.Reac
         try { localStorage.setItem("rechly.dashboard.appearance", value); } catch {}
         window.dispatchEvent(new Event("rechly-appearance"));
     };
+    // Keep <html class="dark"> in sync so Radix portals (Dialog, Select,
+    // Popover, Sheet, toasts) pick up .dark tokens outside this wrapper.
+    useEffect(() => {
+        const root = document.documentElement;
+        root.classList.toggle("dark", dark);
+        root.style.colorScheme = dark ? "dark" : "light";
+        return () => {
+            root.classList.remove("dark");
+            root.style.colorScheme = "";
+        };
+    }, [dark]);
     return (
         <AppearanceContext.Provider value={{ appearance, change }}>
             <div className={`dashboard-appearance${dark ? " dark" : ""}`} data-appearance={dark ? "dark" : "light"}

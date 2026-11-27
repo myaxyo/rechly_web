@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import dayjs, { type Dayjs } from "dayjs";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,16 +21,56 @@ export interface DatePickerProps {
     size?: "small" | "middle" | "large";
 }
 
+const sizeClass = { small: "h-8", middle: "h-9", large: "h-10" } as const;
+
 /** shadcn/ui date picker with the dayjs value contract the app already uses. */
-export function DatePicker({ value, onChange, format = "DD.MM.YYYY", placeholder = "Datum wählen", disabled, className, style }: DatePickerProps) {
+export function DatePicker({
+    value,
+    onChange,
+    format = "DD.MM.YYYY",
+    placeholder = "Datum wählen",
+    disabled,
+    allowClear = false,
+    className,
+    style,
+    size = "middle",
+}: DatePickerProps) {
     const [open, setOpen] = React.useState(false);
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button type="button" variant="outline" disabled={disabled} style={style}
-                    className={cn("h-9 w-full justify-start px-3 font-normal", !value && "text-muted-foreground", className)}>
+                    className={cn(
+                        "relative w-full justify-start px-3 font-normal",
+                        sizeClass[size],
+                        !value && "text-muted-foreground",
+                        allowClear && value && "pr-8",
+                        className,
+                    )}>
                     <CalendarIcon className="mr-2 size-4 shrink-0" />
-                    {value ? value.format(format) : placeholder}
+                    <span className="truncate">{value ? value.format(format) : placeholder}</span>
+                    {allowClear && value ? (
+                        <span
+                            role="button"
+                            tabIndex={-1}
+                            aria-label="Datum löschen"
+                            className="absolute right-2 inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onChange?.(null);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onChange?.(null);
+                                }
+                            }}
+                        >
+                            <XIcon className="size-3.5" />
+                        </span>
+                    ) : null}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -46,12 +86,22 @@ export interface DateRangePickerProps {
     onChange?: (range: [Dayjs | null, Dayjs | null] | null) => void;
     format?: string;
     disabled?: boolean;
+    allowClear?: boolean;
     className?: string;
     style?: React.CSSProperties;
     size?: "small" | "middle" | "large";
 }
 
-export function DateRangePicker({ value, onChange, format = "DD.MM.YYYY", disabled, className, style }: DateRangePickerProps) {
+export function DateRangePicker({
+    value,
+    onChange,
+    format = "DD.MM.YYYY",
+    disabled,
+    allowClear = false,
+    className,
+    style,
+    size = "middle",
+}: DateRangePickerProps) {
     const [open, setOpen] = React.useState(false);
     const from = value?.[0] ?? undefined;
     const to = value?.[1] ?? undefined;
@@ -60,9 +110,37 @@ export function DateRangePicker({ value, onChange, format = "DD.MM.YYYY", disabl
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button type="button" variant="outline" disabled={disabled} style={style}
-                    className={cn("h-9 w-full justify-start px-3 font-normal", !from && "text-muted-foreground", className)}>
+                    className={cn(
+                        "relative w-full justify-start px-3 font-normal",
+                        sizeClass[size],
+                        !from && "text-muted-foreground",
+                        allowClear && from && "pr-8",
+                        className,
+                    )}>
                     <CalendarIcon className="mr-2 size-4 shrink-0" />
-                    {label}
+                    <span className="truncate">{label}</span>
+                    {allowClear && from ? (
+                        <span
+                            role="button"
+                            tabIndex={-1}
+                            aria-label="Zeitraum löschen"
+                            className="absolute right-2 inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onChange?.(null);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onChange?.(null);
+                                }
+                            }}
+                        >
+                            <XIcon className="size-3.5" />
+                        </span>
+                    ) : null}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
