@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Alert, Button, Space, Typography } from "antd";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 export function useWords() { const { language } = useLanguage(); return { language, l: (de: string, en: string) => language === "de" ? de : en }; }
 export function localDay(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; }
@@ -30,21 +31,21 @@ export function useResource<T>(url: string) {
 }
 export function WorkspaceLinks() {
     const { l } = useWords();
-    return <Space wrap style={{ marginBottom: 16 }}>
-        <Link href="/dashboard">{l("Dashboard", "Dashboard")}</Link>
-        <span>·</span>
-        <Link href="/dashboard/calendar">{l("Kalender & Termine", "Calendar")}</Link>
-        <span>·</span>
-        <Link href="/dashboard/termine/buchungen">{l("Buchungen & Zeiten", "Bookings & Hours")}</Link>
-        <span>·</span>
-        <Link href="/dashboard/workspace">{l("Projekte & Aufgaben", "Projects & Tasks")}</Link>
-        <span>·</span>
-        <Link href="/dashboard/workspace/time">{l("Zeiterfassung", "Time & Billing")}</Link>
-        <span>·</span>
-        <Link href="/dashboard/reports?tab=projects">{l("Projektcontrolling", "Project Controlling")}</Link>
-    </Space>;
+    return <nav className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <Link href="/dashboard" className="text-primary hover:underline">{l("Dashboard", "Dashboard")}</Link>
+        <span className="text-muted-foreground">·</span>
+        <Link href="/dashboard/calendar" className="text-primary hover:underline">{l("Kalender & Termine", "Calendar")}</Link>
+        <span className="text-muted-foreground">·</span>
+        <Link href="/dashboard/termine/buchungen" className="text-primary hover:underline">{l("Buchungen & Zeiten", "Bookings & Hours")}</Link>
+        <span className="text-muted-foreground">·</span>
+        <Link href="/dashboard/workspace" className="text-primary hover:underline">{l("Projekte & Aufgaben", "Projects & Tasks")}</Link>
+        <span className="text-muted-foreground">·</span>
+        <Link href="/dashboard/workspace/time" className="text-primary hover:underline">{l("Zeiterfassung", "Time & Billing")}</Link>
+        <span className="text-muted-foreground">·</span>
+        <Link href="/dashboard/reports?tab=projects" className="text-primary hover:underline">{l("Projektcontrolling", "Project Controlling")}</Link>
+    </nav>;
 }
 export function WorkspaceFrame({ title, description, error, retry, children }: { title: string; description: string; error?: string; retry: () => void; children: React.ReactNode }) {
     const { l } = useWords();
-    return <div style={{ maxWidth: 1280, margin: "0 auto" }}><WorkspaceLinks /><Typography.Title level={2}>{title}</Typography.Title><Typography.Paragraph type="secondary">{description}</Typography.Paragraph>{error && <Alert type="error" showIcon title={error} action={<Button onClick={retry}>{l("Erneut versuchen", "Retry")}</Button>} style={{ marginBottom: 16 }} />}{children}</div>;
+    return <div className="mx-auto w-full max-w-[1280px]"><WorkspaceLinks /><h2 className="text-2xl font-semibold">{title}</h2><p className="mt-1 text-sm text-muted-foreground">{description}</p>{error && <Alert variant="destructive" className="mb-4"><AlertTitle>{error}</AlertTitle><AlertDescription><Button type="button" size="sm" className="mt-2" onClick={retry}>{l("Erneut versuchen", "Retry")}</Button></AlertDescription></Alert>}{children}</div>;
 }

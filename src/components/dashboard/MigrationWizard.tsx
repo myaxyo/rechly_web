@@ -3,39 +3,28 @@
 import React, { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
-    Alert,
-    Badge,
-    Button,
-    Card,
-    Checkbox,
-    Collapse,
-    Divider,
-    Empty,
-    Radio,
-    Select,
-    Space,
-    Table,
-    Tabs,
-    Tag,
-    Typography,
-    message } from "antd";
+    ArrowLeftRight, CheckCircle2, CloudDownload, CloudUpload, Download, FileSpreadsheet,
+    FileText, Inbox, Loader2, RefreshCw, Rocket, Settings, ShoppingBag, Trash2, Users, Wallet,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-    CheckCircleOutlined,
-    CloudDownloadOutlined,
-    CloudUploadOutlined,
-    DeleteOutlined,
-    DownloadOutlined,
-    FileExcelOutlined,
-    FilePdfOutlined,
-    FileTextOutlined,
-    InboxOutlined,
-    ReloadOutlined,
-    RocketOutlined,
-    SettingOutlined,
-    ShoppingOutlined,
-    SwapOutlined,
-    TeamOutlined,
-    WalletOutlined } from "@ant-design/icons";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
     MIGRATION_SOURCES,
@@ -52,7 +41,64 @@ import {
     type RechlyBackupBundle } from "@/lib/migration/importer";
 import type { MigrationImportResult } from "@/app/api/migration/import/route";
 
-const { Title, Text, Paragraph } = Typography;
+
+interface PreviewColumn<T> {
+    title: string;
+    dataIndex?: string;
+    render?: (value: unknown, record: T) => React.ReactNode;
+}
+
+function PreviewTable<T extends Record<string, unknown>>({ rows, columns, emptyText }: {
+    rows: T[];
+    columns: PreviewColumn<T>[];
+    emptyText: string;
+}) {
+    const [page, setPage] = useState(1);
+    const pageSize = 6;
+    const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+    const safePage = Math.min(page, pageCount);
+    const slice = rows.slice((safePage - 1) * pageSize, safePage * pageSize);
+    if (rows.length === 0) {
+        return <p className="py-8 text-center text-sm text-muted-foreground">{emptyText}</p>;
+    }
+    return (
+        <div>
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            {columns.map((col, i) => (
+                                <TableHead key={i}>{col.title}</TableHead>
+                            ))}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {slice.map((row, ri) => (
+                            <TableRow key={ri}>
+                                {columns.map((col, ci) => (
+                                    <TableCell key={ci}>
+                                        {col.render
+                                            ? col.render(col.dataIndex ? row[col.dataIndex] : undefined, row)
+                                            : col.dataIndex
+                                              ? String(row[col.dataIndex] ?? "—")
+                                              : "—"}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+            {pageCount > 1 && (
+                <div className="flex items-center justify-end gap-2 pt-3">
+                    <Button type="button" variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage((pg) => Math.max(1, pg - 1))}>‹</Button>
+                    <span className="text-sm">{safePage} / {pageCount}</span>
+                    <Button type="button" variant="outline" size="sm" disabled={safePage >= pageCount} onClick={() => setPage((pg) => Math.min(pageCount, pg + 1))}>›</Button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 interface MigrationWizardProps {
     initialSource?: MigrationSourceId;
@@ -115,13 +161,13 @@ export default function MigrationWizard({
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
-            message.success(
+            toast.success(
                 isDe
                     ? "Komplett-Backup (.json) wurde heruntergeladen!"
                     : "Full backup (.json) downloaded!",
             );
         } catch {
-            message.error(
+            toast.error(
                 isDe
                     ? "Backup konnte nicht erstellt werden."
                     : "Failed to download backup.",
@@ -172,13 +218,13 @@ export default function MigrationWizard({
                     ) {
                         setBackupBundle(parsed);
                         setSelectedSource("rechly_backup");
-                        message.success(
+                        toast.success(
                             isDe
                                 ? `Rechly Backup-Datei „${file.name}“ geladen.`
                                 : `Loaded Rechly backup file "${file.name}".`,
                         );
                     } else {
-                        message.warning(
+                        toast.warning(
                             isDe
                                 ? `JSON-Datei „${file.name}“ hat kein bekanntes Rechly-Backup-Format.`
                                 : `JSON file "${file.name}" is not a valid Rechly backup.`,
@@ -197,7 +243,7 @@ export default function MigrationWizard({
                 const parsedCsv = parseCsvTextToRows(csvText);
 
                 if (parsedCsv.rows.length === 0) {
-                    message.warning(
+                    toast.warning(
                         isDe
                             ? `Datei „${file.name}“ enthält keine lesbaren Datenzeilen.`
                             : `File "${file.name}" contains no data rows.`,
@@ -240,7 +286,7 @@ export default function MigrationWizard({
                     ) {
                         setEInvoices((prev) => [...prev, ...data.invoices]);
                         setSelectedSource("einvoice");
-                        message.success(
+                        toast.success(
                             isDe
                                 ? `${data.invoices.length} E-Rechnung(en) erfolgreich analysiert.`
                                 : `${data.invoices.length} e-invoice(s) parsed successfully.`,
@@ -251,11 +297,11 @@ export default function MigrationWizard({
                         data.failedFiles.length > 0
                     ) {
                         for (const fail of data.failedFiles) {
-                            message.warning(`${fail.fileName}: ${fail.reason}`);
+                            toast.warning(`${fail.fileName}: ${fail.reason}`);
                         }
                     }
                 } else {
-                    message.error(
+                    toast.error(
                         isDe
                             ? "Fehler beim Lesen der E-Rechnungsdateien."
                             : "Failed to parse e-invoice files.",
@@ -264,7 +310,7 @@ export default function MigrationWizard({
             }
         } catch (err) {
             console.error("File parse error:", err);
-            message.error(
+            toast.error(
                 isDe
                     ? "Datei konnte nicht verarbeitet werden."
                     : "Failed to process file.",
@@ -326,7 +372,7 @@ export default function MigrationWizard({
 
     const handleExecuteImport = async () => {
         if (aggregated.totalItems === 0 && !aggregated.hasCompany) {
-            message.warning(
+            toast.warning(
                 isDe
                     ? "Keine Datensätze zum Importieren vorhanden."
                     : "No records to import.",
@@ -363,14 +409,14 @@ export default function MigrationWizard({
                 result.expenses.inserted +
                 result.offers.inserted;
 
-            message.success(
+            toast.success(
                 isDe
                     ? `Umzug abgeschlossen! ${totalInserted} Datensätze wurden importiert.`
                     : `Migration complete! ${totalInserted} records imported.`,
             );
         } catch (err) {
             console.error("Import error:", err);
-            message.error(
+            toast.error(
                 isDe
                     ? "Import fehlgeschlagen. Bitte prüfe deine Dateien."
                     : "Import failed. Please check your files.",
@@ -384,12 +430,13 @@ export default function MigrationWizard({
         <div className="space-y-6">
             {/* Top Banner: Full Account Backup & Web <-> Desktop Portability */}
             <Card className="border-[#c9d8f5] dark:border-[#152438]/60 bg-gradient-to-r from-[#eef3fd]/70 via-white to-sky-50/60 dark:from-[#152438]/30 dark:via-slate-900 dark:to-slate-900">
+                <CardContent>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <Tag color="blue" className="m-0 font-semibold">
+                            <Badge className="m-0 bg-blue-100 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                                 Web ⇄ Desktop
-                            </Tag>
+                            </Badge>
                             <span className="font-semibold text-base text-slate-900 dark:text-slate-100">
                                 {isDe
                                     ? "100% Datenhoheit & Komplett-Backup"
@@ -404,32 +451,33 @@ export default function MigrationWizard({
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                         <Button
-                            type="primary"
-                            icon={<CloudDownloadOutlined />}
-                            loading={downloadingBackup}
+                            type="button"
+                            disabled={downloadingBackup}
                             onClick={handleDownloadFullBackup}
                         >
+                            {downloadingBackup ? <Loader2 className="animate-spin" /> : <CloudDownload />}
                             {isDe
                                 ? "Komplett-Backup herunterladen (.json)"
                                 : "Download Full Backup (.json)"}
                         </Button>
                     </div>
                 </div>
+                </CardContent>
             </Card>
 
             {/* Step 1: Source System Selector */}
-            <Card
-                title={
-                    <div className="flex items-center gap-2">
-                        <SwapOutlined className="text-[#2855d9]" />
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ArrowLeftRight className="size-5 text-[#2855d9]" />
                         <span>
                             {isDe
                                 ? "1. Quelle wählen: Von welchem Programm möchtest du wechseln?"
                                 : "1. Select Source: Which tool are you switching from?"}
                         </span>
-                    </div>
-                }
-            >
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
                 <div
                     className={`grid gap-3 ${
                         compact
@@ -454,12 +502,11 @@ export default function MigrationWizard({
                                     <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">
                                         {source.name}
                                     </span>
-                                    <Tag
-                                        color={active ? "blue" : "default"}
-                                        className="m-0 text-xs"
+                                    <Badge
+                                        className={`m-0 text-xs ${active ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : "bg-secondary text-secondary-foreground"}`}
                                     >
                                         {source.badge}
-                                    </Tag>
+                                    </Badge>
                                 </div>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 m-0 line-clamp-2">
                                     {source.subtitle}
@@ -473,39 +520,47 @@ export default function MigrationWizard({
                 <div className="mt-5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/70 p-4">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-3">
                         <div>
-                            <Text strong className="text-sm">
+                            <span className="text-sm font-semibold">
                                 {isDe
                                     ? `So exportierst du deine Daten aus ${activeSourceGuide.name}:`
                                     : `How to export your data from ${activeSourceGuide.name}:`}
-                            </Text>
+                            </span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             <Button
-                                size="small"
-                                icon={<DownloadOutlined />}
+                                type="button"
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleDownloadSampleCsv("clients")}
                             >
+                                <Download />
                                 {isDe ? "Muster Kunden.csv" : "Sample Clients.csv"}
                             </Button>
                             <Button
-                                size="small"
-                                icon={<DownloadOutlined />}
+                                type="button"
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleDownloadSampleCsv("products")}
                             >
+                                <Download />
                                 {isDe ? "Muster Produkte.csv" : "Sample Products.csv"}
                             </Button>
                             <Button
-                                size="small"
-                                icon={<DownloadOutlined />}
+                                type="button"
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleDownloadSampleCsv("invoices")}
                             >
+                                <Download />
                                 {isDe ? "Muster Rechnungen.csv" : "Sample Invoices.csv"}
                             </Button>
                             <Button
-                                size="small"
-                                icon={<DownloadOutlined />}
+                                type="button"
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleDownloadSampleCsv("expenses")}
                             >
+                                <Download />
                                 {isDe ? "Muster Ausgaben.csv" : "Sample Expenses.csv"}
                             </Button>
                         </div>
@@ -526,34 +581,37 @@ export default function MigrationWizard({
                             : activeSourceGuide.tipsEn}
                     </p>
                 </div>
+                </CardContent>
             </Card>
 
             {/* Step 2: Multi-file Drag & Drop Upload Zone */}
-            <Card
-                title={
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-2">
-                            <CloudUploadOutlined className="text-[#2855d9]" />
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="flex items-center gap-2">
+                            <CloudUpload className="size-5 text-[#2855d9]" />
                             <span>
                                 {isDe
                                     ? "2. Dateien hochladen & Vorschau prüfen"
                                     : "2. Upload Files & Verify Preview"}
                             </span>
-                        </div>
+                        </span>
                         {(csvFiles.length > 0 ||
                             eInvoices.length > 0 ||
                             backupBundle) && (
                             <Button
-                                size="small"
-                                icon={<ReloadOutlined />}
+                                type="button"
+                                variant="outline"
+                                size="sm"
                                 onClick={handleResetAll}
                             >
+                                <RefreshCw />
                                 {isDe ? "Auswahl zurücksetzen" : "Reset files"}
                             </Button>
                         )}
-                    </div>
-                }
-            >
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -587,7 +645,7 @@ export default function MigrationWizard({
                             : "border-slate-300 dark:border-slate-700 hover:border-[#2855d9] bg-slate-50/50 dark:bg-slate-900/40"
                     }`}
                 >
-                    <InboxOutlined className="text-4xl text-[#2855d9] mb-2" />
+                    <Inbox className="mx-auto mb-2 size-10 text-[#2855d9]" />
                     <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
                         {parsingFiles
                             ? isDe
@@ -603,11 +661,11 @@ export default function MigrationWizard({
                             : "You can select multiple files at once (e.g. Clients.csv + Products.csv + Invoices.csv or multiple E-Invoices)."}
                     </p>
                     <Button
-                        type="primary"
-                        ghost
-                        icon={<CloudUploadOutlined />}
-                        loading={parsingFiles}
+                        type="button"
+                        variant="outline"
+                        disabled={parsingFiles}
                     >
+                        {parsingFiles ? <Loader2 className="animate-spin" /> : <CloudUpload />}
                         {isDe ? "Dateien auswählen" : "Browse Files"}
                     </Button>
                 </div>
@@ -615,11 +673,11 @@ export default function MigrationWizard({
                 {/* Loaded CSV files & Column Mapping Inspector */}
                 {csvFiles.length > 0 && (
                     <div className="mt-6 space-y-4">
-                        <Title level={5} className="!mb-2">
+                        <h3 className="mb-2 text-base font-semibold">
                             {isDe
                                 ? "Geladene CSV-Dateien & Spalten-Zuordnung"
                                 : "Loaded CSV Files & Column Mapping"}
-                        </Title>
+                        </h3>
 
                         {csvFiles.map((entry) => {
                             const fieldDefs = getFieldDefinitions(
@@ -628,93 +686,76 @@ export default function MigrationWizard({
                             return (
                                 <Card
                                     key={entry.id}
-                                    size="small"
                                     className="border-slate-200 dark:border-slate-800"
                                 >
+                                    <CardContent>
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <FileExcelOutlined className="text-emerald-600 text-lg" />
-                                            <Text strong>{entry.fileName}</Text>
-                                            <Tag color="geekblue">
+                                            <FileSpreadsheet className="size-5 text-emerald-600" />
+                                            <span className="font-semibold">{entry.fileName}</span>
+                                            <Badge className="bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
                                                 {entry.rows.length}{" "}
                                                 {isDe ? "Zeilen" : "rows"}
-                                            </Tag>
+                                            </Badge>
                                             {entry.detectedSource !==
                                                 "generic" && (
-                                                <Tag color="purple">
+                                                <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
                                                     {entry.detectedSource.toUpperCase()}{" "}
                                                     {isDe
                                                         ? "erkannt"
                                                         : "detected"}
-                                                </Tag>
+                                                </Badge>
                                             )}
                                         </div>
 
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <Text className="text-xs text-slate-500">
+                                            <span className="text-xs text-slate-500">
                                                 {isDe ? "Datentyp:" : "Type:"}
-                                            </Text>
+                                            </span>
                                             <Select
-                                                size="small"
                                                 value={entry.entityType}
-                                                onChange={(val) =>
+                                                onValueChange={(val) =>
                                                     handleChangeCsvEntityType(
                                                         entry.id,
-                                                        val,
+                                                        val as Exclude<MigrationEntityType, "full_backup">,
                                                     )
                                                 }
-                                                options={[
-                                                    {
-                                                        value: "clients",
-                                                        label: isDe
-                                                            ? "Kunden / Kontakte"
-                                                            : "Clients / Contacts" },
-                                                    {
-                                                        value: "products",
-                                                        label: isDe
-                                                            ? "Produkte / Leistungen"
-                                                            : "Products / Services" },
-                                                    {
-                                                        value: "invoices",
-                                                        label: isDe
-                                                            ? "Ausgangsrechnungen"
-                                                            : "Outgoing Invoices" },
-                                                    {
-                                                        value: "expenses",
-                                                        label: isDe
-                                                            ? "Ausgaben / Belege"
-                                                            : "Expenses / Bills" },
-                                                ]}
-                                                style={{ width: 190 }}
-                                            />
+                                            >
+                                                <SelectTrigger className="w-[190px]" aria-label={isDe ? "Datentyp" : "Type"}><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="clients">{isDe ? "Kunden / Kontakte" : "Clients / Contacts"}</SelectItem>
+                                                    <SelectItem value="products">{isDe ? "Produkte / Leistungen" : "Products / Services"}</SelectItem>
+                                                    <SelectItem value="invoices">{isDe ? "Ausgangsrechnungen" : "Outgoing Invoices"}</SelectItem>
+                                                    <SelectItem value="expenses">{isDe ? "Ausgaben / Belege" : "Expenses / Bills"}</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                             <Button
-                                                size="small"
-                                                danger
-                                                type="text"
-                                                icon={<DeleteOutlined />}
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                className="text-destructive hover:text-destructive"
+                                                aria-label={isDe ? "Datei entfernen" : "Remove file"}
                                                 onClick={() =>
                                                     handleRemoveCsvFile(entry.id)
                                                 }
-                                            />
+                                            >
+                                                <Trash2 />
+                                            </Button>
                                         </div>
                                     </div>
 
-                                    <Collapse
-                                        ghost
-                                        size="small"
-                                        className="mt-2"
-                                        items={[
-                                            {
-                                                key: "mapping",
-                                                label: (
-                                                    <span className="text-xs text-[#2855d9] dark:text-[#7ea2f8] font-medium flex items-center gap-1.5">
-                                                        <SettingOutlined />
-                                                        {isDe
-                                                            ? `Spalten-Zuordnung prüfen / anpassen (${Object.keys(entry.mapping).length} Spalten automatisch erkannt)`
-                                                            : `Inspect / customize column mapping (${Object.keys(entry.mapping).length} columns auto-detected)`}
-                                                    </span>
-                                                ),
-                                                children: (
+                                    <Collapsible className="mt-2">
+                                        <CollapsibleTrigger asChild>
+                                            <button type="button" className="flex items-center gap-1.5 text-xs font-medium text-[#2855d9] dark:text-[#7ea2f8]">
+                                                <Settings className="size-3.5" />
+                                                {isDe
+                                                    ? `Spalten-Zuordnung prüfen / anpassen (${Object.keys(entry.mapping).length} Spalten automatisch erkannt)`
+                                                    : `Inspect / customize column mapping (${Object.keys(entry.mapping).length} columns auto-detected)`}
+                                                <ChevronDown className="size-3.5" />
+                                            </button>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent>
+
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
                                                         {fieldDefs.map(
                                                             (field) => (
@@ -730,46 +771,32 @@ export default function MigrationWizard({
                                                                             : field.labelEn}
                                                                     </label>
                                                                     <Select
-                                                                        size="small"
-                                                                        allowClear
-                                                                        placeholder={
-                                                                            isDe
-                                                                                ? "— Nicht zugeordnet —"
-                                                                                : "— Not mapped —"
-                                                                        }
                                                                         value={
-                                                                            entry
-                                                                                .mapping[
-                                                                                field
-                                                                                    .key
-                                                                            ] ||
-                                                                            undefined
+                                                                            entry.mapping[field.key] || "__none"
                                                                         }
-                                                                        onChange={(
-                                                                            val,
-                                                                        ) =>
+                                                                        onValueChange={(val) =>
                                                                             handleChangeColumnMapping(
                                                                                 entry.id,
                                                                                 field.key,
-                                                                                val ||
-                                                                                    "",
+                                                                                val === "__none" ? "" : val,
                                                                             )
                                                                         }
-                                                                        options={entry.headers.map(
-                                                                            (
-                                                                                h,
-                                                                            ) => ({
-                                                                                value: h,
-                                                                                label: h }),
-                                                                        )}
-                                                                    />
+                                                                    >
+                                                                        <SelectTrigger aria-label={isDe ? field.labelDe : field.labelEn}><SelectValue placeholder={isDe ? "— Nicht zugeordnet —" : "— Not mapped —"} /></SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="__none">{isDe ? "— Nicht zugeordnet —" : "— Not mapped —"}</SelectItem>
+                                                                            {entry.headers.map((h) => (
+                                                                                <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
                                                                 </div>
                                                             ),
                                                         )}
                                                     </div>
-                                                ) },
-                                        ]}
-                                    />
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                    </CardContent>
                                 </Card>
                             );
                         })}
@@ -781,14 +808,14 @@ export default function MigrationWizard({
                     <div className="mt-6 rounded-xl border border-[#c9d8f5] dark:border-[#152438] bg-[#eef3fd]/40 dark:bg-[#152438]/30 p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div className="flex items-center gap-2">
-                                <FilePdfOutlined className="text-[#2855d9] text-lg" />
+                                <FileText className="size-5 text-[#2855d9]" />
                                 <div>
-                                    <Text strong>
+                                    <span className="font-semibold">
                                         {eInvoices.length}{" "}
                                         {isDe
                                             ? "E-Rechnungen (XRechnung / ZUGFeRD) geladen"
                                             : "E-Invoices (XRechnung / ZUGFeRD) loaded"}
-                                    </Text>
+                                    </span>
                                     <p className="text-xs text-slate-500 m-0">
                                         {isDe
                                             ? "Wie sollen diese E-Rechnungen importiert werden?"
@@ -796,85 +823,82 @@ export default function MigrationWizard({
                                     </p>
                                 </div>
                             </div>
-                            <Radio.Group
+                            <RadioGroup
                                 value={eInvoiceMode}
-                                onChange={(e) => setEInvoiceMode(e.target.value)}
-                                optionType="button"
-                                buttonStyle="solid"
+                                onValueChange={(v) => setEInvoiceMode(v as "outgoing" | "incoming")}
+                                className="flex flex-wrap gap-2"
                             >
-                                <Radio.Button value="outgoing">
-                                    {isDe
-                                        ? "Als eigene Ausgangsrechnungen (+ Kunden)"
-                                        : "As Outgoing Invoices (+ Clients)"}
-                                </Radio.Button>
-                                <Radio.Button value="incoming">
-                                    {isDe
-                                        ? "Als Eingangsrechnungen (Ausgaben)"
-                                        : "As Incoming Bills (Expenses)"}
-                                </Radio.Button>
-                            </Radio.Group>
+                                {([
+                                    { value: "outgoing", label: isDe ? "Als eigene Ausgangsrechnungen (+ Kunden)" : "As Outgoing Invoices (+ Clients)" },
+                                    { value: "incoming", label: isDe ? "Als Eingangsrechnungen (Ausgaben)" : "As Incoming Bills (Expenses)" },
+                                ] as const).map((option) => (
+                                    <label
+                                        key={option.value}
+                                        className={`flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm ${eInvoiceMode === option.value ? "border-primary bg-primary/5 font-medium" : ""}`}
+                                    >
+                                        <RadioGroupItem value={option.value} />
+                                        {option.label}
+                                    </label>
+                                ))}
+                            </RadioGroup>
                         </div>
                     </div>
                 )}
 
                 {/* Loaded Full Backup Bundle Banner */}
                 {backupBundle && (
-                    <Alert
-                        className="mt-6"
-                        type="info"
-                        showIcon
-                        message={
-                            isDe
+                    <Alert className="mt-6">
+                        <AlertTitle>
+                            {isDe
                                 ? `Rechly Komplett-Backup vom ${new Date(backupBundle.exportedAt || Date.now()).toLocaleDateString("de-DE")} bereit zur Wiederherstellung`
-                                : `Rechly Full Backup ready to restore`
-                        }
-                        description={
-                            isDe
+                                : `Rechly Full Backup ready to restore`}
+                        </AlertTitle>
+                        <AlertDescription>
+                            {isDe
                                 ? `Enthält ${backupBundle.clients?.length || 0} Kunden, ${backupBundle.products?.length || 0} Produkte, ${backupBundle.invoices?.length || 0} Rechnungen, ${backupBundle.offers?.length || 0} Angebote und ${backupBundle.expenses?.length || 0} Ausgaben.`
-                                : `Contains ${backupBundle.clients?.length || 0} clients, ${backupBundle.products?.length || 0} products, ${backupBundle.invoices?.length || 0} invoices, ${backupBundle.offers?.length || 0} offers, and ${backupBundle.expenses?.length || 0} expenses.`
-                        }
-                    />
+                                : `Contains ${backupBundle.clients?.length || 0} clients, ${backupBundle.products?.length || 0} products, ${backupBundle.invoices?.length || 0} invoices, ${backupBundle.offers?.length || 0} offers, and ${backupBundle.expenses?.length || 0} expenses.`}
+                        </AlertDescription>
+                    </Alert>
                 )}
 
                 {/* Live Tabbed Data Preview */}
                 {aggregated.totalItems > 0 && (
                     <div className="mt-6">
-                        <Divider className="!my-4" />
+                        <Separator className="my-4" />
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                             <div>
-                                <Title level={5} className="!mb-0">
+                                <h3 className="mb-0 text-base font-semibold">
                                     {isDe
                                         ? "Live-Vorschau der erkannten Daten"
                                         : "Live Preview of Detected Records"}
-                                </Title>
-                                <Text type="secondary" className="text-xs">
+                                </h3>
+                                <span className="text-xs text-muted-foreground">
                                     {isDe
                                         ? "Prüfe vor dem Import deine erkannten Kunden, Produkte, Rechnungen und Ausgaben."
                                         : "Review your detected clients, products, invoices, and expenses before importing."}
-                                </Text>
+                                </span>
                             </div>
 
                             <div className="flex items-center gap-3 flex-wrap">
-                                <Checkbox
-                                    checked={skipDuplicates}
-                                    onChange={(e) =>
-                                        setSkipDuplicates(e.target.checked)
-                                    }
-                                >
+                                <label className="flex cursor-pointer items-center gap-2">
+                                    <Checkbox
+                                        checked={skipDuplicates}
+                                        onCheckedChange={(checked) => setSkipDuplicates(checked === true)}
+                                    />
                                     <span className="text-xs font-medium">
                                         {isDe
                                             ? "Duplikate automatisch überspringen (Empfohlen)"
                                             : "Automatically skip duplicates (Recommended)"}
                                     </span>
-                                </Checkbox>
+                                </label>
 
                                 <Button
-                                    type="primary"
-                                    size="large"
-                                    icon={<RocketOutlined />}
-                                    loading={importing}
+                                    type="button"
+                                    size="lg"
+                                    disabled={importing}
                                     onClick={handleExecuteImport}
                                 >
+                                    {importing ? <Loader2 className="animate-spin" /> : <Rocket />}
                                     {isDe
                                         ? `Jetzt ${aggregated.totalItems} Datensätze importieren`
                                         : `Import ${aggregated.totalItems} Records Now`}
@@ -882,424 +906,127 @@ export default function MigrationWizard({
                             </div>
                         </div>
 
-                        <Tabs
-                            items={[
-                                {
-                                    key: "clients",
-                                    label: (
-                                        <Space size={6}>
-                                            <TeamOutlined />
-                                            <span>
-                                                {isDe ? "Kunden" : "Clients"}
-                                            </span>
-                                            <Badge
-                                                count={
-                                                    aggregated.clients.length
-                                                }
-                                                showZero
-                                                color={
-                                                    aggregated.clients.length >
-                                                    0
-                                                        ? "blue"
-                                                        : "default"
-                                                }
-                                            />
-                                        </Space>
-                                    ),
-                                    children:
-                                        aggregated.clients.length === 0 ? (
-                                            <Empty
-                                                description={
-                                                    isDe
-                                                        ? "Noch keine Kunden geladen"
-                                                        : "No clients loaded yet"
-                                                }
-                                            />
-                                        ) : (
-                                            <Table
-                                                size="small"
-                                                rowKey={(r, i) =>
-                                                    `${r.name}-${i}`
-                                                }
-                                                dataSource={aggregated.clients}
-                                                pagination={{ pageSize: 6 }}
-                                                scroll={{ x: 700 }}
-                                                columns={[
-                                                    {
-                                                        title: isDe
-                                                            ? "Name / Firma"
-                                                            : "Name / Company",
-                                                        dataIndex: "name",
-                                                        render: (v) => (
-                                                            <Text strong>
-                                                                {v}
-                                                            </Text>
-                                                        ) },
-                                                    {
-                                                        title: isDe
-                                                            ? "Ansprechpartner"
-                                                            : "Contact",
-                                                        dataIndex:
-                                                            "contact_person",
-                                                        render: (v) => v || "—" },
-                                                    {
-                                                        title: isDe
-                                                            ? "Adresse"
-                                                            : "Address",
-                                                        render: (_, r) =>
-                                                            `${r.address_line1}, ${r.postal_code} ${r.city}` },
-                                                    {
-                                                        title: "E-Mail",
-                                                        dataIndex: "email",
-                                                        render: (v) => v || "—" },
-                                                    {
-                                                        title: "USt-IdNr. / Leitweg-ID",
-                                                        render: (_, r) =>
-                                                            r.vat_id ||
-                                                            r.leitweg_id ||
-                                                            "—" },
-                                                ]}
-                                            />
-                                        ) },
-                                {
-                                    key: "products",
-                                    label: (
-                                        <Space size={6}>
-                                            <ShoppingOutlined />
-                                            <span>
-                                                {isDe ? "Produkte" : "Products"}
-                                            </span>
-                                            <Badge
-                                                count={
-                                                    aggregated.products.length
-                                                }
-                                                showZero
-                                                color={
-                                                    aggregated.products.length >
-                                                    0
-                                                        ? "blue"
-                                                        : "default"
-                                                }
-                                            />
-                                        </Space>
-                                    ),
-                                    children:
-                                        aggregated.products.length === 0 ? (
-                                            <Empty
-                                                description={
-                                                    isDe
-                                                        ? "Noch keine Produkte geladen"
-                                                        : "No products loaded yet"
-                                                }
-                                            />
-                                        ) : (
-                                            <Table
-                                                size="small"
-                                                rowKey={(r, i) =>
-                                                    `${r.name}-${i}`
-                                                }
-                                                dataSource={aggregated.products}
-                                                pagination={{ pageSize: 6 }}
-                                                scroll={{ x: 600 }}
-                                                columns={[
-                                                    {
-                                                        title: isDe
-                                                            ? "Bezeichnung"
-                                                            : "Name",
-                                                        dataIndex: "name",
-                                                        render: (v) => (
-                                                            <Text strong>
-                                                                {v}
-                                                            </Text>
-                                                        ) },
-                                                    {
-                                                        title: isDe
-                                                            ? "Beschreibung"
-                                                            : "Description",
-                                                        dataIndex:
-                                                            "description",
-                                                        render: (v) => v || "—" },
-                                                    {
-                                                        title: isDe
-                                                            ? "Nettopreis"
-                                                            : "Net Price",
-                                                        dataIndex: "price",
-                                                        render: (v: number) =>
-                                                            `${Number(v).toFixed(2)} €` },
-                                                    {
-                                                        title: isDe
-                                                            ? "MwSt."
-                                                            : "VAT",
-                                                        dataIndex:
-                                                            "tax_rate_percent",
-                                                        render: (v: number) =>
-                                                            `${v} %` },
-                                                    {
-                                                        title: isDe
-                                                            ? "Einheit"
-                                                            : "Unit",
-                                                        dataIndex:
-                                                            "unit_of_measure" },
-                                                ]}
-                                            />
-                                        ) },
-                                {
-                                    key: "invoices",
-                                    label: (
-                                        <Space size={6}>
-                                            <FileTextOutlined />
-                                            <span>
-                                                {isDe
-                                                    ? "Rechnungen"
-                                                    : "Invoices"}
-                                            </span>
-                                            <Badge
-                                                count={
-                                                    aggregated.invoices.length
-                                                }
-                                                showZero
-                                                color={
-                                                    aggregated.invoices.length >
-                                                    0
-                                                        ? "blue"
-                                                        : "default"
-                                                }
-                                            />
-                                        </Space>
-                                    ),
-                                    children:
-                                        aggregated.invoices.length === 0 ? (
-                                            <Empty
-                                                description={
-                                                    isDe
-                                                        ? "Noch keine Rechnungen geladen"
-                                                        : "No invoices loaded yet"
-                                                }
-                                            />
-                                        ) : (
-                                            <div className="space-y-2">
-                                                <Alert
-                                                    type="info"
-                                                    showIcon
-                                                    message={
-                                                        isDe
-                                                            ? "Kunden-Automatik aktiv: Falls ein Rechnungsempfänger noch nicht in deiner Kundenliste existiert, legt Rechly ihn beim Import automatisch an."
-                                                            : "Auto-Client Creation: If an invoice recipient does not exist in your clients yet, Rechly automatically creates the client record."
-                                                    }
-                                                />
-                                                <Table
-                                                    size="small"
-                                                    rowKey={(r, i) =>
-                                                        `${r.invoice_number}-${i}`
-                                                    }
-                                                    dataSource={
-                                                        aggregated.invoices
-                                                    }
-                                                    pagination={{ pageSize: 6 }}
-                                                    scroll={{ x: 750 }}
-                                                    columns={[
-                                                        {
-                                                            title: isDe
-                                                                ? "Rechnungs-Nr."
-                                                                : "Invoice No.",
-                                                            dataIndex:
-                                                                "invoice_number",
-                                                            render: (v) => (
-                                                                <Text strong>
-                                                                    {v}
-                                                                </Text>
-                                                            ) },
-                                                        {
-                                                            title: isDe
-                                                                ? "Datum"
-                                                                : "Date",
-                                                            dataIndex:
-                                                                "issue_date" },
-                                                        {
-                                                            title: isDe
-                                                                ? "Kunde"
-                                                                : "Client",
-                                                            dataIndex:
-                                                                "client_name" },
-                                                        {
-                                                            title: isDe
-                                                                ? "Netto"
-                                                                : "Net",
-                                                            dataIndex:
-                                                                "subtotal",
-                                                            render: (
-                                                                v: number,
-                                                            ) =>
-                                                                `${Number(v).toFixed(2)} €` },
-                                                        {
-                                                            title: isDe
-                                                                ? "MwSt."
-                                                                : "VAT",
-                                                            dataIndex:
-                                                                "total_vat",
-                                                            render: (
-                                                                v: number,
-                                                            ) =>
-                                                                `${Number(v).toFixed(2)} €` },
-                                                        {
-                                                            title: isDe
-                                                                ? "Brutto"
-                                                                : "Gross",
-                                                            dataIndex:
-                                                                "total_gross",
-                                                            render: (
-                                                                v: number,
-                                                            ) => (
-                                                                <Text strong>
-                                                                    {Number(
-                                                                        v,
-                                                                    ).toFixed(
-                                                                        2,
-                                                                    )}{" "}
-                                                                    €
-                                                                </Text>
-                                                            ) },
-                                                        {
-                                                            title: "Status",
-                                                            dataIndex: "status",
-                                                            render: (
-                                                                s: string,
-                                                            ) => (
-                                                                <Tag
-                                                                    color={
-                                                                        s ===
-                                                                        "paid"
-                                                                            ? "green"
-                                                                            : s ===
-                                                                                "cancelled"
-                                                                              ? "red"
-                                                                              : "gold"
-                                                                    }
-                                                                >
-                                                                    {s}
-                                                                </Tag>
-                                                            ) },
-                                                    ]}
-                                                />
-                                            </div>
-                                        ) },
-                                {
-                                    key: "expenses",
-                                    label: (
-                                        <Space size={6}>
-                                            <WalletOutlined />
-                                            <span>
-                                                {isDe ? "Ausgaben" : "Expenses"}
-                                            </span>
-                                            <Badge
-                                                count={
-                                                    aggregated.expenses.length
-                                                }
-                                                showZero
-                                                color={
-                                                    aggregated.expenses.length >
-                                                    0
-                                                        ? "blue"
-                                                        : "default"
-                                                }
-                                            />
-                                        </Space>
-                                    ),
-                                    children:
-                                        aggregated.expenses.length === 0 ? (
-                                            <Empty
-                                                description={
-                                                    isDe
-                                                        ? "Noch keine Ausgaben geladen"
-                                                        : "No expenses loaded yet"
-                                                }
-                                            />
-                                        ) : (
-                                            <Table
-                                                size="small"
-                                                rowKey={(r, i) =>
-                                                    `${r.vendor_name}-${r.date}-${i}`
-                                                }
-                                                dataSource={aggregated.expenses}
-                                                pagination={{ pageSize: 6 }}
-                                                scroll={{ x: 700 }}
-                                                columns={[
-                                                    {
-                                                        title: isDe
-                                                            ? "Datum"
-                                                            : "Date",
-                                                        dataIndex: "date" },
-                                                    {
-                                                        title: isDe
-                                                            ? "Lieferant"
-                                                            : "Vendor",
-                                                        dataIndex:
-                                                            "vendor_name",
-                                                        render: (v) => (
-                                                            <Text strong>
-                                                                {v}
-                                                            </Text>
-                                                        ) },
-                                                    {
-                                                        title: isDe
-                                                            ? "Beschreibung"
-                                                            : "Description",
-                                                        dataIndex:
-                                                            "description" },
-                                                    {
-                                                        title: isDe
-                                                            ? "Kategorie"
-                                                            : "Category",
-                                                        dataIndex: "category",
-                                                        render: (c) => (
-                                                            <Tag>{c}</Tag>
-                                                        ) },
-                                                    {
-                                                        title: isDe
-                                                            ? "Netto"
-                                                            : "Net",
-                                                        dataIndex: "amount_net",
-                                                        render: (v: number) =>
-                                                            `${Number(v).toFixed(2)} €` },
-                                                    {
-                                                        title: isDe
-                                                            ? "Brutto"
-                                                            : "Gross",
-                                                        dataIndex:
-                                                            "amount_gross",
-                                                        render: (v: number) => (
-                                                            <Text strong>
-                                                                {Number(
-                                                                    v,
-                                                                ).toFixed(2)}{" "}
-                                                                €
-                                                            </Text>
-                                                        ) },
-                                                ]}
-                                            />
-                                        ) },
-                            ]}
-                        />
+<Tabs defaultValue="clients">
+                            <TabsList className="flex-wrap">
+                                <TabsTrigger value="clients">
+                                    <Users />
+                                    {isDe ? "Kunden" : "Clients"}
+                                    <Badge className={aggregated.clients.length > 0 ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : "bg-secondary text-secondary-foreground"}>{aggregated.clients.length}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="products">
+                                    <ShoppingBag />
+                                    {isDe ? "Produkte" : "Products"}
+                                    <Badge className={aggregated.products.length > 0 ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : "bg-secondary text-secondary-foreground"}>{aggregated.products.length}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="invoices">
+                                    <FileText />
+                                    {isDe ? "Rechnungen" : "Invoices"}
+                                    <Badge className={aggregated.invoices.length > 0 ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : "bg-secondary text-secondary-foreground"}>{aggregated.invoices.length}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="expenses">
+                                    <Wallet />
+                                    {isDe ? "Ausgaben" : "Expenses"}
+                                    <Badge className={aggregated.expenses.length > 0 ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" : "bg-secondary text-secondary-foreground"}>{aggregated.expenses.length}</Badge>
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="clients">
+                                <PreviewTable
+                                    rows={aggregated.clients as unknown as Record<string, unknown>[]}
+                                    emptyText={isDe ? "Noch keine Kunden geladen" : "No clients loaded yet"}
+                                    columns={[
+                                        { title: isDe ? "Name / Firma" : "Name / Company", dataIndex: "name", render: (v) => <span className="font-semibold">{String(v ?? "")}</span> },
+                                        { title: isDe ? "Ansprechpartner" : "Contact", dataIndex: "contact_person", render: (v) => String(v ?? "") || "—" },
+                                        { title: isDe ? "Adresse" : "Address", render: (_v, r) => `${String(r.address_line1 ?? "")}, ${String(r.postal_code ?? "")} ${String(r.city ?? "")}` },
+                                        { title: "E-Mail", dataIndex: "email", render: (v) => String(v ?? "") || "—" },
+                                        { title: "USt-IdNr. / Leitweg-ID", render: (_v, r) => String(r.vat_id ?? r.leitweg_id ?? "") || "—" },
+                                    ]}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="products">
+                                <PreviewTable
+                                    rows={aggregated.products as unknown as Record<string, unknown>[]}
+                                    emptyText={isDe ? "Noch keine Produkte geladen" : "No products loaded yet"}
+                                    columns={[
+                                        { title: isDe ? "Bezeichnung" : "Name", dataIndex: "name", render: (v) => <span className="font-semibold">{String(v ?? "")}</span> },
+                                        { title: isDe ? "Beschreibung" : "Description", dataIndex: "description", render: (v) => String(v ?? "") || "—" },
+                                        { title: isDe ? "Nettopreis" : "Net Price", dataIndex: "price", render: (v) => `${Number(v).toFixed(2)} €` },
+                                        { title: isDe ? "MwSt." : "VAT", dataIndex: "tax_rate_percent", render: (v) => `${String(v ?? "")} %` },
+                                        { title: isDe ? "Einheit" : "Unit", dataIndex: "unit_of_measure" },
+                                    ]}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="invoices">
+                                <div className="flex flex-col gap-2">
+                                    <Alert>
+                                        <AlertDescription>
+                                            {isDe
+                                                ? "Kunden-Automatik aktiv: Falls ein Rechnungsempfänger noch nicht in deiner Kundenliste existiert, legt Rechly ihn beim Import automatisch an."
+                                                : "Auto-Client Creation: If an invoice recipient does not exist in your clients yet, Rechly automatically creates the client record."}
+                                        </AlertDescription>
+                                    </Alert>
+                                    <PreviewTable
+                                        rows={aggregated.invoices as unknown as Record<string, unknown>[]}
+                                        emptyText={isDe ? "Noch keine Rechnungen geladen" : "No invoices loaded yet"}
+                                        columns={[
+                                            { title: isDe ? "Rechnungs-Nr." : "Invoice No.", dataIndex: "invoice_number", render: (v) => <span className="font-semibold">{String(v ?? "")}</span> },
+                                            { title: isDe ? "Datum" : "Date", dataIndex: "issue_date" },
+                                            { title: isDe ? "Kunde" : "Client", dataIndex: "client_name" },
+                                            { title: isDe ? "Netto" : "Net", dataIndex: "subtotal", render: (v) => `${Number(v).toFixed(2)} €` },
+                                            { title: isDe ? "MwSt." : "VAT", dataIndex: "total_vat", render: (v) => `${Number(v).toFixed(2)} €` },
+                                            { title: isDe ? "Brutto" : "Gross", dataIndex: "total_gross", render: (v) => <span className="font-semibold">{Number(v).toFixed(2)} €</span> },
+                                            {
+                                                title: "Status",
+                                                dataIndex: "status",
+                                                render: (v) => (
+                                                    <Badge className={v === "paid" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : v === "cancelled" ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"}>
+                                                        {String(v ?? "")}
+                                                    </Badge>
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="expenses">
+                                <PreviewTable
+                                    rows={aggregated.expenses as unknown as Record<string, unknown>[]}
+                                    emptyText={isDe ? "Noch keine Ausgaben geladen" : "No expenses loaded yet"}
+                                    columns={[
+                                        { title: isDe ? "Datum" : "Date", dataIndex: "date" },
+                                        { title: isDe ? "Lieferant" : "Vendor", dataIndex: "vendor_name", render: (v) => <span className="font-semibold">{String(v ?? "")}</span> },
+                                        { title: isDe ? "Beschreibung" : "Description", dataIndex: "description" },
+                                        { title: isDe ? "Kategorie" : "Category", dataIndex: "category", render: (v) => <Badge variant="secondary">{String(v ?? "")}</Badge> },
+                                        { title: isDe ? "Netto" : "Net", dataIndex: "amount_net", render: (v) => `${Number(v).toFixed(2)} €` },
+                                        { title: isDe ? "Brutto" : "Gross", dataIndex: "amount_gross", render: (v) => <span className="font-semibold">{Number(v).toFixed(2)} €</span> },
+                                    ]}
+                                />
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 )}
+                </CardContent>
             </Card>
 
             {/* Step 3: Import Result Breakdown */}
             {importResult && (
                 <Card className="border-emerald-300 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20">
                     <div className="flex items-start gap-3">
-                        <CheckCircleOutlined className="text-2xl text-emerald-600 mt-1" />
+                        <CheckCircle2 className="mt-1 size-6 shrink-0 text-emerald-600" />
                         <div className="flex-1">
-                            <Title level={4} className="!mb-1">
+                            <h3 className="mb-1 text-lg font-semibold">
                                 {isDe
                                     ? "Daten-Umzug erfolgreich abgeschlossen!"
                                     : "Data Migration Completed Successfully!"}
-                            </Title>
-                            <Paragraph className="text-sm text-slate-600 dark:text-slate-300 !mb-4">
+                            </h3>
+                            <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">
                                 {isDe
                                     ? "Deine Daten wurden in deinen Rechly-Arbeitsbereich übernommen:"
                                     : "Your records have been imported into your Rechly workspace:"}
-                            </Paragraph>
+                            </p>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                                 <div className="rounded-lg bg-white dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800">
@@ -1371,36 +1098,40 @@ export default function MigrationWizard({
                                 </div>
                             </div>
 
-                            <Space wrap>
-                                <Link href="/dashboard/clients">
-                                    <Button icon={<TeamOutlined />}>
+                            <div className="flex flex-wrap gap-2">
+                                <Button type="button" variant="outline" asChild>
+                                    <Link href="/dashboard/clients">
+<Users className="size-4" />
                                         {isDe
                                             ? "Zu den Kunden"
                                             : "View Clients"}
-                                    </Button>
-                                </Link>
-                                <Link href="/dashboard/products">
-                                    <Button icon={<ShoppingOutlined />}>
+                                    </Link>
+                                </Button>
+                                <Button type="button" variant="outline" asChild>
+                                    <Link href="/dashboard/products">
+<ShoppingBag className="size-4" />
                                         {isDe
                                             ? "Zu den Produkten"
                                             : "View Products"}
-                                    </Button>
-                                </Link>
-                                <Link href="/dashboard/invoices">
-                                    <Button icon={<FileTextOutlined />}>
+                                    </Link>
+                                </Button>
+                                <Button type="button" variant="outline" asChild>
+                                    <Link href="/dashboard/invoices">
+<FileText className="size-4" />
                                         {isDe
                                             ? "Zu den Rechnungen"
                                             : "View Invoices"}
-                                    </Button>
-                                </Link>
-                                <Link href="/dashboard/expenses">
-                                    <Button icon={<WalletOutlined />}>
+                                    </Link>
+                                </Button>
+                                <Button type="button" variant="outline" asChild>
+                                    <Link href="/dashboard/expenses">
+<Wallet className="size-4" />
                                         {isDe
                                             ? "Zu den Ausgaben"
                                             : "View Expenses"}
-                                    </Button>
-                                </Link>
-                            </Space>
+                                    </Link>
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </Card>

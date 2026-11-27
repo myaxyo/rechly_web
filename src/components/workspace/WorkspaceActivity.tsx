@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Alert, notification } from "antd";
+import { toast } from "sonner";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Timer } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isWorkspaceEnabled } from "@/lib/features";
 import type { RunningTimer } from "@/lib/workspace/work-types";
@@ -10,7 +12,6 @@ import { addDays, localDay, useWords } from "./common";
 export default function WorkspaceActivity() {
     const { user } = useAuth(), { l } = useWords();
     const [timer, setTimer] = useState<RunningTimer | null>(null), [now, setNow] = useState(() => Date.now());
-    const [notify, holder] = notification.useNotification();
     useEffect(() => {
         if (!isWorkspaceEnabled() || !user?.$id) return;
         let active = true, running = false;
@@ -32,7 +33,7 @@ export default function WorkspaceActivity() {
                         const id = `${event.id}:${event.occurrenceStart}:${event.reminder}`;
                         if (event.reminder < 0 || Date.now() < at || Date.now() - at >= 60000 || seen.includes(id)) continue;
                         seen.push(id); localStorage.setItem(key, JSON.stringify(seen.slice(-500)));
-                        notify.info({ title: event.title, description: `${event.occurrenceStart.replace("T", " · ")} ${event.location}`, duration: 12 });
+                        toast.info(event.title, { description: `${event.occurrenceStart.replace("T", " · ")} ${event.location}`, duration: 12000 });
                         if ("Notification" in window && Notification.permission === "granted") {
                             try { const message = new Notification(event.title, { body: event.location, tag: id }); message.onclick = () => { window.focus(); message.close(); }; } catch { /* In-app reminder remains available. */ }
                         }
@@ -45,7 +46,7 @@ export default function WorkspaceActivity() {
         void poll(); const interval = setInterval(poll, 30000), tick = setInterval(() => setNow(Date.now()), 1000);
         window.addEventListener("rechly-workspace-change", poll); window.addEventListener("storage", poll); document.addEventListener("visibilitychange", poll);
         return () => { active = false; clearInterval(interval); clearInterval(tick); window.removeEventListener("rechly-workspace-change", poll); window.removeEventListener("storage", poll); document.removeEventListener("visibilitychange", poll); };
-    }, [user?.$id, notify]);
+    }, [user?.$id]);
     if (!isWorkspaceEnabled()) return null;
-    return <>{holder}{timer && <Alert type="info" showIcon title={<Link href="/dashboard/workspace/time">{l("Timer läuft", "Timer running")}: {timer.description} · {Math.max(0, Math.floor((now - timer.started_at)/60000))} min →</Link>} style={{ marginBottom: 16 }} />}</>;
+    return <>{timer && <Alert className="mb-4"><Timer /><AlertTitle><Link href="/dashboard/workspace/time" className="hover:underline">{l("Timer läuft", "Timer running")}: {timer.description} · {Math.max(0, Math.floor((now - timer.started_at)/60000))} min →</Link></AlertTitle></Alert>}</>;
 }
