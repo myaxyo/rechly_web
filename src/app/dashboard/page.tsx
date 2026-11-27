@@ -3,29 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Card,
-    Tag,
-    Button,
-    Skeleton,
-    Empty,
-    Progress,
-} from "antd";
-import {
-    FileTextOutlined,
-    UserOutlined,
-    ShoppingOutlined,
-    PlusOutlined,
-    ArrowRightOutlined,
-    AlertOutlined,
-    RiseOutlined,
-    WalletOutlined,
-    CheckCircleOutlined,
-    ClockCircleOutlined,
-    SettingOutlined,
-    TagsOutlined,
-    CalendarOutlined,
-    ProjectOutlined,
-} from "@ant-design/icons";
+    ArrowRight, CalendarDays, CircleAlert, CircleCheck, Clock, FileText, FolderKanban, Plus,
+    Settings, ShoppingBag, Tags, TrendingUp, Users, Wallet,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { useInvoiceStore, useClientStore, useProductStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCompanyInfo } from "@/lib/companyService";
@@ -58,11 +44,11 @@ export default function DashboardPage() {
         unbilledTimeValue: 0,
     });
 
-    const statusColors: Record<string, string> = {
-        draft: "default",
-        sent: "processing",
-        paid: "success",
-        cancelled: "error",
+    const statusBadgeClass: Record<string, string> = {
+        draft: "bg-secondary text-secondary-foreground",
+        sent: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+        paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+        cancelled: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
     };
 
     const statusLabels: Record<string, string> = {
@@ -180,11 +166,17 @@ export default function DashboardPage() {
     if (loading) {
         return (
             <div className="dashboard-page">
-                <Skeleton active paragraph={{ rows: 2 }} />
+                <div className="flex flex-col gap-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-72" />
+                </div>
                 <div className="dashboard-kpi-grid" style={{ marginTop: 28 }}>
                     {[1, 2, 3, 4].map((i) => (
                         <Card key={i} className="dashboard-panel">
-                            <Skeleton active paragraph={{ rows: 1 }} />
+                            <CardContent className="flex flex-col gap-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-7 w-16" />
+                            </CardContent>
                         </Card>
                     ))}
                 </div>
@@ -197,7 +189,7 @@ export default function DashboardPage() {
             label: t("dashboard.invoices"),
             value: String(stats?.total ?? 0),
             note: `${stats?.sent ?? 0} ${t("dashboard.sent")}`,
-            icon: <FileTextOutlined />,
+            icon: <FileText />,
             tone: "blue",
             path: "/dashboard/invoices",
         },
@@ -205,7 +197,7 @@ export default function DashboardPage() {
             label: t("dashboard.clients"),
             value: String(clients.length),
             note: t("dashboard.manageClients"),
-            icon: <UserOutlined />,
+            icon: <Users />,
             tone: "teal",
             path: "/dashboard/clients",
         },
@@ -213,7 +205,7 @@ export default function DashboardPage() {
             label: t("dashboard.products"),
             value: String(products.length),
             note: t("dashboard.manageProducts"),
-            icon: <ShoppingOutlined />,
+            icon: <ShoppingBag />,
             tone: "violet",
             path: "/dashboard/products",
         },
@@ -221,7 +213,7 @@ export default function DashboardPage() {
             label: t("dashboard.openAmounts"),
             value: formatCurrency(unpaidTotal),
             note: `${stats?.draft ?? 0} ${t("dashboard.drafts")}`,
-            icon: <ClockCircleOutlined />,
+            icon: <Clock />,
             tone: "amber",
             path: "/dashboard/invoices",
         },
@@ -239,12 +231,8 @@ export default function DashboardPage() {
                     </h1>
                     <p>{t("dashboard.subtitle")}</p>
                 </div>
-                <Button
-                    type="primary"
-                    size="large"
-                    icon={<PlusOutlined />}
-                    onClick={() => router.push("/dashboard/invoices/create")}
-                >
+                <Button type="button" size="lg" onClick={() => router.push("/dashboard/invoices/create")}>
+                    <Plus />
                     {t("dashboard.newInvoice")}
                 </Button>
             </section>
@@ -257,23 +245,23 @@ export default function DashboardPage() {
                     </div>
                     <ol className="dashboard-getting-started-list">
                         <li className={company?.name ? "is-done" : ""}>
-                            <span className="dashboard-step-state">{company?.name ? <CheckCircleOutlined /> : "1"}</span>
+                            <span className="dashboard-step-state">{company?.name ? <CircleCheck /> : "1"}</span>
                             <div>
                                 <strong>{l("Firmendaten hinterlegen", "Add your company details")}</strong>
                                 <span>{l("Erscheinen automatisch auf jeder Rechnung.", "They appear automatically on every invoice.")}</span>
                             </div>
                             {!company?.name && (
-                                <Button onClick={() => router.push("/dashboard/settings")}>{l("Ausfüllen", "Add now")}</Button>
+                                <Button type="button" variant="outline" onClick={() => router.push("/dashboard/settings")}>{l("Ausfüllen", "Add now")}</Button>
                             )}
                         </li>
                         <li className={clients.length > 0 ? "is-done" : ""}>
-                            <span className="dashboard-step-state">{clients.length > 0 ? <CheckCircleOutlined /> : "2"}</span>
+                            <span className="dashboard-step-state">{clients.length > 0 ? <CircleCheck /> : "2"}</span>
                             <div>
                                 <strong>{l("Ersten Kunden anlegen", "Add your first client")}</strong>
                                 <span>{l("Oder Bestandskunden per CSV importieren.", "Or import existing clients via CSV.")}</span>
                             </div>
                             {clients.length === 0 && (
-                                <Button onClick={() => router.push("/dashboard/clients")}>{l("Kunde anlegen", "Add client")}</Button>
+                                <Button type="button" variant="outline" onClick={() => router.push("/dashboard/clients")}>{l("Kunde anlegen", "Add client")}</Button>
                             )}
                         </li>
                         <li>
@@ -282,7 +270,7 @@ export default function DashboardPage() {
                                 <strong>{l("Erste Rechnung erstellen", "Create your first invoice")}</strong>
                                 <span>{l("Als PDF, XRechnung oder ZUGFeRD exportieren.", "Export as PDF, XRechnung or ZUGFeRD.")}</span>
                             </div>
-                            <Button type="primary" onClick={() => router.push("/dashboard/invoices/create")}>
+                            <Button type="button" onClick={() => router.push("/dashboard/invoices/create")}>
                                 {t("dashboard.createFirst")}
                             </Button>
                         </li>
@@ -304,21 +292,22 @@ export default function DashboardPage() {
                             <strong>{kpi.value}</strong>
                             <span className="dashboard-kpi-note">{kpi.note}</span>
                         </span>
-                        <ArrowRightOutlined className="dashboard-kpi-arrow" />
+                        <ArrowRight className="dashboard-kpi-arrow" />
                     </button>
                 ))}
             </section>
 
             <section className="dashboard-finance-grid">
                 <Card className="dashboard-panel dashboard-revenue-panel">
+                    <CardContent>
                     <div className="dashboard-panel-heading">
                         <div>
-                            <span className="dashboard-panel-icon"><RiseOutlined /></span>
+                            <span className="dashboard-panel-icon"><TrendingUp /></span>
                             <h2>{t("dashboard.revenueOverview")}</h2>
                         </div>
-                        <Tag color={paidRatio >= 70 ? "success" : "processing"}>
+                        <Badge className={paidRatio >= 70 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"}>
                             {paidRatio}% {t("dashboard.paid")}
-                        </Tag>
+                        </Badge>
                     </div>
                     <div className="dashboard-revenue-values">
                         <div>
@@ -330,87 +319,79 @@ export default function DashboardPage() {
                             <strong className="text-warning">{formatCurrency(unpaidTotal)}</strong>
                         </div>
                     </div>
-                    <Progress
-                        percent={paidRatio}
-                        showInfo={false}
-                        strokeColor="#10b981"
-                        railColor="#e2e8f0"
-                        size={["100%", 8]}
-                    />
+                    <Progress value={paidRatio} className="h-2 [&>[data-slot=progress-indicator]]:bg-emerald-500" />
                     <div className="dashboard-status-summary">
                         <span><i className="status-dot status-dot--draft" />{stats?.draft ?? 0} {t("dashboard.drafts")}</span>
                         <span><i className="status-dot status-dot--sent" />{stats?.sent ?? 0} {t("dashboard.sent")}</span>
                         <span><i className="status-dot status-dot--paid" />{stats?.paid ?? 0} {t("dashboard.paid")}</span>
                     </div>
+                    </CardContent>
                 </Card>
 
                 <Card className="dashboard-panel dashboard-actions-panel">
+                    <CardContent>
                     <div className="dashboard-panel-heading">
                         <div>
-                            <span className="dashboard-panel-icon"><WalletOutlined /></span>
+                            <span className="dashboard-panel-icon"><Wallet /></span>
                             <h2>{t("dashboard.quickActions")}</h2>
                         </div>
                     </div>
                     <div className="dashboard-action-list">
                         <button type="button" onClick={() => router.push("/dashboard/calendar")}>
-                            <CalendarOutlined />
+                            <CalendarDays />
                             <span>{l("Kalender & Termine", "Calendar & Scheduling")}</span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                         <button type="button" onClick={() => router.push("/dashboard/termine/buchungen")}>
-                            <ClockCircleOutlined />
+                            <Clock />
                             <span>
                                 {l("Terminbuchungen", "Bookings")}
                                 {opsSummary.pendingBookings > 0 ? ` (${opsSummary.pendingBookings})` : ""}
                             </span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                         <button type="button" onClick={() => router.push("/dashboard/workspace")}>
-                            <ProjectOutlined />
+                            <FolderKanban />
                             <span>
                                 {l("Projekte & Aufgaben", "Projects & Tasks")}
                                 {opsSummary.openTasks > 0 ? ` (${opsSummary.openTasks})` : ""}
                             </span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                         <button type="button" onClick={() => router.push("/dashboard/offers")}>
-                            <TagsOutlined />
+                            <Tags />
                             <span>{t("dashboard.offers")}</span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                         <button type="button" onClick={() => router.push("/dashboard/clients")}>
-                            <UserOutlined />
+                            <Users />
                             <span>{t("dashboard.manageClients")}</span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                         <button type="button" onClick={() => router.push("/dashboard/products")}>
-                            <ShoppingOutlined />
+                            <ShoppingBag />
                             <span>{l("Produkte & Leistungen", "Products & Services")}</span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                         <button type="button" onClick={() => router.push("/dashboard/settings")}>
-                            <SettingOutlined />
+                            <Settings />
                             <span>{t("dashboard.settings")}</span>
-                            <ArrowRightOutlined />
+                            <ArrowRight />
                         </button>
                     </div>
+                    </CardContent>
                 </Card>
             </section>
 
             <section className="dashboard-analytics-grid" style={{ marginBottom: 20 }}>
-                <Card
-                    className="dashboard-panel"
-                    title={
-                        <span>
-                            <CalendarOutlined /> {l("Termine & Online-Buchungen", "Appointments & Online Booking")}
-                        </span>
-                    }
-                    extra={
-                        <Button type="link" onClick={() => router.push("/dashboard/calendar")}>
-                            {l("Zum Kalender", "Open Calendar")} <ArrowRightOutlined />
+                <Card className="dashboard-panel">
+                    <CardHeader className="dashboard-panel-head">
+                        <CardTitle className="flex items-center gap-2"><CalendarDays className="size-4" /> {l("Termine & Online-Buchungen", "Appointments & Online Booking")}</CardTitle>
+                        <Button type="button" variant="link" className="h-auto p-0" onClick={() => router.push("/dashboard/calendar")}>
+                            {l("Zum Kalender", "Open Calendar")} <ArrowRight />
                         </Button>
-                    }
-                >
+                    </CardHeader>
+                    <CardContent>
                     <div className="dashboard-forecast-values" style={{ marginBottom: 12 }}>
                         <div>
                             <span>{l("Heute geplant", "Today")}</span>
@@ -423,7 +404,7 @@ export default function DashboardPage() {
                     </div>
                     {opsSummary.nextBooking ? (
                         <div className="dashboard-anomaly-note" style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard/termine/buchungen")}>
-                            <CalendarOutlined />{" "}
+                            <CalendarDays />{" "}
                             {l("Nächster Termin:", "Next appointment:")}{" "}
                             <strong>{opsSummary.nextBooking.customerName}</strong> ·{" "}
                             {opsSummary.nextBooking.serviceNameSnapshot} (
@@ -438,21 +419,17 @@ export default function DashboardPage() {
                             {l("Keine anstehenden Buchungen.", "No upcoming customer bookings.")}
                         </p>
                     )}
+                    </CardContent>
                 </Card>
 
-                <Card
-                    className="dashboard-panel"
-                    title={
-                        <span>
-                            <ProjectOutlined /> {l("Projekte, Aufgaben & Zeiten", "Projects, Tasks & Time")}
-                        </span>
-                    }
-                    extra={
-                        <Button type="link" onClick={() => router.push("/dashboard/workspace")}>
-                            {l("Zum Arbeitsbereich", "Open Projects")} <ArrowRightOutlined />
+                <Card className="dashboard-panel">
+                    <CardHeader className="dashboard-panel-head">
+                        <CardTitle className="flex items-center gap-2"><FolderKanban className="size-4" /> {l("Projekte, Aufgaben & Zeiten", "Projects, Tasks & Time")}</CardTitle>
+                        <Button type="button" variant="link" className="h-auto p-0" onClick={() => router.push("/dashboard/workspace")}>
+                            {l("Zum Arbeitsbereich", "Open Projects")} <ArrowRight />
                         </Button>
-                    }
-                >
+                    </CardHeader>
+                    <CardContent>
                     <div className="dashboard-forecast-values" style={{ marginBottom: 12 }}>
                         <div>
                             <span>{l("Offene Aufgaben", "Open tasks")}</span>
@@ -469,7 +446,7 @@ export default function DashboardPage() {
                             style={{ cursor: "pointer" }}
                             onClick={() => router.push("/dashboard/workspace/time")}
                         >
-                            <ClockCircleOutlined /> {l("Timer läuft:", "Timer running:")}{" "}
+                            <Clock /> {l("Timer läuft:", "Timer running:")}{" "}
                             <strong>{opsSummary.timerRunning}</strong>
                         </div>
                     ) : (
@@ -478,31 +455,27 @@ export default function DashboardPage() {
                             {l("aktive(s) Projekt(e) · Zeiterfassung bereit", "active project(s) · Time tracking ready")}
                         </p>
                     )}
+                    </CardContent>
                 </Card>
             </section>
 
             <section className="dashboard-main-grid">
-                <Card
-                    className="dashboard-panel dashboard-recent-panel"
-                    title={t("dashboard.recentInvoices")}
-                    extra={
-                        <Button type="link" onClick={() => router.push("/dashboard/invoices")}>
-                            {t("dashboard.showAll")} <ArrowRightOutlined />
+                <Card className="dashboard-panel dashboard-recent-panel">
+                    <CardHeader className="dashboard-panel-head">
+                        <CardTitle>{t("dashboard.recentInvoices")}</CardTitle>
+                        <Button type="button" variant="link" className="h-auto p-0" onClick={() => router.push("/dashboard/invoices")}>
+                            {t("dashboard.showAll")} <ArrowRight />
                         </Button>
-                    }
-                >
+                    </CardHeader>
+                    <CardContent>
                     {recentInvoices.length === 0 ? (
-                        <Empty
-                            description={t("dashboard.noInvoices")}
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        >
-                            <Button
-                                type="primary"
-                                onClick={() => router.push("/dashboard/invoices/create")}
-                            >
+                        <div className="flex flex-col items-center gap-3 py-8 text-center">
+                            <FileText className="size-8 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">{t("dashboard.noInvoices")}</p>
+                            <Button type="button" onClick={() => router.push("/dashboard/invoices/create")}>
                                 {t("dashboard.createFirst")}
                             </Button>
-                        </Empty>
+                        </div>
                     ) : (
                         <div className="dashboard-invoice-list">
                             {recentInvoices.map((invoice) => (
@@ -512,7 +485,7 @@ export default function DashboardPage() {
                                     onClick={() => router.push(`/dashboard/invoices/${invoice.id}`)}
                                     className="dashboard-invoice-row"
                                 >
-                                    <span className="dashboard-invoice-symbol"><FileTextOutlined /></span>
+                                    <span className="dashboard-invoice-symbol"><FileText /></span>
                                     <span className="dashboard-invoice-info">
                                         <strong>{invoice.invoice_number}</strong>
                                         <small>
@@ -520,24 +493,26 @@ export default function DashboardPage() {
                                             {" · "}{formatDateGerman(invoice.issue_date)}
                                         </small>
                                     </span>
-                                    <Tag color={statusColors[invoice.status]}>
+                                    <Badge className={cn("shrink-0", statusBadgeClass[invoice.status])}>
                                         {statusLabels[invoice.status]}
-                                    </Tag>
+                                    </Badge>
                                     <strong className="dashboard-invoice-amount">
                                         {formatCurrency(invoice.total_gross)}
                                     </strong>
-                                    <ArrowRightOutlined className="dashboard-row-arrow" />
+                                    <ArrowRight className="dashboard-row-arrow" />
                                 </button>
                             ))}
                         </div>
                     )}
+                    </CardContent>
                 </Card>
 
                 <div className="dashboard-side-stack">
                     <Card className="dashboard-panel dashboard-forecast-card">
+                        <CardContent>
                         <div className="dashboard-panel-heading">
                             <div>
-                                <span className="dashboard-panel-icon"><RiseOutlined /></span>
+                                <span className="dashboard-panel-icon"><TrendingUp /></span>
                                 <h2>Revenue Forecast</h2>
                             </div>
                             <span className="dashboard-confidence">
@@ -554,12 +529,14 @@ export default function DashboardPage() {
                                 <strong>{formatCurrency(analytics?.forecast.next90Days ?? 0)}</strong>
                             </div>
                         </div>
+                        </CardContent>
                     </Card>
 
                     <Card className="dashboard-panel dashboard-insights-card">
+                        <CardContent>
                         <div className="dashboard-panel-heading">
                             <div>
-                                <span className="dashboard-panel-icon"><AlertOutlined /></span>
+                                <span className="dashboard-panel-icon"><CircleAlert /></span>
                                 <h2>KPI Intelligence</h2>
                             </div>
                         </div>
@@ -575,12 +552,15 @@ export default function DashboardPage() {
                         ) : (
                             <p className="dashboard-empty-note">No KPI insights generated yet.</p>
                         )}
+                        </CardContent>
                     </Card>
                 </div>
             </section>
 
             <section className="dashboard-analytics-grid">
-                <Card className="dashboard-panel" title="Late-Payment Risk">
+                <Card className="dashboard-panel">
+                    <CardHeader className="dashboard-panel-head"><CardTitle>Late-Payment Risk</CardTitle></CardHeader>
+                    <CardContent>
                     {analytics?.latePaymentRisk?.length ? (
                         <div className="dashboard-risk-list">
                             {analytics.latePaymentRisk.slice(0, 5).map((risk) => (
@@ -589,18 +569,21 @@ export default function DashboardPage() {
                                         <strong>{risk.clientName}</strong>
                                         <small>Late rate {risk.lateRate}% · Avg {risk.averageDaysLate}d</small>
                                     </div>
-                                    <Tag color={risk.riskLevel === "high" ? "error" : risk.riskLevel === "medium" ? "warning" : "success"}>
+                                    <Badge className={risk.riskLevel === "high" ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" : risk.riskLevel === "medium" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"}>
                                         {(risk.riskScore * 100).toFixed(1)}%
-                                    </Tag>
+                                    </Badge>
                                 </div>
                             ))}
                         </div>
                     ) : (
                         <p className="dashboard-empty-note">Not enough data for risk scoring yet.</p>
                     )}
+                    </CardContent>
                 </Card>
 
-                <Card className="dashboard-panel" title="Customer Segmentation & Anomalies">
+                <Card className="dashboard-panel">
+                    <CardHeader className="dashboard-panel-head"><CardTitle>Customer Segmentation &amp; Anomalies</CardTitle></CardHeader>
+                    <CardContent>
                     <div className="dashboard-segment-list">
                         {analytics?.customerSegments?.length ? (
                             ["champions", "loyal", "at_risk", "new", "needs_attention"].map((segment) => {
@@ -617,11 +600,12 @@ export default function DashboardPage() {
                     </div>
                     {analytics?.anomalies?.length ? (
                         <div className="dashboard-anomaly-note">
-                            <AlertOutlined /> {analytics.anomalies[0].message}
+                            <CircleAlert className="inline size-4" /> {analytics.anomalies[0].message}
                         </div>
                     ) : (
-                        <p className="dashboard-empty-note"><CheckCircleOutlined /> No anomalies detected.</p>
+                        <p className="dashboard-empty-note"><CircleCheck className="inline size-4" /> No anomalies detected.</p>
                     )}
+                    </CardContent>
                 </Card>
             </section>
         </div>

@@ -509,29 +509,26 @@ li.is-done .dashboard-step-state {
     }
 }
 
-/* Shared panels */
-.dashboard-panel.ant-card {
+/* Shared panels (shadcn/ui Card) */
+.dashboard-panel {
     height: 100%;
     border: 1px solid var(--dash-border) !important;
     border-radius: 12px !important;
     background: var(--dash-surface) !important;
     box-shadow: var(--dash-shadow);
+    color: var(--dash-text);
 }
 
-.dashboard-panel.ant-card > .ant-card-head {
-    min-height: 54px;
-    padding: 0 20px;
+.dashboard-panel-head {
+    min-height: 30px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--dash-border);
     color: var(--dash-text);
 }
 
-.dashboard-panel.ant-card > .ant-card-head .ant-card-head-title {
+.dashboard-panel-head [data-slot="card-title"] {
     font-size: 14px;
     font-weight: 650;
-}
-
-.dashboard-panel.ant-card > .ant-card-body {
-    padding: 20px;
 }
 
 .dashboard-panel-heading {
