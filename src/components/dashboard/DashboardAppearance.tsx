@@ -3,6 +3,10 @@
 import { createContext, useContext, useSyncExternalStore } from "react";
 import { ConfigProvider, Select, theme } from "antd";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+    Select as UiSelect, SelectContent as UiSelectContent, SelectItem as UiSelectItem,
+    SelectTrigger as UiSelectTrigger, SelectValue as UiSelectValue,
+} from "@/components/ui/select";
 
 type Appearance = "light" | "dark" | "system";
 let memoryAppearance: Appearance = "light";
@@ -61,7 +65,7 @@ export default function DashboardAppearance({ children }: { children: React.Reac
                     borderRadius: 8,
                     fontFamily: 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 } }}>
-                <div className="dashboard-appearance" data-appearance={dark ? "dark" : "light"}
+                <div className={`dashboard-appearance${dark ? " dark" : ""}`} data-appearance={dark ? "dark" : "light"}
                     style={{ minHeight: "100vh", colorScheme: dark ? "dark" : "light" }}>
                     {children}
                 </div>
@@ -79,4 +83,22 @@ export function AppearanceSelect() {
             { value: "dark", label: t("appearance.dark") },
             { value: "system", label: t("appearance.system") },
         ]} />;
+}
+
+/** shadcn/ui appearance switcher for the new dashboard shell. */
+export function AppearanceSelectNew() {
+    const { appearance, change } = useContext(AppearanceContext);
+    const { t } = useLanguage();
+    return (
+        <UiSelect value={appearance} onValueChange={(v) => change(v as Appearance)}>
+            <UiSelectTrigger className="h-9 w-[118px]" aria-label={t("appearance.label")}>
+                <UiSelectValue />
+            </UiSelectTrigger>
+            <UiSelectContent>
+                <UiSelectItem value="light">{t("appearance.light")}</UiSelectItem>
+                <UiSelectItem value="dark">{t("appearance.dark")}</UiSelectItem>
+                <UiSelectItem value="system">{t("appearance.system")}</UiSelectItem>
+            </UiSelectContent>
+        </UiSelect>
+    );
 }

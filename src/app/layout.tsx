@@ -12,6 +12,7 @@ import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
 import ConsentAnalytics from "@/components/analytics/ConsentAnalytics";
 import PublicTheme from "@/components/PublicTheme";
 import AppwritePing from "@/components/AppwritePing";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const siteUrl = getSiteUrl();
@@ -121,6 +122,7 @@ export default function RootLayout({
                     <LanguageProvider>
                         <AuthProvider>
                             <PublicTheme>{children}</PublicTheme>
+                            <Toaster position="top-center" />
                         </AuthProvider>
                     </LanguageProvider>
                 </AntdRegistry>

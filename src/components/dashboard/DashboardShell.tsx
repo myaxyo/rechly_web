@@ -49,6 +49,9 @@ import { AppearanceSelect } from "./DashboardAppearance";
 import { isDesktopRuntime } from "@/lib/runtime";
 import { isTermineEnabled, isWorkspaceEnabled } from "@/lib/features";
 import WorkspaceActivity from "@/components/workspace/WorkspaceActivity";
+import { useUiMode } from "@/contexts/UiModeContext";
+import DashboardShellNew from "@/components/dashboard/DashboardShellNew";
+import { TryNewUiButton } from "@/components/dashboard/UiModeToggle";
 import CommandPalette from "@/components/dashboard/CommandPalette";
 import UpdateBanner from "@/components/dashboard/UpdateBanner";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmail";
@@ -71,7 +74,7 @@ const pageTitles: Record<string, string> = {
     "/dashboard/termine": "Termine",
 };
 
-export default function DashboardShell({
+function DashboardShellLegacy({
     children,
 }: {
     children: React.ReactNode;
@@ -596,6 +599,7 @@ export default function DashboardShell({
                             </span>
                             <kbd>⌘K</kbd>
                         </button>
+                        <TryNewUiButton compact={isMobile} />
                         <AppearanceSelect />
                         {!isMobile && (
                             <Select
@@ -660,4 +664,14 @@ export default function DashboardShell({
             </Layout>
         </Layout>
     );
+}
+
+/**
+ * Shell switch: users stay on the legacy Ant Design shell by default and
+ * only see the shadcn/ui shell after choosing "Try new UI". The choice is
+ * persisted per browser (UiModeContext) and reversible from both headers.
+ */
+export default function DashboardShell({ children }: { children: React.ReactNode }) {
+    const { isNew } = useUiMode();
+    return isNew ? <DashboardShellNew>{children}</DashboardShellNew> : <DashboardShellLegacy>{children}</DashboardShellLegacy>;
 }

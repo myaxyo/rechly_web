@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import DashboardAppearance from "@/components/dashboard/DashboardAppearance";
+import { UiModeProvider } from "@/contexts/UiModeContext";
 import "./dashboard.css";
 
 export const metadata: Metadata = {
@@ -20,5 +21,11 @@ export const metadata: Metadata = {
 export default function DashboardLayout({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
-    return <DashboardAppearance><DashboardShell>{children}</DashboardShell></DashboardAppearance>;
+    return (
+        <DashboardAppearance>
+            <UiModeProvider>
+                <DashboardShell>{children}</DashboardShell>
+            </UiModeProvider>
+        </DashboardAppearance>
+    );
 }

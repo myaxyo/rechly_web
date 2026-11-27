@@ -36,6 +36,23 @@ maps every shadcn variable to the current Rechly palette from
 - Not changed: `src/app/layout.tsx` (`AntdRegistry`), `PublicTheme`,
   all 87 files importing `antd` — zero UX impact
 
+## Rollout: opt-in preview (no forced switch)
+
+Users are never switched automatically. `src/contexts/UiModeContext.tsx`
+persists a per-browser choice (`rechly.ui-mode`, default `legacy`):
+
+- Legacy dashboard header shows **“Neue UI testen / Try new UI”**
+  (`TryNewUiButton` in `src/components/dashboard/UiModeToggle.tsx`).
+- The new shadcn shell (`DashboardShellNew`) always shows
+  **“Zur alten UI / Back to old UI”** plus a dismissible Beta banner
+  with a feedback link.
+- `DashboardShell` branches on the mode; both shells share the same
+  routes, page titles, and navigation, so switching is instant and
+  reversible. Pages migrate inside the new shell one by one; until a
+  page is migrated it simply renders its current UI inside the new
+  chrome. Only when every page is migrated does the legacy shell and
+  Ant Design get removed (final cutover, announced in advance).
+
 ## Next phases
 
 1. **Leaf components** — add `label`, `badge`, `skeleton`, `separator`,
