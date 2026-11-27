@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { InputNumber, Slider, Card, Tag, Button } from "antd";
-import {
-    CheckCircleOutlined,
-    ExclamationCircleOutlined,
-    CopyOutlined,
-    CheckOutlined,
-    InfoCircleOutlined } from "@ant-design/icons";
+import DecimalInput from "@/components/DecimalInput";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, Check, CheckCircle2, Copy, Info } from "lucide-react";
 import Link from "next/link";
 
 
@@ -92,7 +91,7 @@ export default function KleinunternehmerRechner() {
                     alignItems: "center",
                     gap: 12 }}
             >
-                <InfoCircleOutlined style={{ fontSize: 22, color: "#16a34a" }} />
+                <Info style={{ fontSize: 22, color: "#16a34a", width: 22, height: 22, flexShrink: 0 }} />
                 <div style={{ fontSize: 14, color: "#166534", lineHeight: 1.5 }}>
                     <strong>Gesetzesreform ab 2025/2026:</strong> Die Grenzen nach § 19 UStG wurden durch das
                     Wachstumschancengesetz deutlich angehoben auf <strong>25.000 € Vorjahresumsatz</strong> (zuvor 22.000 €)
@@ -112,14 +111,13 @@ export default function KleinunternehmerRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#334155" }}>
                         Tatsächlicher Umsatz im Vorjahr *
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0}
                         max={500000}
                         step={500}
                         value={priorYearRevenue}
                         onChange={(val) => setPriorYearRevenue(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€"
                     />
                     <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
@@ -131,14 +129,13 @@ export default function KleinunternehmerRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#334155" }}>
                         Erwarteter Umsatz im laufenden Jahr *
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0}
                         max={500000}
                         step={1000}
                         value={currentYearRevenue}
                         onChange={(val) => setCurrentYearRevenue(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€"
                     />
                     <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
@@ -150,14 +147,13 @@ export default function KleinunternehmerRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#334155" }}>
                         Jährliche Ausgaben netto (mit 19% USt)
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0}
                         max={200000}
                         step={500}
                         value={annualExpensesNet}
                         onChange={(val) => setAnnualExpensesNet(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€ / Jahr"
                     />
                     <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
@@ -173,8 +169,8 @@ export default function KleinunternehmerRechner() {
                     <Slider
                         min={0}
                         max={100}
-                        value={b2cSharePercent}
-                        onChange={setB2cSharePercent}
+                        value={[b2cSharePercent]}
+                        onValueChange={([v]) => setB2cSharePercent(v)}
                     />
                     <div style={{ fontSize: 12, color: "#64748b" }}>
                         {100 - b2cSharePercent} % Geschäftskunden (B2B)
@@ -190,28 +186,30 @@ export default function KleinunternehmerRechner() {
                     background: calc.isEligible ? "#f0fdf4" : "#fef2f2",
                     marginBottom: 28 }}
             >
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                    {calc.isEligible ? (
-                        <CheckCircleOutlined style={{ fontSize: 32, color: "#059669" }} />
-                    ) : (
-                        <ExclamationCircleOutlined style={{ fontSize: 32, color: "#dc2626" }} />
-                    )}
-                    <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                            <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: "#0f172a" }}>
-                                {calc.isEligible
-                                    ? "Kleinunternehmerregelung (§ 19 UStG) anwendbar"
-                                    : "Grenzüberschreitung: Regelbesteuerung erforderlich"}
-                            </h3>
-                            <Tag color={calc.isEligible ? "success" : "error"} style={{ fontWeight: 700 }}>
-                                {calc.isEligible ? "GRENZEN EINGEHALTEN" : "PFLICHT ZUR REGELBESTEUERUNG"}
-                            </Tag>
+                <CardContent>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                        {calc.isEligible ? (
+                            <CheckCircle2 style={{ fontSize: 32, color: "#059669", width: 32, height: 32, flexShrink: 0 }} />
+                        ) : (
+                            <AlertCircle style={{ fontSize: 32, color: "#dc2626", width: 32, height: 32, flexShrink: 0 }} />
+                        )}
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                                <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: "#0f172a" }}>
+                                    {calc.isEligible
+                                        ? "Kleinunternehmerregelung (§ 19 UStG) anwendbar"
+                                        : "Grenzüberschreitung: Regelbesteuerung erforderlich"}
+                                </h3>
+                                <Badge className={calc.isEligible ? "bg-green-600 text-white hover:bg-green-600" : "bg-red-600 text-white hover:bg-red-600"} style={{ fontWeight: 700 }}>
+                                    {calc.isEligible ? "GRENZEN EINGEHALTEN" : "PFLICHT ZUR REGELBESTEUERUNG"}
+                                </Badge>
+                            </div>
+                            <p style={{ margin: "8px 0 0 0", color: "#334155", fontSize: 15, lineHeight: 1.6 }}>
+                                {calc.recommendation}
+                            </p>
                         </div>
-                        <p style={{ margin: "8px 0 0 0", color: "#334155", fontSize: 15, lineHeight: 1.6 }}>
-                            {calc.recommendation}
-                        </p>
                     </div>
-                </div>
+                </CardContent>
             </Card>
 
             {/* Comparison Metrics Grid */}
@@ -223,47 +221,53 @@ export default function KleinunternehmerRechner() {
                     marginBottom: 32 }}
             >
                 <Card
-                    title="Als Kleinunternehmer (§ 19 UStG)"
-                    size="small"
                     style={{ borderRadius: 10, border: "1px solid #cbd5e1" }}
                 >
-                    <ul style={{ margin: 0, paddingLeft: 18, color: "#334155", fontSize: 14, lineHeight: 1.7 }}>
-                        <li>
-                            <strong>0 % Umsatzsteuer</strong> auf deinen Rechnungen
-                        </li>
-                        <li>
-                            <strong>Wettbewerbsvorteil bei B2C:</strong> Privatkunden zahlen keinen 19% Aufschlag
-                        </li>
-                        <li>
-                            <strong>Keine USt-Voranmeldungen</strong> beim Finanzamt
-                        </li>
-                        <li style={{ color: "#dc2626" }}>
-                            <strong>Kein Vorsteuerabzug:</strong> Du verlierst ca. {calc.potentialVatRefund.toFixed(2)} €
-                            Vorsteuer aus Betriebsausgaben
-                        </li>
-                    </ul>
+                    <CardHeader>
+                        <CardTitle>Als Kleinunternehmer (§ 19 UStG)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul style={{ margin: 0, paddingLeft: 18, color: "#334155", fontSize: 14, lineHeight: 1.7 }}>
+                            <li>
+                                <strong>0 % Umsatzsteuer</strong> auf deinen Rechnungen
+                            </li>
+                            <li>
+                                <strong>Wettbewerbsvorteil bei B2C:</strong> Privatkunden zahlen keinen 19% Aufschlag
+                            </li>
+                            <li>
+                                <strong>Keine USt-Voranmeldungen</strong> beim Finanzamt
+                            </li>
+                            <li style={{ color: "#dc2626" }}>
+                                <strong>Kein Vorsteuerabzug:</strong> Du verlierst ca. {calc.potentialVatRefund.toFixed(2)} €
+                                Vorsteuer aus Betriebsausgaben
+                            </li>
+                        </ul>
+                    </CardContent>
                 </Card>
 
                 <Card
-                    title="Mit Regelbesteuerung (19% USt)"
-                    size="small"
                     style={{ borderRadius: 10, border: "1px solid #cbd5e1" }}
                 >
-                    <ul style={{ margin: 0, paddingLeft: 18, color: "#334155", fontSize: 14, lineHeight: 1.7 }}>
-                        <li>
-                            <strong>Vorsteuer-Rückerstattung:</strong> Du erhältst ca.{" "}
-                            <strong>+{calc.potentialVatRefund.toFixed(2)} €</strong> vom Finanzamt zurück
-                        </li>
-                        <li>
-                            <strong>USt-neutral bei B2B:</strong> Geschäftskunden zieht die Vorsteuer ab
-                        </li>
-                        <li style={{ color: "#d97706" }}>
-                            Regelmäßige <strong>Umsatzsteuervoranmeldungen</strong> (monatlich/quartalsweise)
-                        </li>
-                        <li style={{ color: "#d97706" }}>
-                            5 Jahre Bindung bei freiwilligem Verzicht (§ 19 Abs. 2 UStG)
-                        </li>
-                    </ul>
+                    <CardHeader>
+                        <CardTitle>Mit Regelbesteuerung (19% USt)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul style={{ margin: 0, paddingLeft: 18, color: "#334155", fontSize: 14, lineHeight: 1.7 }}>
+                            <li>
+                                <strong>Vorsteuer-Rückerstattung:</strong> Du erhältst ca.{" "}
+                                <strong>+{calc.potentialVatRefund.toFixed(2)} €</strong> vom Finanzamt zurück
+                            </li>
+                            <li>
+                                <strong>USt-neutral bei B2B:</strong> Geschäftskunden zieht die Vorsteuer ab
+                            </li>
+                            <li style={{ color: "#d97706" }}>
+                                Regelmäßige <strong>Umsatzsteuervoranmeldungen</strong> (monatlich/quartalsweise)
+                            </li>
+                            <li style={{ color: "#d97706" }}>
+                                5 Jahre Bindung bei freiwilligem Verzicht (§ 19 Abs. 2 UStG)
+                            </li>
+                        </ul>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -293,15 +297,14 @@ export default function KleinunternehmerRechner() {
                 </div>
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                     <Button
-                        icon={copiedClause ? <CheckOutlined /> : <CopyOutlined />}
                         onClick={copyClause}
-                        type="primary"
                         style={{ background: "#2855d9" }}
                     >
+                        {copiedClause ? <Check /> : <Copy />}
                         {copiedClause ? " kopiert!" : "Hinweistext kopieren"}
                     </Button>
                     <Link href="/kleinunternehmer-rechnung">
-                        <Button>Kleinunternehmer-Rechnung in Rechly erstellen</Button>
+                        <Button variant="outline">Kleinunternehmer-Rechnung in Rechly erstellen</Button>
                     </Link>
                 </div>
             </div>

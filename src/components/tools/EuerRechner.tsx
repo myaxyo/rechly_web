@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Card, InputNumber, Button, Tag } from "antd";
-import {
-    DownloadOutlined } from "@ant-design/icons";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DecimalInput from "@/components/DecimalInput";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Download } from "lucide-react";
 import { calculateEuer, EuerRevenueCategory, EuerExpenseCategory } from "@/lib/tools/euer";
 
 
@@ -79,43 +81,51 @@ export default function EuerRechner() {
             {/* Top KPI Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 24 }}>
                 <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Einnahmen (Netto)</div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a", marginTop: 4 }}>
-                        {calculation.totalRevenueNet.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
-                    </div>
-                    <div style={{ fontSize: 11, color: "#16a34a", marginTop: 4 }}>
-                        Brutto: {calculation.totalRevenueGross.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
-                    </div>
+                    <CardContent>
+                        <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Einnahmen (Netto)</div>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a", marginTop: 4 }}>
+                            {calculation.totalRevenueNet.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                        </div>
+                        <div style={{ fontSize: 11, color: "#16a34a", marginTop: 4 }}>
+                            Brutto: {calculation.totalRevenueGross.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                        </div>
+                    </CardContent>
                 </Card>
 
                 <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Ausgaben (Netto)</div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: "#dc2626", marginTop: 4 }}>
-                        {calculation.totalExpensesNet.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
-                    </div>
-                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
-                        Vorsteuer: {calculation.vorsteuerDeductible.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
-                    </div>
+                    <CardContent>
+                        <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Ausgaben (Netto)</div>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: "#dc2626", marginTop: 4 }}>
+                            {calculation.totalExpensesNet.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                        </div>
+                        <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
+                            Vorsteuer: {calculation.vorsteuerDeductible.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                        </div>
+                    </CardContent>
                 </Card>
 
                 <Card style={{ borderRadius: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
-                    <div style={{ fontSize: 12, color: "#166534", fontWeight: 600 }}>Gewinn (§ 4 Abs. 3 EStG)</div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: "#15803d", marginTop: 4 }}>
-                        {calculation.netProfit.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
-                    </div>
-                    <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>
-                        Marge: {calculation.profitMarginPercent} %
-                    </div>
+                    <CardContent>
+                        <div style={{ fontSize: 12, color: "#166534", fontWeight: 600 }}>Gewinn (§ 4 Abs. 3 EStG)</div>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: "#15803d", marginTop: 4 }}>
+                            {calculation.netProfit.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                        </div>
+                        <div style={{ fontSize: 11, color: "#166534", marginTop: 4 }}>
+                            Marge: {calculation.profitMarginPercent} %
+                        </div>
+                    </CardContent>
                 </Card>
 
                 <Card style={{ borderRadius: 12, background: "#eff6ff", border: "1px solid #bfdbfe" }}>
-                    <div style={{ fontSize: 12, color: "#1e40af", fontWeight: 600 }}>USt-Zahllast (ELSTER Kz 83)</div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: "#2855d9", marginTop: 4 }}>
-                        {calculation.elster.kz83Zahllast.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
-                    </div>
-                    <div style={{ fontSize: 11, color: "#1e40af", marginTop: 4 }}>
-                        {calculation.elster.kz83Zahllast >= 0 ? "An Finanzamt zu zahlen" : "Erstattungsanspruch"}
-                    </div>
+                    <CardContent>
+                        <div style={{ fontSize: 12, color: "#1e40af", fontWeight: 600 }}>USt-Zahllast (ELSTER Kz 83)</div>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: "#2855d9", marginTop: 4 }}>
+                            {calculation.elster.kz83Zahllast.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €
+                        </div>
+                        <div style={{ fontSize: 11, color: "#1e40af", marginTop: 4 }}>
+                            {calculation.elster.kz83Zahllast >= 0 ? "An Finanzamt zu zahlen" : "Erstattungsanspruch"}
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -123,176 +133,189 @@ export default function EuerRechner() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
                 {/* Revenue Card */}
                 <Card
-                    title="1. Betriebseinnahmen (Umsätze netto)"
                     style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}
                 >
-                    <div style={{ marginBottom: 16 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
-                                Umsätze zu 19 % (Kz 81)
-                            </span>
-                            <span style={{ fontSize: 12, color: "#64748b" }}>
-                                USt: {(rev19 * 0.19).toFixed(2)} €
-                            </span>
+                    <CardHeader>
+                        <CardTitle>1. Betriebseinnahmen (Umsätze netto)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div style={{ marginBottom: 16 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
+                                    Umsätze zu 19 % (Kz 81)
+                                </span>
+                                <span style={{ fontSize: 12, color: "#64748b" }}>
+                                    USt: {(rev19 * 0.19).toFixed(2)} €
+                                </span>
+                            </div>
+                            <DecimalInput
+                                value={rev19}
+                                onChange={(v) => setRev19(v || 0)}
+                                style={{ width: "100%" }}
+                                precision={2}
+                                addonAfter="€"
+                            />
                         </div>
-                        <InputNumber
-                            value={rev19}
-                            onChange={(v) => setRev19(v || 0)}
-                            style={{ width: "100%" }}
-                            precision={2}
-                            prefix="€"
-                        />
-                    </div>
 
-                    <div style={{ marginBottom: 16 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
-                                Umsätze zu 7 % (Kz 86)
-                            </span>
-                            <span style={{ fontSize: 12, color: "#64748b" }}>
-                                USt: {(rev7 * 0.07).toFixed(2)} €
-                            </span>
+                        <div style={{ marginBottom: 16 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
+                                    Umsätze zu 7 % (Kz 86)
+                                </span>
+                                <span style={{ fontSize: 12, color: "#64748b" }}>
+                                    USt: {(rev7 * 0.07).toFixed(2)} €
+                                </span>
+                            </div>
+                            <DecimalInput
+                                value={rev7}
+                                onChange={(v) => setRev7(v || 0)}
+                                style={{ width: "100%" }}
+                                precision={2}
+                                addonAfter="€"
+                            />
                         </div>
-                        <InputNumber
-                            value={rev7}
-                            onChange={(v) => setRev7(v || 0)}
-                            style={{ width: "100%" }}
-                            precision={2}
-                            prefix="€"
-                        />
-                    </div>
 
-                    <div>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
-                                Steuerfreie / Reverse Charge Umsätze (Kz 21 / 41)
-                            </span>
-                            <span style={{ fontSize: 12, color: "#64748b" }}>USt: 0,00 €</span>
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
+                                    Steuerfreie / Reverse Charge Umsätze (Kz 21 / 41)
+                                </span>
+                                <span style={{ fontSize: 12, color: "#64748b" }}>USt: 0,00 €</span>
+                            </div>
+                            <DecimalInput
+                                value={rev0}
+                                onChange={(v) => setRev0(v || 0)}
+                                style={{ width: "100%" }}
+                                precision={2}
+                                addonAfter="€"
+                            />
                         </div>
-                        <InputNumber
-                            value={rev0}
-                            onChange={(v) => setRev0(v || 0)}
-                            style={{ width: "100%" }}
-                            precision={2}
-                            prefix="€"
-                        />
-                    </div>
+                    </CardContent>
                 </Card>
 
                 {/* Operating Expenses Card */}
                 <Card
-                    title="2. Betriebsausgaben (Netto)"
                     style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}
                 >
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                        <div>
-                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                                Wareneinkauf (19%)
-                            </label>
-                            <InputNumber value={expenseGoods} onChange={(v) => setExpenseGoods(v || 0)} style={{ width: "100%" }} precision={2} />
+                    <CardHeader>
+                        <CardTitle>2. Betriebsausgaben (Netto)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                            <div>
+                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                    Wareneinkauf (19%)
+                                </label>
+                                <DecimalInput value={expenseGoods} onChange={(v) => setExpenseGoods(v || 0)} style={{ width: "100%" }} precision={2} />
+                            </div>
+                            <div>
+                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                    Subunternehmer (19%)
+                                </label>
+                                <DecimalInput value={expenseSub} onChange={(v) => setExpenseSub(v || 0)} style={{ width: "100%" }} precision={2} />
+                            </div>
                         </div>
-                        <div>
-                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                                Subunternehmer (19%)
-                            </label>
-                            <InputNumber value={expenseSub} onChange={(v) => setExpenseSub(v || 0)} style={{ width: "100%" }} precision={2} />
-                        </div>
-                    </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                        <div>
-                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                                Raumkosten / Miete (0%)
-                            </label>
-                            <InputNumber value={expenseRent} onChange={(v) => setExpenseRent(v || 0)} style={{ width: "100%" }} precision={2} />
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                            <div>
+                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                    Raumkosten / Miete (0%)
+                                </label>
+                                <DecimalInput value={expenseRent} onChange={(v) => setExpenseRent(v || 0)} style={{ width: "100%" }} precision={2} />
+                            </div>
+                            <div>
+                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                    IT, Software, Hosting (19%)
+                                </label>
+                                <DecimalInput value={expenseIt} onChange={(v) => setExpenseIt(v || 0)} style={{ width: "100%" }} precision={2} />
+                            </div>
                         </div>
-                        <div>
-                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                                IT, Software, Hosting (19%)
-                            </label>
-                            <InputNumber value={expenseIt} onChange={(v) => setExpenseIt(v || 0)} style={{ width: "100%" }} precision={2} />
-                        </div>
-                    </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                        <div>
-                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                                AfA Abschreibungen (0%)
-                            </label>
-                            <InputNumber value={expenseAfa} onChange={(v) => setExpenseAfa(v || 0)} style={{ width: "100%" }} precision={2} />
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                            <div>
+                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                    AfA Abschreibungen (0%)
+                                </label>
+                                <DecimalInput value={expenseAfa} onChange={(v) => setExpenseAfa(v || 0)} style={{ width: "100%" }} precision={2} />
+                            </div>
+                            <div>
+                                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                    Reisekosten &amp; Bewirtung (19%)
+                                </label>
+                                <DecimalInput value={expenseTravel} onChange={(v) => setExpenseTravel(v || 0)} style={{ width: "100%" }} precision={2} />
+                            </div>
                         </div>
-                        <div>
-                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                                Reisekosten & Bewirtung (19%)
-                            </label>
-                            <InputNumber value={expenseTravel} onChange={(v) => setExpenseTravel(v || 0)} style={{ width: "100%" }} precision={2} />
-                        </div>
-                    </div>
 
-                    <div>
-                        <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
-                            Sonstige Kosten (19%)
-                        </label>
-                        <InputNumber value={expenseOther} onChange={(v) => setExpenseOther(v || 0)} style={{ width: "100%" }} precision={2} />
-                    </div>
+                        <div>
+                            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                                Sonstige Kosten (19%)
+                            </label>
+                            <DecimalInput value={expenseOther} onChange={(v) => setExpenseOther(v || 0)} style={{ width: "100%" }} precision={2} />
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
 
             {/* Official ELSTER Kennziffern Box */}
             <Card
-                title="3. Offizielle ELSTER USt-VA Kennziffern (Bereit zur Übernahme)"
                 style={{ marginTop: 24, borderRadius: 12, border: "1px solid #bfdbfe", background: "#f8fafc" }}
-                extra={
-                    <Button icon={<DownloadOutlined />} onClick={exportCsv} size="small">
-                        CSV exportieren
-                    </Button>
-                }
             >
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-                    <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Tag color="blue">Kz 81</Tag>
-                            <span style={{ fontSize: 11, color: "#64748b" }}>Steuer: {calculation.elster.kz81Tax.toFixed(2)} €</span>
+                <CardHeader>
+                    <CardTitle>3. Offizielle ELSTER USt-VA Kennziffern (Bereit zur Übernahme)</CardTitle>
+                    <CardAction>
+                        <Button variant="outline" onClick={exportCsv} size="sm">
+                            <Download />
+                            CSV exportieren
+                        </Button>
+                    </CardAction>
+                </CardHeader>
+                <CardContent>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+                        <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Badge className="bg-blue-600 text-white hover:bg-blue-600">Kz 81</Badge>
+                                <span style={{ fontSize: 11, color: "#64748b" }}>Steuer: {calculation.elster.kz81Tax.toFixed(2)} €</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Umsätze zu 19 % (Bemessungsgrundlage)</div>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginTop: 2 }}>
+                                {calculation.elster.kz81Base.toFixed(2)} €
+                            </div>
                         </div>
-                        <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Umsätze zu 19 % (Bemessungsgrundlage)</div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginTop: 2 }}>
-                            {calculation.elster.kz81Base.toFixed(2)} €
-                        </div>
-                    </div>
 
-                    <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Tag color="blue">Kz 86</Tag>
-                            <span style={{ fontSize: 11, color: "#64748b" }}>Steuer: {calculation.elster.kz86Tax.toFixed(2)} €</span>
+                        <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Badge className="bg-blue-600 text-white hover:bg-blue-600">Kz 86</Badge>
+                                <span style={{ fontSize: 11, color: "#64748b" }}>Steuer: {calculation.elster.kz86Tax.toFixed(2)} €</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Umsätze zu 7 % (Bemessungsgrundlage)</div>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginTop: 2 }}>
+                                {calculation.elster.kz86Base.toFixed(2)} €
+                            </div>
                         </div>
-                        <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Umsätze zu 7 % (Bemessungsgrundlage)</div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginTop: 2 }}>
-                            {calculation.elster.kz86Base.toFixed(2)} €
-                        </div>
-                    </div>
 
-                    <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Tag color="cyan">Kz 66</Tag>
-                            <span style={{ fontSize: 11, color: "#059669" }}>Vorsteuerabzug</span>
+                        <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Badge className="bg-cyan-600 text-white hover:bg-cyan-600">Kz 66</Badge>
+                                <span style={{ fontSize: 11, color: "#059669" }}>Vorsteuerabzug</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Abziehbare Vorsteuer aus Rechnungen</div>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: "#059669", marginTop: 2 }}>
+                                {calculation.elster.kz66Vorsteuer.toFixed(2)} €
+                            </div>
                         </div>
-                        <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Abziehbare Vorsteuer aus Rechnungen</div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: "#059669", marginTop: 2 }}>
-                            {calculation.elster.kz66Vorsteuer.toFixed(2)} €
-                        </div>
-                    </div>
 
-                    <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Tag color="purple">Kz 83</Tag>
-                            <span style={{ fontSize: 11, color: "#64748b" }}>Zahllast / Guthaben</span>
-                        </div>
-                        <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Verbleibende Umsatzsteuer-Zahllast</div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: "#2855d9", marginTop: 2 }}>
-                            {calculation.elster.kz83Zahllast.toFixed(2)} €
+                        <div style={{ background: "#ffffff", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Badge className="bg-purple-600 text-white hover:bg-purple-600">Kz 83</Badge>
+                                <span style={{ fontSize: 11, color: "#64748b" }}>Zahllast / Guthaben</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Verbleibende Umsatzsteuer-Zahllast</div>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: "#2855d9", marginTop: 2 }}>
+                                {calculation.elster.kz83Zahllast.toFixed(2)} €
+                            </div>
                         </div>
                     </div>
-                </div>
+                </CardContent>
             </Card>
         </div>
     );

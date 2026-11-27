@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Input, Button, Card, Typography, Tag } from "antd";
-import {
-    CheckCircleOutlined,
-    CloseCircleOutlined } from "@ant-design/icons";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { validateLeitwegId, LeitwegIdValidationResult } from "@/lib/tools/leitwegId";
 import Link from "next/link";
-
-const { Text } = Typography;
 
 export default function LeitwegIdValidator() {
     const [inputVal, setInputVal] = useState<string>("04011000-12345-67");
@@ -28,7 +27,7 @@ export default function LeitwegIdValidator() {
                     value={inputVal}
                     onChange={(e) => setInputVal(e.target.value)}
                     placeholder="z. B. 04011000-12345-67 oder 991-12345-67"
-                    size="large"
+                    className="h-10"
                     style={{ fontFamily: "monospace", fontSize: 16 }}
                 />
                 <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
@@ -44,43 +43,45 @@ export default function LeitwegIdValidator() {
                     background: result.isValid ? "#f0fdf4" : "#fffbeb",
                     marginBottom: 28 }}
             >
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                    {result.isValid ? (
-                        <CheckCircleOutlined style={{ fontSize: 32, color: "#059669" }} />
-                    ) : (
-                        <CloseCircleOutlined style={{ fontSize: 32, color: "#d97706" }} />
-                    )}
-                    <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                            <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "#0f172a" }}>
-                                {result.isValid
-                                    ? "Leitweg-ID ist formell & rechnerisch gültig"
-                                    : "Validierungsfehler in der Leitweg-ID"}
-                            </h3>
-                            <Tag color={result.isValid ? "success" : "warning"} style={{ fontWeight: 700 }}>
-                                {result.isValid ? "MOD-97 VALID" : "UNGÜLTIG"}
-                            </Tag>
-                        </div>
-
-                        {result.errors.length > 0 ? (
-                            <ul style={{ margin: "8px 0 0 0", paddingLeft: 18, color: "#b45309", fontSize: 14 }}>
-                                {result.errors.map((err, idx) => (
-                                    <li key={idx}>{err}</li>
-                                ))}
-                            </ul>
+                <CardContent>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                        {result.isValid ? (
+                            <CheckCircle2 style={{ fontSize: 32, color: "#059669", width: 32, height: 32, flexShrink: 0 }} />
                         ) : (
-                            <p style={{ margin: "6px 0 0 0", color: "#166534", fontSize: 14 }}>
-                                Die Prüfziffer ({result.checksum}) entspricht exakt der mathematischen Berechnung nach
-                                ISO 7064 Mod 97-10. Das zuständige Portal (ZRE / OZG-RE) wird diese ID akzeptieren.
-                            </p>
+                            <XCircle style={{ fontSize: 32, color: "#d97706", width: 32, height: 32, flexShrink: 0 }} />
                         )}
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                                <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "#0f172a" }}>
+                                    {result.isValid
+                                        ? "Leitweg-ID ist formell & rechnerisch gültig"
+                                        : "Validierungsfehler in der Leitweg-ID"}
+                                </h3>
+                                <Badge className={result.isValid ? "bg-green-600 text-white hover:bg-green-600" : "bg-amber-500 text-white hover:bg-amber-500"} style={{ fontWeight: 700 }}>
+                                    {result.isValid ? "MOD-97 VALID" : "UNGÜLTIG"}
+                                </Badge>
+                            </div>
+
+                            {result.errors.length > 0 ? (
+                                <ul style={{ margin: "8px 0 0 0", paddingLeft: 18, color: "#b45309", fontSize: 14 }}>
+                                    {result.errors.map((err, idx) => (
+                                        <li key={idx}>{err}</li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style={{ margin: "6px 0 0 0", color: "#166534", fontSize: 14 }}>
+                                    Die Prüfziffer ({result.checksum}) entspricht exakt der mathematischen Berechnung nach
+                                    ISO 7064 Mod 97-10. Das zuständige Portal (ZRE / OZG-RE) wird diese ID akzeptieren.
+                                </p>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </CardContent>
             </Card>
 
             {/* Anatomy Breakdown */}
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: "#0f172a" }}>
-                Aufbau & Bestandteile deiner Leitweg-ID
+                Aufbau &amp; Bestandteile deiner Leitweg-ID
             </h3>
 
             <div
@@ -90,52 +91,60 @@ export default function LeitwegIdValidator() {
                     gap: 16,
                     marginBottom: 28 }}
             >
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Zuständige Behörde / Ebene
-                    </Text>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
-                        {result.federalState || "–"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                        Ermittelt aus den ersten 2 Ziffern
-                    </div>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Zuständige Behörde / Ebene
+                        </span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
+                            {result.federalState || "–"}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                            Ermittelt aus den ersten 2 Ziffern
+                        </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Grobadressierung
-                    </Text>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
-                        {result.coarseAddress || "–"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                        Kennung der übergeordneten Körperschaft
-                    </div>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Grobadressierung
+                        </span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
+                            {result.coarseAddress || "–"}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                            Kennung der übergeordneten Körperschaft
+                        </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Feinadressierung
-                    </Text>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
-                        {result.fineAddress || "–"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                        Konkrete Fachabteilung / Dienststelle
-                    </div>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Feinadressierung
+                        </span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
+                            {result.fineAddress || "–"}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                            Konkrete Fachabteilung / Dienststelle
+                        </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Prüfziffer (Mod 97-10)
-                    </Text>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#2855d9", marginTop: 4 }}>
-                        {result.checksum || "–"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                        Soll-Prüfziffer: {result.calculatedChecksum || "–"}
-                    </div>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Prüfziffer (Mod 97-10)
+                        </span>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#2855d9", marginTop: 4 }}>
+                            {result.checksum || "–"}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                            Soll-Prüfziffer: {result.calculatedChecksum || "–"}
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -162,7 +171,7 @@ export default function LeitwegIdValidator() {
                 </div>
 
                 <Link href="/e-rechnung-software">
-                    <Button type="primary" style={{ background: "#2855d9" }}>
+                    <Button style={{ background: "#2855d9" }}>
                         XRechnung in Rechly erstellen
                     </Button>
                 </Link>

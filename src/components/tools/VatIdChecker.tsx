@@ -1,17 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, Button, Card, Typography, Alert, Tag, Divider } from "antd";
-import {
-    SearchOutlined,
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    PrinterOutlined,
-    FileProtectOutlined,
-    UserAddOutlined } from "@ant-design/icons";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { AlertTriangle, CheckCircle2, Loader2, Printer, Search, ShieldCheck, UserPlus, XCircle } from "lucide-react";
 import Link from "next/link";
-
-const { Text } = Typography;
 
 interface VatValidationResponse {
     valid: boolean;
@@ -82,18 +79,17 @@ export default function VatIdChecker() {
                         placeholder="z. B. DE123456789, ATU12345678, FR12345678901"
                         value={vatIdInput}
                         onChange={(e) => setVatIdInput(e.target.value.toUpperCase())}
-                        size="large"
-                        onPressEnter={handleCheck}
+                        className="h-10"
+                        onKeyDown={(e) => { if (e.key === "Enter") handleCheck(); }}
                         style={{ fontFamily: "monospace", fontSize: 16 }}
                     />
                     <Button
-                        type="primary"
-                        icon={<SearchOutlined />}
-                        size="large"
+                        size="lg"
                         onClick={handleCheck}
-                        loading={loading}
+                        disabled={loading}
                         style={{ background: "#2855d9", padding: "0 24px" }}
                     >
+                        {loading ? <Loader2 className="animate-spin" /> : <Search />}
                         Prüfen
                     </Button>
                 </div>
@@ -104,12 +100,13 @@ export default function VatIdChecker() {
 
             {errorMsg && (
                 <Alert
-                    type="warning"
-                    showIcon
-                    message="Hinweis zur USt-IdNr.-Prüfung"
-                    description={errorMsg}
+                    className="border-amber-300 bg-amber-50 text-amber-900 [&_[data-slot=alert-description]]:text-amber-900"
                     style={{ marginBottom: 24, borderRadius: 8 }}
-                />
+                >
+                    <AlertTriangle />
+                    <AlertTitle>Hinweis zur USt-IdNr.-Prüfung</AlertTitle>
+                    <AlertDescription>{errorMsg}</AlertDescription>
+                </Alert>
             )}
 
             {/* Validation Result Certificate */}
@@ -122,101 +119,104 @@ export default function VatIdChecker() {
                             background: result.valid ? "#f0fdf4" : "#fef2f2",
                             boxShadow: "0 4px 14px rgba(0,0,0,0.04)" }}
                     >
-                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                                {result.valid ? (
-                                    <CheckCircleOutlined style={{ fontSize: 36, color: "#059669" }} />
-                                ) : (
-                                    <CloseCircleOutlined style={{ fontSize: 36, color: "#dc2626" }} />
-                                )}
-                                <div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                        <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: "#0f172a" }}>
-                                            {result.countryCode} {result.vatNumber}
-                                        </h3>
-                                        <Tag color={result.valid ? "success" : "error"} style={{ fontWeight: 700, fontSize: 13, padding: "2px 8px" }}>
-                                            {result.valid ? "GÜLTIG (VALID)" : "UNGÜLTIG (INVALID)"}
-                                        </Tag>
+                        <CardContent>
+                            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                                    {result.valid ? (
+                                        <CheckCircle2 style={{ fontSize: 36, color: "#059669", width: 36, height: 36, flexShrink: 0 }} />
+                                    ) : (
+                                        <XCircle style={{ fontSize: 36, color: "#dc2626", width: 36, height: 36, flexShrink: 0 }} />
+                                    )}
+                                    <div>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                            <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: "#0f172a" }}>
+                                                {result.countryCode} {result.vatNumber}
+                                            </h3>
+                                            <Badge className={result.valid ? "bg-green-600 text-white hover:bg-green-600" : "bg-red-600 text-white hover:bg-red-600"} style={{ fontWeight: 700, fontSize: 13, padding: "2px 8px" }}>
+                                                {result.valid ? "GÜLTIG (VALID)" : "UNGÜLTIG (INVALID)"}
+                                            </Badge>
+                                        </div>
+                                        <p style={{ margin: "4px 0 0 0", color: "#475569", fontSize: 14 }}>
+                                            {result.valid
+                                                ? "Die USt-IdNr. ist im VIES-System der Europäischen Kommission aktiv registriert."
+                                                : "Diese USt-IdNr. existiert nicht oder ist für den innergemeinschaftlichen Waren-/Dienstleistungsverkehr gesperrt."}
+                                        </p>
                                     </div>
-                                    <p style={{ margin: "4px 0 0 0", color: "#475569", fontSize: 14 }}>
-                                        {result.valid
-                                            ? "Die USt-IdNr. ist im VIES-System der Europäischen Kommission aktiv registriert."
-                                            : "Diese USt-IdNr. existiert nicht oder ist für den innergemeinschaftlichen Waren-/Dienstleistungsverkehr gesperrt."}
-                                    </p>
                                 </div>
+
+                                {result.valid && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={handlePrintCertificate}
+                                        style={{ background: "#ffffff" }}
+                                    >
+                                        <Printer />
+                                        Amtlichen Beleg drucken
+                                    </Button>
+                                )}
                             </div>
 
                             {result.valid && (
-                                <Button
-                                    icon={<PrinterOutlined />}
-                                    onClick={handlePrintCertificate}
-                                    style={{ background: "#ffffff" }}
-                                >
-                                    Amtlichen Beleg drucken
-                                </Button>
-                            )}
-                        </div>
+                                <>
+                                    <Separator style={{ margin: "20px 0" }} />
 
-                        {result.valid && (
-                            <>
-                                <Divider style={{ margin: "20px 0" }} />
-
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
-                                    <div>
-                                        <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                                            Amtlicher Unternehmensname
-                                        </Text>
-                                        <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginTop: 4 }}>
-                                            {result.name || "Vom Mitgliedstaat nicht offengelegt (Standard in DE)"}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                                            Registrierte Adresse
-                                        </Text>
-                                        <div style={{ fontSize: 15, color: "#334155", marginTop: 4, whiteSpace: "pre-line" }}>
-                                            {result.address || "Nicht übermittelt"}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                                            Abfragezeitpunkt (Audit Timestamp)
-                                        </Text>
-                                        <div style={{ fontSize: 14, color: "#0f172a", fontWeight: 600, marginTop: 4 }}>
-                                            {result.requestDate ? new Date(result.requestDate).toLocaleString("de-DE") : "–"}
-                                        </div>
-                                        {result.consultationNumber && (
-                                            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                                                Konsultations-ID: {result.consultationNumber}
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+                                        <div>
+                                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                                                Amtlicher Unternehmensname
+                                            </span>
+                                            <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginTop: 4 }}>
+                                                {result.name || "Vom Mitgliedstaat nicht offengelegt (Standard in DE)"}
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
+                                        </div>
 
-                                <div
-                                    style={{
-                                        marginTop: 20,
-                                        background: "#ffffff",
-                                        borderRadius: 8,
-                                        padding: "12px 16px",
-                                        border: "1px solid #cbd5e1",
-                                        fontSize: 13,
-                                        color: "#334155",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 10 }}
-                                >
-                                    <FileProtectOutlined style={{ fontSize: 20, color: "#2855d9" }} />
-                                    <span>
-                                        <strong>Aufbewahrungsnachweis für das Finanzamt:</strong> Drucke diesen Beleg aus oder
-                                        speichere ihn als PDF. Gemäß § 14b UStG musst du den Nachweis für steuerfreie
-                                        Auslandslieferungen (§ 6a UStG / § 13b UStG) 10 Jahre archivieren.
-                                    </span>
-                                </div>
-                            </>
-                        )}
+                                        <div>
+                                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                                                Registrierte Adresse
+                                            </span>
+                                            <div style={{ fontSize: 15, color: "#334155", marginTop: 4, whiteSpace: "pre-line" }}>
+                                                {result.address || "Nicht übermittelt"}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                                                Abfragezeitpunkt (Audit Timestamp)
+                                            </span>
+                                            <div style={{ fontSize: 14, color: "#0f172a", fontWeight: 600, marginTop: 4 }}>
+                                                {result.requestDate ? new Date(result.requestDate).toLocaleString("de-DE") : "–"}
+                                            </div>
+                                            {result.consultationNumber && (
+                                                <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                                                    Konsultations-ID: {result.consultationNumber}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        style={{
+                                            marginTop: 20,
+                                            background: "#ffffff",
+                                            borderRadius: 8,
+                                            padding: "12px 16px",
+                                            border: "1px solid #cbd5e1",
+                                            fontSize: 13,
+                                            color: "#334155",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 10 }}
+                                    >
+                                        <ShieldCheck style={{ fontSize: 20, color: "#2855d9", width: 20, height: 20, flexShrink: 0 }} />
+                                        <span>
+                                            <strong>Aufbewahrungsnachweis für das Finanzamt:</strong> Drucke diesen Beleg aus oder
+                                            speichere ihn als PDF. Gemäß § 14b UStG musst du den Nachweis für steuerfreie
+                                            Auslandslieferungen (§ 6a UStG / § 13b UStG) 10 Jahre archivieren.
+                                        </span>
+                                    </div>
+                                </>
+                            )}
+                        </CardContent>
                     </Card>
 
                     {/* Cross-Tool Chaining Action */}
@@ -242,7 +242,8 @@ export default function VatIdChecker() {
                                 </p>
                             </div>
                             <Link href="/register">
-                                <Button type="primary" icon={<UserAddOutlined />} style={{ background: "#2855d9" }}>
+                                <Button style={{ background: "#2855d9" }}>
+                                    <UserPlus />
                                     Kunde in Rechly anlegen
                                 </Button>
                             </Link>

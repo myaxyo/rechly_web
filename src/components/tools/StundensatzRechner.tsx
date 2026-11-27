@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { InputNumber, Slider, Card, Typography, Button } from "antd";
-import {
-    ArrowRightOutlined } from "@ant-design/icons";
+import DecimalInput from "@/components/DecimalInput";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-
-const { Text } = Typography;
 
 export default function StundensatzRechner() {
     // Financial Target Inputs
@@ -79,144 +79,144 @@ export default function StundensatzRechner() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 28, marginBottom: 32 }}>
                 {/* Monthly Financial Goals */}
                 <Card
-                    title="1. Monatlicher Finanzbedarf & Kosten"
-                    size="small"
                     style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}
                 >
-                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                        <div>
-                            <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
-                                Gewünschtes Netto-Einkommen (Auszahlung) *
-                            </label>
-                            <InputNumber
-                                min={1000}
-                                max={50000}
-                                step={100}
-                                value={desiredNetIncomeMonthly}
-                                onChange={(val) => setDesiredNetIncomeMonthly(val || 3000)}
-                                style={{ width: "100%" }}
-                                size="middle"
-                                addonAfter="€ / Monat"
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
-                                Betriebskosten (Miete, Software, Steuerberater, Kfz)
-                            </label>
-                            <InputNumber
-                                min={0}
-                                max={20000}
-                                step={50}
-                                value={businessOverheadMonthly}
-                                onChange={(val) => setBusinessOverheadMonthly(val || 0)}
-                                style={{ width: "100%" }}
-                                size="middle"
-                                addonAfter="€ / Monat"
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
-                                Krankenversicherung & Altersvorsorge
-                            </label>
-                            <InputNumber
-                                min={0}
-                                max={10000}
-                                step={50}
-                                value={healthAndPensionMonthly}
-                                onChange={(val) => setHealthAndPensionMonthly(val || 0)}
-                                style={{ width: "100%" }}
-                                size="middle"
-                                addonAfter="€ / Monat"
-                            />
-                        </div>
-
-                        <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
-                                <span>Geschätzter Steuersatz (ESt + GewSt):</span>
-                                <span style={{ color: "#2855d9" }}>{taxRatePercent} %</span>
+                    <CardHeader>
+                        <CardTitle>1. Monatlicher Finanzbedarf &amp; Kosten</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                            <div>
+                                <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
+                                    Gewünschtes Netto-Einkommen (Auszahlung) *
+                                </label>
+                                <DecimalInput
+                                    min={1000}
+                                    max={50000}
+                                    step={100}
+                                    value={desiredNetIncomeMonthly}
+                                    onChange={(val) => setDesiredNetIncomeMonthly(val || 3000)}
+                                    style={{ width: "100%" }}
+                                    addonAfter="€ / Monat"
+                                />
                             </div>
-                            <Slider
-                                min={15}
-                                max={45}
-                                value={taxRatePercent}
-                                onChange={setTaxRatePercent}
-                            />
+
+                            <div>
+                                <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
+                                    Betriebskosten (Miete, Software, Steuerberater, Kfz)
+                                </label>
+                                <DecimalInput
+                                    min={0}
+                                    max={20000}
+                                    step={50}
+                                    value={businessOverheadMonthly}
+                                    onChange={(val) => setBusinessOverheadMonthly(val || 0)}
+                                    style={{ width: "100%" }}
+                                    addonAfter="€ / Monat"
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
+                                    Krankenversicherung &amp; Altersvorsorge
+                                </label>
+                                <DecimalInput
+                                    min={0}
+                                    max={10000}
+                                    step={50}
+                                    value={healthAndPensionMonthly}
+                                    onChange={(val) => setHealthAndPensionMonthly(val || 0)}
+                                    style={{ width: "100%" }}
+                                    addonAfter="€ / Monat"
+                                />
+                            </div>
+
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                                    <span>Geschätzter Steuersatz (ESt + GewSt):</span>
+                                    <span style={{ color: "#2855d9" }}>{taxRatePercent} %</span>
+                                </div>
+                                <Slider
+                                    min={15}
+                                    max={45}
+                                    value={[taxRatePercent]}
+                                    onValueChange={([v]) => setTaxRatePercent(v)}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </CardContent>
                 </Card>
 
                 {/* Working Capacity & Time Planning */}
                 <Card
-                    title="2. Arbeitszeit, Urlaub & Auslastung"
-                    size="small"
                     style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}
                 >
-                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <CardHeader>
+                        <CardTitle>2. Arbeitszeit, Urlaub &amp; Auslastung</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                <div>
+                                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
+                                        Urlaubstage (Jahr)
+                                    </label>
+                                    <DecimalInput
+                                        min={0}
+                                        max={60}
+                                        value={vacationDaysYearly}
+                                        onChange={(val) => setVacationDaysYearly(val || 0)}
+                                        style={{ width: "100%" }}
+                                        addonAfter="Tage"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
+                                        Krankheitstage (Puffer)
+                                    </label>
+                                    <DecimalInput
+                                        min={0}
+                                        max={40}
+                                        value={sickDaysYearly}
+                                        onChange={(val) => setSickDaysYearly(val || 0)}
+                                        style={{ width: "100%" }}
+                                        addonAfter="Tage"
+                                    />
+                                </div>
+                            </div>
+
                             <div>
                                 <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
-                                    Urlaubstage (Jahr)
+                                    Akquise-, Fortbildungs- &amp; Buchhaltungstage
                                 </label>
-                                <InputNumber
+                                <DecimalInput
                                     min={0}
                                     max={60}
-                                    value={vacationDaysYearly}
-                                    onChange={(val) => setVacationDaysYearly(val || 0)}
+                                    value={adminDaysYearly}
+                                    onChange={(val) => setAdminDaysYearly(val || 0)}
                                     style={{ width: "100%" }}
-                                    size="middle"
-                                    addonAfter="Tage"
+                                    addonAfter="Tage / Jahr"
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
-                                    Krankheitstage (Puffer)
-                                </label>
-                                <InputNumber
-                                    min={0}
-                                    max={40}
-                                    value={sickDaysYearly}
-                                    onChange={(val) => setSickDaysYearly(val || 0)}
-                                    style={{ width: "100%" }}
-                                    size="middle"
-                                    addonAfter="Tage"
+                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                                    <span>Abrechenbare Quote (Billable Hours):</span>
+                                    <span style={{ color: "#2855d9" }}>{billableRatioPercent} %</span>
+                                </div>
+                                <Slider
+                                    min={40}
+                                    max={90}
+                                    value={[billableRatioPercent]}
+                                    onValueChange={([v]) => setBillableRatioPercent(v)}
                                 />
+                                <div style={{ fontSize: 11, color: "#64748b" }}>
+                                    Realistischer Branchendurchschnitt in DE: 60 % bis 70 % (Rest fließt in Verwaltung und Akquise).
+                                </div>
                             </div>
                         </div>
-
-                        <div>
-                            <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
-                                Akquise-, Fortbildungs- & Buchhaltungstage
-                            </label>
-                            <InputNumber
-                                min={0}
-                                max={60}
-                                value={adminDaysYearly}
-                                onChange={(val) => setAdminDaysYearly(val || 0)}
-                                style={{ width: "100%" }}
-                                size="middle"
-                                addonAfter="Tage / Jahr"
-                            />
-                        </div>
-
-                        <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
-                                <span>Abrechenbare Quote (Billable Hours):</span>
-                                <span style={{ color: "#2855d9" }}>{billableRatioPercent} %</span>
-                            </div>
-                            <Slider
-                                min={40}
-                                max={90}
-                                value={billableRatioPercent}
-                                onChange={setBillableRatioPercent}
-                            />
-                            <div style={{ fontSize: 11, color: "#64748b" }}>
-                                Realistischer Branchendurchschnitt in DE: 60 % bis 70 % (Rest fließt in Verwaltung und Akquise).
-                            </div>
-                        </div>
-                    </div>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -229,61 +229,68 @@ export default function StundensatzRechner() {
                     marginBottom: 32 }}
             >
                 <Card
-                    size="small"
                     style={{
                         borderRadius: 12,
                         border: "2px solid #2855d9",
                         background: "#eff6ff" }}
                 >
-                    <Text style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 800, color: "#1e40af" }}>
-                        Empfohlener Stundensatz
-                    </Text>
-                    <div style={{ fontSize: 32, fontWeight: 900, color: "#2855d9", marginTop: 4 }}>
-                        {calc.recommendedHourlyRate} €
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "#64748b" }}> / Std. netto</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#2855d9", marginTop: 4 }}>
-                        Inkl. 15% Sicherheits- & Investitionspuffer
-                    </div>
+                    <CardContent>
+                        <span style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 800, color: "#1e40af" }}>
+                            Empfohlener Stundensatz
+                        </span>
+                        <div style={{ fontSize: 32, fontWeight: 900, color: "#2855d9", marginTop: 4 }}>
+                            {calc.recommendedHourlyRate} €
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#64748b" }}> / Std. netto</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#2855d9", marginTop: 4 }}>
+                            Inkl. 15% Sicherheits- &amp; Investitionspuffer
+                        </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Tagessatz (8 Std.)
-                    </Text>
-                    <div style={{ fontSize: 26, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>
-                        {calc.dayRate} €
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}> / Tag</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
-                        Idealer Richtwert für B2B-Projekte
-                    </div>
+                <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Tagessatz (8 Std.)
+                        </span>
+                        <div style={{ fontSize: 26, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>
+                            {calc.dayRate} €
+                            <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}> / Tag</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                            Idealer Richtwert für B2B-Projekte
+                        </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Absoluter Mindestsatz
-                    </Text>
-                    <div style={{ fontSize: 26, fontWeight: 900, color: "#dc2626", marginTop: 4 }}>
-                        {calc.minimumHourlyRate} €
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}> / Std.</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
-                        Unterhalb dieses Satzes machst du Verlust
-                    </div>
+                <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Absoluter Mindestsatz
+                        </span>
+                        <div style={{ fontSize: 26, fontWeight: 900, color: "#dc2626", marginTop: 4 }}>
+                            {calc.minimumHourlyRate} €
+                            <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}> / Std.</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                            Unterhalb dieses Satzes machst du Verlust
+                        </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
-                        Benötigter Mindestumsatz
-                    </Text>
-                    <div style={{ fontSize: 22, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>
-                        {calc.totalRevenueNeededYearly.toLocaleString("de-DE")} €
-                        <span style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}> / Jahr</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
-                        ca. {calc.totalRevenueNeededMonthly.toLocaleString("de-DE")} € monatlich
-                    </div>
+                <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                            Benötigter Mindestumsatz
+                        </span>
+                        <div style={{ fontSize: 22, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>
+                            {calc.totalRevenueNeededYearly.toLocaleString("de-DE")} €
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#64748b" }}> / Jahr</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                            ca. {calc.totalRevenueNeededMonthly.toLocaleString("de-DE")} € monatlich
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -312,10 +319,9 @@ export default function StundensatzRechner() {
 
                 <Link href="/register">
                     <Button
-                        type="primary"
-                        icon={<ArrowRightOutlined />}
                         style={{ background: "#2855d9", height: 42, padding: "0 20px" }}
                     >
+                        <ArrowRight />
                         Angebot mit {calc.recommendedHourlyRate} €/Std. in Rechly schreiben
                     </Button>
                 </Link>
