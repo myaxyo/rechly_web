@@ -23,11 +23,13 @@ not the standalone application.
 | Same: deadlines/reminders | Task/invoice deadline links; opt-in in-app/browser reminders while the dashboard is open |
 | Native vault workspace data | Authenticated JSON export of all workspace kinds and customer-ID/name mapping |
 
-The web uses Ant Design, German/English labels and responsive layouts. Its
+The web uses shadcn/ui, German/English labels and responsive layouts. Its
 week/day views group events by day; desktop's hour-positioned timeline is not
 reproduced. Native vault encryption/recovery, OS updates, executable installation
 and Ollama model installation remain desktop capabilities. Web AI settings
 already support Ollama, but a hosted website cannot install local models.
+Encrypted Desktop `.rechly-backup` files can be imported in the migration wizard
+(vault bridge); there is still no live multi-master sync. See PRODUCT_RULE.md.
 
 The previous cross-platform change added desktop GiroCode generation and XML
 corrections. This change does not modify those exporters or establish new

@@ -1,6 +1,6 @@
 # Optional e-invoice identifiers
 
-Rechly uses Next.js App Router, Ant Design forms, Appwrite collections and the
+Rechly uses Next.js App Router, shadcn/ui forms, Appwrite collections and the
 existing CII exporters in `src/lib/eRechnung`. These additions use the same API,
 ownership checks and storage model. No service, subscription or feature gate is
 required.

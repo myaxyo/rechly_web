@@ -144,7 +144,8 @@
   line-height: 1.75;
   color: #33475e;
 }/* shadcn/ui tokens — Rechly palette (primary #2855d9, ink #152438,
-   muted #526174, border #dbe3ee / #e3e9f1, radius 8). */
+   muted #526174, border #dbe3ee / #e3e9f1, radius 8).
+   Keep aligned with src/lib/core/tokens.css and Desktop ui/tokens.css. */
 :root {
   --radius: 0.5rem;
   --card: #ffffff;

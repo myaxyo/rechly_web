@@ -37,6 +37,7 @@ import {
 import { createInvoiceTemplate } from "@/lib/invoiceTemplateService";
 import { getCompanyInfo } from "@/lib/companyService";
 import DunningCard from "@/components/DunningCard";
+import { ComplianceReportCard } from "@/components/dashboard/ComplianceReportCard";
 import { runInvoiceAssistant } from "@/lib/aiService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import { formatDateGerman } from "@/lib/dateUtils";
@@ -672,6 +673,24 @@ export default function InvoiceDetailPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <ComplianceReportCard
+                invoiceNumber={invoice.invoice_number}
+                issueDate={invoice.issue_date}
+                sellerName={company?.name}
+                sellerAddress={[company?.address_line1, company?.postal_code, company?.city].filter(Boolean).join(", ")}
+                buyerName={invoice.client?.name}
+                buyerAddress={[invoice.client?.address_line1, invoice.client?.postal_code, invoice.client?.city].filter(Boolean).join(", ")}
+                sellerTaxId={company?.tax_number}
+                sellerVatId={company?.vat_id}
+                iban={company?.bank_iban}
+                currency="EUR"
+                totalGross={invoice.total_gross}
+                lineCount={invoice.items?.length ?? 0}
+                isSmallBusiness={Boolean(company?.is_small_business)}
+                hasServicePeriod={Boolean(invoice.delivery_date || invoice.delivery_date_start || invoice.delivery_date_end)}
+                hasBuyerLeitwegOrVat={Boolean(invoice.client?.leitweg_id || invoice.client?.vat_id)}
+            />
 
             {/* Actions */}
             <Card>

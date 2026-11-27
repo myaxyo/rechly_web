@@ -207,6 +207,44 @@ export default function MigrationWizard({
             for (const file of files) {
                 const lower = file.name.toLowerCase();
 
+                if (lower.endsWith(".rechly-backup") || lower.endsWith(".rechlybackup")) {
+                    const password = window.prompt(
+                        isDe
+                            ? "Passwort für die Desktop-Sicherung (.rechly-backup, mind. 12 Zeichen):"
+                            : "Password for the Desktop vault backup (.rechly-backup, min. 12 chars):",
+                    );
+                    if (!password) {
+                        toast.warning(isDe ? "Import abgebrochen." : "Import cancelled.");
+                        continue;
+                    }
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("password", password);
+                    const res = await fetch("/api/migration/decrypt-desktop-vault", {
+                        method: "POST",
+                        body: formData,
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.bundle) {
+                        toast.error(
+                            typeof data.error === "string"
+                                ? data.error
+                                : isDe
+                                  ? "Desktop-Sicherung konnte nicht entschlüsselt werden."
+                                  : "Could not decrypt desktop vault backup.",
+                        );
+                        continue;
+                    }
+                    setBackupBundle(data.bundle as RechlyBackupBundle);
+                    setSelectedSource("rechly_backup");
+                    toast.success(
+                        isDe
+                            ? `Desktop-Sicherung „${file.name}“ entschlüsselt und geladen.`
+                            : `Desktop vault "${file.name}" decrypted and loaded.`,
+                    );
+                    continue;
+                }
+
                 if (lower.endsWith(".json")) {
                     const text = decodeFileBuffer(await file.arrayBuffer());
                     const parsed = JSON.parse(text) as RechlyBackupBundle;
@@ -616,7 +654,7 @@ export default function MigrationWizard({
                     ref={fileInputRef}
                     type="file"
                     multiple
-                    accept=".csv,.txt,.xml,.pdf,.json"
+                    accept=".csv,.txt,.xml,.pdf,.json,.rechly-backup"
                     className="hidden"
                     onChange={(e) => {
                         if (e.target.files) {
@@ -652,8 +690,8 @@ export default function MigrationWizard({
                                 ? "Dateien werden analysiert..."
                                 : "Analyzing files..."
                             : isDe
-                              ? "CSV-, XRechnung- (.xml), ZUGFeRD- (.pdf) oder Backup-Dateien (.json) hierher ziehen"
-                              : "Drag & drop CSV, XRechnung (.xml), ZUGFeRD (.pdf), or Backup (.json) files here"}
+                              ? "CSV-, XRechnung- (.xml), ZUGFeRD- (.pdf), Backup (.json) oder Desktop-Vault (.rechly-backup) hierher ziehen"
+                              : "Drag & drop CSV, XRechnung (.xml), ZUGFeRD (.pdf), Backup (.json), or Desktop vault (.rechly-backup) files here"}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
                         {isDe

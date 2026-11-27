@@ -63,7 +63,7 @@ One design language everywhere: ink `#152438`, brand blue `#2855d9`, muted
 `#526174`, hairline `#e3e9f1`, 8–10px radii, no rainbow icon palettes, no
 indigo/purple accents, no cream or blue hero gradients.
 
-- Public: `PublicTheme` (AntD tokens) in the root layout; ink `Footer`;
+- Public: shadcn tokens in `globals.css` / root layout; ink `Footer`;
   `ToolLayout` + tools hub on `tool.module.css`; keyword/SEO pages retokened.
 - Auth: split-screen `AuthShell` for login, register, forgot/reset password.
 - Dashboard: `dashboard.css` “subpage system” — every list, form, settings,

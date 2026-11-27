@@ -1,18 +1,15 @@
 # shadcn/ui migration
 
-Branch: `migration/shadcn-ui` (from `main`). Goal: replace Ant Design with
-shadcn/ui + Tailwind without any visible change for users.
+**Status: complete on `main`.** Ant Design has been removed. The live UI is
+shadcn/ui + Tailwind. Shared brand tokens also live in `src/lib/core/tokens.css`
+for Desktop parity (see PRODUCT_RULE.md).
 
-## Principle: coexistence, no big bang
+## Historical: coexistence (finished)
 
-Ant Design stays fully installed and untouched until the last phase.
-shadcn/ui primitives live in `src/components/ui/` and are adopted
-page-by-page. A page is migrated only when its shadcn version is
-pixel-equivalent to the AntD version it replaces.
+During migration, Ant Design stayed installed while shadcn primitives were
+adopted page-by-page. That phase is over.
 
-Visual parity is enforced by tokens, not by eye: `src/app/globals.css`
-maps every shadcn variable to the current Rechly palette from
-`src/components/PublicTheme.tsx` (AntD `ConfigProvider`):
+Visual parity used tokens in `src/app/globals.css` (Rechly palette):
 
 | Token | Value | AntD source |
 | --- | --- | --- |

@@ -23,13 +23,22 @@ Prefer running everything locally without cloud or account requirements? **[Rech
 
 ## Stack
 
-- Next.js App Router, React, TypeScript, Ant Design
+- Next.js App Router, React, TypeScript, shadcn/ui + Tailwind
 - Appwrite for auth, database, and server-side admin operations
+- Shared domain helpers in `src/lib/core` (GiroCode, decimal, compliance checklist)
+
+## Dual product
+
+Web and Desktop are **one brand, two runtimes** — see [docs/PRODUCT_RULE.md](docs/PRODUCT_RULE.md).
+`desktop/` in this repo is only an Electron+SQLite **dev wrapper** for the web UI;
+shipped offline installs come from [rechly_desktop](https://github.com/myaxyo/rechly_desktop).
 
 ## Repository Layout
 
 - `src/` - web app routes, UI, shared services, and client/server Appwrite code
+- `src/lib/core/` - shared GiroCode / decimal / compliance helpers (+ `tokens.css`)
 - `public/` - static assets and favicons
+- `desktop/` - local Electron wrapper for Next.js (not the standalone Desktop app)
 
 ## Prerequisites
 
