@@ -7,27 +7,23 @@ import { defaultVatRate, VAT_RATE_OPTIONS } from "@/lib/vatDefaults";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Card,
-    Steps,
-    Button,
-    Space,
-    message,
-    Typography,
-    Divider,
-    Select,
-    Table,
-    DatePicker,
-    Result,
-    Input,
-} from "antd";
+    ArrowLeft, ArrowRight, Check, CircleCheck, Loader2, Plus, Repeat, Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import {
-    PlusOutlined,
-    DeleteOutlined,
-    ArrowLeftOutlined,
-    ArrowRightOutlined,
-    CheckOutlined,
-    RedoOutlined,
-} from "@ant-design/icons";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Steps } from "@/components/ui/steps";
 import dayjs from "dayjs";
 import { getAllClients } from "@/lib/clientService";
 import { getAllProducts } from "@/lib/productService";
@@ -35,8 +31,6 @@ import { createRecurring } from "@/lib/recurringService";
 import { formatCurrency, calculateInvoiceTotals } from "@/lib/currencyUtils";
 import type { Client, Product, RecurringFormData } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const { Title, Text } = Typography;
 
 interface LineItem {
     key: string;
@@ -97,7 +91,7 @@ export default function RecurringCreatePage() {
             setFlatRateFarming(!!companyData?.is_flat_rate_farming);
             setProducts(productsData);
         } catch {
-            message.error(t("recurring.loadError"));
+            toast.error(t("recurring.loadError"));
         } finally {
             setLoading(false);
         }
@@ -185,110 +179,11 @@ export default function RecurringCreatePage() {
             setCreatedId(id);
             setCurrentStep(3);
         } catch {
-            message.error(t("recurringCreate.saveError"));
+            toast.error(t("recurringCreate.saveError"));
         } finally {
             setSaving(false);
         }
     };
-
-    const lineColumns = [
-        {
-            title: t("invoiceCreate.description"),
-            key: "description",
-            render: (_: unknown, record: LineItem) => (
-                <Input.TextArea
-                    value={record.description}
-                    onChange={(e) =>
-                        updateLineItem(
-                            record.key,
-                            "description",
-                            e.target.value,
-                        )
-                    }
-                    autoSize={{ minRows: 1, maxRows: 3 }}
-                />
-            ),
-        },
-        {
-            title: t("invoiceCreate.quantity"),
-            key: "quantity",
-            width: 90,
-            render: (_: unknown, record: LineItem) => (
-                <DecimalInput
-                    value={record.quantity}
-                    min={0}
-                    step={0.5}
-                    onChange={(v) =>
-                        updateLineItem(record.key, "quantity", v ?? 0)
-                    }
-                    style={{ width: "100%" }}
-                />
-            ),
-        },
-        {
-            title: t("invoiceCreate.unitPrice"),
-            key: "price",
-            width: 120,
-            render: (_: unknown, record: LineItem) => (
-                <DecimalInput
-                    value={record.price}
-                    min={0}
-                    step={0.01}
-                    addonAfter="€"
-                    onChange={(v) =>
-                        updateLineItem(record.key, "price", v ?? 0)
-                    }
-                    style={{ width: "100%" }}
-                />
-            ),
-        },
-        {
-            title: "MwSt.",
-            key: "vat",
-            width: 80,
-            render: (_: unknown, record: LineItem) => (
-                <Select
-                    value={record.tax_rate_percent}
-                    options={vatOptions}
-                    onChange={(v) =>
-                        updateLineItem(record.key, "tax_rate_percent", v)
-                    }
-                    style={{ width: "100%" }}
-                />
-            ),
-        },
-        {
-            title: t("invoiceCreate.lineTotal"),
-            key: "total",
-            width: 100,
-            align: "right" as const,
-            render: (_: unknown, record: LineItem) => {
-                const net =
-                    record.quantity *
-                    record.price *
-                    (1 - record.discount_percent / 100);
-                return (
-                    <Text>
-                        {formatCurrency(
-                            net * (1 + record.tax_rate_percent / 100),
-                        )}
-                    </Text>
-                );
-            },
-        },
-        {
-            key: "delete",
-            width: 40,
-            render: (_: unknown, record: LineItem) => (
-                <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => removeLineItem(record.key)}
-                />
-            ),
-        },
-    ];
 
     const steps = [
         { title: t("recurringCreate.selectClient") },
@@ -298,260 +193,218 @@ export default function RecurringCreatePage() {
     ];
 
     return (
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-            <Space style={{ marginBottom: 24 }}>
-                <RedoOutlined style={{ fontSize: 24 }} />
-                <Title level={4} style={{ margin: 0 }}>
-                    {t("recurringCreate.title")}
-                </Title>
-            </Space>
+        <div className="mx-auto flex w-full max-w-[900px] flex-col gap-6">
+            <div className="flex items-center gap-3">
+                <Repeat className="size-6 text-primary" />
+                <h2 className="text-xl font-semibold">{t("recurringCreate.title")}</h2>
+            </div>
 
-            <Steps
-                current={currentStep}
-                items={steps}
-                style={{ marginBottom: 32 }}
-            />
+            <Steps current={currentStep} items={steps} />
 
             {currentStep === 0 && (
                 <Card>
-                    <Title level={5}>{t("recurringCreate.selectClient")}</Title>
-                    <Select
-                        showSearch
-                        placeholder={t("invoiceCreate.searchClients")}
-                        style={{ width: "100%", marginBottom: 16 }}
-                        loading={loading}
-                        value={selectedClient?.id}
-                        onChange={(val) =>
-                            setSelectedClient(
-                                clients.find((c) => c.id === val) || null,
-                            )
-                        }
-                        optionFilterProp="label"
-                        options={clients.map((c) => ({
-                            value: c.id,
-                            label: c.name,
-                        }))}
-                    />
-                    <div style={{ textAlign: "right" }}>
-                        <Button
-                            type="primary"
-                            icon={<ArrowRightOutlined />}
-                            disabled={!selectedClient}
-                            onClick={() => setCurrentStep(1)}
+                    <CardContent className="flex flex-col gap-4">
+                        <h3 className="text-base font-semibold">{t("recurringCreate.selectClient")}</h3>
+                        <Select
+                            value={selectedClient?.id}
+                            onValueChange={(val) => setSelectedClient(clients.find((c) => c.id === val) || null)}
+                            disabled={loading}
                         >
-                            {t("recurringCreate.next")}
-                        </Button>
-                    </div>
+                            <SelectTrigger aria-label={t("invoiceCreate.searchClients")}><SelectValue placeholder={t("invoiceCreate.searchClients")} /></SelectTrigger>
+                            <SelectContent>
+                                {clients.map((c) => (
+                                    <SelectItem key={c.id} value={c.id ?? ""}>{c.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <div className="flex justify-end">
+                            <Button type="button" disabled={!selectedClient} onClick={() => setCurrentStep(1)}>
+                                {t("recurringCreate.next")}
+                                <ArrowRight />
+                            </Button>
+                        </div>
+                    </CardContent>
                 </Card>
             )}
 
             {currentStep === 1 && (
                 <Card>
-                    <Space style={{ marginBottom: 16 }}>
-                        <Select
-                            placeholder={t("invoiceCreate.addFromProducts")}
-                            style={{ width: 250 }}
-                            options={products.map((p) => ({
-                                value: p.id,
-                                label: p.name,
-                            }))}
-                            onChange={(val) => addFromProduct(val as string)}
-                            value={null as unknown as string}
-                        />
-                        <Button icon={<PlusOutlined />} onClick={addEmptyLine}>
-                            {t("invoiceCreate.addEmptyLine")}
-                        </Button>
-                    </Space>
-
-                    <Table
-                        dataSource={lineItems}
-                        columns={lineColumns}
-                        rowKey="key"
-                        pagination={false}
-                        locale={{ emptyText: t("invoiceCreate.noItems") }}
-                    />
-
-                    {lineItems.length > 0 && (
-                        <div style={{ textAlign: "right", marginTop: 16 }}>
-                            <Space direction="vertical" align="end">
-                                <Text>
-                                    {t("invoiceCreate.subtotal")}:{" "}
-                                    {formatCurrency(totals.netAfterDiscount)}
-                                </Text>
-                                <Text>
-                                    {t("invoiceCreate.vat")}:{" "}
-                                    {formatCurrency(totals.totalVAT)}
-                                </Text>
-                                <Title level={5}>
-                                    {t("invoiceCreate.total")}:{" "}
-                                    {formatCurrency(totals.totalGross)}
-                                </Title>
-                            </Space>
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                            <div className="w-full sm:w-[250px]">
+                                <Select value={undefined} onValueChange={(val) => addFromProduct(val)}>
+                                    <SelectTrigger aria-label={t("invoiceCreate.addFromProducts")}><SelectValue placeholder={t("invoiceCreate.addFromProducts")} /></SelectTrigger>
+                                    <SelectContent>
+                                        {products.map((prod) => (
+                                            <SelectItem key={prod.id} value={prod.id ?? ""}>{prod.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <Button type="button" variant="outline" onClick={addEmptyLine}>
+                                <Plus />
+                                {t("invoiceCreate.addEmptyLine")}
+                            </Button>
                         </div>
-                    )}
 
-                    <Divider />
-                    <Space>
-                        <Button
-                            icon={<ArrowLeftOutlined />}
-                            onClick={() => setCurrentStep(0)}
-                        >
-                            {t("recurringCreate.back")}
-                        </Button>
-                        <Button
-                            type="primary"
-                            icon={<ArrowRightOutlined />}
-                            disabled={lineItems.length === 0}
-                            onClick={() => setCurrentStep(2)}
-                        >
-                            {t("recurringCreate.next")}
-                        </Button>
-                    </Space>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t("invoiceCreate.description")}</TableHead>
+                                        <TableHead className="w-[110px]">{t("invoiceCreate.quantity")}</TableHead>
+                                        <TableHead className="w-[140px]">{t("invoiceCreate.unitPrice")}</TableHead>
+                                        <TableHead className="w-[110px]">MwSt.</TableHead>
+                                        <TableHead className="w-[110px] text-right">{t("invoiceCreate.lineTotal")}</TableHead>
+                                        <TableHead className="w-[50px]"><span className="sr-only">Delete</span></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {lineItems.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                                                {t("invoiceCreate.noItems")}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        lineItems.map((record) => {
+                                            const net = record.quantity * record.price * (1 - record.discount_percent / 100);
+                                            const gross = net * (1 + record.tax_rate_percent / 100);
+                                            return (
+                                                <TableRow key={record.key}>
+                                                    <TableCell className="min-w-[180px]">
+                                                        <Textarea
+                                                            value={record.description}
+                                                            onChange={(e) => updateLineItem(record.key, "description", e.target.value)}
+                                                            placeholder={t("invoiceCreate.description")}
+                                                            rows={1}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DecimalInput value={record.quantity} min={0} step={0.5}
+                                                            onChange={(v) => updateLineItem(record.key, "quantity", v ?? 0)} style={{ width: "100%" }} />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DecimalInput value={record.price} min={0} step={0.01} addonAfter="€"
+                                                            onChange={(v) => updateLineItem(record.key, "price", v ?? 0)} style={{ width: "100%" }} />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Select value={String(record.tax_rate_percent)}
+                                                            onValueChange={(v) => updateLineItem(record.key, "tax_rate_percent", Number(v))}>
+                                                            <SelectTrigger aria-label="MwSt."><SelectValue /></SelectTrigger>
+                                                            <SelectContent>
+                                                                {vatOptions.map((o) => (
+                                                                    <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">{formatCurrency(gross)}</TableCell>
+                                                    <TableCell>
+                                                        <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => removeLineItem(record.key)} aria-label="Delete">
+                                                            <Trash2 />
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+
+                        {lineItems.length > 0 && (
+                            <div className="flex flex-col items-end gap-1 text-sm">
+                                <span>{t("invoiceCreate.subtotal")}: {formatCurrency(totals.netAfterDiscount)}</span>
+                                <span>{t("invoiceCreate.vat")}: {formatCurrency(totals.totalVAT)}</span>
+                                <span className="text-base font-semibold">{t("invoiceCreate.total")}: {formatCurrency(totals.totalGross)}</span>
+                            </div>
+                        )}
+
+                        <Separator />
+                        <div className="flex flex-wrap gap-2">
+                            <Button type="button" variant="outline" onClick={() => setCurrentStep(0)}>
+                                <ArrowLeft />
+                                {t("recurringCreate.back")}
+                            </Button>
+                            <Button type="button" disabled={lineItems.length === 0} onClick={() => setCurrentStep(2)}>
+                                {t("recurringCreate.next")}
+                                <ArrowRight />
+                            </Button>
+                        </div>
+                    </CardContent>
                 </Card>
             )}
 
             {currentStep === 2 && (
                 <Card>
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr",
-                            gap: 16,
-                        }}
-                    >
-                        <div style={{ gridColumn: "1 / -1" }}>
-                            <label
-                                style={{ display: "block", marginBottom: 4 }}
-                            >
-                                {t("recurringCreate.templateName")} *
-                            </label>
-                            <Input
-                                value={templateName}
-                                onChange={(e) =>
-                                    setTemplateName(e.target.value)
-                                }
-                                placeholder={t(
-                                    "recurringCreate.templateNamePlaceholder",
-                                )}
-                            />
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="flex flex-col gap-1.5 sm:col-span-2">
+                                <Label htmlFor="rec-template">{t("recurringCreate.templateName")} *</Label>
+                                <Input id="rec-template" value={templateName} onChange={(e) => setTemplateName(e.target.value)}
+                                    placeholder={t("recurringCreate.templateNamePlaceholder")} />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label>{t("recurringCreate.interval")}</Label>
+                                <Select value={interval} onValueChange={setInterval}>
+                                    <SelectTrigger aria-label={t("recurringCreate.interval")}><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        {intervalOptions.map((o) => (
+                                            <SelectItem key={o.value} value={o.value}>{t(o.labelKey) || o.value}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label>{t("recurringCreate.nextDueDate")}</Label>
+                                <DatePicker value={nextDueDate} onChange={(d) => d && setNextDueDate(d)} />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label>{t("recurringCreate.endDate")}</Label>
+                                <DatePicker value={endDate} onChange={(d) => setEndDate(d)} placeholder={t("recurringCreate.endDateOptional")} />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label htmlFor="rec-terms">{t("offerCreate.paymentTerms")}</Label>
+                                <Input id="rec-terms" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} />
+                            </div>
+                            <div className="flex flex-col gap-1.5 sm:col-span-2">
+                                <Label htmlFor="rec-notes">{t("offerCreate.notes")}</Label>
+                                <Textarea id="rec-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
+                                    placeholder={t("offerCreate.notesPlaceholder")} />
+                            </div>
                         </div>
-                        <div>
-                            <label
-                                style={{ display: "block", marginBottom: 4 }}
-                            >
-                                {t("recurringCreate.interval")}
-                            </label>
-                            <Select
-                                value={interval}
-                                onChange={setInterval}
-                                style={{ width: "100%" }}
-                                options={intervalOptions.map((o) => ({
-                                    value: o.value,
-                                    label: t(o.labelKey) || o.value,
-                                }))}
-                            />
-                        </div>
-                        <div>
-                            <label
-                                style={{ display: "block", marginBottom: 4 }}
-                            >
-                                {t("recurringCreate.nextDueDate")}
-                            </label>
-                            <DatePicker
-                                value={nextDueDate}
-                                onChange={(d) => d && setNextDueDate(d)}
-                                style={{ width: "100%" }}
-                            />
-                        </div>
-                        <div>
-                            <label
-                                style={{ display: "block", marginBottom: 4 }}
-                            >
-                                {t("recurringCreate.endDate")}
-                            </label>
-                            <DatePicker
-                                value={endDate}
-                                onChange={(d) => setEndDate(d)}
-                                style={{ width: "100%" }}
-                                placeholder={t(
-                                    "recurringCreate.endDateOptional",
-                                )}
-                            />
-                        </div>
-                        <div>
-                            <label
-                                style={{ display: "block", marginBottom: 4 }}
-                            >
-                                {t("offerCreate.paymentTerms")}
-                            </label>
-                            <Input
-                                value={paymentTerms}
-                                onChange={(e) =>
-                                    setPaymentTerms(e.target.value)
-                                }
-                            />
-                        </div>
-                        <div style={{ gridColumn: "1 / -1" }}>
-                            <label
-                                style={{ display: "block", marginBottom: 4 }}
-                            >
-                                {t("offerCreate.notes")}
-                            </label>
-                            <Input.TextArea
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                rows={3}
-                            />
-                        </div>
-                    </div>
 
-                    <Divider />
-                    <Space>
-                        <Button
-                            icon={<ArrowLeftOutlined />}
-                            onClick={() => setCurrentStep(1)}
-                        >
-                            {t("recurringCreate.back")}
-                        </Button>
-                        <Button
-                            type="primary"
-                            icon={<CheckOutlined />}
-                            loading={saving}
-                            onClick={handleCreate}
-                            disabled={!templateName}
-                        >
-                            {t("recurringCreate.create")}
-                        </Button>
-                    </Space>
+                        <Separator />
+                        <div className="flex flex-wrap gap-2">
+                            <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+                                <ArrowLeft />
+                                {t("recurringCreate.back")}
+                            </Button>
+                            <Button type="button" disabled={saving || !templateName} onClick={() => void handleCreate()}>
+                                {saving ? <Loader2 className="animate-spin" /> : <Check />}
+                                {t("recurringCreate.create")}
+                            </Button>
+                        </div>
+                    </CardContent>
                 </Card>
             )}
 
             {currentStep === 3 && createdId && (
                 <Card>
-                    <Result
-                        status="success"
-                        title={t("recurringCreate.success")}
-                        subTitle={t("recurringCreate.successDesc")}
-                        extra={[
-                            <Button
-                                key="list"
-                                type="primary"
-                                onClick={() =>
-                                    router.push("/dashboard/recurring")
-                                }
-                            >
+                    <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
+                        <CircleCheck className="size-12 text-emerald-500" />
+                        <h3 className="text-lg font-semibold">{t("recurringCreate.success")}</h3>
+                        <p className="text-sm text-muted-foreground">{t("recurringCreate.successDesc")}</p>
+                        <div className="flex flex-wrap justify-center gap-2">
+                            <Button type="button" onClick={() => router.push("/dashboard/recurring")}>
                                 {t("recurringCreate.viewList")}
-                            </Button>,
-                            <Button
-                                key="another"
-                                onClick={() =>
-                                    router.push("/dashboard/recurring/create")
-                                }
-                            >
+                            </Button>
+                            <Button type="button" variant="outline" onClick={() => router.push("/dashboard/recurring/create")}>
                                 {t("recurringCreate.createAnother")}
-                            </Button>,
-                        ]}
-                    />
+                            </Button>
+                        </div>
+                    </CardContent>
                 </Card>
             )}
         </div>
