@@ -1,11 +1,12 @@
 "use client";
 
-import { Button, Modal, Space, message } from "antd";
+import { toast } from "sonner";
 import {
     downloadEInvoiceFile,
     EInvoiceDownloadError,
     type EInvoiceFormat,
 } from "@/lib/eRechnung/downloadClient";
+import { Button } from "@/components/ui/button";
 
 interface DownloadWithFeedbackOptions {
     invoiceId: string;
@@ -30,42 +31,41 @@ export async function downloadInvoiceWithFeedback({
             error.status === 422 &&
             error.errors.length > 0
         ) {
-            const modal = Modal.warning({
-                title: t("erechnung.validationModalTitle"),
-                width: 520,
-                content: (
-                    <div>
-                        <p style={{ marginBottom: 8 }}>
-                            {t("erechnung.validationModalHint")}
-                        </p>
-                        <ul style={{ paddingLeft: 20, marginBottom: onNavigate ? 16 : 0 }}>
+            const id = toast.warning(t("erechnung.validationModalTitle"), {
+                duration: Infinity,
+                description: (
+                    <div className="flex flex-col gap-2">
+                        <p>{t("erechnung.validationModalHint")}</p>
+                        <ul className="list-disc pl-5">
                             {error.errors.map((err, idx) => (
-                                <li key={idx} style={{ marginBottom: 4 }}>
-                                    {err}
-                                </li>
+                                <li key={idx}>{err}</li>
                             ))}
                         </ul>
                         {onNavigate && (
-                            <Space wrap>
+                            <div className="flex flex-wrap gap-2">
                                 <Button
-                                    size="small"
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
                                     onClick={() => {
-                                        modal.destroy();
+                                        toast.dismiss(id);
                                         onNavigate("/dashboard/settings");
                                     }}
                                 >
                                     {t("erechnung.fixSettings")}
                                 </Button>
                                 <Button
-                                    size="small"
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
                                     onClick={() => {
-                                        modal.destroy();
+                                        toast.dismiss(id);
                                         onNavigate("/dashboard/clients");
                                     }}
                                 >
                                     {t("erechnung.fixClient")}
                                 </Button>
-                            </Space>
+                            </div>
                         )}
                     </div>
                 ),
@@ -73,7 +73,7 @@ export async function downloadInvoiceWithFeedback({
             return;
         }
 
-        message.error(
+        toast.error(
             error instanceof Error && error.message
                 ? error.message
                 : t("erechnung.downloadError"),

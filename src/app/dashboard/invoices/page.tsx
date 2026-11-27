@@ -1,36 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Table,
-    Button,
-    Input,
-    Tag,
-    Dropdown,
-    Modal,
-    message,
-    Card,
-    Row,
-    Col,
-    Statistic,
-} from "antd";
-import type { TableProps, MenuProps } from "antd";
-import {
-    PlusOutlined,
-    SearchOutlined,
-    MoreOutlined,
-    EyeOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    FilePdfOutlined,
-    FileTextOutlined,
-    CheckCircleOutlined,
-    SendOutlined,
-    RobotOutlined,
-    CopyOutlined,
-    MailOutlined,
-} from "@ant-design/icons";
+    Bot, CheckCircle2, ChevronLeft, ChevronRight, Copy, EllipsisVertical, Eye, FileText,
+    FileDown, Loader2, Mail, Pencil, Plus, Search, Send, Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
 import { useInvoiceStore } from "@/store";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/currencyUtils";
@@ -39,26 +15,52 @@ import { runInvoiceAssistant } from "@/lib/aiService";
 import { getCompanyInfo } from "@/lib/companyService";
 import { downloadInvoiceWithFeedback } from "@/components/dashboard/eInvoiceDownloadModal";
 import type { InvoiceWithClient, Invoice } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
-const statusColors: Record<string, string> = {
-    draft: "default",
-    sent: "processing",
-    paid: "success",
-    cancelled: "error",
+const statusBadgeClass: Record<string, string> = {
+    draft: "bg-secondary text-secondary-foreground",
+    sent: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    cancelled: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
 };
+
+type SortKey = "invoice_number" | "issue_date" | "total_gross";
 
 export default function InvoicesPage() {
     const router = useRouter();
     const { t } = useLanguage();
     const [searchText, setSearchText] = useState("");
     const [companyName, setCompanyName] = useState<string | undefined>();
-    const [draftingInvoiceId, setDraftingInvoiceId] = useState<string | null>(
-        null,
-    );
+    const [draftingInvoiceId, setDraftingInvoiceId] = useState<string | null>(null);
     const [reminderModalOpen, setReminderModalOpen] = useState(false);
     const [reminderDraft, setReminderDraft] = useState("");
-    const [selectedInvoice, setSelectedInvoice] =
-        useState<InvoiceWithClient | null>(null);
+    const [selectedInvoice, setSelectedInvoice] = useState<InvoiceWithClient | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [sortKey, setSortKey] = useState<SortKey>("issue_date");
+    const [sortAsc, setSortAsc] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     const statusLabels: Record<string, string> = {
         draft: t("status.draft"),
@@ -67,7 +69,6 @@ export default function InvoicesPage() {
         cancelled: t("status.cancelled"),
     };
 
-    // Zustand store
     const {
         invoices,
         stats,
@@ -78,16 +79,28 @@ export default function InvoicesPage() {
         removeInvoice,
     } = useInvoiceStore();
 
-    // Filter invoices based on search
-    const filteredInvoices = invoices.filter(
-        (invoice) =>
-            invoice.invoice_number
-                .toLowerCase()
-                .includes(searchText.toLowerCase()) ||
-            invoice.client?.name
-                ?.toLowerCase()
-                .includes(searchText.toLowerCase()),
-    );
+    const filteredInvoices = useMemo(() => {
+        const filtered = invoices.filter(
+            (invoice) =>
+                (statusFilter === "all" || invoice.status === statusFilter) &&
+                (invoice.invoice_number.toLowerCase().includes(searchText.toLowerCase()) ||
+                    invoice.client?.name?.toLowerCase().includes(searchText.toLowerCase())),
+        );
+        const sorted = [...filtered].sort((a, b) => {
+            const cmp =
+                sortKey === "invoice_number"
+                    ? a.invoice_number.localeCompare(b.invoice_number)
+                    : sortKey === "issue_date"
+                      ? new Date(a.issue_date).getTime() - new Date(b.issue_date).getTime()
+                      : a.total_gross - b.total_gross;
+            return sortAsc ? cmp : -cmp;
+        });
+        return sorted;
+    }, [invoices, searchText, statusFilter, sortKey, sortAsc]);
+
+    const pageCount = Math.max(1, Math.ceil(filteredInvoices.length / pageSize));
+    const safePage = Math.min(page, pageCount);
+    const pageInvoices = filteredInvoices.slice((safePage - 1) * pageSize, safePage * pageSize);
 
     useEffect(() => {
         fetchInvoices();
@@ -105,35 +118,26 @@ export default function InvoicesPage() {
         }
     };
 
-    const handleDelete = (id: string) => {
-        Modal.confirm({
-            title: t("invoices.deleteConfirm"),
-            content: t("invoices.deleteDesc"),
-            okText: t("invoices.delete"),
-            okType: "danger",
-            cancelText: t("invoices.cancel"),
-            onOk: async () => {
-                try {
-                    await removeInvoice(id);
-                    message.success(t("invoices.deleted"));
-                } catch (error) {
-                    console.error("Error deleting invoice:", error);
-                    message.error(t("invoices.deleteError"));
-                }
-            },
-        });
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            await removeInvoice(deleteTarget);
+            toast.success(t("invoices.deleted"));
+        } catch (error) {
+            console.error("Error deleting invoice:", error);
+            toast.error(t("invoices.deleteError"));
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
-    const handleStatusChange = async (
-        id: string,
-        status: Invoice["status"],
-    ) => {
+    const handleStatusChange = async (id: string, status: Invoice["status"]) => {
         try {
             await updateStatus(id, status);
-            message.success(t("invoices.statusUpdated"));
+            toast.success(t("invoices.statusUpdated"));
         } catch (error) {
             console.error("Error updating status:", error);
-            message.error(t("invoices.updateError"));
+            toast.error(t("invoices.updateError"));
         }
     };
 
@@ -156,14 +160,10 @@ export default function InvoicesPage() {
             setSelectedInvoice(invoice);
             setReminderDraft(result.content);
             setReminderModalOpen(true);
-            message.success(t("invoices.aiReminderSuccess"));
+            toast.success(t("invoices.aiReminderSuccess"));
         } catch (error) {
             console.error("Error drafting invoice reminder:", error);
-            message.error(
-                error instanceof Error
-                    ? error.message
-                    : t("invoices.aiReminderError"),
-            );
+            toast.error(error instanceof Error ? error.message : t("invoices.aiReminderError"));
         } finally {
             setDraftingInvoiceId(null);
         }
@@ -172,23 +172,21 @@ export default function InvoicesPage() {
     const handleCopyReminderDraft = async () => {
         try {
             await navigator.clipboard.writeText(reminderDraft);
-            message.success(t("invoices.aiCopySuccess"));
+            toast.success(t("invoices.aiCopySuccess"));
         } catch (error) {
             console.error("Error copying invoice reminder draft:", error);
-            message.error(t("invoices.aiCopyError"));
+            toast.error(t("invoices.aiCopyError"));
         }
     };
 
     const handleOpenReminderEmail = () => {
         if (!selectedInvoice?.client?.email || !reminderDraft) {
-            message.warning(t("invoices.aiEmailMissing"));
+            toast.warning(t("invoices.aiEmailMissing"));
             return;
         }
 
         const lines = reminderDraft.split("\n");
-        const subjectLine = lines.find((line) =>
-            line.toLowerCase().startsWith("betreff:"),
-        );
+        const subjectLine = lines.find((line) => line.toLowerCase().startsWith("betreff:"));
         const subject = subjectLine
             ? subjectLine.replace(/^Betreff:\s*/i, "").trim()
             : t("invoices.aiMailSubjectFallback");
@@ -200,289 +198,256 @@ export default function InvoicesPage() {
         );
     };
 
-    const getActionMenu = (record: InvoiceWithClient): MenuProps["items"] => [
-        {
-            key: "view",
-            icon: <EyeOutlined />,
-            label: t("invoices.view"),
-            onClick: () => router.push(`/dashboard/invoices/${record.id}`),
-        },
-        // Only drafts are editable; issued invoices are corrected via credit note / correction.
-        ...(record.status === "draft"
-            ? [
-                  {
-                      key: "edit",
-                      icon: <EditOutlined />,
-                      label: t("invoices.edit"),
-                      onClick: () => router.push(`/dashboard/invoices/${record.id}/edit`),
-                  },
-              ]
-            : []),
-        {
-            key: "pdf",
-            icon: <FilePdfOutlined />,
-            label: t("invoices.downloadPdf"),
-            onClick: () => router.push(`/dashboard/invoices/${record.id}/pdf`),
-        },
-        {
-            key: "zugferd",
-            icon: <FilePdfOutlined />,
-            label: t("erechnung.downloadZUGFeRDBtn"),
-            onClick: () => {
-                if (!record.id) return;
-                void downloadInvoiceWithFeedback({
-                    invoiceId: record.id,
-                    invoiceNumber: record.invoice_number,
-                    format: "zugferd",
-                    t,
-                    onNavigate: (path) => router.push(path),
-                });
-            },
-        },
-        {
-            key: "xrechnung",
-            icon: <FileTextOutlined />,
-            label: t("erechnung.downloadXRechnungBtn"),
-            onClick: () => {
-                if (!record.id) return;
-                void downloadInvoiceWithFeedback({
-                    invoiceId: record.id,
-                    invoiceNumber: record.invoice_number,
-                    format: "xrechnung",
-                    t,
-                    onNavigate: (path) => router.push(path),
-                });
-            },
-        },
-        {
-            key: "ai-reminder",
-            icon: <RobotOutlined />,
-            label: t("invoices.aiReminder"),
-            disabled: !record.client?.email,
-            onClick: () => {
-                void handleDraftReminder(record);
-            },
-        },
-        { type: "divider" },
-        ...(record.status === "draft"
-            ? [
-                  {
-                      key: "send",
-                      icon: <SendOutlined />,
-                      label: t("invoices.markSent"),
-                      onClick: () => handleStatusChange(record.id!, "sent"),
-                  },
-              ]
-            : []),
-        ...(record.status === "sent"
-            ? [
-                  {
-                      key: "paid",
-                      icon: <CheckCircleOutlined />,
-                      label: t("invoices.markPaid"),
-                      onClick: () => handleStatusChange(record.id!, "paid"),
-                  },
-              ]
-            : []),
-        { type: "divider" },
-        {
-            key: "delete",
-            icon: <DeleteOutlined />,
-            label: t("invoices.delete"),
-            danger: true,
-            onClick: () => handleDelete(record.id!),
-        },
-    ];
+    const toggleSort = (key: SortKey) => {
+        if (sortKey === key) setSortAsc((v) => !v);
+        else {
+            setSortKey(key);
+            setSortAsc(true);
+        }
+    };
 
-    const columns: TableProps<InvoiceWithClient>["columns"] = [
-        {
-            title: t("invoices.number"),
-            dataIndex: "invoice_number",
-            key: "invoice_number",
-            sorter: (a, b) => a.invoice_number.localeCompare(b.invoice_number),
-        },
-        {
-            title: t("invoices.client"),
-            dataIndex: ["client", "name"],
-            key: "client",
-            render: (_, record) => record.client?.name || "—",
-        },
-        {
-            title: t("invoices.date"),
-            dataIndex: "issue_date",
-            key: "issue_date",
-            render: (date) => formatDateGerman(date),
-            sorter: (a, b) =>
-                new Date(a.issue_date).getTime() -
-                new Date(b.issue_date).getTime(),
-        },
-        {
-            title: t("invoices.amount"),
-            dataIndex: "total_gross",
-            key: "total_gross",
-            render: (amount) => formatCurrency(amount),
-            sorter: (a, b) => a.total_gross - b.total_gross,
-            align: "right",
-        },
-        {
-            title: t("invoices.status"),
-            dataIndex: "status",
-            key: "status",
-            render: (status) => (
-                <Tag color={statusColors[status]}>{statusLabels[status]}</Tag>
-            ),
-            filters: [
-                { text: t("status.draft"), value: "draft" },
-                { text: t("status.sent"), value: "sent" },
-                { text: t("status.paid"), value: "paid" },
-                { text: t("status.cancelled"), value: "cancelled" },
-            ],
-            onFilter: (value, record) => record.status === value,
-        },
-        {
-            title: "",
-            key: "actions",
-            width: 50,
-            render: (_, record) => (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <Dropdown
-                        menu={{ items: getActionMenu(record) }}
-                        trigger={["click"]}
-                    >
-                        <Button
-                            type="text"
-                            icon={<MoreOutlined />}
-                            loading={draftingInvoiceId === record.id}
-                        />
-                    </Dropdown>
-                </div>
-            ),
-        },
+    const statCards = [
+        { label: t("invoices.total"), value: String(stats?.total ?? 0), className: "" },
+        { label: t("invoices.open"), value: `${(stats?.unpaidAmount ?? 0).toFixed(2)} €`, className: "text-orange-500" },
+        { label: t("status.paid"), value: `${(stats?.paidAmount ?? 0).toFixed(2)} €`, className: "text-emerald-500" },
+        { label: t("dashboard.drafts"), value: String(stats?.draft ?? 0), className: "" },
     ];
 
     return (
-        <div>
+        <div className="flex flex-col gap-4">
             {/* Stats */}
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("invoices.total")}
-                            value={stats?.total ?? 0}
-                        />
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                {statCards.map((stat) => (
+                    <Card key={stat.label}>
+                        <CardContent className="pt-1">
+                            <p className="text-sm text-muted-foreground">{stat.label}</p>
+                            <p className={cn("mt-1 text-2xl font-semibold", stat.className)}>{stat.value}</p>
+                        </CardContent>
                     </Card>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("invoices.open")}
-                            value={stats?.unpaidAmount ?? 0}
-                            precision={2}
-                            suffix="€"
-                            styles={{ content: { color: "#fa8c16" } }}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("status.paid")}
-                            value={stats?.paidAmount ?? 0}
-                            precision={2}
-                            suffix="€"
-                            styles={{ content: { color: "#52c41a" } }}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("dashboard.drafts")}
-                            value={stats?.draft ?? 0}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+                ))}
+            </div>
 
             {/* Toolbar */}
-            <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-                <Col xs={24} sm={16} md={12}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative w-full sm:max-w-md">
+                    <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         placeholder={t("invoices.search")}
-                        prefix={<SearchOutlined />}
                         value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        style={{ width: "100%" }}
-                        allowClear
+                        onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
+                        className="pl-9"
+                        aria-label={t("invoices.search")}
                     />
-                </Col>
-                <Col
-                    xs={24}
-                    sm={8}
-                    md={12}
-                    style={{ display: "flex", justifyContent: "flex-end" }}
-                >
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() =>
-                            router.push("/dashboard/invoices/create")
-                        }
-                        style={{ width: "100%", maxWidth: 200 }}
-                    >
+                </div>
+                <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+                    <SelectTrigger className="w-full sm:w-44" aria-label={t("invoices.status")}>
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{t("invoices.status")}: {t("status.draft")}/{t("status.sent")}/{t("status.paid")}</SelectItem>
+                        <SelectItem value="draft">{t("status.draft")}</SelectItem>
+                        <SelectItem value="sent">{t("status.sent")}</SelectItem>
+                        <SelectItem value="paid">{t("status.paid")}</SelectItem>
+                        <SelectItem value="cancelled">{t("status.cancelled")}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <div className="sm:ml-auto">
+                    <Button type="button" onClick={() => router.push("/dashboard/invoices/create")} className="w-full sm:w-auto">
+                        <Plus />
                         {t("invoices.new")}
                     </Button>
-                </Col>
-            </Row>
+                </div>
+            </div>
 
             {/* Table */}
-            <Table
-                columns={columns}
-                dataSource={filteredInvoices}
-                rowKey="id"
-                loading={loading}
-                pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showTotal: (total, range) =>
-                        t("invoices.pagination")
-                            .replace("{0}", String(range[0]))
-                            .replace("{1}", String(range[1]))
-                            .replace("{2}", String(total)),
-                }}
-                onRow={(record) => ({
-                    onClick: () =>
-                        router.push(`/dashboard/invoices/${record.id}`),
-                    style: { cursor: "pointer" },
-                })}
-            />
+            <Card>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>
+                                    <button type="button" className="font-medium hover:text-foreground" onClick={() => toggleSort("invoice_number")}>
+                                        {t("invoices.number")} {sortKey === "invoice_number" ? (sortAsc ? "↑" : "↓") : ""}
+                                    </button>
+                                </TableHead>
+                                <TableHead>{t("invoices.client")}</TableHead>
+                                <TableHead>
+                                    <button type="button" className="font-medium hover:text-foreground" onClick={() => toggleSort("issue_date")}>
+                                        {t("invoices.date")} {sortKey === "issue_date" ? (sortAsc ? "↑" : "↓") : ""}
+                                    </button>
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    <button type="button" className="font-medium hover:text-foreground" onClick={() => toggleSort("total_gross")}>
+                                        {t("invoices.amount")} {sortKey === "total_gross" ? (sortAsc ? "↑" : "↓") : ""}
+                                    </button>
+                                </TableHead>
+                                <TableHead>{t("invoices.status")}</TableHead>
+                                <TableHead className="w-[50px]"><span className="sr-only">Actions</span></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {loading && pageInvoices.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                                        <Loader2 className="mr-2 inline size-4 animate-spin" />
+                                        {t("invoices.search")}
+                                    </TableCell>
+                                </TableRow>
+                            ) : pageInvoices.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                                        {t("dashboard.noInvoices")}
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                pageInvoices.map((record) => (
+                                    <TableRow
+                                        key={record.id}
+                                        className="cursor-pointer"
+                                        onClick={() => router.push(`/dashboard/invoices/${record.id}`)}
+                                    >
+                                        <TableCell className="font-medium">{record.invoice_number}</TableCell>
+                                        <TableCell>{record.client?.name || "—"}</TableCell>
+                                        <TableCell>{formatDateGerman(record.issue_date)}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(record.total_gross)}</TableCell>
+                                        <TableCell>
+                                            <Badge className={statusBadgeClass[record.status]}>{statusLabels[record.status]}</Badge>
+                                        </TableCell>
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button type="button" variant="ghost" size="icon" aria-label="Actions">
+                                                        {draftingInvoiceId === record.id ? <Loader2 className="animate-spin" /> : <EllipsisVertical />}
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-60">
+                                                    <DropdownMenuItem onClick={() => router.push(`/dashboard/invoices/${record.id}`)}>
+                                                        <Eye />{t("invoices.view")}
+                                                    </DropdownMenuItem>
+                                                    {record.status === "draft" && (
+                                                        <DropdownMenuItem onClick={() => router.push(`/dashboard/invoices/${record.id}/edit`)}>
+                                                            <Pencil />{t("invoices.edit")}
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem onClick={() => router.push(`/dashboard/invoices/${record.id}/pdf`)}>
+                                                        <FileDown />{t("invoices.downloadPdf")}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => {
+                                                        if (!record.id) return;
+                                                        void downloadInvoiceWithFeedback({
+                                                            invoiceId: record.id,
+                                                            invoiceNumber: record.invoice_number,
+                                                            format: "zugferd",
+                                                            t,
+                                                            onNavigate: (path) => router.push(path),
+                                                        });
+                                                    }}>
+                                                        <FileDown />{t("erechnung.downloadZUGFeRDBtn")}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => {
+                                                        if (!record.id) return;
+                                                        void downloadInvoiceWithFeedback({
+                                                            invoiceId: record.id,
+                                                            invoiceNumber: record.invoice_number,
+                                                            format: "xrechnung",
+                                                            t,
+                                                            onNavigate: (path) => router.push(path),
+                                                        });
+                                                    }}>
+                                                        <FileText />{t("erechnung.downloadXRechnungBtn")}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem disabled={!record.client?.email} onClick={() => void handleDraftReminder(record)}>
+                                                        <Bot />{t("invoices.aiReminder")}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    {record.status === "draft" && (
+                                                        <DropdownMenuItem onClick={() => void handleStatusChange(record.id!, "sent")}>
+                                                            <Send />{t("invoices.markSent")}
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    {record.status === "sent" && (
+                                                        <DropdownMenuItem onClick={() => void handleStatusChange(record.id!, "paid")}>
+                                                            <CheckCircle2 />{t("invoices.markPaid")}
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem variant="destructive" onClick={() => setDeleteTarget(record.id!)}>
+                                                        <Trash2 />{t("invoices.delete")}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+                {/* Pagination */}
+                <div className="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-3 sm:flex-row">
+                    <p className="text-sm text-muted-foreground">
+                        {filteredInvoices.length === 0
+                            ? t("invoices.pagination").replace("{0}", "0").replace("{1}", "0").replace("{2}", "0")
+                            : t("invoices.pagination")
+                                  .replace("{0}", String((safePage - 1) * pageSize + 1))
+                                  .replace("{1}", String(Math.min(safePage * pageSize, filteredInvoices.length)))
+                                  .replace("{2}", String(filteredInvoices.length))}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                            <SelectTrigger className="h-8 w-[76px]" aria-label="Page size"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {[10, 20, 50].map((size) => (
+                                    <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button type="button" variant="outline" size="icon" className="size-8" disabled={safePage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} aria-label="Previous page">
+                            <ChevronLeft className="size-4" />
+                        </Button>
+                        <span className="text-sm">{safePage} / {pageCount}</span>
+                        <Button type="button" variant="outline" size="icon" className="size-8" disabled={safePage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))} aria-label="Next page">
+                            <ChevronRight className="size-4" />
+                        </Button>
+                    </div>
+                </div>
+            </Card>
 
-            <Modal
-                title={t("invoices.aiReminderTitle")}
-                open={reminderModalOpen}
-                onCancel={() => setReminderModalOpen(false)}
-                footer={[
-                    <Button
-                        key="copy"
-                        icon={<CopyOutlined />}
-                        onClick={() => void handleCopyReminderDraft()}
-                    >
-                        {t("invoices.aiCopy")}
-                    </Button>,
-                    <Button
-                        key="email"
-                        type="primary"
-                        icon={<MailOutlined />}
-                        onClick={handleOpenReminderEmail}
-                        disabled={!selectedInvoice?.client?.email}
-                    >
-                        {t("invoices.aiOpenEmail")}
-                    </Button>,
-                ]}
-                width={760}
-            >
-                <div style={{ whiteSpace: "pre-wrap" }}>{reminderDraft}</div>
-            </Modal>
+            {/* AI reminder dialog */}
+            <Dialog open={reminderModalOpen} onOpenChange={setReminderModalOpen}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>{t("invoices.aiReminderTitle")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto text-sm whitespace-pre-wrap">{reminderDraft}</div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => void handleCopyReminderDraft()}>
+                            <Copy />
+                            {t("invoices.aiCopy")}
+                        </Button>
+                        <Button type="button" onClick={handleOpenReminderEmail} disabled={!selectedInvoice?.client?.email}>
+                            <Mail />
+                            {t("invoices.aiOpenEmail")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete confirmation */}
+            <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t("invoices.deleteConfirm")}</AlertDialogTitle>
+                        <AlertDialogDescription>{t("invoices.deleteDesc")}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t("invoices.cancel")}</AlertDialogCancel>
+                        <AlertDialogAction variant="destructive" onClick={() => void confirmDelete()}>
+                            {t("invoices.delete")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
