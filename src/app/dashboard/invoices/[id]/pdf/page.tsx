@@ -3,15 +3,12 @@ import { identifierSummary } from "@/lib/eRechnung/identifierSummary";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { Button, Space, message, Spin, Card, Alert, Segmented } from "antd";
-import {
-    ArrowLeftOutlined,
-    DownloadOutlined,
-    PrinterOutlined,
-    GlobalOutlined,
-    FileTextOutlined,
-    FilePdfOutlined,
-} from "@ant-design/icons";
+import { ArrowLeft, Download, FileDown, FileText, Globe, Loader2, Printer } from "lucide-react";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
     Document,
     Page,
@@ -616,7 +613,7 @@ export default function InvoicePDFPage() {
             setCompany(companyData);
         } catch (error) {
             console.error("Error loading data:", error);
-            message.error(t("invoicePdf.loadError"));
+            toast.error(t("invoicePdf.loadError"));
             router.push("/dashboard/invoices");
         } finally {
             setLoading(false);
@@ -716,9 +713,9 @@ export default function InvoicePDFPage() {
 
     if (loading) {
         return (
-            <div style={{ textAlign: "center", padding: 50 }}>
-                <Spin size="large" />
-                <p>{t("invoicePdf.loading")}</p>
+            <div className="flex flex-col items-center gap-3 py-12">
+                <Loader2 className="size-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">{t("invoicePdf.loading")}</p>
             </div>
         );
     }
@@ -732,102 +729,79 @@ export default function InvoicePDFPage() {
     }_${invoice.invoice_number}.pdf`;
 
     return (
-        <div>
+        <div className="flex flex-col gap-4">
             {/* Informative notice if IBAN is missing for GiroCode */}
             {!company?.bank_iban && (
-                <Alert
-                    type="info"
-                    showIcon
-                    style={{ marginBottom: 16 }}
-                    className="no-print"
-                    message={
-                        pdfLanguage === "en"
+                <Alert className="no-print">
+                    <AlertTitle>
+                        {pdfLanguage === "en"
                             ? "GiroCode not included on this invoice"
-                            : "Kein GiroCode auf dieser Rechnung"
-                    }
-                    description={
-                        <span>
-                            {pdfLanguage === "en"
-                                ? "A GiroCode (SEPA QR payment code) could not be generated because no IBAN is configured in your company settings. Add your IBAN under Settings > Bank Details to automatically include a GiroCode on your invoices."
-                                : "Auf dieser Rechnung wird kein GiroCode (SEPA-QR-Code) angezeigt, da in den Unternehmenseinstellungen noch keine IBAN hinterlegt ist. Hinterlegen Sie Ihre IBAN in den Einstellungen unter Bankverbindung, um den GiroCode automatisch einzubinden."}
+                            : "Kein GiroCode auf dieser Rechnung"}
+                    </AlertTitle>
+                    <AlertDescription>
+                        <span className="flex flex-col items-start gap-3">
+                            <span>
+                                {pdfLanguage === "en"
+                                    ? "A GiroCode (SEPA QR payment code) could not be generated because no IBAN is configured in your company settings. Add your IBAN under Settings > Bank Details to automatically include a GiroCode on your invoices."
+                                    : "Auf dieser Rechnung wird kein GiroCode (SEPA-QR-Code) angezeigt, da in den Unternehmenseinstellungen noch keine IBAN hinterlegt ist. Hinterlegen Sie Ihre IBAN in den Einstellungen unter Bankverbindung, um den GiroCode automatisch einzubinden."}
+                            </span>
+                            <Button type="button" size="sm" onClick={() => router.push("/dashboard/settings")}>
+                                {pdfLanguage === "en" ? "Configure IBAN" : "IBAN hinterlegen"}
+                            </Button>
                         </span>
-                    }
-                    action={
-                        <Button
-                            size="small"
-                            type="primary"
-                            onClick={() => router.push("/dashboard/settings")}
-                        >
-                            {pdfLanguage === "en"
-                                ? "Configure IBAN"
-                                : "IBAN hinterlegen"}
-                        </Button>
-                    }
-                />
+                    </AlertDescription>
+                </Alert>
             )}
 
             {/* Toolbar - hidden when printing */}
-            <Card
-                style={{ marginBottom: 16 }}
-                className="no-print"
-                styles={{ body: { padding: "12px 24px" } }}
-            >
-                <Space
-                    style={{ width: "100%", justifyContent: "space-between" }}
-                    wrap
-                >
-                    <Space wrap>
-                        <Button
-                            icon={<ArrowLeftOutlined />}
-                            onClick={() =>
-                                router.push(`/dashboard/invoices/${invoiceId}`)
-                            }
-                        >
+            <Card className="no-print">
+                <CardContent className="flex flex-wrap items-center justify-between gap-3 py-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Button type="button" variant="outline" onClick={() => router.push(`/dashboard/invoices/${invoiceId}`)}>
+                            <ArrowLeft />
                             {t("invoicePdf.back")}
                         </Button>
-                        <span style={{ fontWeight: 500 }}>
-                            PDF: {invoice.invoice_number}
-                        </span>
-                    </Space>
+                        <span className="font-medium">PDF: {invoice.invoice_number}</span>
+                    </div>
 
-                    <Space wrap>
+                    <div className="flex flex-wrap items-center gap-2">
                         {/* Language Switcher for Invoice */}
-                        <Space size={6}>
-                            <GlobalOutlined style={{ color: "#666" }} />
-                            <span style={{ fontSize: 13, color: "#666" }}>
-                                {pdfLanguage === "en" ? "Language:" : "Sprache:"}
-                            </span>
-                            <Segmented<Language>
-                                value={pdfLanguage}
-                                onChange={(val) => setPdfLanguage(val)}
-                                options={[
-                                    { label: "Deutsch", value: "de" },
-                                    { label: "English", value: "en" },
-                                ]}
-                            />
-                        </Space>
+                        <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                            <Globe className="size-4" />
+                            {pdfLanguage === "en" ? "Language:" : "Sprache:"}
+                        </span>
+                        <div className="inline-flex rounded-lg bg-muted p-1" role="group" aria-label={pdfLanguage === "en" ? "Language" : "Sprache"}>
+                            {([
+                                { label: "Deutsch", value: "de" },
+                                { label: "English", value: "en" },
+                            ] as Array<{ label: string; value: Language }>).map((option) => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => setPdfLanguage(option.value)}
+                                    aria-pressed={pdfLanguage === option.value}
+                                    className={cn(
+                                        "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                                        pdfLanguage === option.value ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
+                                    )}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
 
-                        <Button
-                            icon={<PrinterOutlined />}
-                            onClick={() => void handlePrint()}
-                            loading={printing}
-                        >
+                        <Button type="button" variant="outline" disabled={printing} onClick={() => void handlePrint()}>
+                            {printing ? <Loader2 className="animate-spin" /> : <Printer />}
                             {t("invoicePdf.print")}
                         </Button>
-                        <Button
-                            icon={<FilePdfOutlined />}
-                            loading={downloadingFormat === "zugferd"}
-                            onClick={() => void handleDownloadEInvoice("zugferd")}
-                            title={t("erechnung.zugferdTooltip")}
-                        >
+                        <Button type="button" variant="outline" disabled={downloadingFormat === "zugferd"}
+                            onClick={() => void handleDownloadEInvoice("zugferd")} title={t("erechnung.zugferdTooltip")}>
+                            {downloadingFormat === "zugferd" ? <Loader2 className="animate-spin" /> : <FileDown />}
                             {t("erechnung.downloadZUGFeRDBtn")}
                         </Button>
-                        <Button
-                            icon={<FileTextOutlined />}
-                            loading={downloadingFormat === "xrechnung"}
-                            onClick={() => void handleDownloadEInvoice("xrechnung")}
-                            title={t("erechnung.xrechnungTooltip")}
-                        >
+                        <Button type="button" variant="outline" disabled={downloadingFormat === "xrechnung"}
+                            onClick={() => void handleDownloadEInvoice("xrechnung")} title={t("erechnung.xrechnungTooltip")}>
+                            {downloadingFormat === "xrechnung" ? <Loader2 className="animate-spin" /> : <FileText />}
                             {t("erechnung.downloadXRechnungBtn")}
                         </Button>
                         <PDFDownloadLink
@@ -843,17 +817,14 @@ export default function InvoicePDFPage() {
                             fileName={downloadFileName}
                         >
                             {({ loading: pdfLoading }) => (
-                                <Button
-                                    type="primary"
-                                    icon={<DownloadOutlined />}
-                                    loading={pdfLoading}
-                                >
+                                <Button type="button" disabled={pdfLoading}>
+                                    {pdfLoading ? <Loader2 className="animate-spin" /> : <Download />}
                                     {t("invoicePdf.download")}
                                 </Button>
                             )}
                         </PDFDownloadLink>
-                    </Space>
-                </Space>
+                    </div>
+                </CardContent>
             </Card>
 
             {/* PDF Viewer */}
@@ -886,10 +857,6 @@ export default function InvoicePDFPage() {
                         margin: 0;
                     }
                     .no-print {
-                        display: none !important;
-                    }
-                    .ant-layout-sider,
-                    .ant-layout-header {
                         display: none !important;
                     }
                 }
