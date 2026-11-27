@@ -1,25 +1,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-    Alert,
-    Button,
-    Card,
-    Checkbox,
-    Col,
-    Empty,
-    Form,
-    Input,
-    InputNumber,
-    Modal,
-    Popconfirm,
-    Row,
-    Segmented,
-    Select,
-    Space,
-    Tag,
-    Typography,
-} from "antd";
+import { Loader2 } from "lucide-react";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import DecimalInput from "@/components/DecimalInput";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import type { CalendarEvent, Occurrence } from "@/lib/workspace/calendar";
 import type { CalendarBlockItem, CalendarBookingItem } from "@/lib/workspace/calendar-service";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,6 +49,9 @@ export interface CalendarSnapshot {
     termineTimezone?: string;
 }
 
+type EventValues = { title: string; start: string; end: string; allDay: boolean; category: string; location: string; notes: string; repeat: string; interval: number | null; until: string; reminder: number };
+const emptyEvent: EventValues = { title: "", start: "", end: "", allDay: false, category: "work", location: "", notes: "", repeat: "none", interval: 1, until: "", reminder: -1 };
+
 function weekStart(day: string) {
     return addDays(day, -((new Date(day + "T12:00").getDay() + 6) % 7));
 }
@@ -76,17 +73,20 @@ export default function CalendarWorkspace() {
     const [blockOpen, setBlockOpen] = useState(false);
     const [dirty, setDirty] = useState(false),
         [error, setError] = useState("");
+    const [values, setValues] = useState<EventValues>(emptyEvent);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [discardOpen, setDiscardOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<"series" | "occurrence" | null>(null);
     const [source, setSource] = useState(""),
         [preview, setPreview] = useState<{ count: number; skipped: number; titles: string[] } | null>(null),
         [importing, setImporting] = useState(false),
         [importMessage, setImportMessage] = useState("");
     const [reminders, setReminders] = useState(false),
         [zone, setZone] = useState("");
-    const file = useRef<HTMLInputElement>(null),
-        [form] = Form.useForm(),
-        [modal, holder] = Modal.useModal();
-    const allDay = Form.useWatch("allDay", form),
-        repeat = Form.useWatch("repeat", form);
+    const file = useRef<HTMLInputElement>(null);
+    const allDay = values.allDay,
+        repeat = values.repeat;
+    const set = (patch: Partial<EventValues>) => { setValues(v => ({ ...v, ...patch })); setDirty(true); };
     const start = mode === "month" ? weekStart(cursor.slice(0, 7) + "-01") : mode === "week" ? weekStart(cursor) : cursor;
     const count = mode === "month" ? 42 : mode === "week" ? 7 : mode === "agenda" ? 30 : 1;
     const days = Array.from({ length: count }, (_, i) => addDays(start, i));
@@ -105,7 +105,7 @@ export default function CalendarWorkspace() {
         monthly: l("Monatlich", "Monthly"),
         yearly: l("Jährlich", "Yearly"),
     };
-    const required = [{ required: true, message: l("Bitte ausfüllen.", "Required.") }];
+    const reqMsg = l("Bitte ausfüllen.", "Required.");
 
     useEffect(() => {
         setZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -136,18 +136,18 @@ export default function CalendarWorkspace() {
     function open(event?: CalendarEvent, day = cursor, occurrenceDate = "") {
         setError("");
         setDirty(false);
+        setFieldErrors({});
         setEditing(event || {});
         setOccurrence(occurrenceDate);
-        form.resetFields();
-        form.setFieldsValue(
+        setValues(
             event
                 ? {
-                      ...event,
-                      ...(event.allDay
-                          ? { start: event.start.slice(0, 10), end: addDays(event.end.slice(0, 10), -1) }
-                          : {}),
+                      title: event.title, category: event.category, location: event.location, notes: event.notes, repeat: event.repeat, interval: event.interval, until: event.until, reminder: event.reminder, allDay: event.allDay,
+                      start: event.allDay ? event.start.slice(0, 10) : event.start,
+                      end: event.allDay ? addDays(event.end.slice(0, 10), -1) : event.end,
                   }
                 : {
+                      ...emptyEvent,
                       title: "",
                       start: day + "T09:00",
                       end: day + "T10:00",
@@ -165,24 +165,19 @@ export default function CalendarWorkspace() {
 
     function close() {
         if (busy) return;
-        if (dirty)
-            modal.confirm({
-                title: l("Änderungen verwerfen?", "Discard changes?"),
-                onOk: () => {
-                    setEditing(null);
-                    setDirty(false);
-                },
-                okText: l("Verwerfen", "Discard"),
-                cancelText: l("Weiter bearbeiten", "Keep editing"),
-            });
+        if (dirty) setDiscardOpen(true);
         else setEditing(null);
     }
 
-    async function save(values: Record<string, unknown>) {
+    function validate() { const e: Record<string, string> = {}; if (!values.title.trim()) e.title = reqMsg; if (!values.start) e.start = reqMsg; if (!values.end) e.end = reqMsg; if (!values.category) e.category = reqMsg; if (values.interval === null || values.interval === undefined) e.interval = reqMsg; setFieldErrors(e); return !Object.keys(e).length; }
+
+    async function save() {
+        if (!validate()) return;
+        const vals: Record<string, unknown> = { ...values };
         try {
-            const startVal = String(values.start),
-                endVal = String(values.end);
-            if (!values.allDay) {
+            const startVal = String(vals.start),
+                endVal = String(vals.end);
+            if (!vals.allDay) {
                 for (const value of [startVal, endVal]) {
                     const d = new Date(value);
                     const roundtrip =
@@ -198,9 +193,9 @@ export default function CalendarWorkspace() {
                 }
             }
             await resource.mutate({
-                ...values,
-                start: values.allDay ? startVal.slice(0, 10) + "T00:00" : startVal,
-                end: values.allDay ? addDays(endVal.slice(0, 10), 1) + "T00:00" : endVal,
+                ...vals,
+                start: vals.allDay ? startVal.slice(0, 10) + "T00:00" : startVal,
+                end: vals.allDay ? addDays(endVal.slice(0, 10), 1) + "T00:00" : endVal,
                 action: "save",
                 ...(editing?.id ? { id: editing.id, updated_at: editing.updated_at } : {}),
             });
@@ -362,6 +357,12 @@ export default function CalendarWorkspace() {
     const activeServices = (data?.services || []).filter((s) => s.active);
     const activeStaff = (data?.staff || []).filter((s) => s.active);
     const pendingBookingsCount = (data?.bookings || []).filter((b) => b.status === "PENDING").length;
+    const modeOptions = [
+        { value: "month", label: l("Monat", "Month") },
+        { value: "week", label: l("Woche", "Week") },
+        { value: "day", label: l("Tag", "Day") },
+        { value: "agenda", label: "Agenda" },
+    ];
 
     return (
         <WorkspaceFrame
@@ -375,67 +376,61 @@ export default function CalendarWorkspace() {
             error={resource.error}
             retry={resource.load}
         >
-            {holder}
+            <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{l("Änderungen verwerfen?", "Discard changes?")}</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{l("Weiter bearbeiten", "Keep editing")}</AlertDialogCancel><AlertDialogAction onClick={() => { setDiscardOpen(false); setEditing(null); setDirty(false); }}>{l("Verwerfen", "Discard")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+            <AlertDialog open={!!deleteTarget} onOpenChange={o => { if (!o) setDeleteTarget(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{deleteTarget === "occurrence" ? l("Nur dieses Vorkommen löschen?", "Delete this occurrence only?") : l("Termin / gesamte Serie löschen?", "Delete event / entire series?")}</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{l("Abbrechen", "Cancel")}</AlertDialogCancel><AlertDialogAction onClick={() => { const t = deleteTarget; setDeleteTarget(null); void remove(t === "occurrence"); }}>{l("Löschen", "Delete")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
             <input ref={file} type="file" accept=".ics,text/calendar" hidden onChange={(e) => chooseFile(e.target.files?.[0])} />
-            <Space wrap style={{ marginBottom: 16 }}>
-                <Button disabled={!data || busy} type="primary" onClick={() => open()}>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+                <Button disabled={!data || busy} onClick={() => open()}>
                     {l("Termin anlegen", "New event")}
                 </Button>
                 {data?.termineConfigured && activeServices.length > 0 && (
-                    <Button disabled={busy} onClick={() => setManualBookingOpen(true)}>
+                    <Button variant="outline" disabled={busy} onClick={() => setManualBookingOpen(true)}>
                         {l("Kundentermin buchen", "Book customer appointment")}
                     </Button>
                 )}
                 {data?.termineConfigured && (
-                    <Button disabled={busy} onClick={() => setBlockOpen(true)}>
+                    <Button variant="outline" disabled={busy} onClick={() => setBlockOpen(true)}>
                         {l("Sperrzeit eintragen", "Block time")}
                     </Button>
                 )}
-                <Button onClick={() => file.current?.click()} loading={importing} disabled={busy}>
-                    {l("ICS importieren", "Import ICS")}
+                <Button variant="outline" onClick={() => file.current?.click()} disabled={importing || busy}>
+                    {importing && <Loader2 className="animate-spin" />}{l("ICS importieren", "Import ICS")}
                 </Button>
-                <Button href="/api/workspace/calendar?export=1" disabled={!data}>
-                    {l("ICS exportieren", "Export ICS")}
-                </Button>
-                <Button onClick={toggleReminders}>
+                <Button asChild variant="outline"><a href="/api/workspace/calendar?export=1" aria-disabled={!data}>{l("ICS exportieren", "Export ICS")}</a></Button>
+                <Button variant="outline" onClick={toggleReminders}>
                     {reminders ? l("Erinnerungen ausschalten", "Turn reminders off") : l("Erinnerungen einschalten", "Enable reminders")}
                 </Button>
-                <Link href="/dashboard/termine/buchungen">
+                <Link href="/dashboard/termine/buchungen" className="text-primary hover:underline">
                     {l("Buchungen & Arbeitszeiten →", "Bookings & hours →")}
                 </Link>
                 {pendingBookingsCount > 0 && (
-                    <Tag color="warning">
+                    <Badge className="bg-amber-500 text-white hover:bg-amber-500">
                         {pendingBookingsCount} {l("offene Buchungsanfrage(n)", "pending booking request(s)")}
-                    </Tag>
+                    </Badge>
                 )}
-            </Space>
+            </div>
             {reminders && (
-                <Alert
-                    type="info"
-                    style={{ marginBottom: 16 }}
-                    title={l(
+                <Alert className="mb-4">
+                    <AlertTitle>{l(
                         "Erinnerungen erscheinen, solange Rechly in diesem Browser geöffnet ist. Systemmeldungen benötigen zusätzlich die Browser-Erlaubnis.",
                         "Reminders appear while Rechly is open in this browser. System notifications also require browser permission.",
-                    )}
-                />
+                    )}</AlertTitle>
+                </Alert>
             )}
             {importMessage && (
-                <Alert
-                    type="info"
-                    showIcon
-                    title={importMessage}
-                    closable
-                    onClose={() => setImportMessage("")}
-                    style={{ marginBottom: 16 }}
-                />
+                <Alert className="mb-4">
+                    <AlertTitle>{importMessage}</AlertTitle>
+                    <button type="button" aria-label="×" className="absolute top-2 right-2 text-muted-foreground" onClick={() => setImportMessage("")}>×</button>
+                </Alert>
             )}
-            <Card styles={{ body: { padding: 16 } }} loading={resource.loading && !data}>
-                <Space wrap style={{ marginBottom: 16 }}>
-                    <Button aria-label={l("Vorheriger Zeitraum", "Previous period")} onClick={() => changeDate(-1)}>
+            <Card><CardContent className="p-4">
+                {resource.loading && !data ? <div className="flex justify-center py-10"><Loader2 className="animate-spin" /></div> : <>
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <Button variant="outline" aria-label={l("Vorheriger Zeitraum", "Previous period")} onClick={() => changeDate(-1)}>
                         ←
                     </Button>
-                    <Button onClick={() => setCursor(localDay())}>{l("Heute", "Today")}</Button>
-                    <Button aria-label={l("Nächster Zeitraum", "Next period")} onClick={() => changeDate(1)}>
+                    <Button variant="outline" onClick={() => setCursor(localDay())}>{l("Heute", "Today")}</Button>
+                    <Button variant="outline" aria-label={l("Nächster Zeitraum", "Next period")} onClick={() => changeDate(1)}>
                         →
                     </Button>
                     <Input
@@ -445,18 +440,9 @@ export default function CalendarWorkspace() {
                         onChange={(e) => e.target.value && setCursor(e.target.value)}
                         style={{ width: 150 }}
                     />
-                    <Segmented
-                        value={mode}
-                        onChange={(value) => setMode(String(value))}
-                        options={[
-                            { value: "month", label: l("Monat", "Month") },
-                            { value: "week", label: l("Woche", "Week") },
-                            { value: "day", label: l("Tag", "Day") },
-                            { value: "agenda", label: "Agenda" },
-                        ]}
-                    />
-                </Space>
-                <Space wrap style={{ marginBottom: 20 }}>
+                    <div className="inline-flex rounded-md bg-muted p-1">{modeOptions.map(o => <button key={o.value} type="button" aria-pressed={mode === o.value} className={mode === o.value ? "rounded-sm bg-background px-3 py-1 text-sm shadow" : "px-3 py-1 text-sm"} onClick={() => setMode(o.value)}>{o.label}</button>)}</div>
+                </div>
+                <div className="mb-5 flex flex-wrap items-center gap-4">
                     <Input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -464,28 +450,16 @@ export default function CalendarWorkspace() {
                         aria-label={l("Termine suchen", "Search events")}
                         style={{ width: 220 }}
                     />
-                    <Checkbox.Group
-                        value={categories}
-                        onChange={(values) => setCategories(values.map(String))}
-                        options={["work", "personal", "deadline"].map((value) => ({ value, label: labels[value] }))}
-                    />
-                    <Checkbox checked={showBookings} onChange={(e) => setShowBookings(e.target.checked)}>
-                        {l("Kundenbuchungen", "Customer bookings")}
-                    </Checkbox>
-                    <Checkbox checked={deadlines} onChange={(e) => setDeadlines(e.target.checked)}>
-                        {l("Aufgaben & Rechnungen", "Tasks & invoices")}
-                    </Checkbox>
+                    <div className="flex flex-wrap items-center gap-3">{["work", "personal", "deadline"].map((value) => <span key={value} className="flex items-center gap-1.5"><Checkbox id={`cat-${value}`} checked={categories.includes(value)} onCheckedChange={(checked) => setCategories(checked ? [...categories, value] : categories.filter(c => c !== value))} /><Label htmlFor={`cat-${value}`}>{labels[value]}</Label></span>)}</div>
+                    <span className="flex items-center gap-1.5"><Checkbox id="show-bookings" checked={showBookings} onCheckedChange={(c) => setShowBookings(c === true)} /><Label htmlFor="show-bookings">{l("Kundenbuchungen", "Customer bookings")}</Label></span>
+                    <span className="flex items-center gap-1.5"><Checkbox id="show-deadlines" checked={deadlines} onCheckedChange={(c) => setDeadlines(c === true)} /><Label htmlFor="show-deadlines">{l("Aufgaben & Rechnungen", "Tasks & invoices")}</Label></span>
                     {activeStaff.length > 0 && (
                         <Select
-                            allowClear
-                            placeholder={l("Alle Mitarbeiter", "All staff")}
-                            value={staffFilter || undefined}
-                            onChange={(v) => setStaffFilter(v || "")}
-                            style={{ minWidth: 160 }}
-                            options={activeStaff.map((s) => ({ value: s.id, label: s.name }))}
-                        />
+                            value={staffFilter || "__all"}
+                            onValueChange={(v) => setStaffFilter(v === "__all" ? "" : v)}
+                        ><SelectTrigger style={{ minWidth: 160 }}><SelectValue placeholder={l("Alle Mitarbeiter", "All staff")} /></SelectTrigger><SelectContent><SelectItem value="__all">{l("Alle Mitarbeiter", "All staff")}</SelectItem>{activeStaff.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select>
                     )}
-                </Space>
+                </div>
                 {mode === "month" ? (
                     <div className={styles.month}>
                         {Array.from({ length: 7 }, (_, i) => (
@@ -557,24 +531,24 @@ export default function CalendarWorkspace() {
                                     const dues = due(day);
                                     return (
                                         <section className={styles.agendaDay} key={day}>
-                                            <Space wrap>
-                                                <Typography.Text strong>{dateLabel(day)}</Typography.Text>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="font-semibold">{dateLabel(day)}</span>
                                                 <Button
-                                                    size="small"
+                                                    size="sm" variant="outline"
                                                     aria-label={`${l("Termin anlegen", "New event")} ${day}`}
                                                     onClick={() => open(undefined, day)}
                                                 >
                                                     +
                                                 </Button>
-                                            </Space>
+                                            </div>
                                             {bks.map(bookingButton)}
                                             {evs.map(eventButton)}
                                             {bls.map(blockChip)}
                                             {links(day)}
                                             {!evs.length && !bks.length && !bls.length && !dues.length && (
-                                                <Typography.Paragraph type="secondary">
+                                                <p className="text-sm text-muted-foreground">
                                                     {l("Keine Termine", "No events")}
-                                                </Typography.Paragraph>
+                                                </p>
                                             )}
                                         </section>
                                     );
@@ -586,155 +560,75 @@ export default function CalendarWorkspace() {
                                         dayBookings(day).length ||
                                         dayBlocks(day).length ||
                                         due(day).length,
-                                ) && <Empty description={l("Keine passenden Termine.", "No matching events.")} />}
+                                ) && <div className="py-8 text-center text-sm text-muted-foreground">{l("Keine passenden Termine.", "No matching events.")}</div>}
                         </div>
                     </div>
                 )}
-            </Card>
-
-            <Modal
-                title={editing?.id ? l("Termin / Serie bearbeiten", "Edit event / series") : l("Neuer Termin", "New event")}
-                open={!!editing}
-                onCancel={close}
-                footer={null}
-                maskClosable={false}
-                width={700}
-                closable={!busy}
-            >
-                {error && <Alert type="error" title={error} />}
+                </>}
+            </CardContent></Card>
+            <Dialog open={!!editing} onOpenChange={o => { if (!o) close(); }}><DialogContent showCloseButton={!busy} onInteractOutside={e => e.preventDefault()} className="sm:max-w-[700px]"><DialogHeader><DialogTitle>{editing?.id ? l("Termin / Serie bearbeiten", "Edit event / series") : l("Neuer Termin", "New event")}</DialogTitle></DialogHeader>
+                {error && <Alert variant="destructive"><AlertTitle>{error}</AlertTitle></Alert>}
                 {editing?.repeat && editing.repeat !== "none" && (
-                    <Alert
-                        type="info"
-                        title={l(
+                    <Alert>
+                        <AlertTitle>{l(
                             "Änderungen gelten für die gesamte Serie. Einzelne Vorkommen können gelöscht werden.",
                             "Edits apply to the whole series. Individual occurrences can be deleted.",
-                        )}
-                    />
+                        )}</AlertTitle>
+                    </Alert>
                 )}
-                <Form
-                    name="workspace-calendar-event"
-                    form={form}
-                    layout="vertical"
-                    disabled={busy}
-                    onValuesChange={() => setDirty(true)}
-                    onFinish={save}
-                >
-                    <Form.Item name="title" label={l("Titel", "Title")} rules={required}>
-                        <Input maxLength={200} />
-                    </Form.Item>
-                    <Form.Item name="allDay" valuePropName="checked">
-                        <Checkbox
-                            onChange={(e) => {
-                                const values = form.getFieldsValue();
-                                form.setFieldsValue(
-                                    e.target.checked
+                <form onSubmit={e => { e.preventDefault(); void save(); }}>
+                    <fieldset disabled={busy} className="flex flex-col gap-4">
+                    <div><Label>{l("Titel", "Title")}</Label><Input maxLength={200} value={values.title} onChange={e => set({ title: e.target.value })} />{fieldErrors.title && <p className="text-sm text-destructive">{fieldErrors.title}</p>}</div>
+                    <div className="flex items-center gap-2"><Checkbox id="allday" checked={values.allDay} onCheckedChange={(checked) => {
+                                const isDay = checked === true;
+                                set(isDay
                                         ? {
+                                              allDay: true,
                                               start: String(values.start).slice(0, 10),
                                               end: String(values.end).slice(0, 10),
                                           }
                                         : {
+                                              allDay: false,
                                               start: String(values.start).slice(0, 10) + "T09:00",
                                               end: String(values.end).slice(0, 10) + "T10:00",
-                                          },
-                                );
-                            }}
-                        >
-                            {l("Ganztägig", "All day")}
-                        </Checkbox>
-                    </Form.Item>
-                    <Row gutter={12}>
-                        <Col xs={24} sm={12}>
-                            <Form.Item name="start" label={l("Beginn", "Start")} rules={required}>
-                                <Input type={allDay ? "date" : "datetime-local"} />
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12}>
-                            <Form.Item
-                                name="end"
-                                label={allDay ? l("Letzter Tag (einschließlich)", "Last day (inclusive)") : l("Ende", "End")}
-                                rules={required}
-                            >
-                                <Input type={allDay ? "date" : "datetime-local"} />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Form.Item name="category" label={l("Kategorie", "Category")} rules={required}>
-                        <Select options={["work", "personal", "deadline"].map((value) => ({ value, label: labels[value] }))} />
-                    </Form.Item>
-                    <Form.Item name="location" label={l("Ort", "Location")}>
-                        <Input maxLength={1000} />
-                    </Form.Item>
-                    <Form.Item name="notes" label={l("Notizen", "Notes")}>
-                        <Input.TextArea maxLength={20000} rows={3} />
-                    </Form.Item>
-                    <Form.Item name="repeat" label={l("Wiederholung", "Repeat")}>
-                        <Select
-                            options={["none", "daily", "weekly", "monthly", "yearly"].map((value) => ({
-                                value,
-                                label: labels[value],
-                            }))}
-                        />
-                    </Form.Item>
-                    <Row gutter={12} style={{ display: repeat === "none" ? "none" : undefined }}>
-                        <Col span={12}>
-                            <Form.Item name="interval" label={l("Intervall", "Interval")} rules={required}>
-                                <InputNumber min={1} max={30} precision={0} />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name="until" label={l("Bis (optional)", "Until (optional)")}>
-                                <Input type="date" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Form.Item name="reminder" label={l("Erinnerung", "Reminder")}>
-                        <Select
-                            options={[-1, 0, 5, 10, 15, 30, 60, 1440].map((value) => ({
-                                value,
-                                label:
-                                    value < 0
-                                        ? l("Keine", "None")
-                                        : value === 0
-                                          ? l("Bei Beginn", "At start")
-                                          : `${value} ${l("Minuten vorher", "minutes before")}`,
-                            }))}
-                        />
-                    </Form.Item>
-                    <Space wrap>
-                        <Button type="primary" htmlType="submit" loading={busy}>
-                            {l("Speichern", "Save")}
-                        </Button>
-                        <Button onClick={close}>{l("Abbrechen", "Cancel")}</Button>
+                                          });
+                            }} /><Label htmlFor="allday">{l("Ganztägig", "All day")}</Label></div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div><Label>{l("Beginn", "Start")}</Label><Input type={allDay ? "date" : "datetime-local"} value={values.start} onChange={e => set({ start: e.target.value })} />{fieldErrors.start && <p className="text-sm text-destructive">{fieldErrors.start}</p>}</div>
+                        <div><Label>{allDay ? l("Letzter Tag (einschließlich)", "Last day (inclusive)") : l("Ende", "End")}</Label><Input type={allDay ? "date" : "datetime-local"} value={values.end} onChange={e => set({ end: e.target.value })} />{fieldErrors.end && <p className="text-sm text-destructive">{fieldErrors.end}</p>}</div>
+                    </div>
+                    <div><Label>{l("Kategorie", "Category")}</Label><Select value={values.category || undefined} onValueChange={v => set({ category: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{["work", "personal", "deadline"].map((value) => <SelectItem key={value} value={value}>{labels[value]}</SelectItem>)}</SelectContent></Select>{fieldErrors.category && <p className="text-sm text-destructive">{fieldErrors.category}</p>}</div>
+                    <div><Label>{l("Ort", "Location")}</Label><Input maxLength={1000} value={values.location} onChange={e => set({ location: e.target.value })} /></div>
+                    <div><Label>{l("Notizen", "Notes")}</Label><Textarea maxLength={20000} rows={3} value={values.notes} onChange={e => set({ notes: e.target.value })} /></div>
+                    <div><Label>{l("Wiederholung", "Repeat")}</Label><Select value={values.repeat || undefined} onValueChange={v => set({ repeat: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{["none", "daily", "weekly", "monthly", "yearly"].map((value) => <SelectItem key={value} value={value}>{labels[value]}</SelectItem>)}</SelectContent></Select></div>
+                    <div className="grid grid-cols-2 gap-3" style={{ display: repeat === "none" ? "none" : undefined }}>
+                        <div><Label>{l("Intervall", "Interval")}</Label><DecimalInput min={1} max={30} precision={0} value={values.interval} onChange={v => set({ interval: v })} />{fieldErrors.interval && <p className="text-sm text-destructive">{fieldErrors.interval}</p>}</div>
+                        <div><Label>{l("Bis (optional)", "Until (optional)")}</Label><Input type="date" value={values.until} onChange={e => set({ until: e.target.value })} /></div>
+                    </div>
+                    <div><Label>{l("Erinnerung", "Reminder")}</Label><Select value={String(values.reminder)} onValueChange={v => set({ reminder: Number(v) })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{[-1, 0, 5, 10, 15, 30, 60, 1440].map((value) => <SelectItem key={value} value={String(value)}>{value < 0 ? l("Keine", "None") : value === 0 ? l("Bei Beginn", "At start") : `${value} ${l("Minuten vorher", "minutes before")}`}</SelectItem>)}</SelectContent></Select></div>
+                    <div className="flex flex-wrap gap-2">
+                        <Button type="submit" disabled={busy}>{busy && <Loader2 className="animate-spin" />}{l("Speichern", "Save")}</Button>
+                        <Button type="button" variant="outline" onClick={close}>{l("Abbrechen", "Cancel")}</Button>
                         {editing?.id && (
-                            <Popconfirm
-                                title={l("Termin / gesamte Serie löschen?", "Delete event / entire series?")}
-                                onConfirm={() => remove()}
-                            >
-                                <Button danger>{l("Serie / Termin löschen", "Delete event / series")}</Button>
-                            </Popconfirm>
+                            <Button type="button" variant="destructive" onClick={() => setDeleteTarget("series")}>{l("Serie / Termin löschen", "Delete event / series")}</Button>
                         )}
                         {editing?.id && editing.repeat !== "none" && occurrence && (
-                            <Popconfirm
-                                title={l("Nur dieses Vorkommen löschen?", "Delete this occurrence only?")}
-                                onConfirm={() => remove(true)}
-                            >
-                                <Button danger>{l("Dieses Vorkommen löschen", "Delete this occurrence")}</Button>
-                            </Popconfirm>
+                            <Button type="button" variant="destructive" onClick={() => setDeleteTarget("occurrence")}>{l("Dieses Vorkommen löschen", "Delete this occurrence")}</Button>
                         )}
-                    </Space>
-                </Form>
-            </Modal>
+                    </div>
+                    </fieldset>
+                </form>
+            </DialogContent></Dialog>
 
-            <Modal
-                title={l("Kalenderimport prüfen", "Review calendar import")}
-                open={!!preview}
-                onCancel={() => !busy && !importing && setPreview(null)}
-                confirmLoading={busy || importing}
-                okButtonProps={{ disabled: !preview?.count }}
-                cancelButtonProps={{ disabled: importing }}
-                okText={l("Termine importieren", "Import events")}
-                cancelText={l("Abbrechen", "Cancel")}
-                onOk={async () => {
+            <Dialog open={!!preview} onOpenChange={o => { if (!o && !busy && !importing) setPreview(null); }}><DialogContent showCloseButton={!busy && !importing} className="sm:max-w-lg"><DialogHeader><DialogTitle>{l("Kalenderimport prüfen", "Review calendar import")}</DialogTitle></DialogHeader>
+                <p className="text-sm">
+                    {preview?.count} {l("neue Termine", "new events")} · {preview?.skipped}{" "}
+                    {l("bereits vorhanden", "already present")}
+                </p>
+                {preview?.titles.map((title, i) => <p key={i} className="text-sm">{title}</p>)}
+                <DialogFooter>
+                    <Button variant="outline" disabled={importing} onClick={() => setPreview(null)}>{l("Abbrechen", "Cancel")}</Button>
+                    <Button disabled={!preview?.count || busy || importing} onClick={async () => {
                     setImporting(true);
                     let imported = 0;
                     try {
@@ -756,14 +650,9 @@ export default function CalendarWorkspace() {
                     } finally {
                         setImporting(false);
                     }
-                }}
-            >
-                <Typography.Paragraph>
-                    {preview?.count} {l("neue Termine", "new events")} · {preview?.skipped}{" "}
-                    {l("bereits vorhanden", "already present")}
-                </Typography.Paragraph>
-                {preview?.titles.map((title, i) => <Typography.Paragraph key={i}>{title}</Typography.Paragraph>)}
-            </Modal>
+                }}>{(busy || importing) && <Loader2 className="animate-spin" />}{l("Termine importieren", "Import events")}</Button>
+                </DialogFooter>
+            </DialogContent></Dialog>
 
             <BookingDetailDrawer
                 booking={selectedBooking}

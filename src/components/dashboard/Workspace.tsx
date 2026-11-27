@@ -3,8 +3,19 @@
 import DecimalInput from "@/components/DecimalInput";
 
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Col, Empty, Form, Input, Modal, Popconfirm, Progress, Row, Select, Segmented, Space, Spin, Tabs, Tag, Typography } from "antd";
-import { PlusOutlined, DownloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { Loader2, Plus, Download, Search } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { BusinessCollection, BusinessData, BusinessDocument, BusinessTask } from "@/lib/workspace/domain";
 import { WorkspaceLinks } from "@/components/workspace/common";
@@ -12,6 +23,8 @@ import TaskBoard from "@/components/workspace/TaskBoard";
 
 type RecordData = BusinessData[BusinessCollection][number];
 type Snapshot = { data: BusinessData; clients: { id: string; name: string }[] };
+type FormValues = { name: string; title: string; description: string; client_id: string; project_id: string; status: string; due_date: string; budget: number | null; assignee: string; priority: string; kind: string; recipient: string; body: string };
+const emptyValues: FormValues = { name: "", title: "", description: "", client_id: "", project_id: "", status: "", due_date: "", budget: 0, assignee: "", priority: "normal", kind: "note", recipient: "", body: "" };
 const initial: BusinessData = { projects: [], tasks: [], documents: [] };
 const statuses = { projects: ["active", "paused", "done"], tasks: ["todo", "doing", "done"], documents: ["letter", "minutes", "note"] };
 
@@ -37,8 +50,10 @@ export default function Workspace() {
     const [editorError, setEditorError] = useState("");
     const [editing, setEditing] = useState<{ id?: string } | null>(null);
     const [dirty, setDirty] = useState(false);
-    const [form] = Form.useForm();
-    const [modal, holder] = Modal.useModal();
+    const [values, setValues] = useState<FormValues>(emptyValues);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [discardOpen, setDiscardOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
     const { data, clients } = snapshot;
     const labels: Record<string, string> = {
         projects: l("Projekte", "Projects"), tasks: l("Aufgaben", "Tasks"), documents: l("Dokumente", "Documents"),
@@ -46,7 +61,8 @@ export default function Workspace() {
         todo: l("Offen", "To do"), doing: l("In Arbeit", "In progress"),
         letter: l("Brief", "Letter"), minutes: l("Protokoll", "Minutes"), note: l("Notiz", "Note"),
     };
-    const required = [{ required: true, whitespace: true, message: l("Bitte ausfüllen.", "Please fill in this field.") }];
+    const reqMsg = l("Bitte ausfüllen.", "Please fill in this field.");
+    const set = (patch: Partial<FormValues>) => { setValues(v => ({ ...v, ...patch })); setDirty(true); };
 
     async function load() {
         setLoading(true);
@@ -72,17 +88,20 @@ export default function Workspace() {
 
     function close() {
         if (busy) return;
-        const discard = () => { setEditing(null); setDirty(false); };
-        if (dirty) modal.confirm({ title: l("Ungespeicherte Änderungen verwerfen?", "Discard unsaved changes?"), okText: l("Verwerfen", "Discard"), cancelText: l("Weiter bearbeiten", "Keep editing"), onOk: discard });
-        else discard();
+        if (dirty) setDiscardOpen(true);
+        else { setEditing(null); setDirty(false); }
     }
     function edit(record?: RecordData) {
-        form.resetFields();
-        form.setFieldsValue(record || (key === "projects"
-            ? { name: "", description: "", client_id: "", status: "active", due_date: "", budget: 0 }
-            : key === "tasks" ? { title: "", project_id: "", assignee: "", status: "todo", priority: "normal", due_date: "" }
-            : { title: "", kind: "note", recipient: "", body: "", project_id: "" }));
-        setEditing(record || {}); setDirty(false); setEditorError("");
+        if (record) {
+            const r = record as unknown as Record<string, unknown>;
+            setValues({ ...emptyValues, name: String(r.name ?? ""), title: String(r.title ?? ""), description: String(r.description ?? ""), client_id: String(r.client_id ?? ""), project_id: String(r.project_id ?? ""), status: String(r.status ?? ""), due_date: String(r.due_date ?? ""), budget: typeof r.budget === "number" ? r.budget : 0, assignee: String(r.assignee ?? ""), priority: String(r.priority ?? "normal"), kind: String(r.kind ?? "note"), recipient: String(r.recipient ?? ""), body: String(r.body ?? "") });
+        } else {
+            setValues(key === "projects"
+                ? { ...emptyValues, name: "", description: "", client_id: "", status: "active", due_date: "", budget: 0 }
+                : key === "tasks" ? { ...emptyValues, title: "", project_id: "", assignee: "", status: "todo", priority: "normal", due_date: "" }
+                : { ...emptyValues, title: "", kind: "note", recipient: "", body: "", project_id: "" });
+        }
+        setEditing(record || {}); setDirty(false); setEditorError(""); setFieldErrors({});
     }
     async function mutate(body: object) {
         const response = await fetch("/api/workspace", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ collection: key, ...body }) });
@@ -91,10 +110,17 @@ export default function Workspace() {
             throw new Error(language === "de" ? result.error : "Could not save. Check your fields and linked records, then retry.");
         }
     }
-    async function save(values: object) {
+    function payload(): object {
+        if (key === "projects") return { name: values.name, description: values.description, client_id: values.client_id, status: values.status, due_date: values.due_date, budget: values.budget };
+        if (key === "tasks") return { title: values.title, project_id: values.project_id, assignee: values.assignee, status: values.status, priority: values.priority, due_date: values.due_date };
+        return { title: values.title, kind: values.kind, recipient: values.recipient, body: values.body, project_id: values.project_id };
+    }
+    function validate() { const e: Record<string, string> = {}; const titleVal = key === "projects" ? values.name : values.title; if (!titleVal.trim()) e.title = reqMsg; if (key === "projects" && (values.budget === null || values.budget === undefined)) e.budget = reqMsg; setFieldErrors(e); return !Object.keys(e).length; }
+    async function save() {
+        if (!validate()) return;
         setBusy(true); setEditorError("");
         try {
-            await mutate({ action: "save", record: { ...values, ...(editing?.id ? { id: editing.id } : {}) } });
+            await mutate({ action: "save", record: { ...payload(), ...(editing?.id ? { id: editing.id } : {}) } });
             setEditing(null); setDirty(false); await load();
         } catch (error) { setEditorError((error as Error).message); }
         finally { setBusy(false); }
@@ -115,8 +141,9 @@ export default function Workspace() {
         finally { setBusy(false); }
     }
     function template(kind: string) {
-        if (form.getFieldValue("body")?.trim()) return;
-        form.setFieldsValue({ body: kind === "letter" ? l("Sehr geehrte Damen und Herren,\n\n\n\nMit freundlichen Grüßen", "Dear Sir or Madam,\n\n\n\nKind regards") : kind === "minutes" ? l("Datum:\nTeilnehmende:\n\nBesprochene Themen:\n\nEntscheidungen:\n\nNächste Schritte:", "Date:\nAttendees:\n\nDiscussion:\n\nDecisions:\n\nNext steps:") : "" });
+        setValues(v => ({ ...v, kind }));
+        if (values.body?.trim()) return;
+        setValues(v => ({ ...v, kind, body: kind === "letter" ? l("Sehr geehrte Damen und Herren,\n\n\n\nMit freundlichen Grüßen", "Dear Sir or Madam,\n\n\n\nKind regards") : kind === "minutes" ? l("Datum:\nTeilnehmende:\n\nBesprochene Themen:\n\nEntscheidungen:\n\nNächste Schritte:", "Date:\nAttendees:\n\nDiscussion:\n\nDecisions:\n\nNext steps:") : "" }));
         setDirty(true);
     }
     const rows = data[key].filter(record => {
@@ -127,72 +154,73 @@ export default function Workspace() {
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const money = (value: number) => new Intl.NumberFormat(language === "de" ? "de-DE" : "en-GB", { style: "currency", currency: "EUR" }).format(value);
     return <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        {holder}
+        <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{l("Ungespeicherte Änderungen verwerfen?", "Discard unsaved changes?")}</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{l("Weiter bearbeiten", "Keep editing")}</AlertDialogCancel><AlertDialogAction onClick={() => { setDiscardOpen(false); setEditing(null); setDirty(false); }}>{l("Verwerfen", "Discard")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+        <AlertDialog open={!!deleteId} onOpenChange={o => { if (!o) setDeleteId(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{l("Eintrag endgültig löschen?", "Permanently delete this record?")}</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{l("Abbrechen", "Cancel")}</AlertDialogCancel><AlertDialogAction onClick={() => { const id = deleteId; setDeleteId(null); if (id) void remove(id); }}>{l("Löschen", "Delete")}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
         <WorkspaceLinks />
-        <Space orientation="vertical" size="large" style={{ width: "100%" }}>
-            <div><Typography.Title level={2}>{l("Arbeitsbereich", "Workspace")}</Typography.Title>
-                <Typography.Paragraph type="secondary">{l("Projekte planen, Aufgaben organisieren und Geschäftsdokumente schreiben – nur wenn Sie es brauchen.", "Plan projects, organize tasks and write business documents whenever you need them.")}</Typography.Paragraph>
-                <Space wrap><Tag>{data.projects.filter(p => p.status === "active").length} {l("aktive Projekte", "active projects")}</Tag><Tag>{data.tasks.filter(t => t.status !== "done").length} {l("offene Aufgaben", "open tasks")}</Tag><Tag>{data.documents.length} {labels.documents}</Tag></Space>
+        <div className="flex w-full flex-col gap-6">
+            <div><h2 className="text-2xl font-semibold">{l("Arbeitsbereich", "Workspace")}</h2>
+                <p className="text-sm text-muted-foreground">{l("Projekte planen, Aufgaben organisieren und Geschäftsdokumente schreiben – nur wenn Sie es brauchen.", "Plan projects, organize tasks and write business documents whenever you need them.")}</p>
+                <div className="flex flex-wrap gap-2"><Badge variant="secondary">{data.projects.filter(p => p.status === "active").length} {l("aktive Projekte", "active projects")}</Badge><Badge variant="secondary">{data.tasks.filter(t => t.status !== "done").length} {l("offene Aufgaben", "open tasks")}</Badge><Badge variant="secondary">{data.documents.length} {labels.documents}</Badge></div>
             </div>
-            {error && <Alert type="error" showIcon title={error} action={<Button onClick={load} loading={loading}>{l("Erneut versuchen", "Retry")}</Button>} />}
-            <Card>
-                <Tabs activeKey={key} onChange={value => { setKey(value as BusinessCollection); setSearch(""); setFilter("all"); }} items={(["projects", "tasks", "documents"] as const).map(value => ({ key: value, label: labels[value], disabled: busy }))} />
-                <Space wrap style={{ marginBottom: 24, width: "100%" }}>
-                    <Input prefix={<SearchOutlined aria-hidden />} aria-label={l("Arbeitsbereich durchsuchen", "Search workspace")} placeholder={l("Suchen …", "Search …")} value={search} onChange={event => setSearch(event.target.value)} allowClear style={{ width: 230 }} />
-                    <Select aria-label={l("Status filtern", "Filter status")} value={filter} onChange={setFilter} style={{ minWidth: 145 }} options={[{ value: "all", label: l("Alle", "All") }, ...statuses[key].map(value => ({ value, label: labels[value] }))]} />
-                    {key === "tasks" && <Segmented value={board ? "board" : "cards"} onChange={value => setBoard(value === "board")} options={[{ value: "board", label: l("Aufgabenboard", "Task board") }, { value: "cards", label: l("Karten", "Cards") }]} />}
-                    <Button type="primary" icon={<PlusOutlined aria-hidden />} disabled={!ready || loading || busy} onClick={() => edit()}>{l("Neu anlegen", "Create new")}</Button>
-                    <Button icon={<DownloadOutlined aria-hidden />} disabled={!ready || loading} href="/api/workspace/backup">{l("Arbeitsbereich exportieren", "Export workspace")}</Button>
-                </Space>
-                <Spin spinning={loading}>
-                    {!rows.length ? <Empty description={search || filter !== "all" ? l("Keine passenden Einträge.", "No matching records.") : l("Hier ist Platz für Ihre Arbeit. Erstellen Sie den ersten Eintrag.", "Room for your work. Create your first record.")} /> : key === "tasks" && board ? <TaskBoard tasks={rows as BusinessTask[]} projects={data.projects} busy={busy} edit={edit} change={async (task,status) => { setBusy(true); try { await mutate({ action: "save", record: { ...task, status } }); await load(); } catch (error) { setError((error as Error).message); } finally { setBusy(false); } }} /> : <Row gutter={[16, 16]}>
+            {error && <Alert variant="destructive"><AlertTitle>{error}</AlertTitle><AlertDescription><Button onClick={load} disabled={loading} size="sm" className="mt-2">{loading && <Loader2 className="animate-spin" />}{l("Erneut versuchen", "Retry")}</Button></AlertDescription></Alert>}
+            <Card><CardContent>
+                <Tabs value={key} onValueChange={value => { setKey(value as BusinessCollection); setSearch(""); setFilter("all"); }}><TabsList>{(["projects", "tasks", "documents"] as const).map(value => <TabsTrigger key={value} value={value} disabled={busy}>{labels[value]}</TabsTrigger>)}</TabsList></Tabs>
+                <div className="mb-6 flex w-full flex-wrap items-center gap-2">
+                    <div className="relative"><Search className="pointer-events-none absolute left-2 top-2.5 size-4 text-muted-foreground" aria-hidden /><Input aria-label={l("Arbeitsbereich durchsuchen", "Search workspace")} placeholder={l("Suchen …", "Search …")} value={search} onChange={event => setSearch(event.target.value)} style={{ width: 230 }} className="pl-8" /></div>
+                    <Select value={filter} onValueChange={setFilter}><SelectTrigger aria-label={l("Status filtern", "Filter status")} style={{ minWidth: 145 }}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">{l("Alle", "All")}</SelectItem>{statuses[key].map(value => <SelectItem key={value} value={value}>{labels[value]}</SelectItem>)}</SelectContent></Select>
+                    {key === "tasks" && <div className="inline-flex rounded-md bg-muted p-1"><button type="button" aria-pressed={board} className={board ? "rounded-sm bg-background px-3 py-1 text-sm shadow" : "px-3 py-1 text-sm"} onClick={() => setBoard(true)}>{l("Aufgabenboard", "Task board")}</button><button type="button" aria-pressed={!board} className={!board ? "rounded-sm bg-background px-3 py-1 text-sm shadow" : "px-3 py-1 text-sm"} onClick={() => setBoard(false)}>{l("Karten", "Cards")}</button></div>}
+                    <Button disabled={!ready || loading || busy} onClick={() => edit()}><Plus aria-hidden />{l("Neu anlegen", "Create new")}</Button>
+                    <Button asChild variant="outline"><a href="/api/workspace/backup" aria-disabled={!ready || loading}><Download aria-hidden />{l("Arbeitsbereich exportieren", "Export workspace")}</a></Button>
+                </div>
+                {loading ? <div className="flex justify-center py-10"><Loader2 className="animate-spin" /></div> : !rows.length ? <div className="py-10 text-center text-sm text-muted-foreground">{search || filter !== "all" ? l("Keine passenden Einträge.", "No matching records.") : l("Hier ist Platz für Ihre Arbeit. Erstellen Sie den ersten Eintrag.", "Room for your work. Create your first record.")}</div> : key === "tasks" && board ? <TaskBoard tasks={rows as BusinessTask[]} projects={data.projects} busy={busy} edit={edit} change={async (task,status) => { setBusy(true); try { await mutate({ action: "save", record: { ...task, status } }); await load(); } catch (error) { setError((error as Error).message); } finally { setBusy(false); } }} /> : <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {rows.map(record => {
                             const title = "name" in record ? record.name : record.title;
                             const status = "status" in record ? record.status : record.kind;
                             const project = "project_id" in record ? data.projects.find(p => p.id === record.project_id) : undefined;
                             const tasks = data.tasks.filter(t => t.project_id === record.id);
                             const overdue = "due_date" in record && record.due_date && record.due_date < today && status !== "done";
-                            return <Col xs={24} md={12} xl={8} key={record.id}><Card size="small" style={{ height: "100%" }}>
-                                <Space wrap><Tag color={status === "done" ? "green" : "default"}>{labels[status]}</Tag>{overdue && <Tag color="red">{l("Überfällig", "Overdue")}</Tag>}{"priority" in record && record.priority === "high" && <Tag color="orange">{l("Hohe Priorität", "High priority")}</Tag>}</Space>
-                                <Typography.Title level={4} style={{ overflowWrap: "anywhere" }}>{title}</Typography.Title>
-                                {"description" in record && <Typography.Paragraph ellipsis={{ rows: 2 }}>{record.description}</Typography.Paragraph>}
-                                {"body" in record && <Typography.Paragraph ellipsis={{ rows: 3 }}>{record.body}</Typography.Paragraph>}
-                                {project && <Typography.Paragraph type="secondary">{project.name}</Typography.Paragraph>}
-                                {"assignee" in record && record.assignee && <Typography.Paragraph>{record.assignee}</Typography.Paragraph>}
-                                {"due_date" in record && record.due_date && <Typography.Paragraph type={overdue ? "danger" : "secondary"}>{l("Termin", "Due")}: {record.due_date}</Typography.Paragraph>}
-                                {"budget" in record && <><Typography.Paragraph type="secondary">{clients.find(c => c.id === record.client_id)?.name || l("Ohne Kunde", "No customer")} · {l("Planbudget", "Planned budget")}: {money(record.budget)}</Typography.Paragraph><Progress percent={tasks.length ? Math.round(tasks.filter(t => t.status === "done").length / tasks.length * 100) : 0} size="small" /><Typography.Paragraph type="secondary">{tasks.filter(t => t.status === "done").length}/{tasks.length} {labels.tasks}</Typography.Paragraph></>}
-                                <Space wrap><Button disabled={busy} onClick={() => edit(record)}>{l("Öffnen", "Open")}</Button>
-                                    {key === "projects" && <Button disabled={busy} onClick={() => { setKey("tasks"); setSearch(""); setFilter("all"); form.resetFields(); form.setFieldsValue({ title: "", project_id: record.id, assignee: "", status: "todo", priority: "normal", due_date: "" }); setEditing({}); setDirty(false); setEditorError(""); }}>{l("Aufgabe anlegen", "Add task")}</Button>}
-                                    {key === "documents" && <><Button disabled={busy} onClick={() => exportPdf(record.id)}>PDF</Button><Button onClick={() => { const doc = record as BusinessDocument; download(new Blob([`${doc.recipient}\n\n${doc.title}\n\n${doc.body}`], { type: "text/plain;charset=utf-8" }), "document.txt"); }}>TXT</Button></>}
-                                    {key !== "projects" && <Popconfirm title={l("Eintrag endgültig löschen?", "Permanently delete this record?")} onConfirm={() => remove(record.id)} okText={l("Löschen", "Delete")} cancelText={l("Abbrechen", "Cancel")}><Button danger disabled={busy}>{l("Löschen", "Delete")}</Button></Popconfirm>}
-                                </Space>
-                            </Card></Col>;
+                            return <Card key={record.id} className="h-full"><CardContent>
+                                <div className="flex flex-wrap gap-2"><Badge variant={status === "done" ? "default" : "secondary"} className={status === "done" ? "bg-emerald-600 text-white hover:bg-emerald-600" : undefined}>{labels[status]}</Badge>{overdue && <Badge variant="destructive">{l("Überfällig", "Overdue")}</Badge>}{"priority" in record && record.priority === "high" && <Badge className="bg-orange-500 text-white hover:bg-orange-500">{l("Hohe Priorität", "High priority")}</Badge>}</div>
+                                <h4 className="mt-2 text-lg font-semibold break-words">{title}</h4>
+                                {"description" in record && <p className="line-clamp-2 text-sm">{record.description}</p>}
+                                {"body" in record && <p className="line-clamp-3 text-sm">{record.body}</p>}
+                                {project && <p className="text-sm text-muted-foreground">{project.name}</p>}
+                                {"assignee" in record && record.assignee && <p className="text-sm">{record.assignee}</p>}
+                                {"due_date" in record && record.due_date && <p className={overdue ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>{l("Termin", "Due")}: {record.due_date}</p>}
+                                {"budget" in record && <><p className="text-sm text-muted-foreground">{clients.find(c => c.id === record.client_id)?.name || l("Ohne Kunde", "No customer")} · {l("Planbudget", "Planned budget")}: {money(record.budget)}</p><Progress value={tasks.length ? Math.round(tasks.filter(t => t.status === "done").length / tasks.length * 100) : 0} className="h-1.5" /><p className="text-sm text-muted-foreground">{tasks.filter(t => t.status === "done").length}/{tasks.length} {labels.tasks}</p></>}
+                                <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={() => edit(record)}>{l("Öffnen", "Open")}</Button>
+                                    {key === "projects" && <Button variant="outline" disabled={busy} onClick={() => { setKey("tasks"); setSearch(""); setFilter("all"); setValues({ ...emptyValues, title: "", project_id: record.id, assignee: "", status: "todo", priority: "normal", due_date: "" }); setEditing({}); setDirty(false); setEditorError(""); setFieldErrors({}); }}>{l("Aufgabe anlegen", "Add task")}</Button>}
+                                    {key === "documents" && <><Button variant="outline" disabled={busy} onClick={() => exportPdf(record.id)}>PDF</Button><Button variant="outline" onClick={() => { const doc = record as BusinessDocument; download(new Blob([`${doc.recipient}\n\n${doc.title}\n\n${doc.body}`], { type: "text/plain;charset=utf-8" }), "document.txt"); }}>TXT</Button></>}
+                                    {key !== "projects" && <Button variant="destructive" disabled={busy} onClick={() => setDeleteId(record.id)}>{l("Löschen", "Delete")}</Button>}
+                                </div>
+                            </CardContent></Card>;
                         })}
-                    </Row>}
-                </Spin>
-            </Card>
-            <details><summary style={{ cursor: "pointer" }}>{l("Hinweise zu Projekten und Exporten", "About projects and exports")}</summary><Typography.Paragraph type="secondary" style={{ marginTop: 12 }}>{l("Budgets sind Planwerte. Zuständige Personen sind Textangaben, keine Einladungen. Projekte werden über „Erledigt“ archiviert. Der JSON-Export enthält nur diesen Arbeitsbereich; es gibt noch keinen automatischen Import oder Desktop-Abgleich.", "Budgets are estimates. Assignees are text labels, not invitations. Set projects to Done to archive them. JSON export contains this workspace only; automatic import and desktop synchronization are not available yet.")}</Typography.Paragraph></details>
-        </Space>
-        <Modal title={`${labels[key]} · ${editing?.id ? l("Bearbeiten", "Edit") : l("Neu", "New")}`} open={!!editing} onCancel={close} footer={null} width={720} maskClosable={false} keyboard={!busy} closable={!busy}>
-            {editorError && <Alert type="error" showIcon title={editorError} style={{ marginBottom: 16 }} />}
-            <Form form={form} layout="vertical" onFinish={save} onValuesChange={() => setDirty(true)} disabled={busy}>
-                <Form.Item name={key === "projects" ? "name" : "title"} label={l("Titel", "Title")} rules={required}><Input maxLength={key === "tasks" ? 300 : 200} autoFocus /></Form.Item>
+                    </div>}
+            </CardContent></Card>
+            <details><summary style={{ cursor: "pointer" }}>{l("Hinweise zu Projekten und Exporten", "About projects and exports")}</summary><p className="mt-3 text-sm text-muted-foreground">{l("Budgets sind Planwerte. Zuständige Personen sind Textangaben, keine Einladungen. Projekte werden über „Erledigt“ archiviert. Der JSON-Export enthält nur diesen Arbeitsbereich; es gibt noch keinen automatischen Import oder Desktop-Abgleich.", "Budgets are estimates. Assignees are text labels, not invitations. Set projects to Done to archive them. JSON export contains this workspace only; automatic import and desktop synchronization are not available yet.")}</p></details>
+        </div>
+        <Dialog open={!!editing} onOpenChange={o => { if (!o) close(); }}><DialogContent showCloseButton={!busy} onInteractOutside={e => e.preventDefault()} onEscapeKeyDown={e => { if (busy) e.preventDefault(); }} className="sm:max-w-[720px]"><DialogHeader><DialogTitle>{`${labels[key]} · ${editing?.id ? l("Bearbeiten", "Edit") : l("Neu", "New")}`}</DialogTitle></DialogHeader>
+            {editorError && <Alert variant="destructive" className="mb-4"><AlertTitle>{editorError}</AlertTitle></Alert>}
+            <form onSubmit={e => { e.preventDefault(); void save(); }}>
+                <fieldset disabled={busy} className="flex flex-col gap-4">
+                <div><Label>{l("Titel", "Title")}</Label>{key === "projects" ? <Input maxLength={200} autoFocus value={values.name} onChange={e => set({ name: e.target.value })} /> : <Input maxLength={key === "tasks" ? 300 : 200} autoFocus value={values.title} onChange={e => set({ title: e.target.value })} />}{fieldErrors.title && <p className="text-sm text-destructive">{fieldErrors.title}</p>}</div>
                 {key === "projects" ? <>
-                    <Form.Item name="client_id" label={l("Kunde (optional)", "Customer (optional)")}><Select showSearch optionFilterProp="label" options={[{ value: "", label: l("Ohne Kunde", "No customer") }, ...clients.map(c => ({ value: c.id, label: c.name }))]} /></Form.Item>
-                    <Form.Item name="description" label={l("Beschreibung", "Description")}><Input.TextArea rows={3} maxLength={10000} /></Form.Item>
-                    <Form.Item name="budget" label={l("Planbudget (EUR)", "Planned budget (EUR)")} rules={[{ required: true }]}><DecimalInput min={0} max={1e12} precision={2} style={{ width: "100%" }} /></Form.Item>
-                </> : <Form.Item name="project_id" label={l("Projekt (optional)", "Project (optional)")}><Select showSearch optionFilterProp="label" options={[{ value: "", label: l("Ohne Projekt", "No project") }, ...data.projects.map(p => ({ value: p.id, label: p.name }))]} /></Form.Item>}
+                    <div><Label>{l("Kunde (optional)", "Customer (optional)")}</Label><Select value={values.client_id || "__none"} onValueChange={v => set({ client_id: v === "__none" ? "" : v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="__none">{l("Ohne Kunde", "No customer")}</SelectItem>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div>
+                    <div><Label>{l("Beschreibung", "Description")}</Label><Textarea rows={3} maxLength={10000} value={values.description} onChange={e => set({ description: e.target.value })} /></div>
+                    <div><Label>{l("Planbudget (EUR)", "Planned budget (EUR)")}</Label><DecimalInput min={0} max={1e12} precision={2} value={values.budget} onChange={v => set({ budget: v })} />{fieldErrors.budget && <p className="text-sm text-destructive">{fieldErrors.budget}</p>}</div>
+                </> : <div><Label>{l("Projekt (optional)", "Project (optional)")}</Label><Select value={values.project_id || "__none"} onValueChange={v => set({ project_id: v === "__none" ? "" : v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="__none">{l("Ohne Projekt", "No project")}</SelectItem>{data.projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>}
                 {key === "documents" ? <>
-                    <Form.Item name="kind" label={l("Vorlage", "Template")}><Select onChange={template} options={statuses.documents.map(value => ({ value, label: labels[value] }))} /></Form.Item>
-                    <Form.Item name="recipient" label={l("Empfänger (optional)", "Recipient (optional)")}><Input.TextArea rows={2} maxLength={1000} /></Form.Item>
-                    <Form.Item name="body" label={l("Inhalt", "Content")}><Input.TextArea rows={12} maxLength={100000} showCount /></Form.Item>
+                    <div><Label>{l("Vorlage", "Template")}</Label><Select value={values.kind} onValueChange={template}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{statuses.documents.map(value => <SelectItem key={value} value={value}>{labels[value]}</SelectItem>)}</SelectContent></Select></div>
+                    <div><Label>{l("Empfänger (optional)", "Recipient (optional)")}</Label><Textarea rows={2} maxLength={1000} value={values.recipient} onChange={e => set({ recipient: e.target.value })} /></div>
+                    <div><Label>{l("Inhalt", "Content")}</Label><Textarea rows={12} maxLength={100000} value={values.body} onChange={e => set({ body: e.target.value })} /><p className="text-xs text-muted-foreground">{values.body.length} / 100000</p></div>
                 </> : <>
-                    <Form.Item name="status" label="Status"><Select options={statuses[key].map(value => ({ value, label: labels[value] }))} /></Form.Item>
-                    <Form.Item name="due_date" label={l("Termin (optional)", "Due date (optional)")}><Input type="date" /></Form.Item>
-                    {key === "tasks" && <><Form.Item name="assignee" label={l("Zuständig (optional)", "Assignee (optional)")}><Input maxLength={200} /></Form.Item><Form.Item name="priority" label={l("Priorität", "Priority")}><Select options={[{ value: "normal", label: "Normal" }, { value: "high", label: l("Hoch", "High") }]} /></Form.Item></>}
+                    <div><Label>Status</Label><Select value={values.status || undefined} onValueChange={v => set({ status: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{statuses[key].map(value => <SelectItem key={value} value={value}>{labels[value]}</SelectItem>)}</SelectContent></Select></div>
+                    <div><Label>{l("Termin (optional)", "Due date (optional)")}</Label><Input type="date" value={values.due_date} onChange={e => set({ due_date: e.target.value })} /></div>
+                    {key === "tasks" && <><div><Label>{l("Zuständig (optional)", "Assignee (optional)")}</Label><Input maxLength={200} value={values.assignee} onChange={e => set({ assignee: e.target.value })} /></div><div><Label>{l("Priorität", "Priority")}</Label><Select value={values.priority} onValueChange={v => set({ priority: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="normal">Normal</SelectItem><SelectItem value="high">{l("Hoch", "High")}</SelectItem></SelectContent></Select></div></>}
                 </>}
-                <Space><Button type="primary" htmlType="submit" loading={busy}>{l("Speichern", "Save")}</Button><Button onClick={close} disabled={busy}>{l("Abbrechen", "Cancel")}</Button><Typography.Text type="secondary">{dirty ? l("Ungespeicherte Änderungen", "Unsaved changes") : ""}</Typography.Text></Space>
-            </Form>
-        </Modal>
+                <div className="flex flex-wrap items-center gap-2"><Button type="submit" disabled={busy}>{busy && <Loader2 className="animate-spin" />}{l("Speichern", "Save")}</Button><Button type="button" variant="outline" onClick={close} disabled={busy}>{l("Abbrechen", "Cancel")}</Button><span className="text-sm text-muted-foreground">{dirty ? l("Ungespeicherte Änderungen", "Unsaved changes") : ""}</span></div>
+                </fieldset>
+            </form>
+        </DialogContent></Dialog>
     </div>;
 }
