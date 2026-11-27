@@ -4,34 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-    Alert,
-    Button,
-    Card,
-    ColorPicker,
-    DatePicker,
-    Form,
-    Input,
-    Modal,
-    Select,
-    Space,
-    Switch,
-    Table,
-    Tabs,
-    Tag,
-    TimePicker,
-    message,
-} from "antd";
-import {
-    CalendarOutlined,
-    ClockCircleOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    FileTextOutlined,
-    LinkOutlined,
-    PlusOutlined,
-    SettingOutlined,
-    TeamOutlined,
-} from "@ant-design/icons";
+    Calendar,
+    Clock,
+    FileText,
+    Link2,
+    Loader2,
+    Pencil,
+    Plus,
+    Settings,
+    Trash2,
+    Users,
+} from "lucide-react";
+import { toast } from "sonner";
 import dayjs, { type Dayjs } from "dayjs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { del, get, patch, post } from "@/lib/termine/client";
@@ -43,6 +27,51 @@ import {
     ManualBookingModal,
     type UnifiedBookingRecord,
 } from "@/components/termine/BookingDrawerAndModals";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardAction,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AppointmentRow extends Omit<UnifiedBookingRecord, "id"> {
     $id: string;
@@ -132,6 +161,7 @@ export default function TermineSchedulingHubPage() {
     const [detail, setDetail] = useState<UnifiedBookingRecord | null>(null);
     const [manualOpen, setManualOpen] = useState(false);
     const [preselectedClientId, setPreselectedClientId] = useState<string | undefined>(undefined);
+    const [bookingPage, setBookingPage] = useState(1);
 
     // Availability state
     const [weekDay, setWeekDay] = useState("1");
@@ -145,7 +175,14 @@ export default function TermineSchedulingHubPage() {
     // Staff modal state
     const [staffModalOpen, setStaffModalOpen] = useState(false);
     const [editingStaff, setEditingStaff] = useState<StaffRow | null>(null);
-    const [staffForm] = Form.useForm();
+    const [staffName, setStaffName] = useState("");
+    const [staffDescription, setStaffDescription] = useState("");
+    const [staffServiceIds, setStaffServiceIds] = useState<string[]>([]);
+    const [staffColor, setStaffColor] = useState("");
+    const [staffActive, setStaffActive] = useState(true);
+    const [staffBookable, setStaffBookable] = useState(true);
+    const [staffNameError, setStaffNameError] = useState<string | null>(null);
+    const [staffSaving, setStaffSaving] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -172,7 +209,7 @@ export default function TermineSchedulingHubPage() {
             setHours(h.hours);
             setBlocks(b.blocks);
         } catch (e) {
-            message.error(e instanceof Error ? e.message : l("Laden fehlgeschlagen.", "Failed to load scheduling data."));
+            toast.error(e instanceof Error ? e.message : l("Laden fehlgeschlagen.", "Failed to load scheduling data."));
         } finally {
             setLoading(false);
         }
@@ -209,16 +246,16 @@ export default function TermineSchedulingHubPage() {
                           .map((p) => ({ start: p.start!.format("HH:mm"), end: p.end!.format("HH:mm") })),
                 breaks: [],
             });
-            message.success(l("Arbeitszeiten gespeichert.", "Working hours saved."));
+            toast.success(l("Arbeitszeiten gespeichert.", "Working hours saved."));
             await load();
         } catch (e) {
-            message.error(e instanceof Error ? e.message : l("Speichern fehlgeschlagen.", "Save failed."));
+            toast.error(e instanceof Error ? e.message : l("Speichern fehlgeschlagen.", "Save failed."));
         }
     }
 
     async function saveOverride() {
         if (!overrideDate) {
-            message.warning(l("Bitte ein Datum wählen.", "Please choose a date."));
+            toast.warning(l("Bitte ein Datum wählen.", "Please choose a date."));
             return;
         }
         try {
@@ -233,42 +270,63 @@ export default function TermineSchedulingHubPage() {
                           .map((p) => ({ start: p.start!.format("HH:mm"), end: p.end!.format("HH:mm") })),
                 breaks: [],
             });
-            message.success(l("Ausnahme gespeichert.", "Date override saved."));
+            toast.success(l("Ausnahme gespeichert.", "Date override saved."));
             setOverrideDate(null);
             await load();
         } catch (e) {
-            message.error(e instanceof Error ? e.message : l("Speichern fehlgeschlagen.", "Save failed."));
+            toast.error(e instanceof Error ? e.message : l("Speichern fehlgeschlagen.", "Save failed."));
         }
     }
 
     function openNewStaff() {
         setEditingStaff(null);
-        staffForm.resetFields();
-        staffForm.setFieldsValue({ active: true, bookable: true, serviceIds: services.map((s) => s.$id) });
+        setStaffName("");
+        setStaffDescription("");
+        setStaffServiceIds(services.map((s) => s.$id));
+        setStaffColor("");
+        setStaffActive(true);
+        setStaffBookable(true);
+        setStaffNameError(null);
         setStaffModalOpen(true);
     }
 
     function openEditStaff(r: StaffRow) {
         setEditingStaff(r);
-        staffForm.setFieldsValue(r);
+        setStaffName(r.name);
+        setStaffDescription(r.description ?? "");
+        setStaffServiceIds(r.serviceIds ?? []);
+        setStaffColor(r.color ?? "");
+        setStaffActive(r.active);
+        setStaffBookable(r.bookable);
+        setStaffNameError(null);
         setStaffModalOpen(true);
     }
 
     async function saveStaff() {
+        if (!staffName.trim()) {
+            setStaffNameError(l("Name erforderlich.", "Name required."));
+            return;
+        }
+        setStaffNameError(null);
+        setStaffSaving(true);
         try {
-            const v = await staffForm.validateFields();
-            const color = v.color;
             const payload = {
-                ...v,
-                color: typeof color === "string" ? color : color?.toHexString?.() ?? undefined,
+                name: staffName,
+                description: staffDescription || undefined,
+                serviceIds: staffServiceIds,
+                color: staffColor || undefined,
+                active: staffActive,
+                bookable: staffBookable,
             };
             if (editingStaff) await patch(`/api/termine/staff/${editingStaff.$id}`, payload);
             else await post("/api/termine/staff", payload);
-            message.success(l("Mitarbeiter gespeichert.", "Staff saved."));
+            toast.success(l("Mitarbeiter gespeichert.", "Staff saved."));
             setStaffModalOpen(false);
             await load();
         } catch (e) {
-            if (e instanceof Error && !String(e).includes("validate")) message.error(e.message);
+            if (e instanceof Error) toast.error(e.message);
+        } finally {
+            setStaffSaving(false);
         }
     }
 
@@ -281,6 +339,9 @@ export default function TermineSchedulingHubPage() {
             r.serviceNameSnapshot.toLowerCase().includes(q)
         );
     });
+    const bookingPageCount = Math.max(1, Math.ceil(filteredBookings.length / 20));
+    const currentBookingPage = Math.min(bookingPage, bookingPageCount);
+    const pagedBookings = filteredBookings.slice((currentBookingPage - 1) * 20, currentBookingPage * 20);
 
     const weekRows = hours.filter((h) => h.kind === "week");
     const overrideRows = hours.filter((h) => h.kind === "override");
@@ -308,475 +369,617 @@ export default function TermineSchedulingHubPage() {
                         )}
                     </p>
                 </div>
-                <Space wrap>
-                    <Link href="/dashboard/calendar">
-                        <Button icon={<CalendarOutlined />}>{l("Kalender öffnen", "Open calendar")}</Button>
-                    </Link>
-                    <Link href="/dashboard/products?tab=services">
-                        <Button>{l("Buchbare Leistungen", "Bookable services")}</Button>
-                    </Link>
-                    <Link href="/dashboard/settings?tab=booking">
-                        <Button icon={<SettingOutlined />}>{l("Buchungs-Einstellungen", "Booking settings")}</Button>
-                    </Link>
+                <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/calendar">
+                            <Calendar />
+                            {l("Kalender öffnen", "Open calendar")}
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/products?tab=services">{l("Buchbare Leistungen", "Bookable services")}</Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/settings?tab=booking">
+                            <Settings />
+                            {l("Buchungs-Einstellungen", "Booking settings")}
+                        </Link>
+                    </Button>
                     <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
                         disabled={!settings}
                         onClick={() => {
                             setPreselectedClientId(undefined);
                             setManualOpen(true);
                         }}
                     >
+                        <Plus />
                         {l("Manuelle Buchung", "New booking")}
                     </Button>
-                </Space>
+                </div>
             </section>
 
             {!loading && !settings && (
-                <Alert
-                    type="info"
-                    showIcon
-                    style={{ marginBottom: 16 }}
-                    title={l("Online-Terminbuchung noch nicht aktiviert", "Online booking not yet activated")}
-                    description={l(
-                        "Aktivieren Sie Ihre Buchungs-URL in den Einstellungen — Ihre Firmendaten werden automatisch übernommen.",
-                        "Activate your booking URL in Settings — your company profile will be inherited automatically.",
-                    )}
-                    action={
-                        <Link href="/dashboard/settings?tab=booking">
-                            <Button type="primary">{l("Jetzt einrichten", "Set up now")}</Button>
-                        </Link>
-                    }
-                />
+                <Alert className="mb-4">
+                    <AlertTitle>{l("Online-Terminbuchung noch nicht aktiviert", "Online booking not yet activated")}</AlertTitle>
+                    <AlertDescription>
+                        {l(
+                            "Aktivieren Sie Ihre Buchungs-URL in den Einstellungen — Ihre Firmendaten werden automatisch übernommen.",
+                            "Activate your booking URL in Settings — your company profile will be inherited automatically.",
+                        )}
+                    </AlertDescription>
+                    <div className="col-start-2 mt-2">
+                        <Button asChild>
+                            <Link href="/dashboard/settings?tab=booking">{l("Jetzt einrichten", "Set up now")}</Link>
+                        </Button>
+                    </div>
+                </Alert>
             )}
 
             {settings && (
-                <div style={{ marginBottom: 12 }}>
-                    <Space wrap>
-                        <Tag color={settings.enabled && settings.published ? "success" : "default"}>
-                            {settings.enabled && settings.published
-                                ? l("Öffentliche Buchung aktiv", "Public booking live")
-                                : l("Vorschau / Nicht veröffentlicht", "Draft / Unpublished")}
-                        </Tag>
-                        <a href={`/buchen/${settings.slug}`} target="_blank" rel="noreferrer">
-                            /buchen/{settings.slug} <LinkOutlined />
-                        </a>
-                    </Space>
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <Badge
+                        className={
+                            settings.enabled && settings.published
+                                ? "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-950 dark:text-green-300"
+                                : undefined
+                        }
+                        variant={settings.enabled && settings.published ? "default" : "secondary"}
+                    >
+                        {settings.enabled && settings.published
+                            ? l("Öffentliche Buchung aktiv", "Public booking live")
+                            : l("Vorschau / Nicht veröffentlicht", "Draft / Unpublished")}
+                    </Badge>
+                    <a href={`/buchen/${settings.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                        /buchen/{settings.slug} <Link2 className="size-3.5" />
+                    </a>
                 </div>
             )}
 
-            <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
-                items={[
-                    {
-                        key: "bookings",
-                        label: (
-                            <span>
-                                <CalendarOutlined /> {l("Buchungen", "Bookings")} ({rows.length})
-                            </span>
-                        ),
-                        children: (
-                            <>
-                                <Space wrap style={{ marginBottom: 16 }}>
-                                    <Input.Search
-                                        allowClear
-                                        placeholder={l("Kunde oder Leistung suchen …", "Search client or service …")}
-                                        value={searchText}
-                                        onChange={(e) => setSearchText(e.target.value)}
-                                        style={{ width: 240 }}
-                                    />
-                                    <Select
-                                        allowClear
-                                        placeholder="Status"
-                                        value={statusFilter}
-                                        onChange={setStatusFilter}
-                                        style={{ width: 190 }}
-                                        options={[
-                                            "PENDING",
-                                            "CONFIRMED",
-                                            "COMPLETED",
-                                            "CANCELLED_BY_CUSTOMER",
-                                            "CANCELLED_BY_BUSINESS",
-                                            "NO_SHOW",
-                                        ].map((s) => ({ value: s, label: bookingStatusLabel(s, language) }))}
-                                    />
-                                    {staff.length > 0 && (
-                                        <Select
-                                            allowClear
-                                            placeholder={l("Mitarbeiter", "Staff")}
-                                            value={staffFilter}
-                                            onChange={setStaffFilter}
-                                            style={{ width: 170 }}
-                                            options={staff.map((s) => ({ value: s.$id, label: s.name }))}
-                                        />
-                                    )}
-                                    <DatePicker
-                                        value={day}
-                                        onChange={setDay}
-                                        format="DD.MM.YYYY"
-                                        placeholder={l("Tag filtern", "Filter date")}
-                                        allowClear
-                                    />
-                                </Space>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList>
+                    <TabsTrigger value="bookings">
+                        <Calendar /> {l("Buchungen", "Bookings")} ({rows.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="availability">
+                        <Clock /> {l("Arbeitszeiten & Sperrzeiten", "Working Hours & Blocks")}
+                    </TabsTrigger>
+                    <TabsTrigger value="staff">
+                        <Users /> {l("Mitarbeiter", "Staff")} ({staff.length})
+                    </TabsTrigger>
+                </TabsList>
 
-                                <Card className="dashboard-panel">
-                                    <Table
-                                        rowKey="$id"
-                                        loading={loading}
-                                        dataSource={filteredBookings}
-                                        pagination={{ pageSize: 20 }}
-                                        scroll={{ x: 760 }}
-                                        onRow={(r) => ({
-                                            style: { cursor: "pointer" },
-                                            onClick: () =>
-                                                setDetail({
-                                                    ...r,
-                                                    id: r.$id,
-                                                    staffName: staff.find((s) => s.$id === r.staffId)?.name,
-                                                }),
-                                        })}
-                                        columns={[
-                                            {
-                                                title: l("Termin", "Date & Time"),
-                                                render: (_: unknown, r: AppointmentRow) =>
-                                                    new Date(r.startUtc).toLocaleString(locale, {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        year: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    }),
-                                            },
-                                            { title: l("Leistung", "Service"), dataIndex: "serviceNameSnapshot" },
-                                            {
-                                                title: l("Kunde", "Customer"),
-                                                render: (_: unknown, r: AppointmentRow) => (
-                                                    <span>
-                                                        <strong>{r.customerName}</strong>
-                                                        <br />
-                                                        <small style={{ color: "var(--dash-muted)" }}>{r.customerEmail}</small>
-                                                    </span>
-                                                ),
-                                            },
-                                            {
-                                                title: l("Mitarbeiter", "Staff"),
-                                                render: (_: unknown, r: AppointmentRow) =>
-                                                    staff.find((s) => s.$id === r.staffId)?.name ?? "—",
-                                            },
-                                            {
-                                                title: "Status",
-                                                render: (_: unknown, r: AppointmentRow) => (
-                                                    <Tag color={BOOKING_STATUS_COLOR[r.status] ?? "default"}>
-                                                        {bookingStatusLabel(r.status, language)}
-                                                    </Tag>
-                                                ),
-                                            },
-                                            {
-                                                title: l("Abrechnung", "Billing"),
-                                                render: (_: unknown, r: AppointmentRow) =>
-                                                    r.linkedInvoiceId ? (
-                                                        <Link
-                                                            href={`/dashboard/invoices/${r.linkedInvoiceId}`}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <Tag color="green">
-                                                                <FileTextOutlined /> {l("Rechnung", "Invoice")}
-                                                            </Tag>
-                                                        </Link>
-                                                    ) : r.status === "COMPLETED" ? (
-                                                        <Tag color="gold">{l("Abrechenbar", "Ready to bill")}</Tag>
-                                                    ) : (
-                                                        "—"
-                                                    ),
-                                            },
-                                        ]}
-                                        locale={{ emptyText: l("Keine Buchungen gefunden.", "No bookings found.") }}
-                                    />
-                                </Card>
-                            </>
-                        ),
-                    },
-                    {
-                        key: "availability",
-                        label: (
-                            <span>
-                                <ClockCircleOutlined /> {l("Arbeitszeiten & Sperrzeiten", "Working Hours & Blocks")}
-                            </span>
-                        ),
-                        children: (
-                            <>
-                                <Card className="dashboard-panel" title={l("Regulärer Wochenplan", "Weekly schedule")} loading={loading}>
-                                    <Space wrap style={{ marginBottom: 16 }}>
-                                        <Select
-                                            value={weekDay}
-                                            onChange={setWeekDay}
-                                            options={dow.map((label, i) => ({ value: String(i), label }))}
-                                            style={{ width: 140 }}
-                                        />
-                                        <Switch
-                                            checked={!closed}
-                                            onChange={(v) => setClosed(!v)}
-                                            checkedChildren={l("Geöffnet", "Open")}
-                                            unCheckedChildren={l("Geschlossen", "Closed")}
-                                        />
-                                    </Space>
-                                    {!closed &&
-                                        periods.map((p, i) => (
-                                            <Space key={i} style={{ marginBottom: 8, display: "flex" }} wrap>
-                                                <TimePicker
-                                                    format="HH:mm"
-                                                    value={p.start}
-                                                    onChange={(v) =>
-                                                        setPeriods(periods.map((x, j) => (j === i ? { ...x, start: v } : x)))
-                                                    }
-                                                />
-                                                <span>–</span>
-                                                <TimePicker
-                                                    format="HH:mm"
-                                                    value={p.end}
-                                                    onChange={(v) =>
-                                                        setPeriods(periods.map((x, j) => (j === i ? { ...x, end: v } : x)))
-                                                    }
-                                                />
+                <TabsContent value="bookings">
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                        <Input
+                            type="search"
+                            placeholder={l("Kunde oder Leistung suchen …", "Search client or service …")}
+                            value={searchText}
+                            onChange={(e) => {
+                                setSearchText(e.target.value);
+                                setBookingPage(1);
+                            }}
+                            className="w-60"
+                        />
+                        <Select
+                            value={statusFilter ?? "__all__"}
+                            onValueChange={(v) => {
+                                setStatusFilter(v === "__all__" ? undefined : v);
+                                setBookingPage(1);
+                            }}
+                        >
+                            <SelectTrigger className="w-[190px]">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="__all__">{l("Alle Status", "All statuses")}</SelectItem>
+                                {[
+                                    "PENDING",
+                                    "CONFIRMED",
+                                    "COMPLETED",
+                                    "CANCELLED_BY_CUSTOMER",
+                                    "CANCELLED_BY_BUSINESS",
+                                    "NO_SHOW",
+                                ].map((s) => (
+                                    <SelectItem key={s} value={s}>
+                                        {bookingStatusLabel(s, language)}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {staff.length > 0 && (
+                            <Select
+                                value={staffFilter ?? "__all__"}
+                                onValueChange={(v) => {
+                                    setStaffFilter(v === "__all__" ? undefined : v);
+                                    setBookingPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[170px]">
+                                    <SelectValue placeholder={l("Mitarbeiter", "Staff")} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="__all__">{l("Alle Mitarbeiter", "All staff")}</SelectItem>
+                                    {staff.map((s) => (
+                                        <SelectItem key={s.$id} value={s.$id}>
+                                            {s.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                        <div className="w-44">
+                            <DatePicker
+                                value={day}
+                                onChange={(d) => {
+                                    setDay(d);
+                                    setBookingPage(1);
+                                }}
+                                format="DD.MM.YYYY"
+                                placeholder={l("Tag filtern", "Filter date")}
+                                allowClear
+                            />
+                        </div>
+                    </div>
+
+                    <Card className="dashboard-panel">
+                        <CardContent>
+                            {loading ? (
+                                <div className="flex flex-col gap-2" aria-label={l("Lädt …", "Loading …")}>
+                                    <Skeleton className="h-9 w-full" />
+                                    <Skeleton className="h-9 w-full" />
+                                    <Skeleton className="h-9 w-full" />
+                                </div>
+                            ) : (
+                                <>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>{l("Termin", "Date & Time")}</TableHead>
+                                                <TableHead>{l("Leistung", "Service")}</TableHead>
+                                                <TableHead>{l("Kunde", "Customer")}</TableHead>
+                                                <TableHead>{l("Mitarbeiter", "Staff")}</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>{l("Abrechnung", "Billing")}</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {pagedBookings.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                                                        {l("Keine Buchungen gefunden.", "No bookings found.")}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                pagedBookings.map((r) => (
+                                                    <TableRow
+                                                        key={r.$id}
+                                                        className="cursor-pointer"
+                                                        onClick={() =>
+                                                            setDetail({
+                                                                ...r,
+                                                                id: r.$id,
+                                                                staffName: staff.find((s) => s.$id === r.staffId)?.name,
+                                                            })
+                                                        }
+                                                    >
+                                                        <TableCell>
+                                                            {new Date(r.startUtc).toLocaleString(locale, {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            })}
+                                                        </TableCell>
+                                                        <TableCell>{r.serviceNameSnapshot}</TableCell>
+                                                        <TableCell>
+                                                            <span>
+                                                                <strong>{r.customerName}</strong>
+                                                                <br />
+                                                                <small className="text-muted-foreground">{r.customerEmail}</small>
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {staff.find((s) => s.$id === r.staffId)?.name ?? "—"}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge className={BOOKING_STATUS_COLOR[r.status]}>
+                                                                {bookingStatusLabel(r.status, language)}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {r.linkedInvoiceId ? (
+                                                                <Link
+                                                                    href={`/dashboard/invoices/${r.linkedInvoiceId}`}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                >
+                                                                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-950 dark:text-green-300">
+                                                                        <FileText /> {l("Rechnung", "Invoice")}
+                                                                    </Badge>
+                                                                </Link>
+                                                            ) : r.status === "COMPLETED" ? (
+                                                                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-300">
+                                                                    {l("Abrechenbar", "Ready to bill")}
+                                                                </Badge>
+                                                            ) : (
+                                                                "—"
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                    {bookingPageCount > 1 && (
+                                        <div className="mt-3 flex items-center justify-between">
+                                            <span className="text-sm text-muted-foreground">
+                                                {currentBookingPage} / {bookingPageCount}
+                                            </span>
+                                            <div className="flex gap-2">
                                                 <Button
-                                                    danger
-                                                    type="text"
-                                                    onClick={() => setPeriods(periods.filter((_, j) => j !== i))}
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={currentBookingPage <= 1}
+                                                    onClick={() => setBookingPage(currentBookingPage - 1)}
                                                 >
-                                                    {l("Entfernen", "Remove")}
+                                                    {l("Zurück", "Previous")}
                                                 </Button>
-                                            </Space>
-                                        ))}
-                                    {!closed && (
-                                        <div>
-                                            <Button
-                                                type="dashed"
-                                                onClick={() =>
-                                                    setPeriods([
-                                                        ...periods,
-                                                        { start: dayjs("09:00", "HH:mm"), end: dayjs("18:00", "HH:mm") },
-                                                    ])
-                                                }
-                                            >
-                                                {l("Zeitraum hinzufügen", "Add time window")}
-                                            </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={currentBookingPage >= bookingPageCount}
+                                                    onClick={() => setBookingPage(currentBookingPage + 1)}
+                                                >
+                                                    {l("Weiter", "Next")}
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
-                                    <div style={{ marginTop: 16 }}>
-                                        <Button type="primary" onClick={() => void saveWeek()}>
-                                            {l("Wochentag speichern", "Save weekday")}
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="availability">
+                    <Card className="dashboard-panel">
+                        <CardHeader>
+                            <CardTitle>{l("Regulärer Wochenplan", "Weekly schedule")}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="mb-4 flex flex-wrap items-center gap-3">
+                                <Select value={weekDay} onValueChange={setWeekDay}>
+                                    <SelectTrigger className="w-[140px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {dow.map((label, i) => (
+                                            <SelectItem key={i} value={String(i)}>
+                                                {label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2">
+                                    <Switch
+                                        id="week-open"
+                                        checked={!closed}
+                                        onCheckedChange={(v) => setClosed(!v)}
+                                    />
+                                    <Label htmlFor="week-open">{!closed ? l("Geöffnet", "Open") : l("Geschlossen", "Closed")}</Label>
+                                </div>
+                            </div>
+                            {!closed &&
+                                periods.map((p, i) => (
+                                    <div key={i} className="mb-2 flex flex-wrap items-center gap-2">
+                                        <Input
+                                            type="time"
+                                            className="w-32"
+                                            value={p.start ? p.start.format("HH:mm") : ""}
+                                            onChange={(e) => {
+                                                const v = e.target.value ? dayjs(e.target.value, "HH:mm") : null;
+                                                setPeriods(periods.map((x, j) => (j === i ? { ...x, start: v } : x)));
+                                            }}
+                                        />
+                                        <span>–</span>
+                                        <Input
+                                            type="time"
+                                            className="w-32"
+                                            value={p.end ? p.end.format("HH:mm") : ""}
+                                            onChange={(e) => {
+                                                const v = e.target.value ? dayjs(e.target.value, "HH:mm") : null;
+                                                setPeriods(periods.map((x, j) => (j === i ? { ...x, end: v } : x)));
+                                            }}
+                                        />
+                                        <Button
+                                            variant="ghost"
+                                            className="text-destructive hover:text-destructive"
+                                            onClick={() => setPeriods(periods.filter((_, j) => j !== i))}
+                                        >
+                                            {l("Entfernen", "Remove")}
                                         </Button>
                                     </div>
-                                    <Table
-                                        style={{ marginTop: 16 }}
-                                        rowKey="$id"
-                                        pagination={false}
-                                        size="small"
-                                        dataSource={weekRows}
-                                        columns={[
-                                            { title: l("Tag", "Day"), render: (_: unknown, r: HoursRow) => dow[Number(r.day)] },
-                                            {
-                                                title: l("Zeiten", "Hours"),
-                                                render: (_: unknown, r: HoursRow) =>
-                                                    r.closed ? (
-                                                        <Tag>{l("Geschlossen", "Closed")}</Tag>
+                                ))}
+                            {!closed && (
+                                <div>
+                                    <Button
+                                        variant="outline"
+                                        className="border-dashed"
+                                        onClick={() =>
+                                            setPeriods([
+                                                ...periods,
+                                                { start: dayjs("09:00", "HH:mm"), end: dayjs("18:00", "HH:mm") },
+                                            ])
+                                        }
+                                    >
+                                        {l("Zeitraum hinzufügen", "Add time window")}
+                                    </Button>
+                                </div>
+                            )}
+                            <div className="mt-4">
+                                <Button onClick={() => void saveWeek()}>
+                                    {l("Wochentag speichern", "Save weekday")}
+                                </Button>
+                            </div>
+                            <div className="mt-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>{l("Tag", "Day")}</TableHead>
+                                            <TableHead>{l("Zeiten", "Hours")}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {weekRows.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={2} className="py-6 text-center text-muted-foreground">
+                                                    {l("Noch keine Wochentage gespeichert.", "No weekly hours configured yet.")}
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            weekRows.map((r) => (
+                                                <TableRow key={r.$id}>
+                                                    <TableCell>{dow[Number(r.day)]}</TableCell>
+                                                    <TableCell>
+                                                        {r.closed ? (
+                                                            <Badge variant="secondary">{l("Geschlossen", "Closed")}</Badge>
+                                                        ) : (
+                                                            parsePeriods(r.periods)
+                                                                .map((p) => `${p.start?.format("HH:mm")}–${p.end?.format("HH:mm")}`)
+                                                                .join(", ")
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="dashboard-panel mt-[18px]">
+                        <CardHeader>
+                            <CardTitle>{l("Ausnahmen (Feiertage, Sonderöffnungszeiten)", "Date overrides (holidays, special hours)")}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="mb-4 flex flex-wrap items-center gap-3">
+                                <div className="w-44">
+                                    <DatePicker value={overrideDate} onChange={setOverrideDate} format="DD.MM.YYYY" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Switch
+                                        id="override-open"
+                                        checked={!closed}
+                                        onCheckedChange={(v) => setClosed(!v)}
+                                    />
+                                    <Label htmlFor="override-open">{!closed ? l("Geöffnet", "Open") : l("Geschlossen", "Closed")}</Label>
+                                </div>
+                                <Button onClick={() => void saveOverride()}>
+                                    {l("Ausnahme speichern", "Save override")}
+                                </Button>
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{l("Datum", "Date")}</TableHead>
+                                        <TableHead>{l("Zeiten", "Hours")}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {overrideRows.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={2} className="py-6 text-center text-muted-foreground">
+                                                {l("Keine Ausnahmen.", "No date overrides.")}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        overrideRows.map((r) => (
+                                            <TableRow key={r.$id}>
+                                                <TableCell>{r.date}</TableCell>
+                                                <TableCell>
+                                                    {r.closed ? (
+                                                        <Badge variant="secondary">{l("Geschlossen", "Closed")}</Badge>
                                                     ) : (
                                                         parsePeriods(r.periods)
                                                             .map((p) => `${p.start?.format("HH:mm")}–${p.end?.format("HH:mm")}`)
                                                             .join(", ")
-                                                    ),
-                                            },
-                                        ]}
-                                        locale={{ emptyText: l("Noch keine Wochentage gespeichert.", "No weekly hours configured yet.") }}
-                                    />
-                                </Card>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
 
-                                <Card
-                                    className="dashboard-panel"
-                                    title={l("Ausnahmen (Feiertage, Sonderöffnungszeiten)", "Date overrides (holidays, special hours)")}
-                                    style={{ marginTop: 18 }}
-                                >
-                                    <Space wrap style={{ marginBottom: 16 }}>
-                                        <DatePicker value={overrideDate} onChange={setOverrideDate} format="DD.MM.YYYY" />
-                                        <Switch
-                                            checked={!closed}
-                                            onChange={(v) => setClosed(!v)}
-                                            checkedChildren={l("Geöffnet", "Open")}
-                                            unCheckedChildren={l("Geschlossen", "Closed")}
-                                        />
-                                        <Button type="primary" onClick={() => void saveOverride()}>
-                                            {l("Ausnahme speichern", "Save override")}
-                                        </Button>
-                                    </Space>
-                                    <Table
-                                        rowKey="$id"
-                                        pagination={false}
-                                        size="small"
-                                        dataSource={overrideRows}
-                                        columns={[
-                                            { title: l("Datum", "Date"), dataIndex: "date" },
-                                            {
-                                                title: l("Zeiten", "Hours"),
-                                                render: (_: unknown, r: HoursRow) =>
-                                                    r.closed ? (
-                                                        <Tag>{l("Geschlossen", "Closed")}</Tag>
-                                                    ) : (
-                                                        parsePeriods(r.periods)
-                                                            .map((p) => `${p.start?.format("HH:mm")}–${p.end?.format("HH:mm")}`)
-                                                            .join(", ")
-                                                    ),
-                                            },
-                                        ]}
-                                        locale={{ emptyText: l("Keine Ausnahmen.", "No date overrides.") }}
-                                    />
-                                </Card>
-
-                                <Card
-                                    className="dashboard-panel"
-                                    title={l("Abwesenheiten & Sperrzeiten (erscheinen auch im Kalender)", "Blocked times & absences (synced to Calendar)")}
-                                    style={{ marginTop: 18 }}
-                                    extra={
-                                        <Button icon={<PlusOutlined />} type="primary" onClick={() => setBlockOpen(true)}>
-                                            {l("Zeitraum sperren", "Block time")}
-                                        </Button>
-                                    }
-                                >
-                                    <Table
-                                        rowKey="$id"
-                                        pagination={false}
-                                        size="small"
-                                        dataSource={blocks}
-                                        columns={[
-                                            { title: l("Von", "From"), render: (_: unknown, r: BlockRow) => new Date(r.startUtc).toLocaleString(locale) },
-                                            { title: l("Bis", "Until"), render: (_: unknown, r: BlockRow) => new Date(r.endUtc).toLocaleString(locale) },
-                                            {
-                                                title: l("Mitarbeiter", "Staff"),
-                                                render: (_: unknown, r: BlockRow) =>
-                                                    staff.find((s) => s.$id === r.staffId)?.name ?? l("Alle", "All"),
-                                            },
-                                            { title: l("Grund", "Reason"), dataIndex: "reason" },
-                                            {
-                                                title: "",
-                                                render: (_: unknown, r: BlockRow) => (
+                    <Card className="dashboard-panel mt-[18px]">
+                        <CardHeader>
+                            <CardTitle>{l("Abwesenheiten & Sperrzeiten (erscheinen auch im Kalender)", "Blocked times & absences (synced to Calendar)")}</CardTitle>
+                            <CardAction>
+                                <Button onClick={() => setBlockOpen(true)}>
+                                    <Plus />
+                                    {l("Zeitraum sperren", "Block time")}
+                                </Button>
+                            </CardAction>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{l("Von", "From")}</TableHead>
+                                        <TableHead>{l("Bis", "Until")}</TableHead>
+                                        <TableHead>{l("Mitarbeiter", "Staff")}</TableHead>
+                                        <TableHead>{l("Grund", "Reason")}</TableHead>
+                                        <TableHead />
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {blocks.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                                                {l("Keine Sperrzeiten.", "No blocked times.")}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        blocks.map((r) => (
+                                            <TableRow key={r.$id}>
+                                                <TableCell>{new Date(r.startUtc).toLocaleString(locale)}</TableCell>
+                                                <TableCell>{new Date(r.endUtc).toLocaleString(locale)}</TableCell>
+                                                <TableCell>
+                                                    {staff.find((s) => s.$id === r.staffId)?.name ?? l("Alle", "All")}
+                                                </TableCell>
+                                                <TableCell>{r.reason}</TableCell>
+                                                <TableCell>
                                                     <Button
-                                                        size="small"
-                                                        danger
-                                                        icon={<DeleteOutlined />}
+                                                        size="icon-sm"
+                                                        variant="ghost"
+                                                        className="text-destructive hover:text-destructive"
+                                                        aria-label={l("Löschen", "Delete")}
                                                         onClick={async () => {
                                                             try {
                                                                 await del(`/api/termine/blocks/${r.$id}`);
                                                                 await load();
                                                             } catch (e) {
-                                                                message.error(
+                                                                toast.error(
                                                                     e instanceof Error ? e.message : l("Löschen fehlgeschlagen.", "Delete failed."),
                                                                 );
                                                             }
                                                         }}
-                                                    />
-                                                ),
-                                            },
-                                        ]}
-                                        locale={{ emptyText: l("Keine Sperrzeiten.", "No blocked times.") }}
-                                    />
-                                </Card>
-                            </>
-                        ),
-                    },
-                    {
-                        key: "staff",
-                        label: (
-                            <span>
-                                <TeamOutlined /> {l("Mitarbeiter", "Staff")} ({staff.length})
-                            </span>
-                        ),
-                        children: (
-                            <Card
-                                className="dashboard-panel"
-                                title={l("Buchbare Mitarbeiterprofile", "Bookable staff profiles")}
-                                extra={
-                                    <Button type="primary" icon={<PlusOutlined />} onClick={openNewStaff}>
-                                        {l("Neuer Mitarbeiter", "Add staff")}
-                                    </Button>
-                                }
-                            >
-                                <Table
-                                    rowKey="$id"
-                                    loading={loading}
-                                    dataSource={staff}
-                                    pagination={false}
-                                    scroll={{ x: 560 }}
-                                    columns={[
-                                        {
-                                            title: "Name",
-                                            render: (_: unknown, r: StaffRow) => (
-                                                <Space>
-                                                    {r.color && (
-                                                        <span
-                                                            style={{
-                                                                display: "inline-block",
-                                                                width: 10,
-                                                                height: 10,
-                                                                borderRadius: "50%",
-                                                                background: r.color,
-                                                            }}
-                                                        />
-                                                    )}
-                                                    <strong>{r.name}</strong>
-                                                </Space>
-                                            ),
-                                        },
-                                        {
-                                            title: "Status",
-                                            render: (_: unknown, r: StaffRow) => (
-                                                <Space>
-                                                    {r.active ? (
-                                                        <Tag color="success">{l("Aktiv", "Active")}</Tag>
-                                                    ) : (
-                                                        <Tag>{l("Inaktiv", "Inactive")}</Tag>
-                                                    )}
-                                                    {r.bookable ? null : <Tag>{l("Nur intern", "Internal only")}</Tag>}
-                                                </Space>
-                                            ),
-                                        },
-                                        {
-                                            title: l("Zugeordnete Leistungen", "Assigned services"),
-                                            render: (_: unknown, r: StaffRow) => `${r.serviceIds.length}`,
-                                        },
-                                        {
-                                            title: l("Aktionen", "Actions"),
-                                            render: (_: unknown, r: StaffRow) => (
-                                                <Space>
-                                                    <Button size="small" icon={<EditOutlined />} onClick={() => openEditStaff(r)}>
-                                                        {l("Bearbeiten", "Edit")}
+                                                    >
+                                                        <Trash2 />
                                                     </Button>
-                                                    <Button
-                                                        size="small"
-                                                        danger
-                                                        icon={<DeleteOutlined />}
-                                                        onClick={async () => {
-                                                            try {
-                                                                await del(`/api/termine/staff/${r.$id}`);
-                                                                message.success(l("Gelöscht.", "Deleted."));
-                                                                await load();
-                                                            } catch (e) {
-                                                                message.error(
-                                                                    e instanceof Error ? e.message : l("Löschen fehlgeschlagen.", "Delete failed."),
-                                                                );
-                                                            }
-                                                        }}
-                                                    />
-                                                </Space>
-                                            ),
-                                        },
-                                    ]}
-                                    locale={{ emptyText: l("Noch keine Mitarbeiter angelegt.", "No staff profiles created yet.") }}
-                                />
-                            </Card>
-                        ),
-                    },
-                ]}
-            />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="staff">
+                    <Card className="dashboard-panel">
+                        <CardHeader>
+                            <CardTitle>{l("Buchbare Mitarbeiterprofile", "Bookable staff profiles")}</CardTitle>
+                            <CardAction>
+                                <Button onClick={openNewStaff}>
+                                    <Plus />
+                                    {l("Neuer Mitarbeiter", "Add staff")}
+                                </Button>
+                            </CardAction>
+                        </CardHeader>
+                        <CardContent>
+                            {loading ? (
+                                <div className="flex flex-col gap-2">
+                                    <Skeleton className="h-9 w-full" />
+                                    <Skeleton className="h-9 w-full" />
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>{l("Zugeordnete Leistungen", "Assigned services")}</TableHead>
+                                            <TableHead>{l("Aktionen", "Actions")}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {staff.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                                                    {l("Noch keine Mitarbeiter angelegt.", "No staff profiles created yet.")}
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            staff.map((r) => (
+                                                <TableRow key={r.$id}>
+                                                    <TableCell>
+                                                        <span className="flex items-center gap-2">
+                                                            {r.color && (
+                                                                <span
+                                                                    className="inline-block size-2.5 shrink-0 rounded-full"
+                                                                    style={{ background: r.color }}
+                                                                />
+                                                            )}
+                                                            <strong>{r.name}</strong>
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="flex flex-wrap gap-1">
+                                                            {r.active ? (
+                                                                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-950 dark:text-green-300">
+                                                                    {l("Aktiv", "Active")}
+                                                                </Badge>
+                                                            ) : (
+                                                                <Badge variant="secondary">{l("Inaktiv", "Inactive")}</Badge>
+                                                            )}
+                                                            {r.bookable ? null : (
+                                                                <Badge variant="secondary">{l("Nur intern", "Internal only")}</Badge>
+                                                            )}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell>{`${r.serviceIds.length}`}</TableCell>
+                                                    <TableCell>
+                                                        <span className="flex gap-2">
+                                                            <Button size="sm" variant="outline" onClick={() => openEditStaff(r)}>
+                                                                <Pencil />
+                                                                {l("Bearbeiten", "Edit")}
+                                                            </Button>
+                                                            <Button
+                                                                size="icon-sm"
+                                                                variant="ghost"
+                                                                className="text-destructive hover:text-destructive"
+                                                                aria-label={l("Löschen", "Delete")}
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        await del(`/api/termine/staff/${r.$id}`);
+                                                                        toast.success(l("Gelöscht.", "Deleted."));
+                                                                        await load();
+                                                                    } catch (e) {
+                                                                        toast.error(
+                                                                            e instanceof Error ? e.message : l("Löschen fehlgeschlagen.", "Delete failed."),
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Trash2 />
+                                                            </Button>
+                                                        </span>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
 
             <BookingDetailDrawer
                 booking={detail}
@@ -799,44 +1002,101 @@ export default function TermineSchedulingHubPage() {
                 onCreated={load}
             />
 
-            <Modal
-                title={editingStaff ? l("Mitarbeiter bearbeiten", "Edit staff") : l("Neuer Mitarbeiter", "New staff")}
-                open={staffModalOpen}
-                onOk={() => void saveStaff()}
-                onCancel={() => setStaffModalOpen(false)}
-                okText={l("Speichern", "Save")}
-            >
-                <Form form={staffForm} layout="vertical">
-                    <Form.Item
-                        name="name"
-                        label="Name"
-                        rules={[{ required: true, message: l("Name erforderlich.", "Name required.") }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="description" label={l("Beschreibung / Rolle", "Description / role")}>
-                        <Input.TextArea rows={2} />
-                    </Form.Item>
-                    <Form.Item name="serviceIds" label={l("Buchbare Leistungen", "Bookable services")} extra={l("Leer = alle Leistungen. Zusätzliche Mitarbeiterzuordnungen an der Leistung gelten ebenfalls.", "Empty = all services. Staff restrictions on the service also apply.")}>
-                        <Select
-                            mode="multiple"
-                            allowClear
-                            options={services.map((s) => ({ value: s.$id, label: s.name }))}
-                        />
-                    </Form.Item>
-                    <Form.Item name="color" label={l("Kalenderfarbe", "Calendar color")}>
-                        <ColorPicker />
-                    </Form.Item>
-                    <Space size="large">
-                        <Form.Item name="active" label={l("Aktiv", "Active")} valuePropName="checked">
-                            <Switch />
-                        </Form.Item>
-                        <Form.Item name="bookable" label={l("Online buchbar", "Bookable online")} valuePropName="checked">
-                            <Switch />
-                        </Form.Item>
-                    </Space>
-                </Form>
-            </Modal>
+            <Dialog open={staffModalOpen} onOpenChange={(o) => { if (!o) setStaffModalOpen(false); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingStaff ? l("Mitarbeiter bearbeiten", "Edit staff") : l("Neuer Mitarbeiter", "New staff")}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="staff-name">Name</Label>
+                            <Input
+                                id="staff-name"
+                                value={staffName}
+                                onChange={(e) => setStaffName(e.target.value)}
+                            />
+                            {staffNameError && <p className="text-sm text-destructive">{staffNameError}</p>}
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="staff-description">{l("Beschreibung / Rolle", "Description / role")}</Label>
+                            <Textarea
+                                id="staff-description"
+                                rows={2}
+                                value={staffDescription}
+                                onChange={(e) => setStaffDescription(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{l("Buchbare Leistungen", "Bookable services")}</Label>
+                            <p className="text-sm text-muted-foreground">
+                                {l(
+                                    "Leer = alle Leistungen. Zusätzliche Mitarbeiterzuordnungen an der Leistung gelten ebenfalls.",
+                                    "Empty = all services. Staff restrictions on the service also apply.",
+                                )}
+                            </p>
+                            <div className="flex max-h-44 flex-col gap-2 overflow-y-auto rounded-md border p-3">
+                                {services.map((s) => (
+                                    <label key={s.$id} className="flex items-center gap-2 text-sm">
+                                        <Checkbox
+                                            checked={staffServiceIds.includes(s.$id)}
+                                            onCheckedChange={(checked) =>
+                                                setStaffServiceIds(
+                                                    checked === true
+                                                        ? [...staffServiceIds, s.$id]
+                                                        : staffServiceIds.filter((id) => id !== s.$id),
+                                                )
+                                            }
+                                        />
+                                        <span>{s.name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="staff-color">{l("Kalenderfarbe", "Calendar color")}</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="color"
+                                    className="w-14 shrink-0 p-1"
+                                    value={staffColor || "#000000"}
+                                    onChange={(e) => setStaffColor(e.target.value)}
+                                />
+                                <Input
+                                    id="staff-color"
+                                    value={staffColor}
+                                    placeholder="#000000"
+                                    onChange={(e) => setStaffColor(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-6">
+                            <div className="flex items-center gap-2">
+                                <Switch id="staff-active" checked={staffActive} onCheckedChange={setStaffActive} />
+                                <Label htmlFor="staff-active">{l("Aktiv", "Active")}</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Switch id="staff-bookable" checked={staffBookable} onCheckedChange={setStaffBookable} />
+                                <Label htmlFor="staff-bookable">{l("Online buchbar", "Bookable online")}</Label>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setStaffModalOpen(false)}>
+                            {l("Abbrechen", "Cancel")}
+                        </Button>
+                        <Button disabled={staffSaving} onClick={() => void saveStaff()}>
+                            {staffSaving && <Loader2 className="animate-spin" />}
+                            {l("Speichern", "Save")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
+
+
+
+

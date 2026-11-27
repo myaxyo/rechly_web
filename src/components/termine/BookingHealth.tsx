@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Space } from "antd";
+import { Info, Loader2, TriangleAlert } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { get, post } from "@/lib/termine/client";
 
@@ -91,14 +93,13 @@ export default function BookingHealth() {
                 ),
             );
     }
+    const isWarning = Boolean(error || issues.length);
     return (
-        <Alert
-            style={{ marginBottom: 16 }}
-            showIcon
-            type={error || issues.length ? "warning" : "info"}
-            title={l("Buchungsseite & Benachrichtigungen", "Booking page & notifications")}
-            description={
-                <Space orientation="vertical" style={{ width: "100%" }}>
+        <Alert className="mb-4">
+            {isWarning ? <TriangleAlert /> : <Info />}
+            <AlertTitle>{l("Buchungsseite & Benachrichtigungen", "Booking page & notifications")}</AlertTitle>
+            <AlertDescription>
+                <div className="flex w-full flex-col gap-2">
                     {error && <span role="alert">{error}</span>}
                     {issues.map((issue) => (
                         <div key={issue}>{issue}</div>
@@ -111,26 +112,29 @@ export default function BookingHealth() {
                             )}
                         </div>
                     )}
-                    <Space wrap>
-                        <Button size="small" loading={busy} onClick={() => void load()}>
+                    <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void load()}>
+                            {busy && <Loader2 className="animate-spin" />}
                             {l("Status aktualisieren", "Refresh status")}
                         </Button>
                         {!!health?.failed && (
                             <Button
-                                size="small"
-                                disabled={!health.mailConfigured || !health.retryAuthConfigured}
-                                loading={busy}
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={busy || !health.mailConfigured || !health.retryAuthConfigured}
                                 onClick={() => void retry()}
                             >
+                                {busy && <Loader2 className="animate-spin" />}
                                 {l(
                                     "Fehlgeschlagene erneut vormerken (max. 20)",
                                     "Requeue failed notifications (up to 20)",
                                 )}
                             </Button>
                         )}
-                    </Space>
-                </Space>
-            }
-        />
+                    </div>
+                </div>
+            </AlertDescription>
+        </Alert>
     );
 }

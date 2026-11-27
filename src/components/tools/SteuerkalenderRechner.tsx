@@ -115,17 +115,15 @@ export default function SteuerkalenderRechner() {
                         <div className="flex flex-col gap-2">
                             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                                 <Switch
-                                    size="sm"
                                     checked={hasDauerfristverlaengerung}
-                                    onChange={setHasDauerfristverlaengerung}
+                                    onCheckedChange={setHasDauerfristverlaengerung}
                                 />
                                 <span>Dauerfristverlängerung (§ 46 UStDV, +1 Monat)</span>
                             </label>
                             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                                 <Switch
-                                    size="sm"
                                     checked={isEmployer}
-                                    onChange={setIsEmployer}
+                                    onCheckedChange={setIsEmployer}
                                 />
                                 <span>Arbeitgeber (Lohnsteuer-Anmeldung)</span>
                             </label>

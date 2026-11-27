@@ -1,6 +1,17 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Select, Skeleton, Space, Typography } from "antd";
+import { ChevronLeft, ChevronRight, Info, Loader2, XCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface BookingSlot {
     startUtc: string;
@@ -116,65 +127,97 @@ export default function SlotPicker({
     return (
         <div className="booking-picker" aria-busy={loading}>
             <div className="booking-picker-toolbar">
-                <Space>
+                <div className="flex items-center gap-2">
                     <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
                         aria-label="Vorheriger Monat"
                         disabled={disabled || month <= firstAllowedMonth}
                         onClick={() => move(-1)}
                     >
-                        ←
+                        <ChevronLeft />
                     </Button>
-                    <Typography.Title level={4} style={{ margin: 0 }}>
+                    <h4 className="m-0 text-base font-semibold">
                         {monthDate.toLocaleDateString("de-DE", {
                             timeZone: "UTC",
                             month: "long",
                             year: "numeric",
                         })}
-                    </Typography.Title>
+                    </h4>
                     <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
                         aria-label="Nächster Monat"
                         disabled={disabled || month >= lastAllowed.slice(0, 7)}
                         onClick={() => move(1)}
                     >
-                        →
+                        <ChevronRight />
                     </Button>
-                </Space>
+                </div>
                 <Button
-                    size="small"
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     disabled={disabled || loading}
                     onClick={() => {
                         onChange(null);
                         setRevision((r) => r + 1);
                     }}
                 >
+                    {loading && <Loader2 className="animate-spin" />}
                     Aktualisieren
                 </Button>
             </div>
-            <label className="booking-zone">
-                Zeitzone
+            <div className="booking-zone">
+                <Label htmlFor="slotpicker-timezone">Zeitzone</Label>
                 <Select
-                    aria-label="Zeitzone"
-                    showSearch
-                    optionFilterProp="label"
-                    options={zones}
                     value={zone}
                     disabled={disabled}
-                    onChange={(v) => {
+                    onValueChange={(v) => {
                         setZone(v);
                         setSelectedDay("");
                         onChange(null);
                     }}
-                />
-            </label>
+                >
+                    <SelectTrigger id="slotpicker-timezone" aria-label="Zeitzone" className="w-full">
+                        <SelectValue placeholder="Bitte auswählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {zones.map((z) => (
+                            <SelectItem key={z.value} value={z.value}>
+                                {z.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
             {error ? (
-                <Alert
-                    type="error"
-                    showIcon
-                    title={error}
-                    action={<Button onClick={() => setRevision((r) => r + 1)}>Erneut versuchen</Button>}
-                />
+                <Alert variant="destructive">
+                    <XCircle />
+                    <AlertTitle>{error}</AlertTitle>
+                    <AlertDescription>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => setRevision((r) => r + 1)}
+                        >
+                            Erneut versuchen
+                        </Button>
+                    </AlertDescription>
+                </Alert>
             ) : loading ? (
-                <Skeleton active paragraph={{ rows: 5 }} />
+                <div className="flex flex-col gap-2" aria-label="Wird geladen">
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                </div>
             ) : (
                 <div className="booking-picker-columns">
                     <div>
@@ -214,15 +257,17 @@ export default function SlotPicker({
                         </p>
                     </div>
                     <div>
-                        <Typography.Title level={5} style={{ marginTop: 0 }}>
+                        <h5 className="mt-0 text-sm font-semibold">
                             {day ? dateLabel(day) : "Keine freien Termine"}
-                        </Typography.Title>
+                        </h5>
                         {!day ? (
-                            <Alert
-                                type="info"
-                                title="In diesem Monat ist nichts mehr frei."
-                                description="Wählen Sie den nächsten Monat oder kontaktieren Sie das Unternehmen."
-                            />
+                            <Alert>
+                                <Info />
+                                <AlertTitle>In diesem Monat ist nichts mehr frei.</AlertTitle>
+                                <AlertDescription>
+                                    Wählen Sie den nächsten Monat oder kontaktieren Sie das Unternehmen.
+                                </AlertDescription>
+                            </Alert>
                         ) : (
                             <div className="buchen-times">
                                 {(grouped[day] || []).map((slot) => (

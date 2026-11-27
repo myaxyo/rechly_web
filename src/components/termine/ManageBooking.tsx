@@ -1,6 +1,18 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Card, Modal, Space, Tag, Typography } from "antd";
+import { CheckCircle2, Info, Loader2, XCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import SlotPicker, { bookingWhen, type BookingSlot } from "./SlotPicker";
 interface ManagedAppointment {
     serviceName: string;
@@ -98,155 +110,211 @@ export default function ManageBooking({ token }: { token: string }) {
             </header>
             <main className="buchen-main booking-manage">
                 {loading ? (
-                    <Card loading />
+                    <Card>
+                        <CardContent className="flex flex-col gap-3">
+                            <Skeleton className="h-6 w-1/3" />
+                            <Skeleton className="h-8 w-2/3" />
+                            <Skeleton className="h-5 w-1/2" />
+                            <Skeleton className="h-5 w-full" />
+                        </CardContent>
+                    </Card>
                 ) : error || !appt ? (
-                    <Alert
-                        type="error"
-                        showIcon
-                        title={error || "Buchung nicht gefunden."}
-                        description="Prüfen Sie Ihren Link oder kontaktieren Sie das Unternehmen."
-                        action={<Button onClick={() => void load()}>Erneut versuchen</Button>}
-                    />
+                    <Alert variant="destructive">
+                        <XCircle />
+                        <AlertTitle>{error || "Buchung nicht gefunden."}</AlertTitle>
+                        <AlertDescription>
+                            <span>Prüfen Sie Ihren Link oder kontaktieren Sie das Unternehmen.</span>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                                onClick={() => void load()}
+                            >
+                                Erneut versuchen
+                            </Button>
+                        </AlertDescription>
+                    </Alert>
                 ) : (
                     <Card className="buchen-card">
-                        {success && (
-                            <Alert type="success" title={success} showIcon style={{ marginBottom: 24 }} />
-                        )}
-                        <Tag
-                            color={
-                                cancelled ? "error" : appt.status === "CONFIRMED" ? "success" : "processing"
-                            }
-                        >
-                            {labels[appt.status] || appt.status}
-                        </Tag>
-                        <Typography.Title level={2}>{appt.serviceName}</Typography.Title>
-                        <Typography.Paragraph strong>
-                            {bookingWhen(appt.startUtc, appt.timezone)}
-                        </Typography.Paragraph>
-                        <p className="booking-muted">
-                            {appt.durationMinutes} Minuten · {appt.timezone}
-                        </p>
-                        {appt.status === "PENDING" && (
-                            <Alert
-                                type="info"
-                                showIcon
-                                title="Ihre Anfrage wird geprüft."
-                                description="Der Termin ist erst nach Bestätigung durch das Unternehmen verbindlich."
-                                style={{ marginBottom: 24 }}
-                            />
-                        )}
-                        {active && (
-                            <>
-                                <div className="booking-policy">
-                                    <strong>Ihre Änderungsfristen</strong>
-                                    <p>Stornieren bis {bookingWhen(appt.cancelBefore, appt.timezone)}.</p>
-                                    <p>Umbuchen bis {bookingWhen(appt.rescheduleBefore, appt.timezone)}.</p>
-                                </div>
-                                <Space wrap style={{ marginTop: 24 }}>
-                                    <Button
-                                        type="primary"
-                                        disabled={!appt.canReschedule}
-                                        onClick={() => {
-                                            setAction("reschedule");
-                                            setActionError("");
-                                            setSlot(null);
-                                        }}
-                                    >
-                                        Termin verschieben
-                                    </Button>
-                                    <Button
-                                        danger
-                                        disabled={!appt.canCancel}
-                                        onClick={() => {
-                                            setAction("cancel");
-                                            setActionError("");
-                                        }}
-                                    >
-                                        Termin stornieren
-                                    </Button>
-                                    {appt.status === "CONFIRMED" && (
-                                        <Button href={base + "/calendar"}>Zum Kalender hinzufügen</Button>
+                        <CardContent>
+                            {success && (
+                                <Alert className="mb-6">
+                                    <CheckCircle2 />
+                                    <AlertTitle>{success}</AlertTitle>
+                                </Alert>
+                            )}
+                            <Badge
+                                variant={
+                                    cancelled
+                                        ? "destructive"
+                                        : appt.status === "CONFIRMED"
+                                          ? "default"
+                                          : "secondary"
+                                }
+                            >
+                                {labels[appt.status] || appt.status}
+                            </Badge>
+                            <h2 className="text-2xl font-semibold">{appt.serviceName}</h2>
+                            <p className="font-semibold">{bookingWhen(appt.startUtc, appt.timezone)}</p>
+                            <p className="booking-muted">
+                                {appt.durationMinutes} Minuten · {appt.timezone}
+                            </p>
+                            {appt.status === "PENDING" && (
+                                <Alert className="mb-6">
+                                    <Info />
+                                    <AlertTitle>Ihre Anfrage wird geprüft.</AlertTitle>
+                                    <AlertDescription>
+                                        Der Termin ist erst nach Bestätigung durch das Unternehmen verbindlich.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            {active && (
+                                <>
+                                    <div className="booking-policy">
+                                        <strong>Ihre Änderungsfristen</strong>
+                                        <p>Stornieren bis {bookingWhen(appt.cancelBefore, appt.timezone)}.</p>
+                                        <p>Umbuchen bis {bookingWhen(appt.rescheduleBefore, appt.timezone)}.</p>
+                                    </div>
+                                    <div className="mt-6 flex flex-wrap gap-2">
+                                        <Button
+                                            type="button"
+                                            disabled={!appt.canReschedule}
+                                            onClick={() => {
+                                                setAction("reschedule");
+                                                setActionError("");
+                                                setSlot(null);
+                                            }}
+                                        >
+                                            Termin verschieben
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            disabled={!appt.canCancel}
+                                            onClick={() => {
+                                                setAction("cancel");
+                                                setActionError("");
+                                            }}
+                                        >
+                                            Termin stornieren
+                                        </Button>
+                                        {appt.status === "CONFIRMED" && (
+                                            <Button type="button" variant="outline" asChild>
+                                                <a href={base + "/calendar"}>Zum Kalender hinzufügen</a>
+                                            </Button>
+                                        )}
+                                    </div>
+                                    {(!appt.canCancel || !appt.canReschedule) && (
+                                        <p className="booking-muted">
+                                            Für Änderungen nach Ablauf der Frist kontaktieren Sie bitte das
+                                            Unternehmen direkt.
+                                        </p>
                                     )}
-                                </Space>
-                                {(!appt.canCancel || !appt.canReschedule) && (
-                                    <p className="booking-muted">
-                                        Für Änderungen nach Ablauf der Frist kontaktieren Sie bitte das
-                                        Unternehmen direkt.
-                                    </p>
-                                )}
-                            </>
-                        )}
-                        {!active && (
-                            <Alert
-                                type={cancelled ? "warning" : "info"}
-                                showIcon
-                                title={labels[appt.status] || appt.status}
-                                description="Dieser Termin kann nicht mehr online geändert werden."
-                                style={{ marginTop: 20 }}
-                            />
-                        )}
-                        <div className="booking-actions">
-                            <Button href={"/buchen/" + appt.slug}>Weiteren Termin buchen</Button>
-                            <Space wrap>
-                                {appt.contactPhone && (
-                                    <a href={"tel:" + appt.contactPhone}>{appt.contactPhone}</a>
-                                )}
-                                {appt.contactEmail && (
-                                    <a href={"mailto:" + appt.contactEmail}>{appt.contactEmail}</a>
-                                )}
-                            </Space>
-                        </div>
+                                </>
+                            )}
+                            {!active && (
+                                <Alert className="mt-5">
+                                    <Info />
+                                    <AlertTitle>{labels[appt.status] || appt.status}</AlertTitle>
+                                    <AlertDescription>
+                                        Dieser Termin kann nicht mehr online geändert werden.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            <div className="booking-actions">
+                                <Button type="button" variant="outline" asChild>
+                                    <a href={"/buchen/" + appt.slug}>Weiteren Termin buchen</a>
+                                </Button>
+                                <div className="flex flex-wrap gap-2">
+                                    {appt.contactPhone && (
+                                        <a href={"tel:" + appt.contactPhone}>{appt.contactPhone}</a>
+                                    )}
+                                    {appt.contactEmail && (
+                                        <a href={"mailto:" + appt.contactEmail}>{appt.contactEmail}</a>
+                                    )}
+                                </div>
+                            </div>
+                        </CardContent>
                     </Card>
                 )}
-                <Modal
-                    title={action === "cancel" ? "Termin wirklich stornieren?" : "Neuen Termin auswählen"}
+                <Dialog
                     open={!!action}
-                    width={action === "reschedule" ? 850 : 480}
-                    onCancel={() => {
-                        if (!busy) setAction(null);
+                    onOpenChange={(open) => {
+                        if (!open && !busy) setAction(null);
                     }}
-                    maskClosable={!busy}
-                    closable={!busy}
-                    confirmLoading={busy}
-                    cancelButtonProps={{ disabled: busy }}
-                    okButtonProps={{
-                        danger: action === "cancel",
-                        disabled: action === "reschedule" && !slot,
-                    }}
-                    okText={action === "cancel" ? "Ja, Termin stornieren" : "Umbuchung bestätigen"}
-                    cancelText="Bisherigen Termin behalten"
-                    onOk={() => void change()}
                 >
-                    {actionError && (
-                        <Alert type="error" showIcon title={actionError} style={{ marginBottom: 16 }} />
-                    )}
-                    {appt && (
-                        <p>
-                            Ihr bisheriger Termin:{" "}
-                            <strong>{bookingWhen(appt.startUtc, appt.timezone)}</strong>.
-                            {action === "reschedule" &&
-                                " Er bleibt reserviert, bis die Umbuchung erfolgreich ist."}
-                        </p>
-                    )}
-                    {action === "reschedule" && appt && (
-                        <SlotPicker
-                            key={revision}
-                            endpoint={base + "/availability"}
-                            timezone={appt.timezone}
-                            maxHorizonDays={appt.maxHorizonDays}
-                            value={slot}
-                            onChange={setSlot}
-                            disabled={busy}
-                        />
-                    )}
-                    {slot && action === "reschedule" && appt && (
-                        <Alert
-                            type="info"
-                            title={"Neuer Termin: " + bookingWhen(slot.startUtc, appt.timezone)}
-                            style={{ marginTop: 16 }}
-                        />
-                    )}
-                </Modal>
+                    <DialogContent
+                        className={action === "reschedule" ? "sm:max-w-[850px]" : "sm:max-w-[480px]"}
+                        showCloseButton={!busy}
+                        onEscapeKeyDown={(e) => {
+                            if (busy) e.preventDefault();
+                        }}
+                        onInteractOutside={(e) => {
+                            if (busy) e.preventDefault();
+                        }}
+                    >
+                        <DialogHeader>
+                            <DialogTitle>
+                                {action === "cancel" ? "Termin wirklich stornieren?" : "Neuen Termin auswählen"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div>
+                            {actionError && (
+                                <Alert variant="destructive" className="mb-4">
+                                    <XCircle />
+                                    <AlertTitle>{actionError}</AlertTitle>
+                                </Alert>
+                            )}
+                            {appt && (
+                                <p>
+                                    Ihr bisheriger Termin:{" "}
+                                    <strong>{bookingWhen(appt.startUtc, appt.timezone)}</strong>.
+                                    {action === "reschedule" &&
+                                        " Er bleibt reserviert, bis die Umbuchung erfolgreich ist."}
+                                </p>
+                            )}
+                            {action === "reschedule" && appt && (
+                                <SlotPicker
+                                    key={revision}
+                                    endpoint={base + "/availability"}
+                                    timezone={appt.timezone}
+                                    maxHorizonDays={appt.maxHorizonDays}
+                                    value={slot}
+                                    onChange={setSlot}
+                                    disabled={busy}
+                                />
+                            )}
+                            {slot && action === "reschedule" && appt && (
+                                <Alert className="mt-4">
+                                    <Info />
+                                    <AlertTitle>
+                                        {"Neuer Termin: " + bookingWhen(slot.startUtc, appt.timezone)}
+                                    </AlertTitle>
+                                </Alert>
+                            )}
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={busy}
+                                onClick={() => setAction(null)}
+                            >
+                                Bisherigen Termin behalten
+                            </Button>
+                            <Button
+                                type="button"
+                                variant={action === "cancel" ? "destructive" : "default"}
+                                disabled={busy || (action === "reschedule" && !slot)}
+                                onClick={() => void change()}
+                            >
+                                {busy && <Loader2 className="animate-spin" />}
+                                {action === "cancel" ? "Ja, Termin stornieren" : "Umbuchung bestätigen"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </main>
         </div>
     );
