@@ -2,41 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Card,
-    Table,
-    Button,
-    Space,
-    Tag,
-    Switch,
-    Typography,
-    Row,
-    Col,
-    Statistic,
-    Modal,
-    message,
-    Tooltip,
-} from "antd";
-import {
-    PlusOutlined,
-    PlayCircleOutlined,
-    DeleteOutlined,
-} from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
+import { Loader2, Play, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import dayjs from "dayjs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRecurringStore } from "@/store/recurringStore";
 import { generateNextInvoice } from "@/lib/recurringService";
 import { formatCurrency } from "@/lib/currencyUtils";
-import type { RecurringInvoiceWithDetails, RecurringInterval } from "@/types";
+import type { RecurringInterval } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+    Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
-const { Title } = Typography;
-
-const intervalColors: Record<RecurringInterval, string> = {
-    weekly: "cyan",
-    monthly: "blue",
-    quarterly: "purple",
-    annually: "gold",
+const intervalBadgeClass: Record<RecurringInterval, string> = {
+    weekly: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
+    monthly: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    quarterly: "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+    annually: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
 };
 
 export default function RecurringPage() {
@@ -45,6 +39,7 @@ export default function RecurringPage() {
     const { templates, loading, fetchTemplates, toggleActive, removeTemplate } =
         useRecurringStore();
     const [generating, setGenerating] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
     useEffect(() => {
         fetchTemplates();
@@ -54,176 +49,174 @@ export default function RecurringPage() {
         setGenerating(id);
         try {
             const invoiceId = await generateNextInvoice(id);
-            message.success(t("recurring.invoiceGenerated"));
+            toast.success(t("recurring.invoiceGenerated"));
             fetchTemplates(true);
             router.push(`/dashboard/invoices/${invoiceId}`);
         } catch {
-            message.error(t("recurring.generateError"));
+            toast.error(t("recurring.generateError"));
         } finally {
             setGenerating(null);
         }
     };
 
-    const handleDelete = (id: string, name: string) => {
-        Modal.confirm({
-            title: t("recurring.deleteConfirm"),
-            content: `"${name}" ${t("recurring.deleteDesc")}`,
-            okText: t("recurring.delete"),
-            okType: "danger",
-            cancelText: t("recurring.cancel"),
-            onOk: async () => {
-                try {
-                    await removeTemplate(id);
-                    message.success(t("recurring.deleted"));
-                } catch {
-                    message.error(t("recurring.deleteError"));
-                }
-            },
-        });
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            await removeTemplate(deleteTarget.id);
+            toast.success(t("recurring.deleted"));
+        } catch {
+            toast.error(t("recurring.deleteError"));
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
-    const activeCount = templates.filter((t) => t.is_active).length;
+    const activeCount = templates.filter((tpl) => tpl.is_active).length;
+    const overdueCount = templates.filter(
+        (tpl) => tpl.is_active && dayjs(tpl.next_due_date).isBefore(dayjs(), "day"),
+    ).length;
 
-    const columns: ColumnsType<RecurringInvoiceWithDetails> = [
-        {
-            title: t("recurring.name"),
-            dataIndex: "template_name",
-            key: "template_name",
-        },
-        {
-            title: t("recurring.client"),
-            key: "client",
-            render: (_, r) => r.client?.name || "—",
-        },
-        {
-            title: t("recurring.interval"),
-            dataIndex: "interval",
-            key: "interval",
-            render: (val: RecurringInterval) => (
-                <Tag color={intervalColors[val]}>
-                    {t(`recurring.interval.${val}`) || val}
-                </Tag>
-            ),
-        },
-        {
-            title: t("recurring.nextDue"),
-            dataIndex: "next_due_date",
-            key: "next_due_date",
-            render: (val) => {
-                if (!val) return "—";
-                const isOverdue = dayjs(val).isBefore(dayjs(), "day");
-                return (
-                    <Tag color={isOverdue ? "warning" : "default"}>{val}</Tag>
-                );
-            },
-        },
-        {
-            title: t("recurring.amount"),
-            key: "amount",
-            align: "right",
-            render: (_, r) => formatCurrency(r.total_gross),
-        },
-        {
-            title: t("recurring.active"),
-            key: "active",
-            render: (_, r) => (
-                <Switch
-                    checked={r.is_active}
-                    onChange={(checked) => toggleActive(r.id!, checked)}
-                    size="small"
-                />
-            ),
-        },
-        {
-            key: "actions",
-            align: "right",
-            render: (_, r) => (
-                <Space>
-                    <Tooltip title={t("recurring.generate")}>
-                        <Button
-                            type="primary"
-                            icon={<PlayCircleOutlined />}
-                            size="small"
-                            loading={generating === r.id}
-                            onClick={() => handleGenerate(r.id!)}
-                        />
-                    </Tooltip>
-                    <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        size="small"
-                        onClick={() => handleDelete(r.id!, r.template_name)}
-                    />
-                </Space>
-            ),
-        },
+    const stats = [
+        { label: t("recurring.total"), value: String(templates.length), className: "" },
+        { label: t("recurring.active"), value: String(activeCount), className: "text-emerald-500" },
+        { label: t("recurring.overdue"), value: String(overdueCount), className: "text-amber-500" },
     ];
 
     return (
-        <div>
-            <Title level={4}>{t("recurring.title")}</Title>
+        <TooltipProvider>
+            <div className="flex flex-col gap-4">
+                <h2 className="text-xl font-semibold">{t("recurring.title")}</h2>
 
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                <Col xs={12} sm={8}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("recurring.total")}
-                            value={templates.length}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={8}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("recurring.active")}
-                            value={activeCount}
-                            valueStyle={{ color: "#52c41a" }}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={8}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("recurring.overdue")}
-                            value={
-                                templates.filter(
-                                    (t) =>
-                                        t.is_active &&
-                                        dayjs(t.next_due_date).isBefore(
-                                            dayjs(),
-                                            "day",
-                                        ),
-                                ).length
-                            }
-                            valueStyle={{ color: "#faad14" }}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+                <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-3 sm:gap-4">
+                    {stats.map((stat) => (
+                        <Card key={stat.label}>
+                            <CardContent className="pt-1">
+                                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                <p className={cn("mt-1 text-2xl font-semibold", stat.className)}>{stat.value}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginBottom: 16,
-                }}
-            >
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => router.push("/dashboard/recurring/create")}
-                >
-                    {t("recurring.new")}
-                </Button>
+                <div className="flex justify-end">
+                    <Button type="button" onClick={() => router.push("/dashboard/recurring/create")}>
+                        <Plus />
+                        {t("recurring.new")}
+                    </Button>
+                </div>
+
+                <Card>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{t("recurring.name")}</TableHead>
+                                    <TableHead>{t("recurring.client")}</TableHead>
+                                    <TableHead>{t("recurring.interval")}</TableHead>
+                                    <TableHead>{t("recurring.nextDue")}</TableHead>
+                                    <TableHead className="text-right">{t("recurring.amount")}</TableHead>
+                                    <TableHead>{t("recurring.active")}</TableHead>
+                                    <TableHead className="text-right"><span className="sr-only">Actions</span></TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {loading && templates.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                                            <Loader2 className="mr-2 inline size-4 animate-spin" />
+                                            …
+                                        </TableCell>
+                                    </TableRow>
+                                ) : templates.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                                            {t("recurring.title")}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    templates.map((r) => {
+                                        const isOverdue = r.next_due_date
+                                            ? dayjs(r.next_due_date).isBefore(dayjs(), "day")
+                                            : false;
+                                        return (
+                                            <TableRow key={r.id}>
+                                                <TableCell className="font-medium">{r.template_name}</TableCell>
+                                                <TableCell>{r.client?.name || "—"}</TableCell>
+                                                <TableCell>
+                                                    <Badge className={intervalBadgeClass[r.interval]}>
+                                                        {t(`recurring.interval.${r.interval}`) || r.interval}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {r.next_due_date ? (
+                                                        <Badge className={isOverdue ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-secondary text-secondary-foreground"}>
+                                                            {r.next_due_date}
+                                                        </Badge>
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">{formatCurrency(r.total_gross)}</TableCell>
+                                                <TableCell>
+                                                    <Switch
+                                                        checked={r.is_active}
+                                                        onCheckedChange={(checked) => void toggleActive(r.id!, checked)}
+                                                        aria-label={t("recurring.active")}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex justify-end gap-1">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    size="icon-sm"
+                                                                    disabled={generating === r.id}
+                                                                    onClick={() => void handleGenerate(r.id!)}
+                                                                    aria-label={t("recurring.generate")}
+                                                                >
+                                                                    {generating === r.id ? <Loader2 className="animate-spin" /> : <Play />}
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>{t("recurring.generate")}</TooltipContent>
+                                                        </Tooltip>
+                                                        <Button
+                                                            type="button"
+                                                            variant="destructive"
+                                                            size="icon-sm"
+                                                            onClick={() => setDeleteTarget({ id: r.id!, name: r.template_name })}
+                                                            aria-label={t("recurring.delete")}
+                                                        >
+                                                            <Trash2 />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </Card>
+
+                <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>{t("recurring.deleteConfirm")}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {deleteTarget ? `"${deleteTarget.name}" ${t("recurring.deleteDesc")}` : ""}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>{t("recurring.cancel")}</AlertDialogCancel>
+                            <AlertDialogAction variant="destructive" onClick={() => void confirmDelete()}>
+                                {t("recurring.delete")}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
-
-            <Table
-                columns={columns}
-                dataSource={templates}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10 }}
-            />
-        </div>
+        </TooltipProvider>
     );
 }
