@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { parseDecimalInput } from "@/lib/decimalInput";
 import { cn } from "@/lib/utils";
@@ -31,8 +31,8 @@ export default function DecimalInput({ value, onChange, min, max, precision, pla
     };
     const [text, setText] = useState(() => format(value));
     const [focused, setFocused] = useState(false);
-
-    useEffect(() => { if (!focused) setText(format(value)); }, [value, focused]); // eslint-disable-line react-hooks/exhaustive-deps
+    // While unfocused the display always derives from the prop value;
+    // the local text only exists during an edit.
 
     const commit = (raw: string) => {
         const trimmed = raw.trim();
@@ -48,12 +48,12 @@ export default function DecimalInput({ value, onChange, min, max, precision, pla
             id={id}
             type="text"
             inputMode="decimal"
-            value={text}
+            value={focused ? text : format(value)}
             placeholder={placeholder}
             disabled={disabled}
-            onFocus={() => setFocused(true)}
+            onFocus={() => { setText(format(value)); setFocused(true); }}
             onChange={(e) => { setText(e.target.value); commit(e.target.value); }}
-            onBlur={() => { setFocused(false); setText(format(value)); }}
+            onBlur={() => setFocused(false)}
             style={addonAfter ? undefined : style}
             className={cn(
                 "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
