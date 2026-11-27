@@ -1,46 +1,15 @@
 "use client";
 import HelpLink from "@/components/dashboard/HelpLink";
-import EInvoiceFields from "@/components/dashboard/EInvoiceFields";
+import { EInvoiceFieldsControlled } from "@/components/dashboard/EInvoiceFields";
 
 import { useEffect, useState } from "react";
 import {
-    Card,
-    Form,
-    Input,
-    Button,
-    Select,
-    AutoComplete,
-    Alert,
-    Space,
-    message,
-    Typography,
-    Divider,
-    Upload,
-    Image,
-    Tabs,
-    Modal,
-    Row,
-    Col,
-    Progress,
-    Switch,
-    InputNumber,
-    Tag,
-} from "antd";
-import {
-    SaveOutlined,
-    UploadOutlined,
-    DeleteOutlined,
-    UserOutlined,
-    BankOutlined,
-    RobotOutlined,
-    ExclamationCircleOutlined,
-    SwapOutlined,
-    CalendarOutlined,
-} from "@ant-design/icons";
+    ArrowLeftRight, Bot, Building2, CalendarDays, Loader2, Save, Trash2, Upload, User,
+} from "lucide-react";
+import { toast } from "sonner";
 import MigrationWizard from "@/components/dashboard/MigrationWizard";
 import OnlineBookingSettingsTab from "@/components/termine/OnlineBookingSettingsTab";
 import { isTermineEnabled } from "@/lib/features";
-import type { UploadProps } from "antd";
 import { getCompanyInfo, saveCompanyInfo } from "@/lib/companyService";
 import { euCountryOptions } from "@/lib/euCountries";
 import { LogoError, normalizeLogoFile } from "@/lib/companyLogo";
@@ -56,26 +25,91 @@ import { getAISettings, saveAISettings, testAI } from "@/lib/aiService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AIProvider, UserCompany } from "@/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import DecimalInput from "@/components/DecimalInput";
 
-const { Title, Text } = Typography;
+type CompanyValues = Omit<UserCompany, "id" | "created_at" | "updated_at">;
+
+const emptyCompany: CompanyValues = {
+    name: "",
+    legal_form: "",
+    address_line1: "",
+    address_line2: "",
+    postal_code: "",
+    city: "",
+    country: "Deutschland",
+    email: "",
+    phone: "",
+    website: "",
+    vat_id: "",
+    tax_number: "",
+    commercial_register_number: "",
+    registry_court: "",
+    managing_directors: "",
+    bank_name: "",
+    bank_iban: "",
+    bank_bic: "",
+    payment_terms_default: "",
+    is_small_business: false,
+    is_flat_rate_farming: false,
+    invoice_number_prefix: "",
+    invoice_number_pattern: "",
+    next_invoice_number: 1,
+};
+
+function Field({
+    label, children, error, hint, htmlFor,
+}: {
+    label: string;
+    children: React.ReactNode;
+    error?: string;
+    hint?: string;
+    htmlFor?: string;
+}) {
+    return (
+        <div className="flex flex-col gap-1.5">
+            <Label htmlFor={htmlFor}>{label}</Label>
+            {children}
+            {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+            {error && <p className="text-xs text-destructive">{error}</p>}
+        </div>
+    );
+}
 
 /** Live-validated invoice numbering settings with format preview. */
 function NumberingSection({
     t,
-    form,
+    values,
+    set,
 }: {
     t: (key: string) => string;
-    form: ReturnType<typeof Form.useForm>[0];
+    values: CompanyValues;
+    set: (patch: Partial<CompanyValues>) => void;
 }) {
-    const pattern = Form.useWatch("invoice_number_pattern", form) as string | undefined;
-    const prefix = Form.useWatch("invoice_number_prefix", form) as string | undefined;
-    const next = Form.useWatch("next_invoice_number", form) as number | undefined;
     const [suggesting, setSuggesting] = useState(false);
+    const pattern = values.invoice_number_pattern;
+    const prefix = values.invoice_number_prefix;
+    const next = values.next_invoice_number;
 
-    const activePattern =
-        pattern && pattern.trim() ? pattern.trim() : DEFAULT_NUMBER_PATTERN;
-    const activePrefix =
-        prefix && prefix.trim() ? prefix.trim().slice(0, 32) : DEFAULT_NUMBER_PREFIX;
+    const activePattern = pattern && pattern.trim() ? pattern.trim() : DEFAULT_NUMBER_PATTERN;
+    const activePrefix = prefix && prefix.trim() ? prefix.trim().slice(0, 32) : DEFAULT_NUMBER_PREFIX;
     const patternError = validateNumberPattern(activePattern);
     const preview =
         patternError === null
@@ -88,71 +122,66 @@ function NumberingSection({
             : null;
 
     return (
-        <>
-            <Row gutter={[16, 0]}>
-                <Col xs={24} sm={8}>
-                    <Form.Item label={t("settings.numberPrefix")} name="invoice_number_prefix">
-                        <Input placeholder="RE" maxLength={32} />
-                    </Form.Item>
-                </Col>
-                <Col xs={24} sm={16}>
-                    <Form.Item
-                        label={t("settings.numberPattern")}
-                        name="invoice_number_pattern"
-                        extra={t("settings.numberPatternHelp")}
-                        validateStatus={patternError ? "error" : undefined}
-                        help={patternError ? t("settings.numberPatternInvalid") : undefined}
+        <div className="flex flex-col gap-4">
+            <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+                <Field label={t("settings.numberPrefix")} htmlFor="num-prefix">
+                    <Input id="num-prefix" placeholder="RE" maxLength={32} value={prefix ?? ""}
+                        onChange={(e) => set({ invoice_number_prefix: e.target.value })} />
+                </Field>
+                <Field label={t("settings.numberPattern")} htmlFor="num-pattern"
+                    hint={t("settings.numberPatternHelp")}
+                    error={patternError ? t("settings.numberPatternInvalid") : undefined}>
+                    <Input id="num-pattern" placeholder={DEFAULT_NUMBER_PATTERN} maxLength={64} value={pattern ?? ""}
+                        onChange={(e) => set({ invoice_number_pattern: e.target.value })}
+                        aria-invalid={!!patternError} />
+                </Field>
+            </div>
+            <div className="grid items-end gap-4 sm:grid-cols-2">
+                <Field label={t("settings.nextInvoiceNumber")} hint={t("settings.nextInvoiceNumberHint")}>
+                    <DecimalInput min={1} precision={0} style={{ width: "100%" }} value={next ?? 1}
+                        onChange={(v) => set({ next_invoice_number: v ?? 1 })} />
+                </Field>
+                <div className="flex flex-col gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="self-start"
+                        disabled={suggesting}
+                        onClick={async () => {
+                            setSuggesting(true);
+                            try {
+                                const suggestion = await getNextInvoiceNumber(true);
+                                if (suggestion) {
+                                    set({ next_invoice_number: suggestion.next });
+                                    toast.success(t("settings.numberSuggested"));
+                                }
+                            } catch {
+                                toast.error(t("settings.saveError"));
+                            } finally {
+                                setSuggesting(false);
+                            }
+                        }}
                     >
-                        <Input placeholder={DEFAULT_NUMBER_PATTERN} maxLength={64} />
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row gutter={[16, 0]}>
-                <Col xs={24} sm={12}>
-                    <Form.Item
-                        label={t("settings.nextInvoiceNumber")}
-                        name="next_invoice_number"
-                        extra={t("settings.nextInvoiceNumberHint")}
-                    >
-                        <InputNumber min={1} precision={0} style={{ width: "100%" }} />
-                    </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                    <Form.Item label=" ">
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                            <Button
-                                loading={suggesting}
-                                onClick={async () => {
-                                    setSuggesting(true);
-                                    try {
-                                        const suggestion = await getNextInvoiceNumber(true);
-                                        if (suggestion) {
-                                            form.setFieldsValue({
-                                                next_invoice_number: suggestion.next,
-                                            });
-                                            message.success(t("settings.numberSuggested"));
-                                        }
-                                    } catch {
-                                        message.error(t("settings.saveError"));
-                                    } finally {
-                                        setSuggesting(false);
-                                    }
-                                }}
-                            >
-                                {t("settings.suggestFromHistory")}
-                            </Button>
-                            <Text type="secondary">
-                                {t("settings.numberPreview")}:{" "}
-                                <Text strong code={!!preview}>
-                                    {preview ?? "—"}
-                                </Text>
-                            </Text>
-                        </Space>
-                    </Form.Item>
-                </Col>
-            </Row>
-        </>
+                        {suggesting && <Loader2 className="animate-spin" />}
+                        {t("settings.suggestFromHistory")}
+                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                        {t("settings.numberPreview")}:{" "}
+                        <code className="rounded bg-muted px-1.5 py-0.5 font-semibold">{preview ?? "—"}</code>
+                    </p>
+                </div>
+            </div>
+        </div>
     );
+}
+
+interface AiValues {
+    provider: AIProvider;
+    model: string;
+    base_url?: string;
+    api_key?: string;
+    system_prompt?: string;
+    test_prompt?: string;
 }
 
 export default function SettingsPage() {
@@ -164,6 +193,7 @@ export default function SettingsPage() {
     const [companyLoadError, setCompanyLoadError] = useState<string | null>(null);
     const [companySaveError, setCompanySaveError] = useState<string | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [aiLoading, setAiLoading] = useState(true);
     const [aiSaving, setAiSaving] = useState(false);
@@ -177,28 +207,34 @@ export default function SettingsPage() {
     } | null>(null);
     const [aiLocalAllowed, setAiLocalAllowed] = useState<boolean>(true);
     const [verifySending, setVerifySending] = useState(false);
-    const [aiModelPresets, setAiModelPresets] = useState<
-        Record<AIProvider, string[]>
-    >({
+    const [aiModelPresets, setAiModelPresets] = useState<Record<AIProvider, string[]>>({
         openai: [],
         anthropic: [],
         openrouter: [],
         ollama: [],
     });
-    const [form] = Form.useForm();
-    const [aiForm] = Form.useForm();
-    const watchedProvider = Form.useWatch("provider", aiForm);
-    const selectedProvider = (
-        typeof watchedProvider === "string" ? watchedProvider : "openai"
-    ) as AIProvider;
+    const [values, setValues] = useState<CompanyValues>(emptyCompany);
+    const [errors, setErrors] = useState<Partial<Record<keyof CompanyValues, string>>>({});
+    const set = (patch: Partial<CompanyValues>) => setValues((v) => ({ ...v, ...patch }));
+
+    const [aiValues, setAiValues] = useState<AiValues>({
+        provider: "openai",
+        model: "gpt-4o-mini",
+        base_url: "http://localhost:11434/v1",
+        api_key: "",
+        system_prompt: "You are Rechly AI. Help the user write invoice-related text clearly and concisely.",
+        test_prompt: "",
+    });
+    const setAi = (patch: Partial<AiValues>) => setAiValues((v) => ({ ...v, ...patch }));
+    const selectedProvider = aiValues.provider;
 
     useEffect(() => {
         const tabParam = new URLSearchParams(window.location.search).get("tab");
         if (tabParam && ["company", "booking", "ai", "migration", "account"].includes(tabParam)) {
             setActiveTab(tabParam);
         }
-        loadCompanyInfo();
-        loadAISettings();
+        void loadCompanyInfo();
+        void loadAISettings();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -208,7 +244,7 @@ export default function SettingsPage() {
             setCompanyLoadError(null);
             const data = await getCompanyInfo({ throwOnError: true });
             if (data) {
-                form.setFieldsValue(data);
+                setValues({ ...emptyCompany, ...data });
                 setLogoPreview(data.logo_base64 || null);
             }
         } catch (error) {
@@ -225,12 +261,14 @@ export default function SettingsPage() {
             setAiLoading(true);
             const data = await getAISettings();
             if (data) {
-                aiForm.setFieldsValue({
+                setAiValues((v) => ({
+                    ...v,
                     provider: data.provider,
                     model: data.model,
                     base_url: data.base_url || "http://localhost:11434/v1",
                     system_prompt: data.system_prompt,
-                });
+                    api_key: "",
+                }));
                 setAiKeyConfigured(data.api_key_configured);
                 setAiLocalAllowed(data.local_ai_allowed ?? true);
                 setAiDailyUsage(data.daily_usage || null);
@@ -240,16 +278,27 @@ export default function SettingsPage() {
             }
         } catch (error) {
             console.error("Error loading AI settings:", error);
-            message.error(t("settings.aiLoadError"));
+            toast.error(t("settings.aiLoadError"));
         } finally {
             setAiLoading(false);
         }
     };
 
-    const handleSave = async (
-        values: Omit<UserCompany, "id" | "created_at" | "updated_at">,
-    ) => {
+    const handleSave = async (event: React.FormEvent) => {
+        event.preventDefault();
         if (loading || companyLoadError) return;
+        const nextErrors: Partial<Record<keyof CompanyValues, string>> = {};
+        if (!values.name.trim()) nextErrors.name = t("settings.required");
+        if (!values.address_line1.trim()) nextErrors.address_line1 = t("settings.required");
+        if (!values.postal_code.trim()) nextErrors.postal_code = t("settings.required");
+        if (!values.city.trim()) nextErrors.city = t("settings.required");
+        if (!values.email.trim()) nextErrors.email = t("settings.required");
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) nextErrors.email = t("settings.invalidEmail");
+        if (!values.bank_iban.trim()) nextErrors.bank_iban = t("settings.required");
+        if (!values.payment_terms_default.trim()) nextErrors.payment_terms_default = t("settings.required");
+        setErrors(nextErrors);
+        if (Object.keys(nextErrors).length > 0) return;
+
         setSaving(true);
         setCompanySaveError(null);
         try {
@@ -257,8 +306,8 @@ export default function SettingsPage() {
                 ...values,
                 logo_base64: logoPreview || "",
             });
-            form.setFieldsValue(saved);
-            message.success(t("settings.saved"));
+            setValues({ ...emptyCompany, ...saved });
+            toast.success(t("settings.saved"));
         } catch (error) {
             setCompanySaveError(error instanceof ApiError
                 ? (error.status === 401
@@ -270,21 +319,19 @@ export default function SettingsPage() {
         }
     };
 
-    const handleLogoUpload: UploadProps["beforeUpload"] = (file) => {
+    const handleLogoUpload = (file: File) => {
         void (async () => {
             try {
                 const normalized = await normalizeLogoFile(file);
                 setLogoPreview(normalized);
             } catch (error) {
                 if (error instanceof LogoError && error.code === "size") {
-                    message.error(t("settings.imageTooLarge"));
+                    toast.error(t("settings.imageTooLarge"));
                 } else {
-                    message.error(t("settings.imageFormatUnsupported"));
+                    toast.error(t("settings.imageFormatUnsupported"));
                 }
             }
         })();
-
-        return false; // Prevent auto upload
     };
 
     const handleRemoveLogo = () => {
@@ -296,72 +343,52 @@ export default function SettingsPage() {
         window.location.href = "/login";
     };
 
-    const handleDeleteAccount = () => {
-        Modal.confirm({
-            title: t("settings.deleteAccountTitle"),
-            icon: <ExclamationCircleOutlined />,
-            content: (
-                <div>
-                    <p>{t("settings.deleteAccountConfirm")}</p>
-                    <p style={{ color: "#ff4d4f", fontWeight: 500 }}>
-                        {t("settings.deleteAccountWarning")}
-                    </p>
-                </div>
-            ),
-            okText: t("settings.deleteAccountButton"),
-            okType: "danger",
-            cancelText: t("settings.deleteAccountCancel"),
-            onOk: async () => {
-                setDeleting(true);
-                try {
-                    await deleteAccount();
-                    message.success(t("settings.accountDeleted"));
-                    window.location.href = "/";
-                } catch (error) {
-                    console.error("Error deleting account:", error);
-                    message.error(t("settings.deleteError"));
-                    throw error; // Keep confirmation open; do not imply completion on failure.
-                } finally {
-                    setDeleting(false);
-                }
-            },
-        });
+    const confirmDeleteAccount = async () => {
+        setDeleting(true);
+        try {
+            await deleteAccount();
+            toast.success(t("settings.accountDeleted"));
+            window.location.href = "/";
+        } catch (error) {
+            console.error("Error deleting account:", error);
+            toast.error(t("settings.deleteError"));
+            // Keep confirmation open; do not imply completion on failure.
+        } finally {
+            setDeleting(false);
+        }
     };
 
-    const handleSaveAISettings = async (values: {
-        provider: AIProvider;
-        model: string;
-        base_url?: string;
-        api_key?: string;
-        system_prompt?: string;
-    }) => {
+    const handleSaveAISettings = async (event: React.FormEvent) => {
+        event.preventDefault();
         setAiSaving(true);
         try {
-            const saved = await saveAISettings(values);
-            aiForm.setFieldValue("api_key", "");
+            const saved = await saveAISettings({
+                provider: aiValues.provider,
+                model: aiValues.model,
+                base_url: aiValues.base_url,
+                api_key: aiValues.api_key,
+                system_prompt: aiValues.system_prompt,
+            });
+            setAi({ api_key: "" });
             setAiKeyConfigured(saved.api_key_configured);
             setAiLocalAllowed(saved.local_ai_allowed ?? true);
             setAiDailyUsage(saved.daily_usage || null);
             if (saved.model_presets) {
                 setAiModelPresets(saved.model_presets);
             }
-            message.success(t("settings.aiSaved"));
+            toast.success(t("settings.aiSaved"));
         } catch (error) {
             console.error("Error saving AI settings:", error);
-            message.error(
-                error instanceof Error
-                    ? error.message
-                    : t("settings.aiTestError"),
-            );
+            toast.error(error instanceof Error ? error.message : t("settings.aiTestError"));
         } finally {
             setAiSaving(false);
         }
     };
 
     const handleTestAI = async () => {
-        const prompt = aiForm.getFieldValue("test_prompt")?.trim();
+        const prompt = aiValues.test_prompt?.trim();
         if (!prompt) {
-            message.error(t("settings.required"));
+            toast.error(t("settings.required"));
             return;
         }
 
@@ -373,15 +400,11 @@ export default function SettingsPage() {
             if (refreshedSettings?.daily_usage) {
                 setAiDailyUsage(refreshedSettings.daily_usage);
             }
-            message.success(t("settings.aiTestSuccess"));
+            toast.success(t("settings.aiTestSuccess"));
         } catch (error) {
             console.error("Error testing AI:", error);
             setAiResponse("");
-            message.error(
-                error instanceof Error
-                    ? error.message
-                    : t("settings.aiTestError"),
-            );
+            toast.error(error instanceof Error ? error.message : t("settings.aiTestError"));
         } finally {
             setAiTesting(false);
         }
@@ -392,9 +415,9 @@ export default function SettingsPage() {
         try {
             const res = await fetch("/api/auth/verification", { method: "POST" });
             if (!res.ok) throw new Error("send failed");
-            message.success(t("verify.sent"));
+            toast.success(t("verify.sent"));
         } catch {
-            message.error(t("verify.sendFailed"));
+            toast.error(t("verify.sendFailed"));
         } finally {
             setVerifySending(false);
         }
@@ -406,719 +429,491 @@ export default function SettingsPage() {
         { value: "anthropic", label: t("settings.aiProviderAnthropic") },
         { value: "openrouter", label: t("settings.aiProviderOpenRouter") },
     ];
-    const modelOptions = (aiModelPresets[selectedProvider] || []).map(
-        (model) => ({ value: model, label: model }),
-    );
-
-    const tabItems = [
-        {
-            key: "company",
-            label: (
-                <span>
-                    <BankOutlined /> {t("settings.company")}
-                </span>
-            ),
-            children: (
-                <>
-                {companyLoadError && <Alert type="error" showIcon title={companyLoadError} style={{ marginBottom: 16 }}
-                    action={<Button onClick={loadCompanyInfo} loading={loading}>{language === "de" ? "Erneut laden" : "Retry"}</Button>} />}
-                {companySaveError && <Alert type="error" showIcon title={companySaveError} style={{ marginBottom: 16 }} />}
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSave}
-                    disabled={loading || !!companyLoadError}
-                >
-                    {/* Logo */}
-                    <Card size="small" style={{ marginBottom: 16 }}>
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 16,
-                            }}
-                        >
-                            {logoPreview ? (
-                                <Image
-                                    src={logoPreview}
-                                    alt="Logo"
-                                    width={80}
-                                    height={80}
-                                    style={{ objectFit: "contain" }}
-                                />
-                            ) : (
-                                <div
-                                    className="dashboard-logo-placeholder"
-                                    style={{
-                                        width: 80,
-                                        height: 80,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        borderRadius: 8,
-                                    }}
-                                >
-                                    <BankOutlined
-                                        style={{ fontSize: 32, color: "var(--dash-muted)" }}
-                                    />
-                                </div>
-                            )}
-                            <Space direction="vertical">
-                                <Upload
-                                    beforeUpload={handleLogoUpload}
-                                    showUploadList={false}
-                                    accept="image/*"
-                                >
-                                    <Button icon={<UploadOutlined />}>
-                                        {t("settings.uploadLogo")}
-                                    </Button>
-                                </Upload>
-                                {logoPreview && (
-                                    <Button
-                                        danger
-                                        icon={<DeleteOutlined />}
-                                        onClick={handleRemoveLogo}
-                                    >
-                                        {t("settings.removeLogo")}
-                                    </Button>
-                                )}
-                            </Space>
-                        </div>
-                    </Card>
-
-                    {/* Company Name */}
-                    <Form.Item
-                        name="name"
-                        label={t("settings.companyName")}
-                        rules={[
-                            { required: true, message: t("settings.required") },
-                        ]}
-                    >
-                        <Input placeholder={t("settings.companyName")} />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="legal_form"
-                        label={t("settings.legalForm")}
-                    >
-                        <Input
-                            placeholder={t("settings.legalFormPlaceholder")}
-                        />
-                    </Form.Item>
-
-                    <Divider>{t("settings.address")}</Divider>
-
-                    <Form.Item
-                        name="address_line1"
-                        label={t("settings.address")}
-                        rules={[
-                            { required: true, message: t("settings.required") },
-                        ]}
-                    >
-                        <Input placeholder={t("settings.streetNumber")} />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="address_line2"
-                        label={t("settings.addressExtra")}
-                    >
-                        <Input placeholder={t("settings.addressExtra")} />
-                    </Form.Item>
-
-                    <Row gutter={[12, 0]}>
-                        <Col xs={24} sm={8}>
-                            <Form.Item
-                                name="postal_code"
-                                label={t("settings.postalCode")}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t("settings.required"),
-                                    },
-                                ]}
-                            >
-                                <Input placeholder="12345" />
-                            </Form.Item>
-                        </Col>
-
-                        <Col xs={24} sm={16}>
-                            <Form.Item
-                                name="city"
-                                label={t("settings.city")}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t("settings.required"),
-                                    },
-                                ]}
-                            >
-                                <Input placeholder={t("settings.city")} />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <Form.Item name="country" label={t("settings.country")}>
-                        <Select showSearch options={euCountryOptions(language)} placeholder={t("settings.country")} />
-                    </Form.Item>
-
-                    <Divider>{t("settings.contact")}</Divider>
-
-                    <Form.Item
-                        name="email"
-                        label={t("settings.email")}
-                        rules={[
-                            { required: true, message: t("settings.required") },
-                            {
-                                type: "email",
-                                message: t("settings.invalidEmail"),
-                            },
-                        ]}
-                    >
-                        <Input placeholder="info@company.com" />
-                    </Form.Item>
-
-                    <Form.Item name="phone" label={t("settings.phone")}>
-                        <Input placeholder="+49 30 123456" />
-                    </Form.Item>
-
-                    <Form.Item name="website" label={t("settings.website")}>
-                        <Input placeholder="https://www.company.com" />
-                    </Form.Item>
-
-                    <Divider>{t("settings.taxInfo")}</Divider>
-
-                    <Row gutter={[12, 0]}>
-                        <Col xs={24} sm={12}>
-                            <EInvoiceFields seller />
-                            <Form.Item
-                                name="vat_id"
-                                label={t("settings.vatId")}
-                            >
-                                <Input placeholder="DE123456789" />
-                            </Form.Item>
-                        </Col>
-
-                        <Col xs={24} sm={12}>
-                            <Form.Item
-                                name="tax_number"
-                                label={t("settings.taxNumber")}
-                            >
-                                <Input placeholder="12/345/67890" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <Form.Item
-                        name="commercial_register_number"
-                        label={t("settings.commercialRegister")}
-                    >
-                        <Input placeholder="HRB 12345" />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="registry_court"
-                        label={t("settings.registryCourt")}
-                    >
-                        <Input placeholder={t("settings.registryCourt")} />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="managing_directors"
-                        label={t("settings.managingDirectors")}
-                    >
-                        <Input placeholder={t("settings.managingDirectors")} />
-                    </Form.Item>
-
-                    <Divider>{t("settings.bankDetails")}</Divider>
-
-                    <Form.Item name="bank_name" label={t("settings.bankName")}>
-                        <Input placeholder={t("settings.bankName")} />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="bank_iban"
-                        label={t("settings.iban")}
-                        extra={t("settings.ibanGirocodeHelp")}
-                        rules={[
-                            { required: true, message: t("settings.required") },
-                        ]}
-                    >
-                        <Input placeholder="DE89 3704 0044 0532 0130 00" />
-                    </Form.Item>
-
-                    <Form.Item name="bank_bic" label={t("settings.bic")}>
-                        <Input placeholder="COBADEFFXXX" />
-                    </Form.Item>
-
-                    <Divider>{t("settings.invoiceSettings")}</Divider>
-
-                    <Form.Item
-                        name="payment_terms_default"
-                        label={t("settings.paymentTerms")}
-                        rules={[
-                            { required: true, message: t("settings.required") },
-                        ]}
-                    >
-                        <Input.TextArea
-                            placeholder={t("settings.paymentTermsPlaceholder")}
-                            rows={2}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="is_small_business"
-                        label={t("settings.smallBusiness")}
-                        valuePropName="checked"
-                        extra={t("settings.smallBusinessHint")}
-                    >
-                        <Switch onChange={(checked) => { if (checked) form.setFieldValue("is_flat_rate_farming", false); }} />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="is_flat_rate_farming"
-                        label={t("settings.flatRateFarming")}
-                        valuePropName="checked"
-                        extra={t("settings.flatRateFarmingHint")}
-                    >
-                        <Switch onChange={(checked) => { if (checked) form.setFieldValue("is_small_business", false); }} />
-                    </Form.Item>
-
-                    <Divider>{t("settings.numberingTitle")}</Divider>
-                    <NumberingSection t={t} form={form} />
-
-                    <Form.Item style={{ marginTop: 24 }}>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            icon={<SaveOutlined />}
-                            loading={saving}
-                            size="large"
-                        >
-                            {t("settings.save")}
-                        </Button>
-                    </Form.Item>
-                </Form>
-                </>
-            ),
-        },
-        ...(isTermineEnabled()
-            ? [
-                  {
-                      key: "booking",
-                      label: (
-                          <span>
-                              <CalendarOutlined />{" "}
-                              {language === "de" ? "Online-Buchung & Termine" : "Online Booking"}
-                          </span>
-                      ),
-                      children: <OnlineBookingSettingsTab />,
-                  },
-              ]
-            : []),
-        {
-            key: "ai",
-            label: (
-                <span>
-                    <RobotOutlined /> {t("settings.ai")}
-                </span>
-            ),
-            children: (
-                <Form
-                    form={aiForm}
-                    layout="vertical"
-                    onFinish={handleSaveAISettings}
-                    disabled={aiLoading}
-                    initialValues={{
-                        provider: "openai",
-                        model: "gpt-4o-mini",
-                        system_prompt:
-                            "You are Rechly AI. Help the user write invoice-related text clearly and concisely.",
-                    }}
-                >
-                    <Card>
-                        <Title level={5}>{t("settings.aiTitle")}</Title>
-                        <Text type="secondary">
-                            {t("settings.aiDescription")}
-                        </Text>
-
-                        <Divider />
-
-                        {aiDailyUsage ? (
-                            <Card size="small" style={{ marginBottom: 16 }}>
-                                <Space
-                                    direction="vertical"
-                                    style={{ width: "100%" }}
-                                    size={4}
-                                >
-                                    <Text strong>
-                                        {t("settings.aiUsageTitle")}
-                                    </Text>
-                                    <Text type="secondary">
-                                        {t("settings.aiUsageSummary")
-                                            .replace(
-                                                "{used}",
-                                                String(aiDailyUsage.used),
-                                            )
-                                            .replace(
-                                                "{limit}",
-                                                String(aiDailyUsage.limit),
-                                            )
-                                            .replace(
-                                                "{remaining}",
-                                                String(aiDailyUsage.remaining),
-                                            )}
-                                    </Text>
-                                    <Progress
-                                        percent={Math.min(
-                                            100,
-                                            aiDailyUsage.limit > 0
-                                                ? (aiDailyUsage.used /
-                                                      aiDailyUsage.limit) *
-                                                      100
-                                                : 0,
-                                        )}
-                                        showInfo={false}
-                                        status={
-                                            aiDailyUsage.remaining === 0
-                                                ? "exception"
-                                                : aiDailyUsage.remaining <= 10
-                                                  ? "active"
-                                                  : "normal"
-                                        }
-                                    />
-                                </Space>
-                            </Card>
-                        ) : null}
-
-                        <Form.Item
-                            name="provider"
-                            label={t("settings.aiProvider")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("settings.required"),
-                                },
-                            ]}
-                        >
-                            <Select
-                                options={providerOptions}
-                                onChange={(value: AIProvider) => {
-                                    const presets = aiModelPresets[value] || [];
-                                    const currentModel =
-                                        aiForm.getFieldValue("model");
-                                    if (
-                                        presets.length > 0 &&
-                                        !presets.includes(currentModel)
-                                    ) {
-                                        aiForm.setFieldValue(
-                                            "model",
-                                            presets[0],
-                                        );
-                                    }
-                                    if (
-                                        value === "ollama" &&
-                                        !aiForm.getFieldValue("base_url")
-                                    ) {
-                                        aiForm.setFieldValue(
-                                            "base_url",
-                                            "http://localhost:11434/v1",
-                                        );
-                                    }
-                                }}
-                            />
-                        </Form.Item>
-
-                        {!aiLocalAllowed && (
-                            <Alert
-                                type="warning"
-                                showIcon
-                                style={{ marginBottom: 12 }}
-                                message={t("settings.aiOllamaHostedTitle")}
-                                description={t("settings.aiOllamaHostedBody")}
-                            />
-                        )}
-
-                        {selectedProvider === "ollama" && aiLocalAllowed && (
-                            <>
-                                <Alert
-                                    type="success"
-                                    showIcon
-                                    style={{ marginBottom: 12 }}
-                                    message={t("settings.aiLocalPrivacyBadge")}
-                                />
-                                <Card
-                                    size="small"
-                                    className="dashboard-success-panel"
-                                    style={{
-                                        marginBottom: 16,
-                                    }}
-                                >
-                                    <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                                        <Text strong style={{ color: "var(--dash-positive)" }}>
-                                            ⭐ Empfohlenes Modell: <code>jonprompter/Rechly-DE-3B</code>
-                                        </Text>
-                                        <Text type="secondary" style={{ fontSize: 12 }}>
-                                            Speziell trainiert für deutsche Rechnungen, GoBD & §19 UStG.
-                                            Terminal-Befehl zum Starten:
-                                        </Text>
-                                        <Text code style={{ fontSize: 12 }}>
-                                            ollama run jonprompter/Rechly-DE-3B
-                                        </Text>
-                                        <Space size={12} style={{ marginTop: 4 }}>
-                                            <a
-                                                href="https://ollama.com/jonprompter/Rechly-DE-3B"
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                style={{ fontSize: 12 }}
-                                            >
-                                                Ollama Modell-Seite ↗
-                                            </a>
-                                            <a
-                                                href="https://huggingface.co/jonprompter/rechly-de-3b"
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                style={{ fontSize: 12 }}
-                                            >
-                                                Hugging Face Repo ↗
-                                            </a>
-                                        </Space>
-                                    </Space>
-                                </Card>
-                            </>
-                        )}
-
-                        <Form.Item
-                            name="model"
-                            label={t("settings.aiModel")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("settings.required"),
-                                },
-                            ]}
-                        >
-                            <AutoComplete
-                                options={modelOptions}
-                                placeholder={t("settings.aiModelPlaceholder")}
-                                filterOption={(inputValue, option) =>
-                                    (option?.value ?? "")
-                                        .toLowerCase()
-                                        .includes(inputValue.toLowerCase())
-                                }
-                            />
-                        </Form.Item>
-
-                        {selectedProvider === "ollama" && (
-                            <Form.Item
-                                name="base_url"
-                                label={t("settings.aiBaseUrl")}
-                                extra={t("settings.aiBaseUrlHelp")}
-                            >
-                                <Input placeholder="http://localhost:11434/v1" />
-                            </Form.Item>
-                        )}
-
-                        <Form.Item
-                            name="api_key"
-                            label={t("settings.aiApiKey")}
-                            extra={
-                                selectedProvider === "ollama"
-                                    ? "Optional für lokale Server (Standard: nicht benötigt)"
-                                    : t("settings.aiApiKeyHelp")
-                            }
-                        >
-                            <Input.Password
-                                placeholder={
-                                    selectedProvider === "ollama"
-                                        ? "Optional..."
-                                        : "sk-..."
-                                }
-                            />
-                        </Form.Item>
-
-                        <Text type={aiKeyConfigured ? "success" : "secondary"}>
-                            {aiKeyConfigured
-                                ? t("settings.aiConfigured")
-                                : t("settings.aiNotConfigured")}
-                        </Text>
-
-                        <Form.Item
-                            name="system_prompt"
-                            label={t("settings.aiSystemPrompt")}
-                            style={{ marginTop: 16 }}
-                        >
-                            <Input.TextArea
-                                rows={3}
-                                placeholder={t(
-                                    "settings.aiSystemPromptPlaceholder",
-                                )}
-                            />
-                        </Form.Item>
-
-                        <Form.Item style={{ marginBottom: 0 }}>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                icon={<SaveOutlined />}
-                                loading={aiSaving}
-                            >
-                                {t("settings.aiSave")}
-                            </Button>
-                        </Form.Item>
-                    </Card>
-
-                    <Card style={{ marginTop: 16 }}>
-                        <Title level={5}>{t("settings.aiTestRun")}</Title>
-
-                        <Form.Item
-                            name="test_prompt"
-                            label={t("settings.aiTestPrompt")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: t("settings.required"),
-                                },
-                            ]}
-                        >
-                            <Input.TextArea
-                                rows={4}
-                                placeholder={t(
-                                    "settings.aiTestPromptPlaceholder",
-                                )}
-                            />
-                        </Form.Item>
-
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                            <Button
-                                onClick={handleTestAI}
-                                loading={aiTesting}
-                                icon={<RobotOutlined />}
-                            >
-                                {t("settings.aiTestRun")}
-                            </Button>
-
-                            {aiResponse ? (
-                                <Card size="small">
-                                    <Text strong>
-                                        {t("settings.aiResponse")}
-                                    </Text>
-                                    <div
-                                        style={{
-                                            whiteSpace: "pre-wrap",
-                                            marginTop: 8,
-                                        }}
-                                    >
-                                        {aiResponse}
-                                    </div>
-                                </Card>
-                            ) : null}
-                        </Space>
-                    </Card>
-                </Form>
-            ),
-        },
-        {
-            key: "account",
-            label: (
-                <span>
-                    <UserOutlined /> {t("settings.account")}
-                </span>
-            ),
-            children: (
-                <div>
-                    <Card>
-                        <Title level={5}>{t("settings.accountInfo")}</Title>
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                            <div>
-                                <Text type="secondary">
-                                    {t("settings.accountEmail")}
-                                </Text>
-                                <br />
-                                <Text strong>
-                                    {user?.email || t("settings.guest")}
-                                </Text>
-                                {user?.email && (
-                                    <div style={{ marginTop: 6 }}>
-                                        {user.emailVerification ? (
-                                            <Tag color="green">{t("verify.verifiedBadge")}</Tag>
-                                        ) : (
-                                            <Space wrap>
-                                                <Tag color="orange">{t("verify.unverifiedBadge")}</Tag>
-                                                <Button
-                                                    size="small"
-                                                    loading={verifySending}
-                                                    onClick={handleResendVerification}
-                                                >
-                                                    {t("verify.resend")}
-                                                </Button>
-                                            </Space>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <Text type="secondary">
-                                    {t("settings.accountId")}
-                                </Text>
-                                <br />
-                                <Text code>{user?.$id}</Text>
-                            </div>
-                        </Space>
-                    </Card>
-
-                    <Card style={{ marginTop: 16 }}>
-                        <Title level={5}>{t("settings.logout")}</Title>
-                        <Text type="secondary">{t("settings.logoutDesc")}</Text>
-                        <div style={{ marginTop: 16 }}>
-                            <Button danger onClick={handleLogout}>
-                                {t("settings.logout")}
-                            </Button>
-                        </div>
-                    </Card>
-
-                    <Card
-                        style={{
-                            marginTop: 16,
-                            borderColor: "#ff4d4f",
-                        }}
-                    >
-                        <Title level={5} style={{ color: "#ff4d4f" }}>
-                            {t("settings.deleteAccount")}
-                        </Title>
-                        <Text type="secondary">
-                            {t("settings.deleteAccountWarning")}
-                        </Text>
-                        <div style={{ marginTop: 16 }}>
-                            <Button
-                                danger
-                                type="primary"
-                                onClick={handleDeleteAccount}
-                                loading={deleting}
-                                icon={<DeleteOutlined />}
-                            >
-                                {t("settings.deleteAccount")}
-                            </Button>
-                        </div>
-                    </Card>
-                </div>
-            ),
-        },
-        {
-            key: "migration",
-            label: (
-                <span>
-                    <SwapOutlined /> {t("dashboard.migration")}
-                </span>
-            ),
-            children: <MigrationWizard compact />,
-        },
-    ];
+    const modelOptions = aiModelPresets[selectedProvider] || [];
+    const formDisabled = loading || !!companyLoadError;
 
     return (
-        <div>
-            <Title level={4}>{t("settings.title")}</Title>
-            <HelpLink href="/hilfe/erste-schritte#firma" label="Hilfe zur Einrichtung" />
-            <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+        <div className="flex flex-col gap-4">
+            <div>
+                <h2 className="text-xl font-semibold">{t("settings.title")}</h2>
+                <HelpLink href="/hilfe/erste-schritte#firma" label="Hilfe zur Einrichtung" />
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="flex-wrap">
+                    <TabsTrigger value="company"><Building2 />{t("settings.company")}</TabsTrigger>
+                    {isTermineEnabled() && (
+                        <TabsTrigger value="booking">
+                            <CalendarDays />
+                            {language === "de" ? "Online-Buchung & Termine" : "Online Booking"}
+                        </TabsTrigger>
+                    )}
+                    <TabsTrigger value="ai"><Bot />{t("settings.ai")}</TabsTrigger>
+                    <TabsTrigger value="account"><User />{t("settings.account")}</TabsTrigger>
+                    <TabsTrigger value="migration"><ArrowLeftRight />{t("dashboard.migration")}</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="company" className="flex flex-col gap-4">
+                    {companyLoadError && (
+                        <Alert variant="destructive">
+                            <AlertTitle>{companyLoadError}</AlertTitle>
+                            <AlertDescription>
+                                <Button type="button" size="sm" className="mt-2" disabled={loading} onClick={() => void loadCompanyInfo()}>
+                                    {loading && <Loader2 className="animate-spin" />}
+                                    {language === "de" ? "Erneut laden" : "Retry"}
+                                </Button>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    {companySaveError && (
+                        <Alert variant="destructive">
+                            <AlertTitle>{companySaveError}</AlertTitle>
+                        </Alert>
+                    )}
+
+                    <form onSubmit={handleSave} className={formDisabled ? "pointer-events-none flex flex-col gap-4 opacity-60" : "flex flex-col gap-4"} noValidate>
+                        {/* Logo */}
+                        <Card>
+                            <CardContent className="flex flex-wrap items-center gap-4">
+                                {logoPreview ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={logoPreview} alt="Logo" className="size-20 rounded-lg object-contain" />
+                                ) : (
+                                    <div className="dashboard-logo-placeholder flex size-20 items-center justify-center rounded-lg">
+                                        <Building2 className="size-8 text-muted-foreground" />
+                                    </div>
+                                )}
+                                <div className="flex flex-col items-start gap-2">
+                                    <label className="inline-flex cursor-pointer">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleLogoUpload(file);
+                                                e.target.value = "";
+                                            }}
+                                        />
+                                        <span className="inline-flex h-9 items-center gap-2 rounded-md border border-input px-4 text-sm font-medium hover:bg-accent">
+                                            <Upload className="size-4" />
+                                            {t("settings.uploadLogo")}
+                                        </span>
+                                    </label>
+                                    {logoPreview && (
+                                        <Button type="button" variant="destructive" size="sm" onClick={handleRemoveLogo}>
+                                            <Trash2 />
+                                            {t("settings.removeLogo")}
+                                        </Button>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Field label={t("settings.companyName")} htmlFor="co-name" error={errors.name}>
+                            <Input id="co-name" placeholder={t("settings.companyName")} value={values.name}
+                                onChange={(e) => set({ name: e.target.value })} aria-invalid={!!errors.name} />
+                        </Field>
+
+                        <Field label={t("settings.legalForm")} htmlFor="co-legal">
+                            <Input id="co-legal" placeholder={t("settings.legalFormPlaceholder")} value={values.legal_form ?? ""}
+                                onChange={(e) => set({ legal_form: e.target.value })} />
+                        </Field>
+
+                        <Separator>{t("settings.address")}</Separator>
+
+                        <Field label={t("settings.address")} htmlFor="co-addr1" error={errors.address_line1}>
+                            <Input id="co-addr1" placeholder={t("settings.streetNumber")} value={values.address_line1}
+                                onChange={(e) => set({ address_line1: e.target.value })} aria-invalid={!!errors.address_line1} />
+                        </Field>
+
+                        <Field label={t("settings.addressExtra")} htmlFor="co-addr2">
+                            <Input id="co-addr2" placeholder={t("settings.addressExtra")} value={values.address_line2 ?? ""}
+                                onChange={(e) => set({ address_line2: e.target.value })} />
+                        </Field>
+
+                        <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+                            <Field label={t("settings.postalCode")} htmlFor="co-postal" error={errors.postal_code}>
+                                <Input id="co-postal" placeholder="12345" value={values.postal_code}
+                                    onChange={(e) => set({ postal_code: e.target.value })} aria-invalid={!!errors.postal_code} />
+                            </Field>
+                            <Field label={t("settings.city")} htmlFor="co-city" error={errors.city}>
+                                <Input id="co-city" placeholder={t("settings.city")} value={values.city}
+                                    onChange={(e) => set({ city: e.target.value })} aria-invalid={!!errors.city} />
+                            </Field>
+                        </div>
+
+                        <Field label={t("settings.country")}>
+                            <Select value={values.country} onValueChange={(v) => set({ country: v })}>
+                                <SelectTrigger aria-label={t("settings.country")}><SelectValue placeholder={t("settings.country")} /></SelectTrigger>
+                                <SelectContent>
+                                    {euCountryOptions(language, values.country).map((o) => (
+                                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </Field>
+
+                        <Separator>{t("settings.contact")}</Separator>
+
+                        <Field label={t("settings.email")} htmlFor="co-email" error={errors.email}>
+                            <Input id="co-email" placeholder="info@company.com" value={values.email ?? ""}
+                                onChange={(e) => set({ email: e.target.value })} aria-invalid={!!errors.email} />
+                        </Field>
+
+                        <Field label={t("settings.phone")} htmlFor="co-phone">
+                            <Input id="co-phone" placeholder="+49 30 123456" value={values.phone ?? ""}
+                                onChange={(e) => set({ phone: e.target.value })} />
+                        </Field>
+
+                        <Field label={t("settings.website")} htmlFor="co-website">
+                            <Input id="co-website" placeholder="https://www.company.com" value={values.website ?? ""}
+                                onChange={(e) => set({ website: e.target.value })} />
+                        </Field>
+
+                        <Separator>{t("settings.taxInfo")}</Separator>
+
+                        <div className="grid items-start gap-4 sm:grid-cols-2">
+                            <div className="flex flex-col gap-4">
+                                <EInvoiceFieldsControlled seller value={values.e_invoice} onChange={(e_invoice) => set({ e_invoice })} />
+                                <Field label={t("settings.vatId")} htmlFor="co-vat">
+                                    <Input id="co-vat" placeholder="DE123456789" value={values.vat_id ?? ""}
+                                        onChange={(e) => set({ vat_id: e.target.value })} />
+                                </Field>
+                            </div>
+                            <Field label={t("settings.taxNumber")} htmlFor="co-tax">
+                                <Input id="co-tax" placeholder="12/345/67890" value={values.tax_number ?? ""}
+                                    onChange={(e) => set({ tax_number: e.target.value })} />
+                            </Field>
+                        </div>
+
+                        <Field label={t("settings.commercialRegister")} htmlFor="co-register">
+                            <Input id="co-register" placeholder="HRB 12345" value={values.commercial_register_number ?? ""}
+                                onChange={(e) => set({ commercial_register_number: e.target.value })} />
+                        </Field>
+
+                        <Field label={t("settings.registryCourt")} htmlFor="co-court">
+                            <Input id="co-court" placeholder={t("settings.registryCourt")} value={values.registry_court ?? ""}
+                                onChange={(e) => set({ registry_court: e.target.value })} />
+                        </Field>
+
+                        <Field label={t("settings.managingDirectors")} htmlFor="co-directors">
+                            <Input id="co-directors" placeholder={t("settings.managingDirectors")} value={values.managing_directors ?? ""}
+                                onChange={(e) => set({ managing_directors: e.target.value })} />
+                        </Field>
+
+                        <Separator>{t("settings.bankDetails")}</Separator>
+
+                        <Field label={t("settings.bankName")} htmlFor="co-bank">
+                            <Input id="co-bank" placeholder={t("settings.bankName")} value={values.bank_name ?? ""}
+                                onChange={(e) => set({ bank_name: e.target.value })} />
+                        </Field>
+
+                        <Field label={t("settings.iban")} htmlFor="co-iban" hint={t("settings.ibanGirocodeHelp")} error={errors.bank_iban}>
+                            <Input id="co-iban" placeholder="DE89 3704 0044 0532 0130 00" value={values.bank_iban ?? ""}
+                                onChange={(e) => set({ bank_iban: e.target.value })} aria-invalid={!!errors.bank_iban} />
+                        </Field>
+
+                        <Field label={t("settings.bic")} htmlFor="co-bic">
+                            <Input id="co-bic" placeholder="COBADEFFXXX" value={values.bank_bic ?? ""}
+                                onChange={(e) => set({ bank_bic: e.target.value })} />
+                        </Field>
+
+                        <Separator>{t("settings.invoiceSettings")}</Separator>
+
+                        <Field label={t("settings.paymentTerms")} htmlFor="co-terms" error={errors.payment_terms_default}>
+                            <Textarea id="co-terms" placeholder={t("settings.paymentTermsPlaceholder")} rows={2}
+                                value={values.payment_terms_default ?? ""}
+                                onChange={(e) => set({ payment_terms_default: e.target.value })}
+                                aria-invalid={!!errors.payment_terms_default} />
+                        </Field>
+
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <Label htmlFor="co-small">{t("settings.smallBusiness")}</Label>
+                                <p className="text-xs text-muted-foreground">{t("settings.smallBusinessHint")}</p>
+                            </div>
+                            <Switch id="co-small" checked={!!values.is_small_business}
+                                onCheckedChange={(checked) => set(checked ? { is_small_business: true, is_flat_rate_farming: false } : { is_small_business: false })} />
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <Label htmlFor="co-flat">{t("settings.flatRateFarming")}</Label>
+                                <p className="text-xs text-muted-foreground">{t("settings.flatRateFarmingHint")}</p>
+                            </div>
+                            <Switch id="co-flat" checked={!!values.is_flat_rate_farming}
+                                onCheckedChange={(checked) => set(checked ? { is_flat_rate_farming: true, is_small_business: false } : { is_flat_rate_farming: false })} />
+                        </div>
+
+                        <Separator>{t("settings.numberingTitle")}</Separator>
+                        <NumberingSection t={t} values={values} set={set} />
+
+                        <div className="pt-2">
+                            <Button type="submit" size="lg" disabled={saving || formDisabled}>
+                                {saving ? <Loader2 className="animate-spin" /> : <Save />}
+                                {t("settings.save")}
+                            </Button>
+                        </div>
+                    </form>
+                </TabsContent>
+
+                {isTermineEnabled() && (
+                    <TabsContent value="booking">
+                        <OnlineBookingSettingsTab />
+                    </TabsContent>
+                )}
+
+                <TabsContent value="ai" className="flex flex-col gap-4">
+                    <form onSubmit={handleSaveAISettings} className={aiLoading ? "pointer-events-none flex flex-col gap-4 opacity-60" : "flex flex-col gap-4"} noValidate>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>{t("settings.aiTitle")}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-4">
+                                <p className="text-sm text-muted-foreground">{t("settings.aiDescription")}</p>
+                                <Separator />
+
+                                {aiDailyUsage && (
+                                    <Card>
+                                        <CardContent className="flex flex-col gap-1.5">
+                                            <p className="font-semibold">{t("settings.aiUsageTitle")}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {t("settings.aiUsageSummary")
+                                                    .replace("{used}", String(aiDailyUsage.used))
+                                                    .replace("{limit}", String(aiDailyUsage.limit))
+                                                    .replace("{remaining}", String(aiDailyUsage.remaining))}
+                                            </p>
+                                            <Progress
+                                                value={aiDailyUsage.limit > 0 ? Math.min(100, (aiDailyUsage.used / aiDailyUsage.limit) * 100) : 0}
+                                                className={aiDailyUsage.remaining === 0 ? "[&>[data-slot=progress-indicator]]:bg-destructive" : undefined}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                )}
+
+                                <Field label={t("settings.aiProvider")}>
+                                    <Select
+                                        value={selectedProvider}
+                                        onValueChange={(value) => {
+                                            const provider = value as AIProvider;
+                                            const presets = aiModelPresets[provider] || [];
+                                            const patch: Partial<AiValues> = { provider };
+                                            if (presets.length > 0 && !presets.includes(aiValues.model)) {
+                                                patch.model = presets[0];
+                                            }
+                                            if (provider === "ollama" && !aiValues.base_url) {
+                                                patch.base_url = "http://localhost:11434/v1";
+                                            }
+                                            setAi(patch);
+                                        }}
+                                    >
+                                        <SelectTrigger aria-label={t("settings.aiProvider")}><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {providerOptions.map((o) => (
+                                                <SelectItem key={o.value} value={o.value} disabled={o.disabled}>{o.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+
+                                {!aiLocalAllowed && (
+                                    <Alert>
+                                        <AlertTitle>{t("settings.aiOllamaHostedTitle")}</AlertTitle>
+                                        <AlertDescription>{t("settings.aiOllamaHostedBody")}</AlertDescription>
+                                    </Alert>
+                                )}
+
+                                {selectedProvider === "ollama" && aiLocalAllowed && (
+                                    <>
+                                        <Alert>
+                                            <AlertTitle>{t("settings.aiLocalPrivacyBadge")}</AlertTitle>
+                                        </Alert>
+                                        <Card className="dashboard-success-panel">
+                                            <CardContent className="flex flex-col gap-1.5">
+                                                <p className="font-semibold text-emerald-600">
+                                                    ⭐ Empfohlenes Modell: <code>jonprompter/Rechly-DE-3B</code>
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Speziell trainiert für deutsche Rechnungen, GoBD &amp; §19 UStG.
+                                                    Terminal-Befehl zum Starten:
+                                                </p>
+                                                <code className="rounded bg-muted px-1.5 py-0.5 text-xs">ollama run jonprompter/Rechly-DE-3B</code>
+                                                <div className="mt-1 flex gap-3 text-xs">
+                                                    <a href="https://ollama.com/jonprompter/Rechly-DE-3B" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                                                        Ollama Modell-Seite ↗
+                                                    </a>
+                                                    <a href="https://huggingface.co/jonprompter/rechly-de-3b" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                                                        Hugging Face Repo ↗
+                                                    </a>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </>
+                                )}
+
+                                <Field label={t("settings.aiModel")} htmlFor="ai-model">
+                                    <>
+                                        <Input
+                                            id="ai-model"
+                                            list="ai-model-presets"
+                                            value={aiValues.model}
+                                            onChange={(e) => setAi({ model: e.target.value })}
+                                            placeholder={t("settings.aiModelPlaceholder")}
+                                        />
+                                        <datalist id="ai-model-presets">
+                                            {modelOptions.map((model) => (
+                                                <option key={model} value={model} />
+                                            ))}
+                                        </datalist>
+                                    </>
+                                </Field>
+
+                                {selectedProvider === "ollama" && (
+                                    <Field label={t("settings.aiBaseUrl")} htmlFor="ai-base" hint={t("settings.aiBaseUrlHelp")}>
+                                        <Input id="ai-base" placeholder="http://localhost:11434/v1" value={aiValues.base_url ?? ""}
+                                            onChange={(e) => setAi({ base_url: e.target.value })} />
+                                    </Field>
+                                )}
+
+                                <Field label={t("settings.aiApiKey")} htmlFor="ai-key"
+                                    hint={selectedProvider === "ollama" ? "Optional für lokale Server (Standard: nicht benötigt)" : t("settings.aiApiKeyHelp")}>
+                                    <Input id="ai-key" type="password" value={aiValues.api_key ?? ""}
+                                        onChange={(e) => setAi({ api_key: e.target.value })}
+                                        placeholder={selectedProvider === "ollama" ? "Optional..." : "sk-..."} />
+                                </Field>
+
+                                <p className={aiKeyConfigured ? "text-sm text-emerald-600" : "text-sm text-muted-foreground"}>
+                                    {aiKeyConfigured ? t("settings.aiConfigured") : t("settings.aiNotConfigured")}
+                                </p>
+
+                                <Field label={t("settings.aiSystemPrompt")} htmlFor="ai-prompt">
+                                    <Textarea id="ai-prompt" rows={3} value={aiValues.system_prompt ?? ""}
+                                        onChange={(e) => setAi({ system_prompt: e.target.value })}
+                                        placeholder={t("settings.aiSystemPromptPlaceholder")} />
+                                </Field>
+
+                                <div>
+                                    <Button type="submit" disabled={aiSaving || aiLoading}>
+                                        {aiSaving ? <Loader2 className="animate-spin" /> : <Save />}
+                                        {t("settings.aiSave")}
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </form>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t("settings.aiTestRun")}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            <Field label={t("settings.aiTestPrompt")} htmlFor="ai-test">
+                                <Textarea id="ai-test" rows={4} value={aiValues.test_prompt ?? ""}
+                                    onChange={(e) => setAi({ test_prompt: e.target.value })}
+                                    placeholder={t("settings.aiTestPromptPlaceholder")} />
+                            </Field>
+                            <div>
+                                <Button type="button" variant="outline" disabled={aiTesting} onClick={() => void handleTestAI()}>
+                                    {aiTesting ? <Loader2 className="animate-spin" /> : <Bot />}
+                                    {t("settings.aiTestRun")}
+                                </Button>
+                            </div>
+                            {aiResponse && (
+                                <Card>
+                                    <CardContent className="flex flex-col gap-2">
+                                        <p className="font-semibold">{t("settings.aiResponse")}</p>
+                                        <div className="text-sm whitespace-pre-wrap">{aiResponse}</div>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="account" className="flex flex-col gap-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t("settings.accountInfo")}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            <div>
+                                <p className="text-sm text-muted-foreground">{t("settings.accountEmail")}</p>
+                                <p className="font-semibold">{user?.email || t("settings.guest")}</p>
+                                {user?.email && (
+                                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                        {user.emailVerification ? (
+                                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">{t("verify.verifiedBadge")}</Badge>
+                                        ) : (
+                                            <>
+                                                <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300">{t("verify.unverifiedBadge")}</Badge>
+                                                <Button type="button" size="sm" variant="outline" disabled={verifySending} onClick={() => void handleResendVerification()}>
+                                                    {verifySending && <Loader2 className="animate-spin" />}
+                                                    {t("verify.resend")}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">{t("settings.accountId")}</p>
+                                <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{user?.$id}</code>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t("settings.logout")}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-start gap-4">
+                            <p className="text-sm text-muted-foreground">{t("settings.logoutDesc")}</p>
+                            <Button type="button" variant="destructive" onClick={() => void handleLogout()}>
+                                {t("settings.logout")}
+                            </Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-destructive">
+                        <CardHeader>
+                            <CardTitle className="text-destructive">{t("settings.deleteAccount")}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-start gap-4">
+                            <p className="text-sm text-muted-foreground">{t("settings.deleteAccountWarning")}</p>
+                            <Button type="button" variant="destructive" disabled={deleting} onClick={() => setDeleteOpen(true)}>
+                                {deleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                                {t("settings.deleteAccount")}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="migration">
+                    <MigrationWizard compact />
+                </TabsContent>
+            </Tabs>
+
+            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t("settings.deleteAccountTitle")}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            <span className="flex flex-col gap-2">
+                                <span>{t("settings.deleteAccountConfirm")}</span>
+                                <span className="font-medium text-destructive">{t("settings.deleteAccountWarning")}</span>
+                            </span>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t("settings.deleteAccountCancel")}</AlertDialogCancel>
+                        <AlertDialogAction variant="destructive" disabled={deleting} onClick={() => void confirmDeleteAccount()}>
+                            {deleting && <Loader2 className="animate-spin" />}
+                            {t("settings.deleteAccountButton")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
