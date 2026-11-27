@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, Button, Space, Typography } from "antd";
-import { CloudDownloadOutlined } from "@ant-design/icons";
+import { CloudDownload, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isLoopbackHostname } from "@/lib/updateCheck";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 interface CheckPayload {
     enabled?: boolean;
@@ -91,32 +92,36 @@ export default function UpdateBanner() {
         ? `v${check.latestVersion}`
         : check?.latestCommit || "";
 
+    const close = () => {
+        if (check) {
+            localStorage.setItem(
+                DISMISS_KEY,
+                check.latestVersion || check.latestCommit || "",
+            );
+        }
+        setCheck(null);
+        setStatus(null);
+    };
+
     return (
-        <Alert
-            type={status?.state === "failed" ? "error" : status?.state === "done" ? "success" : "info"}
-            showIcon
-            icon={<CloudDownloadOutlined />}
-            closable={!running}
-            onClose={() => {
-                if (check) {
-                    localStorage.setItem(
-                        DISMISS_KEY,
-                        check.latestVersion || check.latestCommit || "",
-                    );
-                }
-                setCheck(null);
-                setStatus(null);
-            }}
-            style={{ marginBottom: 16 }}
-            message={
-                status?.state === "done"
-                    ? t("update.doneTitle")
-                    : status?.state === "failed"
-                      ? t("update.failedTitle")
-                      : `${t("update.availableTitle")} ${versionLabel}`.trim()
-            }
-            description={
-                <Space direction="vertical" size={8}>
+        <Alert variant={status?.state === "failed" ? "destructive" : "default"} className="mb-4">
+            <CloudDownload />
+            <AlertTitle className="flex items-start justify-between gap-2">
+                <span>
+                    {status?.state === "done"
+                        ? t("update.doneTitle")
+                        : status?.state === "failed"
+                          ? t("update.failedTitle")
+                          : `${t("update.availableTitle")} ${versionLabel}`.trim()}
+                </span>
+                {!running && (
+                    <Button type="button" variant="ghost" size="icon" className="size-7 shrink-0" onClick={close} aria-label="Dismiss">
+                        <X className="size-4" />
+                    </Button>
+                )}
+            </AlertTitle>
+            <AlertDescription>
+                <span className="flex flex-col gap-2">
                     <span>
                         {status?.message ||
                             (check?.kind === "release"
@@ -124,32 +129,28 @@ export default function UpdateBanner() {
                                 : t("update.commitDesc"))}
                     </span>
                     {!status && (
-                        <Space wrap>
-                            <Button
-                                type="primary"
-                                size="small"
-                                loading={starting}
-                                onClick={startUpdate}
-                            >
+                        <span className="flex flex-wrap items-center gap-2">
+                            <Button type="button" size="sm" disabled={starting} onClick={startUpdate}>
+                                {starting && <Loader2 className="animate-spin" />}
                                 {t("update.now")}
                             </Button>
                             {check?.url && (
-                                <Button size="small" href={check.url} target="_blank" rel="noreferrer">
-                                    {t("update.whatsNew")}
+                                <Button type="button" size="sm" variant="outline" asChild>
+                                    <a href={check.url} target="_blank" rel="noreferrer">{t("update.whatsNew")}</a>
                                 </Button>
                             )}
-                            <Typography.Text code copyable>
-                                npm run update
-                            </Typography.Text>
-                        </Space>
+                            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">npm run update</code>
+                        </span>
                     )}
                     {status?.state === "done" && (
-                        <Button size="small" type="primary" onClick={() => window.location.reload()}>
-                            {t("update.reload")}
-                        </Button>
+                        <span>
+                            <Button type="button" size="sm" onClick={() => window.location.reload()}>
+                                {t("update.reload")}
+                            </Button>
+                        </span>
                     )}
-                </Space>
-            }
-        />
+                </span>
+            </AlertDescription>
+        </Alert>
     );
 }

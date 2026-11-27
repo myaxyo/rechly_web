@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Alert, Button, Card, Space, Spin, Typography, message } from "antd";
-import { MailOutlined } from "@ant-design/icons";
+import Link from "next/link";
+import { Loader2, Mail, X } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isDesktopRuntime } from "@/lib/runtime";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
-const { Paragraph, Title } = Typography;
 const DISMISS_KEY = "rechly-verify-banner-dismissed";
 
 function useVerificationActions() {
@@ -21,9 +24,9 @@ function useVerificationActions() {
         try {
             const res = await fetch("/api/auth/verification", { method: "POST" });
             if (!res.ok) throw new Error("send failed");
-            message.success(t("verify.sent"));
+            toast.success(t("verify.sent"));
         } catch {
-            message.error(t("verify.sendFailed"));
+            toast.error(t("verify.sendFailed"));
         } finally {
             setSending(false);
         }
@@ -37,9 +40,9 @@ function useVerificationActions() {
             const res = await fetch("/api/auth/user");
             const fresh = res.ok ? await res.json() : null;
             if (fresh?.emailVerification) {
-                message.success(t("verify.verifiedBadge"));
+                toast.success(t("verify.verifiedBadge"));
             } else {
-                message.info(t("verify.stillPending"));
+                toast.info(t("verify.stillPending"));
             }
         } finally {
             setChecking(false);
@@ -65,30 +68,36 @@ export function VerifyEmailBanner() {
     if (!user || isAnonymous || !user.email || user.emailVerification) return null;
 
     return (
-        <Alert
-            type="warning"
-            showIcon
-            closable
-            style={{ marginBottom: 16 }}
-            onClose={() => {
-                sessionStorage.setItem(DISMISS_KEY, "1");
-                setDismissed(true);
-            }}
-            message={t("verify.bannerTitle")}
-            description={
-                <Space direction="vertical" size={8}>
+        <Alert className="mb-4">
+            <Mail />
+            <AlertTitle className="flex items-start justify-between gap-2">
+                <span>{t("verify.bannerTitle")}</span>
+                <Button
+                    type="button" variant="ghost" size="icon" className="size-7 shrink-0" aria-label="Dismiss"
+                    onClick={() => {
+                        sessionStorage.setItem(DISMISS_KEY, "1");
+                        setDismissed(true);
+                    }}
+                >
+                    <X className="size-4" />
+                </Button>
+            </AlertTitle>
+            <AlertDescription>
+                <span className="flex flex-col gap-2">
                     <span>{t("verify.bannerDesc")}</span>
-                    <Space wrap>
-                        <Button size="small" type="primary" icon={<MailOutlined />} loading={sending} onClick={resend}>
+                    <span className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" disabled={sending} onClick={resend}>
+                            {sending ? <Loader2 className="animate-spin" /> : <Mail />}
                             {t("verify.resend")}
                         </Button>
-                        <Button size="small" loading={checking} onClick={checkNow}>
+                        <Button type="button" size="sm" variant="outline" disabled={checking} onClick={checkNow}>
+                            {checking && <Loader2 className="animate-spin" />}
                             {t("verify.checkNow")}
                         </Button>
-                    </Space>
-                </Space>
-            }
-        />
+                    </span>
+                </span>
+            </AlertDescription>
+        </Alert>
     );
 }
 
@@ -103,8 +112,8 @@ export function VerifiedOnly({ children }: { children: React.ReactNode }) {
 
     if (loading) {
         return (
-            <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
-                <Spin size="large" />
+            <div className="flex justify-center p-12">
+                <Loader2 className="size-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -113,15 +122,15 @@ export function VerifiedOnly({ children }: { children: React.ReactNode }) {
     }
     if (!user?.email) {
         return (
-            <Card style={{ maxWidth: 560, margin: "48px auto", textAlign: "center" }}>
-                <MailOutlined style={{ fontSize: 40, color: "var(--dash-accent, #2855d9)" }} />
-                <Title level={3} style={{ marginTop: 16 }}>
-                    {t("termine.verifyGateTitle")}
-                </Title>
-                <Paragraph type="secondary">{t("termine.verifyGateGuest")}</Paragraph>
-                <Button type="primary" size="large" href="/register">
-                    {t("dashboard.registerNow")}
-                </Button>
+            <Card className="mx-auto my-12 max-w-xl text-center">
+                <CardContent className="flex flex-col items-center gap-3">
+                    <Mail className="size-10 text-primary" />
+                    <h3 className="text-lg font-semibold">{t("termine.verifyGateTitle")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("termine.verifyGateGuest")}</p>
+                    <Button size="lg" asChild>
+                        <Link href="/register">{t("dashboard.registerNow")}</Link>
+                    </Button>
+                </CardContent>
             </Card>
         );
     }
@@ -134,21 +143,23 @@ export function VerifyEmailGate() {
     const { resend, sending, checkNow, checking, email } = useVerificationActions();
 
     return (
-        <Card style={{ maxWidth: 560, margin: "48px auto", textAlign: "center" }}>
-            <MailOutlined style={{ fontSize: 40, color: "var(--dash-accent, #2855d9)" }} />
-            <Title level={3} style={{ marginTop: 16 }}>
-                {t("termine.verifyGateTitle")}
-            </Title>
-            <Paragraph type="secondary">{t("termine.verifyGateDesc")}</Paragraph>
-            {email && <Paragraph strong>{email}</Paragraph>}
-            <Space wrap style={{ justifyContent: "center" }}>
-                <Button type="primary" size="large" icon={<MailOutlined />} loading={sending} onClick={resend}>
-                    {t("verify.resend")}
-                </Button>
-                <Button size="large" loading={checking} onClick={checkNow}>
-                    {t("verify.checkNow")}
-                </Button>
-            </Space>
+        <Card className="mx-auto my-12 max-w-xl text-center">
+            <CardContent className="flex flex-col items-center gap-3">
+                <Mail className="size-10 text-primary" />
+                <h3 className="text-lg font-semibold">{t("termine.verifyGateTitle")}</h3>
+                <p className="text-sm text-muted-foreground">{t("termine.verifyGateDesc")}</p>
+                {email && <p className="font-semibold">{email}</p>}
+                <div className="flex flex-wrap justify-center gap-2">
+                    <Button type="button" size="lg" disabled={sending} onClick={resend}>
+                        {sending ? <Loader2 className="animate-spin" /> : <Mail />}
+                        {t("verify.resend")}
+                    </Button>
+                    <Button type="button" size="lg" variant="outline" disabled={checking} onClick={checkNow}>
+                        {checking && <Loader2 className="animate-spin" />}
+                        {t("verify.checkNow")}
+                    </Button>
+                </div>
+            </CardContent>
         </Card>
     );
 }
