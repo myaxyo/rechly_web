@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import {
@@ -10,7 +9,6 @@ import {
 } from "@/lib/env";
 import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
 import ConsentAnalytics from "@/components/analytics/ConsentAnalytics";
-import PublicTheme from "@/components/PublicTheme";
 import AppwritePing from "@/components/AppwritePing";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -118,14 +116,12 @@ export default function RootLayout({
             <body>
                 <AppwritePing />
                 <ConsentAnalytics googleAnalyticsId={analyticsId} />
-                <AntdRegistry>
-                    <LanguageProvider>
-                        <AuthProvider>
-                            <PublicTheme>{children}</PublicTheme>
-                            <Toaster position="top-center" />
-                        </AuthProvider>
-                    </LanguageProvider>
-                </AntdRegistry>
+                <LanguageProvider>
+                    <AuthProvider>
+                        {children}
+                        <Toaster position="top-center" />
+                    </AuthProvider>
+                </LanguageProvider>
             </body>
         </html>
     );

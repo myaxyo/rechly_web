@@ -36,7 +36,17 @@ maps every shadcn variable to the current Rechly palette from
 - Not changed: `src/app/layout.tsx` (`AntdRegistry`), `PublicTheme`,
   all 87 files importing `antd` — zero UX impact
 
-## Rollout: opt-in preview (no forced switch)
+## Status: migration complete
+
+All pages and components are migrated to shadcn/ui. Ant Design
+(`antd`, `@ant-design/icons`, `@ant-design/nextjs-registry`) is
+removed from `package.json`, `AntdRegistry`/`PublicTheme` are gone,
+and no `.ant-*` selectors remain in the CSS. The dashboard shell is
+`src/components/dashboard/DashboardShellNew.tsx`; the opt-in toggle
+that protected users during the migration (below) was removed at
+cutover — there is now exactly one UI.
+
+## Rollout history: opt-in preview (no forced switch)
 
 Users are never switched automatically. `src/contexts/UiModeContext.tsx`
 persists a per-browser choice (`rechly.ui-mode`, default `legacy`):
@@ -53,22 +63,21 @@ persists a per-browser choice (`rechly.ui-mode`, default `legacy`):
   chrome. Only when every page is migrated does the legacy shell and
   Ant Design get removed (final cutover, announced in advance).
 
-## Next phases
+## How the migration was executed
 
-1. **Leaf components** — add `label`, `badge`, `skeleton`, `separator`,
-   `tooltip`, `dialog`, `dropdown-menu`, `table`, `tabs`, `switch`,
-   `checkbox`, `select`, `sonner` (replaces `message`/`notification`).
-   Migrate one leaf component at a time in low-traffic pages first.
-2. **Forms** — react-hook-form + zod wrappers replacing AntD `Form`
-   in auth pages (`login`, `register`, `forgot-password`), then
-   dashboard forms.
-3. **Data** — `Table` → TanStack Table + `ui/table`; `Modal` →
-   `dialog`; `DatePicker`, `Upload` get dedicated replacements.
-4. **Shell** — `DashboardShell` (`Layout`/`Menu`/`Drawer`) → shadcn
-   `sidebar` + custom header, last because it frames every page.
-5. **Removal** — drop `antd`, `@ant-design/icons`,
-   `@ant-design/nextjs-registry`, `AntdRegistry`, `PublicTheme`,
-   and the `.ant-*` overrides in `globals.css` / `dashboard.css`.
+1. **Leaf components** — full primitive library in
+   `src/components/ui/` (plus `date-picker`, `steps`); forms use
+   controlled state with manual validation (no form library needed).
+2. **Forms** — auth pages, then dashboard forms (clients, products,
+   settings, invoice/offer/recurring wizards).
+3. **Data** — antd `Table` → `ui/table` with client sorting/filter/
+   pagination; `Modal` → `dialog`/`alert-dialog`; `DatePicker` →
+   dayjs-based `ui/date-picker`; `Upload` → styled file inputs.
+4. **Shell** — new `DashboardShellNew` replaced the legacy shell
+   behind the opt-in toggle, then became the only shell.
+5. **Removal** — antd packages uninstalled, `PublicTheme` and the
+   toggle deleted, `.ant-*` CSS stripped, `.legal-prose` and
+   dashboard panel selectors updated to plain/shadcn selectors.
 
 ## Adding a component
 

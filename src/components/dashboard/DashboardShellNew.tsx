@@ -29,8 +29,7 @@ import WorkspaceActivity from "@/components/workspace/WorkspaceActivity";
 import CommandPalette from "@/components/dashboard/CommandPalette";
 import UpdateBanner from "@/components/dashboard/UpdateBanner";
 import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmail";
-import { AppearanceSelectNew } from "./DashboardAppearance";
-import { BackToOldUiButton, NewUiBadge } from "./UiModeToggle";
+import { AppearanceSelect } from "./DashboardAppearance";
 import LanguageSelectNew from "./LanguageSelectNew";
 
 interface NavItem { key: string; icon: ReactNode; label: string }
@@ -59,9 +58,6 @@ export default function DashboardShellNew({ children }: { children: ReactNode })
     const [paletteOpen, setPaletteOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [betaDismissed, setBetaDismissed] = useState(() => {
-        try { return sessionStorage.getItem("rechly.new-ui-beta-dismissed") === "1"; } catch { return false; }
-    });
 
     const workspaceEnabled = isWorkspaceEnabled();
     const termineEnabled = isTermineEnabled();
@@ -265,7 +261,6 @@ export default function DashboardShellNew({ children }: { children: ReactNode })
                         {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
                     </Button>
                     <h1 className="truncate text-base font-semibold sm:text-lg">{headerTitle}</h1>
-                    <NewUiBadge />
                     {isDesktopRuntime && <Badge variant="secondary" className="hidden sm:inline-flex">Offline · Local</Badge>}
 
                     <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
@@ -278,9 +273,7 @@ export default function DashboardShellNew({ children }: { children: ReactNode })
                         <Button type="button" variant="ghost" size="icon" onClick={() => setPaletteOpen(true)} className="md:hidden" aria-label={de ? "Suche öffnen" : "Open search"}>
                             <Search />
                         </Button>
-                        <span className="hidden xl:inline-flex"><BackToOldUiButton /></span>
-                        <span className="xl:hidden"><BackToOldUiButton compact /></span>
-                        <AppearanceSelectNew />
+                        <AppearanceSelect />
                         <span className="hidden sm:block"><LanguageSelectNew /></span>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -302,24 +295,6 @@ export default function DashboardShellNew({ children }: { children: ReactNode })
                 </header>
 
                 <main className="mx-auto w-full max-w-[1400px] flex-1 px-3 py-4 sm:px-5 sm:py-6">
-                    {!betaDismissed && (
-                        <Alert className="mb-4 border-primary/30 bg-primary/5">
-                            <TriangleAlert className="hidden" />
-                            <AlertTitle className="flex items-center justify-between gap-2">
-                                <span>{de ? "Du nutzt die neue Rechly-Oberfläche (Beta)" : "You're using the new Rechly interface (Beta)"}</span>
-                                <Button type="button" variant="ghost" size="icon" className="size-7 shrink-0" aria-label={de ? "Hinweis schließen" : "Dismiss"}
-                                    onClick={() => { setBetaDismissed(true); try { sessionStorage.setItem("rechly.new-ui-beta-dismissed", "1"); } catch {} }}>
-                                    <X className="size-4" />
-                                </Button>
-                            </AlertTitle>
-                            <AlertDescription>
-                                {de
-                                    ? "Gleicher Funktionsumfang, neues Design. Falls etwas ungewohnt aussieht, wechsle jederzeit über „Zur alten UI“ zurück und gib uns Feedback."
-                                    : "Same features, new design. If anything looks off, switch back any time with “Back to old UI” and send us feedback."}{" "}
-                                <a className="font-medium underline underline-offset-2" href="mailto:admin@rechly.de">{t("dashboard.feedbackCta")}</a>
-                            </AlertDescription>
-                        </Alert>
-                    )}
                     {isAnonymous && (
                         <Alert className="mb-4">
                             <AlertTitle>{t("dashboard.guestModeActive")}</AlertTitle>

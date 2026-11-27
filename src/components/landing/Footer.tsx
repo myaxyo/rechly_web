@@ -91,8 +91,8 @@ export default function Footer() {
                             <Code2 aria-hidden="true" /> GitHub
                             <span className={s.srOnly}>{l(" (neuer Tab)", " (new tab)")}</span>
                         </a>
-                        <a href={repoUrl} target="_blank" rel="noopener noreferrer" className={s.github} aria-label={`${t("footer.starOnCode2")}${l(" (neuer Tab)", " (new tab)")}`}>
-                            <Star aria-hidden="true" /> {t("footer.starOnCode2")}
+                        <a href={repoUrl} target="_blank" rel="noopener noreferrer" className={s.github} aria-label={`${t("footer.starOnGithub")}${l(" (neuer Tab)", " (new tab)")}`}>
+                            <Star aria-hidden="true" /> {t("footer.starOnGithub")}
                         </a>
                     </div>
                 </div>
