@@ -5,13 +5,13 @@ import Link from "next/link";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import {
-    CheckCircleOutlined,
-    SafetyCertificateOutlined,
-    ArrowRightOutlined,
-    AppstoreOutlined,
-    PrinterOutlined,
-    ShareAltOutlined,
-} from "@ant-design/icons";
+    CheckCircle2,
+    ShieldCheck,
+    ArrowRight,
+    LayoutGrid,
+    Printer,
+    Share2,
+} from "lucide-react";
 import { getSiteUrl } from "@/lib/env";
 import s from "./tool.module.css";
 
@@ -155,7 +155,7 @@ export default function ToolLayout({
                 <div className={s.wrap}>
                     <div className={s.crumbs}>
                         <Link href="/tools">
-                            <AppstoreOutlined /> Alle Tools & Rechner
+                            <LayoutGrid /> Alle Tools & Rechner
                         </Link>
                         <span aria-hidden="true">/</span>
                         <span className={s.cat}>{category}</span>
@@ -163,15 +163,15 @@ export default function ToolLayout({
                     <h1>{title}</h1>
                     <p className={s.lede}>{description}</p>
                     <div className={s.trust}>
-                        <span><CheckCircleOutlined /> 100 % kostenlos</span>
-                        <span><SafetyCertificateOutlined /> Ohne Registrierung</span>
-                        <span><CheckCircleOutlined /> Direkt im Browser</span>
+                        <span><CheckCircle2 /> 100 % kostenlos</span>
+                        <span><ShieldCheck /> Ohne Registrierung</span>
+                        <span><CheckCircle2 /> Direkt im Browser</span>
                         <div className={s.heroActions}>
                             <button type="button" className={s.toolBtn} onClick={handlePrint} title="Drucken / Als PDF speichern">
-                                <PrinterOutlined /> Drucken
+                                <Printer /> Drucken
                             </button>
                             <button type="button" className={s.toolBtn} onClick={handleShare} title="Link kopieren">
-                                <ShareAltOutlined /> {copied ? "Link kopiert" : "Teilen"}
+                                <Share2 /> {copied ? "Link kopiert" : "Teilen"}
                             </button>
                         </div>
                     </div>
@@ -188,7 +188,7 @@ export default function ToolLayout({
                         <p>{rechlyCtaDescription}</p>
                     </div>
                     <Link href={rechlyCtaHref} className={s.ctaBtn}>
-                        {rechlyCtaButtonText} <ArrowRightOutlined />
+                        {rechlyCtaButtonText} <ArrowRight />
                     </Link>
                 </div>
 

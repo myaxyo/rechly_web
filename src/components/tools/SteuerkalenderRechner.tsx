@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Radio, Card, Tag, Button, Switch, Space, Table } from "antd";
-import {
-    DownloadOutlined,
-    ClockCircleOutlined,
-    CheckCircleOutlined,
-    ExclamationCircleOutlined,
-    InfoCircleOutlined } from "@ant-design/icons";
+import { Download, Clock, CheckCircle2, CircleAlert, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getTaxDeadlines2026, generateIcsCalendar, TaxDeadline } from "@/lib/tools/taxDeadlines";
 
 
@@ -51,131 +51,71 @@ export default function SteuerkalenderRechner() {
 
     const getStatusTag = (dueDate: string) => {
         if (dueDate < todayStr) {
-            return <Tag color="default">Vergangen</Tag>;
+            return <Badge variant="secondary">Vergangen</Badge>;
         }
         const diffDays = Math.floor(
             (new Date(dueDate).getTime() - new Date(todayStr).getTime()) / (1000 * 60 * 60 * 24)
         );
         if (diffDays <= 7) {
-            return <Tag color="red" icon={<ExclamationCircleOutlined />}>In {diffDays} Tagen fällig</Tag>;
+            return <Badge variant="destructive"><CircleAlert /> In {diffDays} Tagen fällig</Badge>;
         }
         if (diffDays <= 30) {
-            return <Tag color="orange" icon={<ClockCircleOutlined />}>Diesen Monat</Tag>;
+            return <Badge variant="secondary" className="bg-orange-100 text-orange-800 hover:bg-orange-100"><Clock /> Diesen Monat</Badge>;
         }
-        return <Tag color="green" icon={<CheckCircleOutlined />}>Geplant</Tag>;
+        return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle2 /> Geplant</Badge>;
     };
 
     const getCategoryBadge = (cat: TaxDeadline["category"]) => {
         switch (cat) {
             case "USt":
-                return <Tag color="blue">Umsatzsteuer</Tag>;
+                return <Badge>Umsatzsteuer</Badge>;
             case "ESt":
-                return <Tag color="purple">Einkommensteuer</Tag>;
+                return <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-100">Einkommensteuer</Badge>;
             case "GewSt":
-                return <Tag color="gold">Gewerbesteuer</Tag>;
+                return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Gewerbesteuer</Badge>;
             case "LSt":
-                return <Tag color="cyan">Lohnsteuer</Tag>;
+                return <Badge variant="secondary" className="bg-cyan-100 text-cyan-800 hover:bg-cyan-100">Lohnsteuer</Badge>;
             default:
-                return <Tag color="magenta">Erklärung</Tag>;
+                return <Badge variant="secondary" className="bg-pink-100 text-pink-800 hover:bg-pink-100">Erklärung</Badge>;
         }
     };
 
-    const columns = [
-        {
-            title: "Fälligkeit (Zahlung)",
-            dataIndex: "dueDate",
-            key: "dueDate",
-            width: 170,
-            render: (dueDate: string, record: TaxDeadline) => (
-                <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>
-                        {formatDate(dueDate)}
-                    </div>
-                    {record.nominalDate !== dueDate && (
-                        <div style={{ fontSize: 11, color: "#64748b" }}>
-                            Verschoben von {formatDate(record.nominalDate)} (§ 108 AO)
-                        </div>
-                    )}
-                </div>
-            ) },
-        {
-            title: "Steuerart & Bezeichnung",
-            key: "title",
-            render: (_: unknown, record: TaxDeadline) => (
-                <div>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
-                        {getCategoryBadge(record.category)}
-                        <strong style={{ fontSize: 14, color: "#0f172a" }}>{record.title}</strong>
-                    </div>
-                    <div style={{ fontSize: 13, color: "#475569" }}>{record.description}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
-                        Rechtsgrundlage: {record.legalBasis}
-                    </div>
-                </div>
-            ) },
-        {
-            title: "Schonfrist (§ 240 AO)",
-            dataIndex: "schonfristDate",
-            key: "schonfristDate",
-            width: 160,
-            render: (schonfristDate: string) => (
-                <div>
-                    <div style={{ fontWeight: 600, color: "#059669" }}>
-                        bis {formatDate(schonfristDate)}
-                    </div>
-                    <div style={{ fontSize: 11, color: "#64748b" }}>Überweisungsgutschrift</div>
-                </div>
-            ) },
-        {
-            title: "Status",
-            dataIndex: "dueDate",
-            key: "status",
-            width: 140,
-            render: (dueDate: string) => getStatusTag(dueDate) },
-    ];
 
     return (
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: "16px 8px" }}>
             {/* Filter Configuration Card */}
             <Card style={{ marginBottom: 24, borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                <CardContent>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
                     <div>
                         <div style={{ fontWeight: 600, marginBottom: 8, color: "#334155" }}>
                             USt-Voranmeldung Intervall:
                         </div>
-                        <Radio.Group
-                            value={ustInterval}
-                            onChange={(e) => setUstInterval(e.target.value)}
-                            buttonStyle="solid"
-                        >
-                            <Radio.Button value="quarter">Vierteljährlich</Radio.Button>
-                            <Radio.Button value="month">Monatlich</Radio.Button>
-                            <Radio.Button value="none">Kleinunternehmer (Keine)</Radio.Button>
-                        </Radio.Group>
+                        <RadioGroup value={ustInterval} onValueChange={(v) => setUstInterval(v as "month" | "quarter" | "none")} className="flex flex-wrap gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="quarter" />Vierteljährlich</label>
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="month" />Monatlich</label>
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="none" />Kleinunternehmer (Keine)</label>
+                        </RadioGroup>
                     </div>
 
                     <div>
                         <div style={{ fontWeight: 600, marginBottom: 8, color: "#334155" }}>
                             Rechtsform / Unternehmenstyp:
                         </div>
-                        <Radio.Group
-                            value={isGmbH ? "gmbh" : "freelancer"}
-                            onChange={(e) => setIsGmbH(e.target.value === "gmbh")}
-                            buttonStyle="solid"
-                        >
-                            <Radio.Button value="freelancer">Freiberufler / Einzelunternehmer</Radio.Button>
-                            <Radio.Button value="gmbh">GmbH / UG (haftungsbeschränkt)</Radio.Button>
-                        </Radio.Group>
+                        <RadioGroup value={isGmbH ? "gmbh" : "freelancer"} onValueChange={(v) => setIsGmbH(v === "gmbh")} className="flex flex-wrap gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="freelancer" />Freiberufler / Einzelunternehmer</label>
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="gmbh" />GmbH / UG (haftungsbeschränkt)</label>
+                        </RadioGroup>
                     </div>
 
                     <div>
                         <div style={{ fontWeight: 600, marginBottom: 8, color: "#334155" }}>
                             Sonderregelungen & Optionen:
                         </div>
-                        <Space direction="vertical">
+                        <div className="flex flex-col gap-2">
                             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                                 <Switch
-                                    size="small"
+                                    size="sm"
                                     checked={hasDauerfristverlaengerung}
                                     onChange={setHasDauerfristverlaengerung}
                                 />
@@ -183,15 +123,16 @@ export default function SteuerkalenderRechner() {
                             </label>
                             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                                 <Switch
-                                    size="small"
+                                    size="sm"
                                     checked={isEmployer}
                                     onChange={setIsEmployer}
                                 />
                                 <span>Arbeitgeber (Lohnsteuer-Anmeldung)</span>
                             </label>
-                        </Space>
+                        </div>
                     </div>
                 </div>
+            </CardContent>
             </Card>
 
             {/* Quick Actions & Category Filter */}
@@ -206,37 +147,32 @@ export default function SteuerkalenderRechner() {
             >
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     <Button
-                        type={selectedCategory === "ALL" ? "primary" : "default"}
-                        size="small"
+                        variant={selectedCategory === "ALL" ? "default" : "outline"} size="sm"
                         onClick={() => setSelectedCategory("ALL")}
                     >
                         Alle ({deadlines.length})
                     </Button>
                     <Button
-                        type={selectedCategory === "USt" ? "primary" : "default"}
-                        size="small"
+                        variant={selectedCategory === "USt" ? "default" : "outline"} size="sm"
                         onClick={() => setSelectedCategory("USt")}
                     >
                         Umsatzsteuer
                     </Button>
                     <Button
-                        type={selectedCategory === "ESt" ? "primary" : "default"}
-                        size="small"
+                        variant={selectedCategory === "ESt" ? "default" : "outline"} size="sm"
                         onClick={() => setSelectedCategory("ESt")}
                     >
                         Einkommensteuer
                     </Button>
                     <Button
-                        type={selectedCategory === "GewSt" ? "primary" : "default"}
-                        size="small"
+                        variant={selectedCategory === "GewSt" ? "default" : "outline"} size="sm"
                         onClick={() => setSelectedCategory("GewSt")}
                     >
                         Gewerbesteuer
                     </Button>
                     {isEmployer && (
                         <Button
-                            type={selectedCategory === "LSt" ? "primary" : "default"}
-                            size="small"
+                            variant={selectedCategory === "LSt" ? "default" : "outline"} size="sm"
                             onClick={() => setSelectedCategory("LSt")}
                         >
                             Lohnsteuer
@@ -245,23 +181,58 @@ export default function SteuerkalenderRechner() {
                 </div>
 
                 <Button
-                    type="primary"
-                    icon={<DownloadOutlined />}
                     onClick={downloadIcs}
                     style={{ background: "#2855d9", borderColor: "#2855d9", fontWeight: 600 }}
                 >
-                    Kalenderdatei (.ics) herunterladen
+                    <Download /> Kalenderdatei (.ics) herunterladen
                 </Button>
             </div>
 
             {/* Table of Deadlines */}
             <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0", overflowX: "auto" }}>
-                <Table
-                    columns={columns}
-                    dataSource={filteredDeadlines.map((d) => ({ ...d, key: d.id }))}
-                    pagination={false}
-                    size="middle"
-                />
+                <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead style={{ width: 170 }}>Fälligkeit (Zahlung)</TableHead>
+                            <TableHead>Steuerart &amp; Bezeichnung</TableHead>
+                            <TableHead style={{ width: 160 }}>Schonfrist (§ 240 AO)</TableHead>
+                            <TableHead style={{ width: 140 }}>Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredDeadlines.map((record) => (
+                            <TableRow key={record.id}>
+                                <TableCell>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{formatDate(record.dueDate)}</div>
+                                        {record.nominalDate !== record.dueDate && (
+                                            <div style={{ fontSize: 11, color: "#64748b" }}>Verschoben von {formatDate(record.nominalDate)} (§ 108 AO)</div>
+                                        )}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div>
+                                        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+                                            {getCategoryBadge(record.category)}
+                                            <strong style={{ fontSize: 14, color: "#0f172a" }}>{record.title}</strong>
+                                        </div>
+                                        <div style={{ fontSize: 13, color: "#475569" }}>{record.description}</div>
+                                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>Rechtsgrundlage: {record.legalBasis}</div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div>
+                                        <div style={{ fontWeight: 600, color: "#059669" }}>bis {formatDate(record.schonfristDate)}</div>
+                                        <div style={{ fontSize: 11, color: "#64748b" }}>Überweisungsgutschrift</div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{getStatusTag(record.dueDate)}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                </CardContent>
             </Card>
 
             {/* Statutory Legal Tip Box */}
@@ -277,7 +248,7 @@ export default function SteuerkalenderRechner() {
                     display: "flex",
                     gap: 12 }}
             >
-                <InfoCircleOutlined style={{ fontSize: 18, color: "#16a34a", marginTop: 2 }} />
+                <Info style={{ width: 18, height: 18, color: "#16a34a", marginTop: 2, flexShrink: 0 }} />
                 <div>
                     <strong>Tipp zur 3-Tage-Schonfrist nach § 240 Abs. 3 AO:</strong> Bei Banküberweisungen gilt
                     die Zahlung erst dann als säumig, wenn sie nicht innerhalb von drei Tagen nach Ablauf des

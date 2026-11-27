@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Input, InputNumber, Radio, Button, Card, Typography, DatePicker } from "antd";
-import {
-    PrinterOutlined } from "@ant-design/icons";
+import { Printer } from "lucide-react";
 import dayjs from "dayjs";
-
-const { Text } = Typography;
+import DecimalInput from "@/components/DecimalInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function BewirtungsbelegRechner() {
     const [billDate, setBillDate] = useState<string>(dayjs().format("YYYY-MM-DD"));
@@ -66,7 +69,6 @@ export default function BewirtungsbelegRechner() {
                         value={dayjs(billDate)}
                         onChange={(d) => setBillDate(d ? d.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"))}
                         format="DD.MM.YYYY"
-                        size="large"
                         style={{ width: "100%" }}
                     />
                 </div>
@@ -78,7 +80,6 @@ export default function BewirtungsbelegRechner() {
                     <Input
                         value={restaurantName}
                         onChange={(e) => setRestaurantName(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -86,14 +87,13 @@ export default function BewirtungsbelegRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Rechnungsbetrag laut Beleg (brutto) *
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={1}
                         max={50000}
                         step={10}
                         value={foodGross}
                         onChange={(val) => setFoodGross(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€"
                     />
                 </div>
@@ -102,14 +102,13 @@ export default function BewirtungsbelegRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Freiwilliges Trinkgeld (0% USt)
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0}
                         max={1000}
                         step={2}
                         value={tipAmount}
                         onChange={(val) => setTipAmount(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€"
                     />
                 </div>
@@ -120,16 +119,10 @@ export default function BewirtungsbelegRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Steuersatz der Speisen/Getränke:
                     </label>
-                    <Radio.Group
-                        value={vatRate}
-                        onChange={(e) => setVatRate(e.target.value)}
-                        size="large"
-                        buttonStyle="solid"
-                        style={{ display: "flex", width: "100%" }}
-                    >
-                        <Radio.Button value={19} style={{ flex: 1, textAlign: "center" }}>19 %</Radio.Button>
-                        <Radio.Button value={7} style={{ flex: 1, textAlign: "center" }}>7 %</Radio.Button>
-                    </Radio.Group>
+                    <RadioGroup value={String(vatRate)} onValueChange={(v) => setVatRate(Number(v))} className="flex w-full gap-2">
+                        <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="19" />19 %</label>
+                        <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="7" />7 %</label>
+                    </RadioGroup>
                 </div>
 
                 <div>
@@ -139,7 +132,6 @@ export default function BewirtungsbelegRechner() {
                     <Input
                         value={participants}
                         onChange={(e) => setParticipants(e.target.value)}
-                        size="large"
                         placeholder="z. B. Max Mustermann (Gastgeber), Anna Schmidt (Kunde XY GmbH)"
                     />
                 </div>
@@ -149,7 +141,7 @@ export default function BewirtungsbelegRechner() {
                 <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                     Konkreter geschäftlicher Anlass (Finanzamt-Pflichtangabe!) *
                 </label>
-                <Input.TextArea
+                <Textarea
                     rows={2}
                     value={businessPurpose}
                     onChange={(e) => setBusinessPurpose(e.target.value)}
@@ -165,68 +157,74 @@ export default function BewirtungsbelegRechner() {
                     gap: 16,
                     marginBottom: 32 }}
             >
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                    <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                         Gesamtzahlung (inkl. Trinkgeld)
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 24, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>
                         {calc.totalPaid.toFixed(2)} €
                     </div>
+                    </CardContent>
                 </Card>
 
                 <Card
-                    size="small"
                     style={{
                         borderRadius: 10,
                         border: "2px solid #16a34a",
                         background: "#f0fdf4" }}
                 >
-                    <Text style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 800, color: "#166534" }}>
+                    <CardContent>
+                    <span style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 800, color: "#166534" }}>
                         70 % Betriebsausgabe (§ 4 EStG)
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 26, fontWeight: 900, color: "#15803d", marginTop: 4 }}>
                         {calc.deductibleExpenses70.toFixed(2)} €
                     </div>
                     <div style={{ fontSize: 12, color: "#166534", marginTop: 2 }}>
                         Steuerlich voll abzugsfähig
                     </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                    <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                         30 % Nicht abziehbar
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 24, fontWeight: 900, color: "#dc2626", marginTop: 4 }}>
                         {calc.nonDeductibleExpenses30.toFixed(2)} €
                     </div>
                     <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
                         Privatanteil nach EStG
                     </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                    <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                         100 % Vorsteuerabzug
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 24, fontWeight: 900, color: "#2855d9", marginTop: 4 }}>
                         {calc.fullVatDeduction.toFixed(2)} €
                     </div>
                     <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
                         Voll vom Finanzamt erstattet
                     </div>
+                    </CardContent>
                 </Card>
             </div>
 
             {/* Printable Form Preview */}
-            <Card
-                title="Druckfertiger Bewirtungsbeleg nach BMF-Vorgaben"
-                extra={
-                    <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint} style={{ background: "#2855d9" }}>
-                        Drucken / Als PDF speichern
+            <Card style={{ borderRadius: 12, border: "1px solid #cbd5e1" }}>
+                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <CardTitle>Druckfertiger Bewirtungsbeleg nach BMF-Vorgaben</CardTitle>
+                    <Button onClick={handlePrint} style={{ background: "#2855d9" }}>
+                        <Printer /> Drucken / Als PDF speichern
                     </Button>
-                }
-                style={{ borderRadius: 12, border: "1px solid #cbd5e1" }}
-            >
+                </CardHeader>
+                <CardContent>
                 <div
                     style={{
                         border: "2px dashed #94a3b8",
@@ -283,6 +281,7 @@ export default function BewirtungsbelegRechner() {
                         </div>
                     </div>
                 </div>
+            </CardContent>
             </Card>
         </div>
     );

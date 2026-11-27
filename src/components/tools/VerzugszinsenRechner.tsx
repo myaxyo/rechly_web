@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { InputNumber, Radio, DatePicker, Button, Table, Card, Typography, Tabs } from "antd";
-import {
-    CopyOutlined,
-    CheckOutlined,
-    FileTextOutlined } from "@ant-design/icons";
+import { Copy, Check, FileText } from "lucide-react";
+import DecimalInput from "@/components/DecimalInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dayjs from "dayjs";
 import { calculateVerzugszinsen, BUNDESBANK_BASE_RATES } from "@/lib/tools/verzugszinsen";
 import Link from "next/link";
 
-const { Text } = Typography;
 
 export default function VerzugszinsenRechner() {
     const todayStr = dayjs().format("YYYY-MM-DD");
@@ -68,33 +71,6 @@ export default function VerzugszinsenRechner() {
         }
     };
 
-    const columns = [
-        {
-            title: "Zeitraum",
-            dataIndex: "periodLabel",
-            key: "periodLabel" },
-        {
-            title: "Basiszinssatz",
-            dataIndex: "baseRate",
-            key: "baseRate",
-            render: (val: number) => `${val.toFixed(2)} %` },
-        {
-            title: "Zinssatz p.a.",
-            dataIndex: "applicableRate",
-            key: "applicableRate",
-            render: (val: number) => (
-                <span style={{ fontWeight: 700, color: "#2855d9" }}>{val.toFixed(2)} %</span>
-            ) },
-        {
-            title: "Tage",
-            dataIndex: "days",
-            key: "days" },
-        {
-            title: "Zinsbetrag",
-            dataIndex: "periodInterest",
-            key: "periodInterest",
-            render: (val: number) => <strong>{val.toFixed(2)} €</strong> },
-    ];
 
     return (
         <div>
@@ -110,14 +86,13 @@ export default function VerzugszinsenRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#334155" }}>
                         Fälliger Rechnungsbetrag (EUR) *
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0.01}
                         max={10000000}
                         step={100}
                         value={principal}
                         onChange={(val) => setPrincipal(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€"
                     />
                 </div>
@@ -126,20 +101,10 @@ export default function VerzugszinsenRechner() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 6, color: "#334155" }}>
                         Schuldner / Kundentyp (§ 288 BGB) *
                     </label>
-                    <Radio.Group
-                        value={isB2B}
-                        onChange={(e) => setIsB2B(e.target.value)}
-                        size="large"
-                        buttonStyle="solid"
-                        style={{ width: "100%", display: "flex" }}
-                    >
-                        <Radio.Button value={true} style={{ flex: 1, textAlign: "center" }}>
-                            B2B (Geschäftskunde)
-                        </Radio.Button>
-                        <Radio.Button value={false} style={{ flex: 1, textAlign: "center" }}>
-                            B2C (Verbraucher)
-                        </Radio.Button>
-                    </Radio.Group>
+                    <RadioGroup value={String(isB2B)} onValueChange={(v) => setIsB2B(v === "true")} className="flex w-full gap-2">
+                        <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-input px-3 py-2 text-center text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="true" />B2B (Geschäftskunde)</label>
+                        <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-center text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="false" />B2C (Verbraucher)</label>
+                    </RadioGroup>
                 </div>
 
                 <div>
@@ -150,7 +115,6 @@ export default function VerzugszinsenRechner() {
                         value={dayjs(dueDate)}
                         onChange={(d) => setDueDate(d ? d.format("YYYY-MM-DD") : todayStr)}
                         format="DD.MM.YYYY"
-                        size="large"
                         style={{ width: "100%" }}
                     />
                 </div>
@@ -163,7 +127,6 @@ export default function VerzugszinsenRechner() {
                         value={dayjs(calcDate)}
                         onChange={(d) => setCalcDate(d ? d.format("YYYY-MM-DD") : todayStr)}
                         format="DD.MM.YYYY"
-                        size="large"
                         style={{ width: "100%" }}
                     />
                 </div>
@@ -177,84 +140,104 @@ export default function VerzugszinsenRechner() {
                     gap: 16,
                     marginBottom: 32 }}
             >
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                    <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                         Verzugstage
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 24, fontWeight: 900, color: "#0f172a", marginTop: 4 }}>
                         {result.totalDays} Tage
                     </div>
+                    </CardContent>
                 </Card>
 
-                <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                    <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                    <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                         Verzugszinsen (§ 288 BGB)
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 24, fontWeight: 900, color: "#dc2626", marginTop: 4 }}>
                         + {result.interestAmount.toFixed(2)} €
                     </div>
+                    </CardContent>
                 </Card>
 
                 {isB2B && (
-                    <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                        <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                    <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                    <CardContent>
+                        <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                             Mahnpauschale (§ 288 Abs. 5)
-                        </Text>
+                        </span>
                         <div style={{ fontSize: 24, fontWeight: 900, color: "#059669", marginTop: 4 }}>
                             + 40,00 €
                         </div>
-                    </Card>
+                        </CardContent>
+                </Card>
                 )}
 
                 <Card
-                    size="small"
                     style={{
                         borderRadius: 10,
                         border: "2px solid #2855d9",
                         background: "#eff6ff" }}
                 >
-                    <Text style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 800, color: "#1e40af" }}>
+                    <CardContent>
+                    <span style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 800, color: "#1e40af" }}>
                         Gesamtforderung
-                    </Text>
+                    </span>
                     <div style={{ fontSize: 26, fontWeight: 900, color: "#2855d9", marginTop: 4 }}>
                         {result.totalAmountDue.toFixed(2)} €
                     </div>
+                    </CardContent>
                 </Card>
             </div>
 
             {/* Detailed Tabs: Zinsstaffel vs. Mahnschreiben Generator */}
-            <Tabs
-                defaultActiveKey="breakdown"
-                items={[
-                    {
-                        key: "breakdown",
-                        label: "Detaillierte Zinsstaffel (Tagesgenau)",
-                        children: (
+            <Tabs defaultValue="breakdown">
+                <TabsList>
+                    <TabsTrigger value="breakdown">Detaillierte Zinsstaffel (Tagesgenau)</TabsTrigger>
+                    <TabsTrigger value="dunning">Fertiges Mahnschreiben (Vorlage)</TabsTrigger>
+                </TabsList>
+                <TabsContent value="breakdown">
                             <div>
-                                <Table
-                                    dataSource={result.periodBreakdown.map((row, i) => ({ ...row, key: i }))}
-                                    columns={columns}
-                                    pagination={false}
-                                    size="middle"
-                                    style={{ border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}
-                                />
+                                <div style={{ border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Zeitraum</TableHead>
+                                            <TableHead>Basiszinssatz</TableHead>
+                                            <TableHead>Zinssatz p.a.</TableHead>
+                                            <TableHead>Tage</TableHead>
+                                            <TableHead>Zinsbetrag</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {result.periodBreakdown.map((row, i) => (
+                                            <TableRow key={i}>
+                                                <TableCell>{row.periodLabel}</TableCell>
+                                                <TableCell>{row.baseRate.toFixed(2)} %</TableCell>
+                                                <TableCell><span style={{ fontWeight: 700, color: "#2855d9" }}>{row.applicableRate.toFixed(2)} %</span></TableCell>
+                                                <TableCell>{row.days}</TableCell>
+                                                <TableCell><strong>{row.periodInterest.toFixed(2)} €</strong></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                </div>
                                 <div style={{ fontSize: 13, color: "#64748b", marginTop: 12 }}>
                                     Zinsformel nach BGB: Hauptforderung × (Basiszinssatz + {isB2B ? "9%" : "5%"}) × (Tage / 365).
                                     Der aktuelle Bundesbank-Basiszinssatz beträgt {BUNDESBANK_BASE_RATES[0].rate.toFixed(2)} %.
                                 </div>
                             </div>
-                        ) },
-                    {
-                        key: "dunning",
-                        label: "Fertiges Mahnschreiben (Vorlage)",
-                        children: (
+                </TabsContent>
+                <TabsContent value="dunning">
                             <div>
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
                                     <div>
                                         <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#64748b" }}>
                                             Rechnungsnummer
                                         </label>
-                                        <input
+                                        <Input
                                             type="text"
                                             value={invoiceNo}
                                             onChange={(e) => setInvoiceNo(e.target.value)}
@@ -269,7 +252,7 @@ export default function VerzugszinsenRechner() {
                                         <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#64748b" }}>
                                             Kundenname / Firma
                                         </label>
-                                        <input
+                                        <Input
                                             type="text"
                                             value={debtorName}
                                             onChange={(e) => setDebtorName(e.target.value)}
@@ -298,23 +281,20 @@ export default function VerzugszinsenRechner() {
 
                                 <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
                                     <Button
-                                        type="primary"
-                                        icon={copiedText ? <CheckOutlined /> : <CopyOutlined />}
                                         onClick={copyDunning}
                                         style={{ background: "#2855d9" }}
                                     >
-                                        {copiedText ? "Mahntext kopiert!" : "Mahntext in Zwischenablage kopieren"}
+                                        {copiedText ? <Check /> : <Copy />} {copiedText ? "Mahntext kopiert!" : "Mahntext in Zwischenablage kopieren"}
                                     </Button>
                                     <Link href="/zahlungserinnerung-schreiben">
-                                        <Button icon={<FileTextOutlined />}>
-                                            Mahnung in Rechly generieren
+                                        <Button variant="outline">
+                                            <FileText /> Mahnung in Rechly generieren
                                         </Button>
                                     </Link>
                                 </div>
                             </div>
-                        ) },
-                ]}
-            />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

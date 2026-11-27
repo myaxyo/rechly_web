@@ -1,9 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, InputNumber, Button, Card, DatePicker } from "antd";
-import {
-    PrinterOutlined } from "@ant-design/icons";
+import { Printer } from "lucide-react";
+import DecimalInput from "@/components/DecimalInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import dayjs from "dayjs";
 
 
@@ -45,7 +49,6 @@ export default function BautagebuchBuilder() {
                     <Input
                         value={project}
                         onChange={(e) => setProject(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -57,7 +60,6 @@ export default function BautagebuchBuilder() {
                         value={dayjs(reportDate)}
                         onChange={(d) => setReportDate(d ? d.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"))}
                         format="DD.MM.YYYY"
-                        size="large"
                         style={{ width: "100%" }}
                     />
                 </div>
@@ -70,17 +72,15 @@ export default function BautagebuchBuilder() {
                         <Input
                             value={weather}
                             onChange={(e) => setWeather(e.target.value)}
-                            size="large"
                         />
                     </div>
                     <div>
                         <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                             Temp. (°C)
                         </label>
-                        <InputNumber
+                        <DecimalInput
                             value={temperature}
                             onChange={(val) => setTemperature(val || 0)}
-                            size="large"
                             style={{ width: "100%" }}
                         />
                     </div>
@@ -90,12 +90,11 @@ export default function BautagebuchBuilder() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Eigene Handwerker / Mitarbeiter (Anzahl)
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0}
                         max={100}
                         value={workersOwn}
                         onChange={(val) => setWorkersOwn(val || 0)}
-                        size="large"
                         style={{ width: "100%" }}
                     />
                 </div>
@@ -109,7 +108,6 @@ export default function BautagebuchBuilder() {
                     <Input
                         value={subcontractors}
                         onChange={(e) => setSubcontractors(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -117,7 +115,7 @@ export default function BautagebuchBuilder() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Ausgeführte Arbeiten am Berichtstag *
                     </label>
-                    <Input.TextArea
+                    <Textarea
                         rows={3}
                         value={workPerformed}
                         onChange={(e) => setWorkPerformed(e.target.value)}
@@ -128,7 +126,7 @@ export default function BautagebuchBuilder() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Behinderungen, Bedenken & Leistungsänderungen (§ 6 VOB/B) *
                     </label>
-                    <Input.TextArea
+                    <Textarea
                         rows={2}
                         value={obstructions}
                         onChange={(e) => setObstructions(e.target.value)}
@@ -142,21 +140,19 @@ export default function BautagebuchBuilder() {
                     <Input
                         value={materials}
                         onChange={(e) => setMaterials(e.target.value)}
-                        size="large"
                     />
                 </div>
             </div>
 
             {/* Printable Report Preview */}
-            <Card
-                title="Druckfertiger Bautagesbericht nach VOB/B"
-                extra={
-                    <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint} style={{ background: "#2855d9" }}>
-                        Bautagesbericht drucken / PDF
+            <Card style={{ borderRadius: 12, border: "1px solid #cbd5e1" }}>
+                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <CardTitle>Druckfertiger Bautagesbericht nach VOB/B</CardTitle>
+                    <Button onClick={handlePrint} style={{ background: "#2855d9" }}>
+                        <Printer /> Bautagesbericht drucken / PDF
                     </Button>
-                }
-                style={{ borderRadius: 12, border: "1px solid #cbd5e1" }}
-            >
+                </CardHeader>
+                <CardContent>
                 <div
                     style={{
                         border: "2px dashed #94a3b8",
@@ -218,6 +214,7 @@ export default function BautagebuchBuilder() {
                         </div>
                     </div>
                 </div>
+            </CardContent>
             </Card>
         </div>
     );

@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Input, InputNumber, Radio, Card, Button, Switch, message } from "antd";
-import {
-    CopyOutlined,
-    PrinterOutlined,
-    CheckOutlined } from "@ant-design/icons";
+import { Copy, Printer, Check } from "lucide-react";
+import { toast } from "sonner";
+import DecimalInput from "@/components/DecimalInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { calculateDunning, DunningLevel, DunningInput } from "@/lib/tools/dunning";
 import Link from "next/link";
 
@@ -108,7 +112,7 @@ ${creditorName}`;
 
         navigator.clipboard.writeText(text);
         setCopied(true);
-        message.success("Mahntext erfolgreich in die Zwischenablage kopiert!");
+        toast.success("Mahntext erfolgreich in die Zwischenablage kopiert!");
         setTimeout(() => setCopied(false), 3000);
     };
 
@@ -117,35 +121,23 @@ ${creditorName}`;
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
                 {/*  Controls Column */}
                 <div>
-                    <Card
-                        title="1. Mahndaten & Verzugsstatus"
-                        style={{ borderRadius: 12, border: "1px solid #e2e8f0", marginBottom: 16 }}
-                    >
+                    <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0", marginBottom: 16 }}>
+                        <CardHeader><CardTitle>1. Mahndaten &amp; Verzugsstatus</CardTitle></CardHeader>
+                        <CardContent>
                         <div style={{ marginBottom: 16 }}>
                             <div style={{ fontWeight: 600, marginBottom: 6, color: "#334155" }}>
                                 Mahnstufe auswählen:
                             </div>
-                            <Radio.Group
-                                value={dunningLevel}
-                                onChange={(e) => setDunningLevel(e.target.value)}
-                                buttonStyle="solid"
-                                style={{ width: "100%" }}
-                            >
-                                <Radio.Button value={1} style={{ width: "33%", textAlign: "center" }}>
-                                    Zahlungserinnerung
-                                </Radio.Button>
-                                <Radio.Button value={2} style={{ width: "33%", textAlign: "center" }}>
-                                    1. Mahnung
-                                </Radio.Button>
-                                <Radio.Button value={3} style={{ width: "34%", textAlign: "center" }}>
-                                    Letzte Mahnung
-                                </Radio.Button>
-                            </Radio.Group>
+                            <RadioGroup value={String(dunningLevel)} onValueChange={(v) => setDunningLevel(Number(v) as DunningLevel)} className="flex w-full gap-2">
+                                <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-input px-2 py-2 text-center text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="1" />Zahlungserinnerung</label>
+                                <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-input px-2 py-2 text-center text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="2" />1. Mahnung</label>
+                                <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-input px-2 py-2 text-center text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="3" />Letzte Mahnung</label>
+                            </RadioGroup>
                         </div>
 
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, padding: "8px 12px", background: "#f8fafc", borderRadius: 8 }}>
                             <span style={{ fontSize: 13, fontWeight: 500 }}>Schuldner ist Unternehmer (B2B)</span>
-                            <Switch checked={isB2B} onChange={setIsB2B} />
+                            <Switch checked={isB2B} onCheckedChange={setIsB2B} />
                         </div>
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
@@ -159,7 +151,7 @@ ${creditorName}`;
                                 <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
                                     Offener Betrag (€)
                                 </label>
-                                <InputNumber
+                                <DecimalInput
                                     value={amount}
                                     onChange={(v) => setAmount(v || 0)}
                                     style={{ width: "100%" }}
@@ -188,7 +180,7 @@ ${creditorName}`;
                                 <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
                                     Mahnfrist (Tage)
                                 </label>
-                                <InputNumber
+                                <DecimalInput
                                     value={customGraceDays}
                                     onChange={(v) => setCustomGraceDays(v || 7)}
                                     style={{ width: "100%" }}
@@ -198,7 +190,7 @@ ${creditorName}`;
                                 <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
                                     Mahngebühr (€)
                                 </label>
-                                <InputNumber
+                                <DecimalInput
                                     value={customMahngebuehr}
                                     onChange={(v) => setCustomMahngebuehr(v || 0)}
                                     style={{ width: "100%" }}
@@ -206,12 +198,12 @@ ${creditorName}`;
                                 />
                             </div>
                         </div>
+                        </CardContent>
                     </Card>
 
-                    <Card
-                        title="2. Beteiligte Parteien & Bankdaten"
-                        style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}
-                    >
+                    <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                        <CardHeader><CardTitle>2. Beteiligte Parteien &amp; Bankdaten</CardTitle></CardHeader>
+                        <CardContent>
                         <div style={{ marginBottom: 12 }}>
                             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
                                 Gläubiger (Ihr Name / Firma)
@@ -222,7 +214,7 @@ ${creditorName}`;
                             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
                                 Ihre Anschrift
                             </label>
-                            <Input.TextArea
+                            <Textarea
                                 rows={2}
                                 value={creditorAddress}
                                 onChange={(e) => setCreditorAddress(e.target.value)}
@@ -238,7 +230,7 @@ ${creditorName}`;
                             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 4 }}>
                                 Kundenanschrift
                             </label>
-                            <Input.TextArea
+                            <Textarea
                                 rows={2}
                                 value={debtorAddress}
                                 onChange={(e) => setDebtorAddress(e.target.value)}
@@ -258,6 +250,7 @@ ${creditorName}`;
                                 <Input value={creditorBic} onChange={(e) => setCreditorBic(e.target.value)} />
                             </div>
                         </div>
+                        </CardContent>
                     </Card>
                 </div>
 
@@ -265,37 +258,42 @@ ${creditorName}`;
                 <div>
                     {/* Summary Cards */}
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
-                        <Card size="small" style={{ borderRadius: 8, background: "#f8fafc" }}>
+                        <Card style={{ borderRadius: 8, background: "#f8fafc" }}>
+                            <CardContent>
                             <div style={{ fontSize: 11, color: "#64748b" }}>Tage im Verzug</div>
                             <div style={{ fontSize: 20, fontWeight: 700, color: "#ef4444" }}>
                                 {calculation.daysOverdue} Tage
                             </div>
-                        </Card>
-                        <Card size="small" style={{ borderRadius: 8, background: "#f8fafc" }}>
+                            </CardContent>
+                    </Card>
+                        <Card style={{ borderRadius: 8, background: "#f8fafc" }}>
+                            <CardContent>
                             <div style={{ fontSize: 11, color: "#64748b" }}>Zinsen & Gebühren</div>
                             <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>
                                 {(calculation.interestAmount + calculation.statutoryLumpSum + calculation.mahngebuehr).toFixed(2)} €
                             </div>
-                        </Card>
-                        <Card size="small" style={{ borderRadius: 8, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                            </CardContent>
+                    </Card>
+                        <Card style={{ borderRadius: 8, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                            <CardContent>
                             <div style={{ fontSize: 11, color: "#166534" }}>Gesamtforderung</div>
                             <div style={{ fontSize: 20, fontWeight: 700, color: "#15803d" }}>
                                 {calculation.totalDue.toFixed(2)} €
                             </div>
-                        </Card>
+                            </CardContent>
+                    </Card>
                     </div>
 
                     {/* Action Bar */}
                     <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
                         <Button
-                            type="primary"
-                            icon={copied ? <CheckOutlined /> : <CopyOutlined />}
                             onClick={copyText}
                             style={{ flex: 1, background: "#2855d9", borderColor: "#2855d9" }}
                         >
-                            {copied ? "Kopiert!" : " kopieren"}
+                            {copied ? <Check /> : <Copy />} {copied ? "Kopiert!" : " kopieren"}
                         </Button>
-                        <Button icon={<PrinterOutlined />} onClick={printLetter}>
+                        <Button variant="outline" onClick={printLetter}>
+                            <Printer />
                             Drucken / PDF
                         </Button>
                     </div>

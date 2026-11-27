@@ -1,18 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Input, InputNumber, Button, Card, Typography, Alert, Space } from "antd";
-import {
-    QrcodeOutlined,
-    DownloadOutlined,
-    CopyOutlined,
-    CheckOutlined,
-    LinkOutlined } from "@ant-design/icons";
+import { QrCode, Download, Copy, Check, Link as LinkIcon } from "lucide-react";
+import DecimalInput from "@/components/DecimalInput";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import QRCode from "qrcode";
 import { buildGirocodePayload, GirocodeInput } from "@/lib/girocode";
 import { useSearchParams } from "next/navigation";
 
-const { Text } = Typography;
 
 export default function GiroCodeGenerator() {
     const searchParams = useSearchParams();
@@ -134,7 +133,6 @@ export default function GiroCodeGenerator() {
                             value={recipient}
                             maxLength={70}
                             onChange={(e) => setRecipient(e.target.value)}
-                            size="large"
                         />
                     </div>
 
@@ -147,7 +145,6 @@ export default function GiroCodeGenerator() {
                             value={iban}
                             onChange={handleIbanChange}
                             maxLength={34}
-                            size="large"
                         />
                     </div>
 
@@ -156,7 +153,7 @@ export default function GiroCodeGenerator() {
                             <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#334155" }}>
                                 Betrag (EUR) *
                             </label>
-                            <InputNumber
+                            <DecimalInput
                                 min={0.01}
                                 max={999999.99}
                                 step={0.01}
@@ -164,7 +161,6 @@ export default function GiroCodeGenerator() {
                                 value={amount}
                                 onChange={(val) => setAmount(val || 0)}
                                 style={{ width: "100%" }}
-                                size="large"
                                 addonAfter="€"
                             />
                         </div>
@@ -177,7 +173,6 @@ export default function GiroCodeGenerator() {
                                 placeholder="z. B. COBADEFFXXX"
                                 value={bic}
                                 onChange={(e) => setBic(e.target.value.toUpperCase())}
-                                size="large"
                                 maxLength={11}
                             />
                         </div>
@@ -187,23 +182,20 @@ export default function GiroCodeGenerator() {
                         <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#334155" }}>
                             Verwendungszweck (max. 140 Zeichen)
                         </label>
-                        <Input.TextArea
+                        <Textarea
                             rows={2}
                             placeholder="z. B. Rechnungsnummer RE-2026-0042, Kundennummer 104"
                             value={reference}
                             maxLength={140}
-                            showCount
                             onChange={(e) => setReference(e.target.value)}
                         />
+                        <div className="text-right text-xs text-muted-foreground">{reference.length} / 140</div>
                     </div>
 
                     {(validation.error || errorMsg) && (
-                        <Alert
-                            type="warning"
-                            showIcon
-                            message={validation.error || errorMsg}
-                            style={{ borderRadius: 6 }}
-                        />
+                        <Alert style={{ borderRadius: 6 }}>
+                            <AlertDescription>{validation.error || errorMsg}</AlertDescription>
+                        </Alert>
                     )}
                 </div>
             </div>
@@ -220,6 +212,7 @@ export default function GiroCodeGenerator() {
                         boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
                         background: "#ffffff" }}
                 >
+                    <CardContent>
                     <div
                         style={{
                             background: "#0f172a",
@@ -261,22 +254,20 @@ export default function GiroCodeGenerator() {
                                 </div>
                             </div>
 
-                            <Space wrap style={{ justifyContent: "center" }}>
+                            <div className="flex flex-wrap justify-center gap-2">
                                 <Button
-                                    type="primary"
-                                    icon={<DownloadOutlined />}
                                     onClick={downloadQr}
                                     style={{ background: "#2855d9" }}
                                 >
-                                    PNG herunterladen
+                                    <Download /> PNG herunterladen
                                 </Button>
                                 <Button
-                                    icon={copied ? <CheckOutlined style={{ color: "#059669" }} /> : <CopyOutlined />}
+                                    variant="outline"
                                     onClick={copyImage}
                                 >
-                                    {copied ? "Kopiert!" : "Bild kopieren"}
+                                    {copied ? <Check style={{ color: "#059669" }} /> : <Copy />} {copied ? "Kopiert!" : "Bild kopieren"}
                                 </Button>
-                            </Space>
+                            </div>
                         </div>
                     ) : (
                         <div
@@ -288,12 +279,13 @@ export default function GiroCodeGenerator() {
                                 alignItems: "center",
                                 gap: 12 }}
                         >
-                            <QrcodeOutlined style={{ fontSize: 64, color: "#cbd5e1" }} />
-                            <Text type="secondary">
+                            <QrCode style={{ width: 64, height: 64, color: "#cbd5e1" }} />
+                            <span className="text-muted-foreground">
                                 Bitte Empfänger, IBAN und Betrag eingeben, um den GiroCode live zu erstellen.
-                            </Text>
+                            </span>
                         </div>
                     )}
+                    </CardContent>
                 </Card>
 
                 <div
@@ -310,7 +302,7 @@ export default function GiroCodeGenerator() {
                         alignItems: "center",
                         gap: 10 }}
                 >
-                    <LinkOutlined style={{ fontSize: 18 }} />
+                    <LinkIcon style={{ width: 18, height: 18 }} />
                     <span>
                         Kann mit jeder deutschen Banking-App (Sparkasse, Deutsche Bank, ING, DKB, N26, etc.) sofort
                         gescannt werden.

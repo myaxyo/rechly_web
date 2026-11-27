@@ -4,32 +4,34 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import { Input, Tag } from "antd";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
-    SearchOutlined,
-    CheckCircleOutlined,
-    SafetyCertificateOutlined,
-    ArrowRightOutlined,
-    QrcodeOutlined,
-    FileSearchOutlined,
-    DollarOutlined,
-    PercentageOutlined,
-    CalculatorOutlined,
-    ShopOutlined,
-    FileProtectOutlined,
-    CoffeeOutlined,
-    CalendarOutlined,
-    AuditOutlined,
-    BankOutlined,
-    CompassOutlined,
-    SolutionOutlined,
-    ToolOutlined,
-    FileTextOutlined,
-    SnippetsOutlined,
-    CarOutlined,
-    RollbackOutlined,
-    ClockCircleOutlined,
-    LineChartOutlined } from "@ant-design/icons";
+    Search,
+    CheckCircle2,
+    ShieldCheck,
+    ArrowRight,
+    QrCode,
+    FileSearch,
+    DollarSign,
+    Percent,
+    Calculator,
+    Store,
+    FileCheck,
+    Coffee,
+    Calendar,
+    ClipboardCheck,
+    Landmark,
+    Compass,
+    ClipboardList,
+    Wrench,
+    FileText,
+    Files,
+    Car,
+    Undo2,
+    Clock,
+    TrendingUp,
+    X } from "lucide-react";
 import { TOOLS_CATALOG } from "@/lib/tools/catalog";
 import s from "@/components/tools/tool.module.css";
 import hub from "./tools.module.css";
@@ -38,27 +40,27 @@ import { getSiteUrl } from "@/lib/env";
 const siteUrl = getSiteUrl();
 
 const ICON_MAP: Record<string, React.ReactNode> = {
-    FileSearchOutlined: <FileSearchOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    QrcodeOutlined: <QrcodeOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    DollarOutlined: <DollarOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    SafetyCertificateOutlined: <SafetyCertificateOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    PercentageOutlined: <PercentageOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    CalculatorOutlined: <CalculatorOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    ShopOutlined: <ShopOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    FileProtectOutlined: <FileProtectOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    CoffeeOutlined: <CoffeeOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    CalendarOutlined: <CalendarOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    AuditOutlined: <AuditOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    BankOutlined: <BankOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    CompassOutlined: <CompassOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    SolutionOutlined: <SolutionOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    ToolOutlined: <ToolOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    FileTextOutlined: <FileTextOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    SnippetsOutlined: <SnippetsOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    CarOutlined: <CarOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    RollbackOutlined: <RollbackOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    ClockCircleOutlined: <ClockCircleOutlined style={{ fontSize: 24, color: "#2855d9" }} />,
-    LineChartOutlined: <LineChartOutlined style={{ fontSize: 24, color: "#2855d9" }} /> };
+    FileSearchOutlined: <FileSearch style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    QrcodeOutlined: <QrCode style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    DollarOutlined: <DollarSign style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    SafetyCertificateOutlined: <ShieldCheck style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    PercentageOutlined: <Percent style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    CalculatorOutlined: <Calculator style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    ShopOutlined: <Store style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    FileProtectOutlined: <FileCheck style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    CoffeeOutlined: <Coffee style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    CalendarOutlined: <Calendar style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    AuditOutlined: <ClipboardCheck style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    BankOutlined: <Landmark style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    CompassOutlined: <Compass style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    SolutionOutlined: <ClipboardList style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    ToolOutlined: <Wrench style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    FileTextOutlined: <FileText style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    SnippetsOutlined: <Files style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    CarOutlined: <Car style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    RollbackOutlined: <Undo2 style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    ClockCircleOutlined: <Clock style={{ width: 24, height: 24, color: "#2855d9" }} />,
+    LineChartOutlined: <TrendingUp style={{ width: 24, height: 24, color: "#2855d9" }} /> };
 
 const CATEGORIES = [
     "Alle",
@@ -130,14 +132,20 @@ export default function ToolsHubPage() {
                         Rechnungen, Kunden und Termine in einem Konto für 0 €.
                     </p>
                     <div className={hub.search}>
-                        <Input
-                            placeholder="Tool suchen — z. B. Skonto, GiroCode, USt-IdNr …"
-                            prefix={<SearchOutlined />}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            size="large"
-                            allowClear
-                        />
+                        <div className="relative">
+                            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                placeholder="Tool suchen — z. B. Skonto, GiroCode, USt-IdNr …"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="h-11 pl-10 pr-10"
+                            />
+                            {searchQuery && (
+                                <button type="button" aria-label="Suche löschen" onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                    <X className="size-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className={hub.chips} role="group" aria-label="Kategorie filtern">
                         {CATEGORIES.map((cat) => {
@@ -164,8 +172,8 @@ export default function ToolsHubPage() {
                         {filteredTools.length} {filteredTools.length === 1 ? "Werkzeug" : "Werkzeuge"}
                     </span>
                     <span className={hub.metaTrust}>
-                        <span><CheckCircleOutlined /> Ohne Login nutzbar</span>
-                        <span><SafetyCertificateOutlined /> Berechnung nur in deinem Browser</span>
+                        <span><CheckCircle2 /> Ohne Login nutzbar</span>
+                        <span><ShieldCheck /> Berechnung nur in deinem Browser</span>
                     </span>
                 </div>
 
@@ -173,7 +181,7 @@ export default function ToolsHubPage() {
                     <div className={hub.empty}>
                         <p>Kein Tool gefunden. Versuch ein anderes Stichwort — oder leg direkt los:</p>
                         <Link href="/register" className={s.ctaBtn}>
-                            Kostenlos mit Rechly starten <ArrowRightOutlined />
+                            Kostenlos mit Rechly starten <ArrowRight />
                         </Link>
                     </div>
                 ) : (
@@ -183,9 +191,9 @@ export default function ToolsHubPage() {
                                 <div>
                                     <div className={hub.cardTop}>
                                         <span className={hub.cardIcon}>
-                                            {ICON_MAP[tool.icon] || <CalculatorOutlined style={{ fontSize: 22, color: "#2855d9" }} />}
+                                            {ICON_MAP[tool.icon] || <Calculator style={{ width: 22, height: 22, color: "#2855d9" }} />}
                                         </span>
-                                        {tool.badge && <Tag color="blue">{tool.badge}</Tag>}
+                                        {tool.badge && <Badge>{tool.badge}</Badge>}
                                     </div>
                                     <h2 className={hub.cardTitle}>{tool.shortTitle}</h2>
                                     <p className={hub.cardText}>{tool.description}</p>
@@ -193,7 +201,7 @@ export default function ToolsHubPage() {
                                 <div className={hub.cardFoot}>
                                     <span>{tool.category}</span>
                                     <span className={hub.open}>
-                                        Tool öffnen <ArrowRightOutlined style={{ fontSize: 11 }} />
+                                        Tool öffnen <ArrowRight style={{ width: 11, height: 11 }} />
                                     </span>
                                 </div>
                             </Link>
@@ -212,7 +220,7 @@ export default function ToolsHubPage() {
                         </p>
                     </div>
                     <Link href="/register" className={s.ctaBtn}>
-                        Kostenlos registrieren <ArrowRightOutlined />
+                        Kostenlos registrieren <ArrowRight />
                     </Link>
                 </div>
             </main>

@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Radio, Card, Input, InputNumber, Button, Tag, Space, message } from "antd";
-import {
-    DownloadOutlined,
-    PlusOutlined,
-    DeleteOutlined,
-    SafetyCertificateOutlined,
-    CopyOutlined,
-    CheckOutlined } from "@ant-design/icons";
+import { Download, Plus, Trash2, ShieldCheck, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
+import DecimalInput from "@/components/DecimalInput";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { generateSepaXml, SepaTransaction, SepaXmlInput } from "@/lib/tools/sepaXml";
 
 
@@ -71,7 +71,7 @@ export default function SepaXmlGenerator() {
 
     const removeTransaction = (id: string) => {
         if (transactions.length <= 1) {
-            message.warning("Mindestens eine Position muss vorhanden sein.");
+            toast.warning("Mindestens eine Position muss vorhanden sein.");
             return;
         }
         setTransactions(transactions.filter((t) => t.id !== id));
@@ -85,7 +85,7 @@ export default function SepaXmlGenerator() {
 
     const downloadXml = () => {
         if (sepaResult.error || !sepaResult.xml) {
-            message.error(sepaResult.error || "Fehler beim Erzeugen der XML-Datei.");
+            toast.error(sepaResult.error || "Fehler beim Erzeugen der XML-Datei.");
             return;
         }
         const blob = new Blob([sepaResult.xml], { type: "application/xml;charset=utf-8" });
@@ -95,14 +95,14 @@ export default function SepaXmlGenerator() {
         link.download = `SEPA_${type.replace(".", "_")}_${executionDate}.xml`;
         link.click();
         URL.revokeObjectURL(url);
-        message.success("SEPA XML-Datei erfolgreich heruntergeladen!");
+        toast.success("SEPA XML-Datei erfolgreich heruntergeladen!");
     };
 
     const copyXml = () => {
         if (!sepaResult.xml) return;
         navigator.clipboard.writeText(sepaResult.xml);
         setCopiedXml(true);
-        message.success("XML-Inhalt kopiert!");
+        toast.success("XML-Inhalt kopiert!");
         setTimeout(() => setCopiedXml(false), 3000);
     };
 
@@ -122,7 +122,7 @@ export default function SepaXmlGenerator() {
                     fontSize: 13,
                     color: "#166534" }}
             >
-                <SafetyCertificateOutlined style={{ fontSize: 20, color: "#16a34a" }} />
+                <ShieldCheck style={{ width: 20, height: 20, color: "#16a34a", flexShrink: 0 }} />
                 <span>
                     <strong>100 % Lokale Generierung im Browser:</strong> Ihre Bankverbindungen, Beträge und
                     Personendaten werden rein client-seitig verarbeitet und niemals auf externe Server übertragen.
@@ -130,26 +130,17 @@ export default function SepaXmlGenerator() {
             </div>
 
             {/* Type & Sender Config */}
-            <Card
-                title="1. Auftragsart & Kontoinhaber"
-                style={{ borderRadius: 12, border: "1px solid #e2e8f0", marginBottom: 20 }}
-            >
+            <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0", marginBottom: 20 }}>
+                <CardHeader><CardTitle>1. Auftragsart &amp; Kontoinhaber</CardTitle></CardHeader>
+                <CardContent>
                 <div style={{ marginBottom: 16 }}>
                     <div style={{ fontWeight: 600, marginBottom: 8, color: "#334155" }}>
                         Format auswählen:
                     </div>
-                    <Radio.Group
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
-                        buttonStyle="solid"
-                    >
-                        <Radio.Button value="pain.001">
-                            pain.001 (SEPA-Sammelüberweisung / Überweisung)
-                        </Radio.Button>
-                        <Radio.Button value="pain.008">
-                            pain.008 (SEPA-Basislastschrift CORE / Lastschrift)
-                        </Radio.Button>
-                    </Radio.Group>
+                    <RadioGroup value={type} onValueChange={(v) => setType(v as "pain.001" | "pain.008")} className="flex flex-wrap gap-2">
+                        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="pain.001" />pain.001 (SEPA-Sammelüberweisung / Überweisung)</label>
+                        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/10"><RadioGroupItem value="pain.008" />pain.008 (SEPA-Basislastschrift CORE / Lastschrift)</label>
+                    </RadioGroup>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
@@ -190,23 +181,21 @@ export default function SepaXmlGenerator() {
                         </div>
                     )}
                 </div>
+            </CardContent>
             </Card>
 
             {/* Transactions List */}
-            <Card
-                title={
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span>
+            <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0", marginBottom: 20 }}>
+                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <CardTitle>
                             2. Zahlungspositionen ({transactions.length} Posten • Gesamt:{" "}
                             {sepaResult.controlSum.toLocaleString("de-DE", { minimumFractionDigits: 2 })} €)
-                        </span>
-                        <Button icon={<PlusOutlined />} onClick={addTransaction} size="small" type="dashed">
-                            Position hinzufügen
+                    </CardTitle>
+                        <Button variant="outline" size="sm" onClick={addTransaction}>
+                            <Plus /> Position hinzufügen
                         </Button>
-                    </div>
-                }
-                style={{ borderRadius: 12, border: "1px solid #e2e8f0", marginBottom: 20 }}
-            >
+                </CardHeader>
+                <CardContent>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {transactions.map((tx) => (
                         <div
@@ -224,7 +213,7 @@ export default function SepaXmlGenerator() {
                             <div>
                                 <label style={{ fontSize: 11, color: "#64748b" }}>Empfänger / Zahlungspflichtiger</label>
                                 <Input
-                                    size="small"
+                                    
                                     value={tx.recipientName}
                                     placeholder="Name oder Firma"
                                     onChange={(e) => updateTransaction(tx.id, "recipientName", e.target.value)}
@@ -234,7 +223,7 @@ export default function SepaXmlGenerator() {
                             <div>
                                 <label style={{ fontSize: 11, color: "#64748b" }}>IBAN</label>
                                 <Input
-                                    size="small"
+                                    
                                     value={tx.iban}
                                     placeholder="DE..."
                                     onChange={(e) => updateTransaction(tx.id, "iban", e.target.value)}
@@ -243,8 +232,8 @@ export default function SepaXmlGenerator() {
 
                             <div>
                                 <label style={{ fontSize: 11, color: "#64748b" }}>Betrag (€)</label>
-                                <InputNumber
-                                    size="small"
+                                <DecimalInput
+                                    
                                     value={tx.amount}
                                     precision={2}
                                     style={{ width: "100%" }}
@@ -255,7 +244,7 @@ export default function SepaXmlGenerator() {
                             <div>
                                 <label style={{ fontSize: 11, color: "#64748b" }}>Verwendungszweck</label>
                                 <Input
-                                    size="small"
+                                    
                                     value={tx.remittanceInfo}
                                     placeholder="Rechnungsnummer"
                                     onChange={(e) => updateTransaction(tx.id, "remittanceInfo", e.target.value)}
@@ -266,7 +255,7 @@ export default function SepaXmlGenerator() {
                                 <div>
                                     <label style={{ fontSize: 11, color: "#64748b" }}>Mandats-ID</label>
                                     <Input
-                                        size="small"
+                                        
                                         value={tx.mandateId}
                                         onChange={(e) => updateTransaction(tx.id, "mandateId", e.target.value)}
                                     />
@@ -274,45 +263,30 @@ export default function SepaXmlGenerator() {
                             )}
 
                             <div>
-                                <Button
-                                    danger
-                                    type="text"
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => removeTransaction(tx.id)}
-                                    style={{ marginTop: 14 }}
-                                />
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => removeTransaction(tx.id)} style={{ marginTop: 14 }}><Trash2 /></Button>
                             </div>
                         </div>
                     ))}
                 </div>
+            </CardContent>
             </Card>
 
             {/* XML Generation & Download Action */}
-            <Card
-                title="3. Standardkonforme ISO 20022 XML-Datei herunterladen"
-                style={{ borderRadius: 12, border: "1px solid #bfdbfe", background: "#f8fafc" }}
-                extra={
-                    <Space>
-                        <Button
-                            icon={copiedXml ? <CheckOutlined /> : <CopyOutlined />}
-                            size="small"
-                            onClick={copyXml}
-                        >
-                            {copiedXml ? "Kopiert" : "XML kopieren"}
+            <Card style={{ borderRadius: 12, border: "1px solid #bfdbfe", background: "#f8fafc" }}>
+                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <CardTitle>3. Standardkonforme ISO 20022 XML-Datei herunterladen</CardTitle>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={copyXml}>
+                            {copiedXml ? <Check /> : <Copy />} {copiedXml ? "Kopiert" : "XML kopieren"}
                         </Button>
-                        <Button
-                            type="primary"
-                            icon={<DownloadOutlined />}
-                            onClick={downloadXml}
-                            style={{ background: "#2855d9", borderColor: "#2855d9", fontWeight: 600 }}
-                        >
-                            XML herunterladen (.xml)
+                        <Button onClick={downloadXml} style={{ background: "#2855d9", borderColor: "#2855d9", fontWeight: 600 }}>
+                            <Download /> XML herunterladen (.xml)
                         </Button>
-                    </Space>
-                }
-            >
+                    </div>
+                </CardHeader>
+                <CardContent>
                 <div style={{ display: "flex", gap: 16, marginBottom: 12, alignItems: "center" }}>
-                    <Tag color="blue">{type === "pain.001" ? "pain.001.001.03" : "pain.008.001.02"}</Tag>
+                    <Badge>{type === "pain.001" ? "pain.001.001.03" : "pain.008.001.02"}</Badge>
                     <span style={{ fontSize: 13, color: "#475569" }}>
                         Anzahl Posten: <strong>{sepaResult.count}</strong>
                     </span>
@@ -336,6 +310,7 @@ export default function SepaXmlGenerator() {
                 >
                     {sepaResult.xml}
                 </div>
+            </CardContent>
             </Card>
         </div>
     );

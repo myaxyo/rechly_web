@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, Button, Alert, Card, Typography, Modal } from "antd";
-import {
-    InboxOutlined,
-    FileTextOutlined,
-    QrcodeOutlined,
-    DownloadOutlined,
-    CheckCircleOutlined } from "@ant-design/icons";
+import { Inbox, FileText, QrCode, Download, CheckCircle2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
     parseEInvoiceXml,
     extractZugferdXmlFromPdfBytesAsync,
@@ -15,8 +13,6 @@ import {
 import type { ParsedEInvoice } from "@/lib/eInvoiceParser";
 import Link from "next/link";
 
-const { Text } = Typography;
-const { Dragger } = Upload;
 
 export default function ERechnungViewer() {
     const [, setLoading] = useState(false);
@@ -94,23 +90,29 @@ export default function ERechnungViewer() {
     return (
         <div style={{ minWidth: 0, overflowWrap: "anywhere" }}>
             {/* Upload Area */}
-            <Dragger
-                accept=".xml,.pdf"
-                multiple={false}
-                showUploadList={false}
-                beforeUpload={(file) => {
-                    handleFile(file);
-                    return false;
-                }}
+            <label
                 style={{
+                    display: "block",
+                    cursor: "pointer",
+                    textAlign: "center",
                     padding: "32px 16px",
                     background: "#f8fafc",
                     border: "2px dashed #cbd5e1",
                     borderRadius: 12,
                     marginBottom: 24 }}
             >
-                <p className="ant-upload-drag-icon" style={{ marginBottom: 12 }}>
-                    <InboxOutlined style={{ fontSize: 44, color: "#2855d9" }} />
+                <input
+                    type="file"
+                    accept=".xml,.pdf"
+                    className="sr-only"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFile(file);
+                        e.target.value = "";
+                    }}
+                />
+                <p style={{ marginBottom: 12 }}>
+                    <Inbox style={{ width: 44, height: 44, color: "#2855d9", margin: "0 auto" }} />
                 </p>
                 <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "0 0 6px 0" }}>
                     XRechnung (.xml) oder ZUGFeRD (.pdf) hier ablegen oder auswählen
@@ -118,16 +120,13 @@ export default function ERechnungViewer() {
                 <p style={{ fontSize: 14, color: "#64748b", margin: 0 }}>
                     100% lokal im Browser: Deine sensiblen Finanzdaten verlassen zu keinem Zeitpunkt dein Gerät.
                 </p>
-            </Dragger>
+            </label>
 
             {errorMsg && (
-                <Alert
-                    type="error"
-                    showIcon
-                    message="Datei konnte nicht gelesen werden"
-                    description={errorMsg}
-                    style={{ marginBottom: 24, borderRadius: 8 }}
-                />
+                <Alert variant="destructive" style={{ marginBottom: 24, borderRadius: 8 }}>
+                    <AlertTitle>Datei konnte nicht gelesen werden</AlertTitle>
+                    <AlertDescription>{errorMsg}</AlertDescription>
+                </Alert>
             )}
 
             {/* Parsed Result View */}
@@ -146,7 +145,7 @@ export default function ERechnungViewer() {
                             border: "1px solid #a7f3d0" }}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                            <CheckCircleOutlined style={{ color: "#059669", fontSize: 20 }} />
+                            <CheckCircle2 style={{ color: "#059669", width: 20, height: 20 }} />
                             <div style={{ minWidth: 0 }}>
                                 <span style={{ fontWeight: 700, color: "#065f46" }}>
                                     Rechnungsdaten erfolgreich gelesen:
@@ -156,21 +155,21 @@ export default function ERechnungViewer() {
                         </div>
 
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                            <Button icon={<FileTextOutlined />} onClick={() => setShowRawModal(true)}>
+                            <Button variant="outline" onClick={() => setShowRawModal(true)}>
+                                <FileText />
                                 Roh-XML ansehen
                             </Button>
-                            <Button icon={<DownloadOutlined />} onClick={exportCsv}>
+                            <Button variant="outline" onClick={exportCsv}>
+                                <Download />
                                 Als CSV exportieren
                             </Button>
                         </div>
                     </div>
 
-                    <Alert
-                        type="info"
-                        showIcon
-                        title="Datenansicht, keine Konformitätsprüfung"
-                        description="Der Viewer zeigt ausgewählte Rechnungsdaten. Er führt keine vollständige Prüfung nach EN 16931, XRechnung/KoSIT oder PDF/A-3 durch. Bewahre die Originaldatei auf."
-                    />
+                    <Alert>
+                        <AlertTitle>Datenansicht, keine Konformitätsprüfung</AlertTitle>
+                        <AlertDescription>Der Viewer zeigt ausgewählte Rechnungsdaten. Er führt keine vollständige Prüfung nach EN 16931, XRechnung/KoSIT oder PDF/A-3 durch. Bewahre die Originaldatei auf.</AlertDescription>
+                    </Alert>
 
                     {/* Key Metrics Grid */}
                     <div
@@ -179,53 +178,59 @@ export default function ERechnungViewer() {
                             gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
                             gap: 16 }}
                     >
-                        <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                            <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                        <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                            <CardContent>
+                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                                 Rechnungsnummer
-                            </Text>
+                            </span>
                             <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
                                 {parsedData.invoice_number || "–"}
                             </div>
+                            </CardContent>
                         </Card>
 
-                        <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                            <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                        <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                            <CardContent>
+                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                                 Rechnungsdatum
-                            </Text>
+                            </span>
                             <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
                                 {parsedData.date || "–"}
                             </div>
+                            </CardContent>
                         </Card>
 
-                        <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                            <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                        <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                            <CardContent>
+                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                                 Nettobetrag
-                            </Text>
+                            </span>
                             <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>
                                 {parsedData.amount_net !== undefined
                                     ? `${parsedData.amount_net.toFixed(2)} €`
                                     : "–"}
                             </div>
+                            </CardContent>
                         </Card>
 
-                        <Card size="small" style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                            <Text type="secondary" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
+                        <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                            <CardContent>
+                            <span className="text-muted-foreground" style={{ fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>
                                 Gesamtbetrag (Brutto)
-                            </Text>
+                            </span>
                             <div style={{ fontSize: 20, fontWeight: 900, color: "#2855d9", marginTop: 4 }}>
                                 {parsedData.amount_gross !== undefined
                                     ? `${parsedData.amount_gross.toFixed(2)} €`
                                     : "–"}
                             </div>
+                            </CardContent>
                         </Card>
                     </div>
 
                     {/* Details  */}
-                    <Card
-                        title="Ausgelesene Rechnungsdaten"
-                        styles={{ title: { whiteSpace: "normal", padding: "12px 0" } }}
-                        style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}
-                    >
+                    <Card style={{ borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                        <CardHeader><CardTitle style={{ whiteSpace: "normal" }}>Ausgelesene Rechnungsdaten</CardTitle></CardHeader>
+                        <CardContent>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 24 }}>
                             <div>
                                 <h4 style={{ margin: "0 0 8px 0", fontSize: 14, color: "#64748b" }}>
@@ -294,29 +299,24 @@ export default function ERechnungViewer() {
                                         parsedData.vendor_name || ""
                                     )}&reference=${encodeURIComponent(parsedData.invoice_number || "")}`}
                                 >
-                                    <Button type="primary" icon={<QrcodeOutlined />} style={{ background: "#2855d9", maxWidth: "100%", height: "auto", whiteSpace: "normal" }}>
+                                    <Button style={{ background: "#2855d9", maxWidth: "100%", height: "auto", whiteSpace: "normal" }}>
+                                        <QrCode />
                                         GiroCode generieren
                                     </Button>
                                 </Link>
                             </div>
                         )}
+                    </CardContent>
                     </Card>
                 </div>
             )}
 
             {/* Raw XML Modal */}
-            <Modal
-                title={`Roh-XML: ${fileName}`}
-                open={showRawModal}
-                onOk={() => setShowRawModal(false)}
-                onCancel={() => setShowRawModal(false)}
-                width={800}
-                footer={[
-                    <Button key="close" onClick={() => setShowRawModal(false)}>
-                        Schließen
-                    </Button>,
-                ]}
-            >
+            <Dialog open={showRawModal} onOpenChange={setShowRawModal}>
+                <DialogContent className="sm:max-w-[800px]">
+                    <DialogHeader>
+                        <DialogTitle>{`Roh-XML: ${fileName}`}</DialogTitle>
+                    </DialogHeader>
                 <pre
                     style={{
                         background: "#0f172a",
@@ -330,7 +330,13 @@ export default function ERechnungViewer() {
                 >
                     {rawXml}
                 </pre>
-            </Modal>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowRawModal(false)}>
+                            Schließen
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

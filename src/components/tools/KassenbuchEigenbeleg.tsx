@@ -1,9 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, InputNumber, Button, Card, DatePicker, Select } from "antd";
-import {
-    PrinterOutlined } from "@ant-design/icons";
+import { Printer } from "lucide-react";
+import DecimalInput from "@/components/DecimalInput";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import dayjs from "dayjs";
 
 
@@ -45,7 +49,6 @@ export default function KassenbuchEigenbeleg() {
                         value={dayjs(receiptDate)}
                         onChange={(d) => setReceiptDate(d ? d.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"))}
                         format="DD.MM.YYYY"
-                        size="large"
                         style={{ width: "100%" }}
                     />
                 </div>
@@ -57,7 +60,6 @@ export default function KassenbuchEigenbeleg() {
                     <Input
                         value={recipient}
                         onChange={(e) => setRecipient(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -65,14 +67,13 @@ export default function KassenbuchEigenbeleg() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Gezahlter Gesamtbetrag *
                     </label>
-                    <InputNumber
+                    <DecimalInput
                         min={0.01}
                         max={10000}
                         step={1}
                         value={amount}
                         onChange={(val) => setAmount(val || 0)}
                         style={{ width: "100%" }}
-                        size="large"
                         addonAfter="€"
                     />
                 </div>
@@ -81,18 +82,15 @@ export default function KassenbuchEigenbeleg() {
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Grund für die Ausstellung des Eigenbelegs *
                     </label>
-                    <Select
-                        value={lossReason}
-                        onChange={setLossReason}
-                        style={{ width: "100%" }}
-                        size="large"
-                        options={[
-                            { value: "automat_ohne_quittung", label: "Automat ohne Quittungsausgabe" },
-                            { value: "beleg_verloren", label: "Originalbeleg unauffindbar / verloren" },
-                            { value: "trinkgeld_bar", label: "Freiwilliges Trinkgeld (Bar)" },
-                            { value: "telefon_porto", label: "Münztelefon / Briefmarken" },
-                        ]}
-                    />
+                    <Select value={lossReason} onValueChange={setLossReason}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="automat_ohne_quittung">Automat ohne Quittungsausgabe</SelectItem>
+                            <SelectItem value="beleg_verloren">Originalbeleg unauffindbar / verloren</SelectItem>
+                            <SelectItem value="trinkgeld_bar">Freiwilliges Trinkgeld (Bar)</SelectItem>
+                            <SelectItem value="telefon_porto">Münztelefon / Briefmarken</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
@@ -104,7 +102,6 @@ export default function KassenbuchEigenbeleg() {
                     <Input
                         value={purpose}
                         onChange={(e) => setPurpose(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -115,21 +112,19 @@ export default function KassenbuchEigenbeleg() {
                     <Input
                         value={issuerName}
                         onChange={(e) => setIssuerName(e.target.value)}
-                        size="large"
                     />
                 </div>
             </div>
 
             {/* Printable Eigenbeleg Preview */}
-            <Card
-                title="Druckfertiger Eigenbeleg nach § 160 Abgabenordnung (AO)"
-                extra={
-                    <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint} style={{ background: "#2855d9" }}>
-                        Eigenbeleg drucken / PDF
+            <Card style={{ borderRadius: 12, border: "1px solid #cbd5e1" }}>
+                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <CardTitle>Druckfertiger Eigenbeleg nach § 160 Abgabenordnung (AO)</CardTitle>
+                    <Button onClick={handlePrint} style={{ background: "#2855d9" }}>
+                        <Printer /> Eigenbeleg drucken / PDF
                     </Button>
-                }
-                style={{ borderRadius: 12, border: "1px solid #cbd5e1" }}
-            >
+                </CardHeader>
+                <CardContent>
                 <div
                     style={{
                         border: "2px dashed #94a3b8",
@@ -199,6 +194,7 @@ export default function KassenbuchEigenbeleg() {
                         </div>
                     </div>
                 </div>
+            </CardContent>
             </Card>
         </div>
     );

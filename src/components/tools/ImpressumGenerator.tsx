@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Input, Select, Button, Tabs } from "antd";
-import {
-    CopyOutlined,
-    CheckOutlined,
-    SafetyCertificateOutlined } from "@ant-design/icons";
+import { Copy, Check, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 export default function ImpressumGenerator() {
@@ -177,7 +177,7 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     alignItems: "center",
                     gap: 12 }}
             >
-                <SafetyCertificateOutlined style={{ fontSize: 24, color: "#16a34a" }} />
+                <ShieldCheck style={{ width: 24, height: 24, color: "#16a34a", flexShrink: 0 }} />
                 <div style={{ fontSize: 14, color: "#166534", lineHeight: 1.5 }}>
                     <strong>Aktuelle Rechtslage:</strong> Das Digitale-Dienste-Gesetz (§ 5 DDG) hat am 14. Mai 2024 das alte
                     Telemediengesetz (§ 5 TMG) vollständig abgelöst. Dieser Generator erstellt die aktuelle, abmahnsichere
@@ -191,19 +191,16 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     <label style={{ display: "block", fontSize: 13, fontWeight: 700, marginBottom: 4, color: "#334155" }}>
                         Unternehmensform (Rechtsform) *
                     </label>
-                    <Select
-                        value={legalForm}
-                        onChange={setLegalForm}
-                        style={{ width: "100%" }}
-                        size="large"
-                        options={[
-                            { value: "einzelunternehmen", label: "Einzelunternehmen / Freiberufler" },
-                            { value: "gbr", label: "Gesellschaft bürgerlichen Rechts (GbR)" },
-                            { value: "gmbh", label: "GmbH (Gesellschaft mit beschränkter Haftung)" },
-                            { value: "ug", label: "UG (haftungsbeschränkt)" },
-                            { value: "ek", label: "Eingetragener Kaufmann / Kauffrau (e. K.)" },
-                        ]}
-                    />
+                    <Select value={legalForm} onValueChange={setLegalForm}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="einzelunternehmen">Einzelunternehmen / Freiberufler</SelectItem>
+                            <SelectItem value="gbr">Gesellschaft bürgerlichen Rechts (GbR)</SelectItem>
+                            <SelectItem value="gmbh">GmbH (Gesellschaft mit beschränkter Haftung)</SelectItem>
+                            <SelectItem value="ug">UG (haftungsbeschränkt)</SelectItem>
+                            <SelectItem value="ek">Eingetragener Kaufmann / Kauffrau (e. K.)</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div>
@@ -213,7 +210,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     <Input
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -224,7 +220,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     <Input
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -235,7 +230,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     <Input
                         value={street}
                         onChange={(e) => setStreet(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -247,7 +241,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                         <Input
                             value={zip}
                             onChange={(e) => setZip(e.target.value)}
-                            size="large"
                         />
                     </div>
                     <div>
@@ -257,7 +250,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                         <Input
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
-                            size="large"
                         />
                     </div>
                 </div>
@@ -269,7 +261,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     <Input
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -280,7 +271,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                     <Input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        size="large"
                     />
                 </div>
 
@@ -292,7 +282,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                         placeholder="z. B. DE123456789"
                         value={vatId}
                         onChange={(e) => setVatId(e.target.value.toUpperCase())}
-                        size="large"
                     />
                 </div>
 
@@ -306,7 +295,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                                 placeholder="z. B. HRB 123456 B"
                                 value={commercialRegister}
                                 onChange={(e) => setCommercialRegister(e.target.value)}
-                                size="large"
                             />
                         </div>
                         <div>
@@ -317,7 +305,6 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                                 placeholder="z. B. Amtsgericht Berlin-Charlottenburg"
                                 value={registerCourt}
                                 onChange={(e) => setRegisterCourt(e.target.value)}
-                                size="large"
                             />
                         </div>
                     </>
@@ -325,13 +312,12 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
             </div>
 
             {/* Generated Output Tabs */}
-            <Tabs
-                defaultActiveKey="text"
-                items={[
-                    {
-                        key: "text",
-                        label: "Klartext / Markdown",
-                        children: (
+            <Tabs defaultValue="text">
+                <TabsList>
+                    <TabsTrigger value="text">Klartext / Markdown</TabsTrigger>
+                    <TabsTrigger value="html">HTML-Code</TabsTrigger>
+                </TabsList>
+                <TabsContent value="text">
                             <div>
                                 <pre
                                     style={{
@@ -350,20 +336,15 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                                 </pre>
                                 <div style={{ marginTop: 16 }}>
                                     <Button
-                                        type="primary"
-                                        icon={copiedText ? <CheckOutlined /> : <CopyOutlined />}
                                         onClick={copyText}
                                         style={{ background: "#2855d9" }}
                                     >
-                                        {copiedText ? " kopiert!" : "Klartext kopieren"}
+                                        {copiedText ? <Check /> : <Copy />} {copiedText ? " kopiert!" : "Klartext kopieren"}
                                     </Button>
                                 </div>
                             </div>
-                        ) },
-                    {
-                        key: "html",
-                        label: "HTML-Code",
-                        children: (
+                </TabsContent>
+                <TabsContent value="html">
                             <div>
                                 <pre
                                     style={{
@@ -382,18 +363,15 @@ Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>`;
                                 </pre>
                                 <div style={{ marginTop: 16 }}>
                                     <Button
-                                        type="primary"
-                                        icon={copiedHtml ? <CheckOutlined /> : <CopyOutlined />}
                                         onClick={copyHtml}
                                         style={{ background: "#2855d9" }}
                                     >
-                                        {copiedHtml ? "HTML kopiert!" : "HTML kopieren"}
+                                        {copiedHtml ? <Check /> : <Copy />} {copiedHtml ? "HTML kopiert!" : "HTML kopieren"}
                                     </Button>
                                 </div>
                             </div>
-                        ) },
-                ]}
-            />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
