@@ -5,51 +5,44 @@ import { VAT_RATE_OPTIONS } from "@/lib/vatDefaults";
 
 import { useEffect, useState, useCallback } from "react";
 import dayjs from "dayjs";
+import { Import, Loader2, Pencil, Plus, ScanLine, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-    Card,
-    Table,
-    Button,
-    Space,
-    Tag,
-    Typography,
-    Row,
-    Col,
-    Statistic,
-    Modal,
-    Input,
-    Select,
-    DatePicker,
-    Upload,
-    message,
-} from "antd";
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
-    ImportOutlined,
-    PlusOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    UploadOutlined,
-    ScanOutlined,
-} from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useExpenseStore } from "@/store/expenseStore";
 import { ocrExpenseReceipt, uploadExpenseReceipt } from "@/lib/expenseService";
 import { formatCurrency } from "@/lib/currencyUtils";
 import type { Expense, ExpenseCategory, ExpenseFormData } from "@/types";
 
-const { Title, Text } = Typography;
-
-const categoryColors: Record<ExpenseCategory, string> = {
-    office: "blue",
-    travel: "cyan",
-    software: "purple",
-    hardware: "geekblue",
-    marketing: "magenta",
-    consulting: "gold",
-    utilities: "orange",
-    rent: "volcano",
-    insurance: "lime",
-    other: "default",
+const categoryBadgeClass: Record<ExpenseCategory, string> = {
+    office: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    travel: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
+    software: "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+    hardware: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+    marketing: "bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300",
+    consulting: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+    utilities: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+    rent: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
+    insurance: "bg-lime-100 text-lime-700 dark:bg-lime-950 dark:text-lime-300",
+    other: "bg-secondary text-secondary-foreground",
 };
 
 const DEFAULT_FORM: ExpenseFormData = {
@@ -118,7 +111,7 @@ export default function ExpensesPage() {
                 });
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    message.error(
+                    toast.error(
                         err.error === "no_embedded_xml"
                             ? t("expenses.eInvoiceNoXml")
                             : t("expenses.eInvoiceUnsupported")
@@ -142,10 +135,10 @@ export default function ExpensesPage() {
                     vat_rate_percent: parsed.vat_rate_percent ?? 19,
                 });
                 setModalOpen(true);
-                message.success(t("expenses.eInvoiceParsed"));
+                toast.success(t("expenses.eInvoiceParsed"));
             } catch (error) {
                 console.error("E-invoice import failed:", error);
-                message.error(t("expenses.eInvoiceUnsupported"));
+                toast.error(t("expenses.eInvoiceUnsupported"));
             }
         };
         input.click();
@@ -210,9 +203,9 @@ export default function ExpensesPage() {
                     vat_rate_percent: result.vat_rate ?? prev.vat_rate_percent,
                     description: result.description || prev.description,
                 }));
-                message.success(t("expenses.ocrSuccess"));
+                toast.success(t("expenses.ocrSuccess"));
             } catch {
-                message.warning(t("expenses.ocrError"));
+                toast.warning(t("expenses.ocrError"));
             } finally {
                 setOcrLoading(false);
             }
@@ -222,7 +215,7 @@ export default function ExpensesPage() {
 
     const handleSave = async () => {
         if (!form.vendor_name || !form.date) {
-            message.error(t("expenses.fillRequired"));
+            toast.error(t("expenses.fillRequired"));
             return;
         }
         setSaving(true);
@@ -240,37 +233,33 @@ export default function ExpensesPage() {
                 try {
                     await uploadExpenseReceipt(expenseId, pendingFile);
                 } catch {
-                    message.warning(t("expenses.receiptUploadError"));
+                    toast.warning(t("expenses.receiptUploadError"));
                 }
             }
 
-            message.success(
+            toast.success(
                 editingId ? t("expenses.updated") : t("expenses.created"),
             );
             fetchExpenses(true);
             setModalOpen(false);
         } catch {
-            message.error(t("expenses.saveError"));
+            toast.error(t("expenses.saveError"));
         } finally {
             setSaving(false);
         }
     };
 
-    const handleDelete = (id: string) => {
-        Modal.confirm({
-            title: t("expenses.deleteConfirm"),
-            okText: t("expenses.delete"),
-            okType: "danger",
-            cancelText: t("expenses.cancel"),
-            onOk: async () => {
-                try {
-                    await removeExpense(id);
-                    message.success(t("expenses.deleted"));
-                } catch {
-                    message.error(t("expenses.deleteError"));
-                }
-            },
-        });
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            await removeExpense(deleteTarget);
+            toast.success(t("expenses.deleted"));
+        } catch {
+            toast.error(t("expenses.deleteError"));
+        } finally {
+            setDeleteTarget(null);
+        }
     };
 
     const currentMonthTotal = expenses
@@ -280,70 +269,6 @@ export default function ExpensesPage() {
     const ytdTotal = expenses
         .filter((e) => e.date?.startsWith(dayjs().format("YYYY")))
         .reduce((sum, e) => sum + (e.amount_gross || 0), 0);
-
-    const columns: ColumnsType<Expense> = [
-        {
-            title: t("expenses.date"),
-            dataIndex: "date",
-            key: "date",
-            sorter: (a, b) => a.date.localeCompare(b.date),
-        },
-        {
-            title: t("expenses.vendor"),
-            dataIndex: "vendor_name",
-            key: "vendor_name",
-        },
-        {
-            title: t("expenses.description"),
-            dataIndex: "description",
-            key: "description",
-            render: (v) => v || "—",
-        },
-        {
-            title: t("expenses.category"),
-            dataIndex: "category",
-            key: "category",
-            render: (v: ExpenseCategory) => (
-                <Tag color={categoryColors[v]}>
-                    {t(`expenses.category.${v}`) || v}
-                </Tag>
-            ),
-        },
-        {
-            title: t("expenses.gross"),
-            dataIndex: "amount_gross",
-            key: "amount_gross",
-            align: "right",
-            render: (v) => formatCurrency(v),
-            sorter: (a, b) => a.amount_gross - b.amount_gross,
-        },
-        {
-            title: t("expenses.vat"),
-            dataIndex: "vat_amount",
-            key: "vat_amount",
-            align: "right",
-            render: (v) => formatCurrency(v),
-        },
-        {
-            key: "actions",
-            align: "right",
-            render: (_, record) => (
-                <Space>
-                    <Button
-                        size="small"
-                        icon={<EditOutlined />}
-                        onClick={() => openEdit(record)}
-                    />
-                    <Button
-                        size="small"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(record.id!)}
-                    />
-                </Space>
-            ),
-        },
-    ];
 
     const vatOptions = VAT_RATE_OPTIONS;
 
@@ -382,223 +307,258 @@ export default function ExpensesPage() {
         },
     ];
 
+    const sortedExpenses = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
+    const pageSize = 20;
+    const pageCount = Math.max(1, Math.ceil(sortedExpenses.length / pageSize));
+    const [page, setPage] = useState(1);
+    const safePage = Math.min(page, pageCount);
+    const pageExpenses = sortedExpenses.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+    const stats = [
+        { label: t("expenses.monthTotal"), value: `€ ${currentMonthTotal.toFixed(2)}` },
+        { label: t("expenses.ytdTotal"), value: `€ ${ytdTotal.toFixed(2)}` },
+        { label: t("expenses.count"), value: String(expenses.length) },
+    ];
+
     return (
-        <div>
-            <Title level={4}>{t("expenses.title")}</Title>
+        <div className="flex flex-col gap-4">
+            <h2 className="text-xl font-semibold">{t("expenses.title")}</h2>
 
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                <Col xs={12} sm={8}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("expenses.monthTotal")}
-                            value={currentMonthTotal}
-                            precision={2}
-                            prefix="€"
-                        />
+            <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-3 sm:gap-4">
+                {stats.map((stat) => (
+                    <Card key={stat.label}>
+                        <CardContent className="pt-1">
+                            <p className="text-sm text-muted-foreground">{stat.label}</p>
+                            <p className="mt-1 text-2xl font-semibold">{stat.value}</p>
+                        </CardContent>
                     </Card>
-                </Col>
-                <Col xs={12} sm={8}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("expenses.ytdTotal")}
-                            value={ytdTotal}
-                            precision={2}
-                            prefix="€"
-                        />
-                    </Card>
-                </Col>
-                <Col xs={12} sm={8}>
-                    <Card size="small">
-                        <Statistic
-                            title={t("expenses.count")}
-                            value={expenses.length}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+                ))}
+            </div>
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    gap: 8,
-                    marginBottom: 16,
-                }}
-            >
-                <Button
-                    icon={<ImportOutlined />}
-                    onClick={handleImportEInvoice}
-                >
+            <div className="flex flex-wrap justify-end gap-2">
+                <Button type="button" variant="outline" onClick={handleImportEInvoice}>
+                    <Import />
                     {t("expenses.importEInvoice")}
                 </Button>
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={openCreate}
-                >
+                <Button type="button" onClick={openCreate}>
+                    <Plus />
                     {t("expenses.new")}
                 </Button>
             </div>
 
-            <Table
-                columns={columns}
-                dataSource={expenses}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 20 }}
-            />
-
-            <Modal
-                title={
-                    editingId
-                        ? t("expenses.editTitle")
-                        : t("expenses.newTitle")
-                }
-                open={modalOpen}
-                onCancel={() => setModalOpen(false)}
-                onOk={handleSave}
-                okText={t("expenses.save")}
-                cancelText={t("expenses.cancel")}
-                confirmLoading={saving}
-                width={640}
-            >
-                {/* Receipt upload / OCR */}
-                <div style={{ marginBottom: 16 }}>
-                    <Upload.Dragger
-                        accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
-                        showUploadList={false}
-                        beforeUpload={(file) => {
-                            setPendingFile(file);
-                            handleOCR(file);
-                            return false;
-                        }}
-                        style={{ padding: "8px 0" }}
-                    >
-                        <Space>
-                            {ocrLoading ? (
-                                <ScanOutlined spin />
+            <Card>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t("expenses.date")}</TableHead>
+                                <TableHead>{t("expenses.vendor")}</TableHead>
+                                <TableHead>{t("expenses.description")}</TableHead>
+                                <TableHead>{t("expenses.category")}</TableHead>
+                                <TableHead className="text-right">{t("expenses.gross")}</TableHead>
+                                <TableHead className="text-right">{t("expenses.vat")}</TableHead>
+                                <TableHead className="text-right"><span className="sr-only">Actions</span></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {loading && pageExpenses.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                                        <Loader2 className="mr-2 inline size-4 animate-spin" />…
+                                    </TableCell>
+                                </TableRow>
+                            ) : pageExpenses.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                                        {t("expenses.title")}
+                                    </TableCell>
+                                </TableRow>
                             ) : (
-                                <UploadOutlined />
+                                pageExpenses.map((record) => (
+                                    <TableRow key={record.id}>
+                                        <TableCell>{record.date}</TableCell>
+                                        <TableCell className="font-medium">{record.vendor_name}</TableCell>
+                                        <TableCell>{record.description || "—"}</TableCell>
+                                        <TableCell>
+                                            <Badge className={categoryBadgeClass[record.category]}>
+                                                {t(`expenses.category.${record.category}`) || record.category}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">{formatCurrency(record.amount_gross)}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(record.vat_amount)}</TableCell>
+                                        <TableCell>
+                                            <div className="flex justify-end gap-1">
+                                                <Button type="button" variant="outline" size="icon-sm" onClick={() => openEdit(record)} aria-label={t("expenses.editTitle")}>
+                                                    <Pencil />
+                                                </Button>
+                                                <Button type="button" variant="destructive" size="icon-sm" onClick={() => setDeleteTarget(record.id!)} aria-label={t("expenses.delete")}>
+                                                    <Trash2 />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
                             )}
-                            <Text type="secondary">
-                                {t("expenses.uploadHint")}
-                            </Text>
-                        </Space>
-                    </Upload.Dragger>
-                    {pendingFile && (
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                            {pendingFile.name}
-                        </Text>
-                    )}
+                        </TableBody>
+                    </Table>
                 </div>
+                {pageCount > 1 && (
+                    <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-3">
+                        <Button type="button" variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage((pg) => Math.max(1, pg - 1))}>‹</Button>
+                        <span className="text-sm">{safePage} / {pageCount}</span>
+                        <Button type="button" variant="outline" size="sm" disabled={safePage >= pageCount} onClick={() => setPage((pg) => Math.min(pageCount, pg + 1))}>›</Button>
+                    </div>
+                )}
+            </Card>
 
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 12,
-                    }}
-                >
-                    <div>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.date")} *
+            <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
+                    <DialogHeader>
+                        <DialogTitle>{editingId ? t("expenses.editTitle") : t("expenses.newTitle")}</DialogTitle>
+                    </DialogHeader>
+
+                    {/* Receipt upload / OCR */}
+                    <div className="flex flex-col gap-1.5">
+                        <label
+                            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-input px-4 py-6 text-center transition-colors hover:bg-accent/50"
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                const file = e.dataTransfer.files?.[0];
+                                if (file) {
+                                    setPendingFile(file);
+                                    void handleOCR(file);
+                                }
+                            }}
+                        >
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setPendingFile(file);
+                                        void handleOCR(file);
+                                    }
+                                    e.target.value = "";
+                                }}
+                            />
+                            {ocrLoading ? <ScanLine className="size-6 animate-pulse text-primary" /> : <Upload className="size-6 text-muted-foreground" />}
+                            <span className="text-sm text-muted-foreground">{t("expenses.uploadHint")}</span>
                         </label>
-                        <DatePicker
-                            value={form.date ? dayjs(form.date) : null}
-                            onChange={(d) =>
-                                setForm((prev) => ({
-                                    ...prev,
-                                    date: d ? d.format("YYYY-MM-DD") : "",
-                                }))
-                            }
-                            style={{ width: "100%" }}
-                        />
+                        {pendingFile && <p className="text-xs text-muted-foreground">{pendingFile.name}</p>}
                     </div>
-                    <div>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.vendor")} *
-                        </label>
-                        <Input
-                            value={form.vendor_name}
-                            onChange={(e) =>
-                                setForm((prev) => ({
-                                    ...prev,
-                                    vendor_name: e.target.value,
-                                }))
-                            }
-                        />
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("expenses.date")} *</Label>
+                            <DatePicker
+                                value={form.date ? dayjs(form.date) : null}
+                                onChange={(d) =>
+                                    setForm((prev) => ({
+                                        ...prev,
+                                        date: d ? d.format("YYYY-MM-DD") : "",
+                                    }))
+                                }
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="expense-vendor">{t("expenses.vendor")} *</Label>
+                            <Input
+                                id="expense-vendor"
+                                value={form.vendor_name}
+                                onChange={(e) =>
+                                    setForm((prev) => ({ ...prev, vendor_name: e.target.value }))
+                                }
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5 sm:col-span-2">
+                            <Label htmlFor="expense-desc">{t("expenses.description")}</Label>
+                            <Input
+                                id="expense-desc"
+                                value={form.description}
+                                onChange={(e) =>
+                                    setForm((prev) => ({ ...prev, description: e.target.value }))
+                                }
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("expenses.gross")} (€)</Label>
+                            <DecimalInput
+                                value={form.amount_gross}
+                                min={0}
+                                step={0.01}
+                                style={{ width: "100%" }}
+                                onChange={handleGrossChange}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("expenses.vatRate")}</Label>
+                            <Select value={String(form.vat_rate_percent)} onValueChange={(v) => handleVatRateChange(Number(v))}>
+                                <SelectTrigger aria-label={t("expenses.vatRate")}><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {vatOptions.map((o) => (
+                                        <SelectItem key={o.value} value={String(o.value)}>{o.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("expenses.category")}</Label>
+                            <Select
+                                value={form.category}
+                                onValueChange={(v) => setForm((prev) => ({ ...prev, category: v as ExpenseCategory }))}
+                            >
+                                <SelectTrigger aria-label={t("expenses.category")}><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {categoryOptions.map((o) => (
+                                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <Label>{t("expenses.paymentMethod")}</Label>
+                            <Select
+                                value={form.payment_method}
+                                onValueChange={(v) => setForm((prev) => ({ ...prev, payment_method: v as ExpenseFormData["payment_method"] }))}
+                            >
+                                <SelectTrigger aria-label={t("expenses.paymentMethod")}><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {paymentMethodOptions.map((o) => (
+                                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <div style={{ gridColumn: "1 / -1" }}>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.description")}
-                        </label>
-                        <Input
-                            value={form.description}
-                            onChange={(e) =>
-                                setForm((prev) => ({
-                                    ...prev,
-                                    description: e.target.value,
-                                }))
-                            }
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.gross")} (€)
-                        </label>
-                        <DecimalInput
-                            value={form.amount_gross}
-                            min={0}
-                            step={0.01}
-                            style={{ width: "100%" }}
-                            onChange={handleGrossChange}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.vatRate")}
-                        </label>
-                        <Select
-                            value={form.vat_rate_percent}
-                            options={vatOptions}
-                            onChange={handleVatRateChange}
-                            style={{ width: "100%" }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.category")}
-                        </label>
-                        <Select
-                            value={form.category}
-                            options={categoryOptions}
-                            onChange={(v) =>
-                                setForm((prev) => ({
-                                    ...prev,
-                                    category: v as ExpenseCategory,
-                                }))
-                            }
-                            style={{ width: "100%" }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                            {t("expenses.paymentMethod")}
-                        </label>
-                        <Select
-                            value={form.payment_method}
-                            options={paymentMethodOptions}
-                            onChange={(v) =>
-                                setForm((prev) => ({
-                                    ...prev,
-                                    payment_method: v,
-                                }))
-                            }
-                            style={{ width: "100%" }}
-                        />
-                    </div>
-                </div>
-            </Modal>
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+                            {t("expenses.cancel")}
+                        </Button>
+                        <Button type="button" disabled={saving} onClick={() => void handleSave()}>
+                            {saving && <Loader2 className="animate-spin" />}
+                            {t("expenses.save")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t("expenses.deleteConfirm")}</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t("expenses.cancel")}</AlertDialogCancel>
+                        <AlertDialogAction variant="destructive" onClick={() => void confirmDelete()}>
+                            {t("expenses.delete")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
