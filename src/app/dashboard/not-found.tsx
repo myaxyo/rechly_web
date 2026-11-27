@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "antd";
-import { HomeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeft, House } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardNotFound() {
     const router = useRouter();
@@ -15,9 +15,7 @@ export default function DashboardNotFound() {
             <section className="dashboard-welcome">
                 <div>
                     <div className="dashboard-eyebrow">404</div>
-                    <h1>
-                        {isDe ? "Seite nicht gefunden" : "Page not found"}
-                    </h1>
+                    <h1>{isDe ? "Seite nicht gefunden" : "Page not found"}</h1>
                     <p>
                         {isDe
                             ? "Dieser Bereich des Dashboards existiert nicht oder wurde verschoben."
@@ -25,20 +23,13 @@ export default function DashboardNotFound() {
                     </p>
                 </div>
             </section>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Button
-                    type="primary"
-                    size="large"
-                    icon={<HomeOutlined />}
-                    onClick={() => router.push("/dashboard")}
-                >
+            <div className="flex flex-wrap gap-3">
+                <Button type="button" size="lg" onClick={() => router.push("/dashboard")}>
+                    <House />
                     {isDe ? "Zum Dashboard" : "Back to dashboard"}
                 </Button>
-                <Button
-                    size="large"
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => router.back()}
-                >
+                <Button type="button" size="lg" variant="outline" onClick={() => router.back()}>
+                    <ArrowLeft />
                     {isDe ? "Zurück" : "Go back"}
                 </Button>
             </div>
