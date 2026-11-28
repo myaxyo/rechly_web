@@ -3,7 +3,6 @@
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import QRCode from "qrcode";
 import {
     Plus,
     Trash2,
@@ -307,12 +306,15 @@ function RechnungsGeneratorInner() {
                 active = false;
             };
         }
-        QRCode.toDataURL(giroPayload, {
-            errorCorrectionLevel: "M",
-            margin: 1,
-            width: 140,
-            color: { dark: "#0f172a", light: "#ffffff" },
-        })
+        void import("qrcode")
+            .then((mod) =>
+                mod.default.toDataURL(giroPayload, {
+                    errorCorrectionLevel: "M",
+                    margin: 1,
+                    width: 140,
+                    color: { dark: "#0f172a", light: "#ffffff" },
+                }),
+            )
             .then((url) => {
                 if (active) setQrDataUrl(url);
             })
