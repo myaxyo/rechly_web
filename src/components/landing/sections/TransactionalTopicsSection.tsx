@@ -23,8 +23,8 @@ const content = {
                     "Für Nutzer, die schnell verstehen wollen, welche Inhalte eine deutsche Rechnungsvorlage wirklich tragen sollte.",
             },
             {
-                href: "/zahlungserinnerung-schreiben",
-                title: "Zahlungserinnerung schreiben",
+                href: "/tools/mahnung-generator",
+                title: "Mahnung schreiben: Vorlage für 1. bis 3. Mahnung",
                 description:
                     "Für Fälle, in denen offene Rechnungen freundlich, klar und professionell nachverfolgt werden müssen.",
             },
@@ -55,7 +55,7 @@ const content = {
                     "For users who need a clear view of what a German invoice template should actually contain.",
             },
             {
-                href: "/zahlungserinnerung-schreiben",
+                href: "/tools/mahnung-generator",
                 title: "Write a payment reminder",
                 description:
                     "For overdue invoices that need a professional follow-up with the right tone.",

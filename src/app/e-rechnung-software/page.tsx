@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/e-rechnung-software";
 
 export const metadata = createPageMetadata({
-    title: "E-Rechnung Software kostenlos – XRechnung & ZUGFeRD erstellen",
+    title: "E-Rechnung-Software: XRechnung & ZUGFeRD erstellen",
     description:
         "Kostenlose E-Rechnung Software für Deutschland: XRechnung 3.0 & ZUGFeRD 2.3 (EN 16931) rechtskonform erstellen, prüfen und versenden. 100% kostenlos & ohne Abo!",
     path,

@@ -4,9 +4,9 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnungsprogramm-kostenlos";
 
 export const metadata = createPageMetadata({
-    title: "Rechnungsprogramm kostenlos – Freeware Vollversion ohne Limit",
+    title: "Rechnungsprogramm kostenlos – Vollversion ohne Abo",
     description:
-        "Kostenloses Rechnungsprogramm & Freeware Vollversion für Deutschland: Rechnungen, E-Rechnung (XRechnung & ZUGFeRD) & Kunden ohne Abo oder versteckte Kosten verwalten.",
+        "Rechnungsprogramm kostenlos als Vollversion: Rechnungen, Kunden und E-Rechnung (XRechnung, ZUGFeRD) ohne Abo und ohne Rechnungslimit verwalten.",
     path,
     type: "article",
     keywords: [
@@ -24,7 +24,7 @@ export default function RechnungsprogrammKostenlosPage() {
         <KeywordLandingPage
             path={path}
             eyebrow="RECHNUNGSPROGRAMM KOSTENLOS"
-            title="Rechnungsprogramm kostenlos: wann gratis wirklich sinnvoll ist"
+            title="Rechnungsprogramm kostenlos: Vollversion ohne Abo"
             intro="Wer nach einem kostenlosen Rechnungsprogramm sucht, will meistens zwei Dinge gleichzeitig: schnell loslegen und später nicht in versteckte Grenzen oder aggressive Upsell-Logik laufen. Genau deshalb ist diese Suchanfrage für den deutschen Markt so wertvoll."
             summary="Rechly ist hier besonders relevant, weil das Produkt als Open-Source-Projekt kostenlos nutzbar bleibt und trotzdem die Kernaufgaben abdeckt: Rechnungen erstellen, Kundendaten verwalten, PDFs exportieren und offene Zahlungen sauber nachverfolgen."
             keywordPills={[
@@ -62,7 +62,7 @@ export default function RechnungsprogrammKostenlosPage() {
                     ],
                 },
                 {
-                    title: "Wann kostenlos ausreicht und wann du mehr Struktur brauchst",
+                    title: "Wann kostenlos ausreicht und wann Sie mehr Struktur brauchen",
                     body: [
                         "Für viele Freelancer und kleine Teams reicht ein kostenloses Rechnungsprogramm lange aus, wenn der Ablauf sauber ist. Relevant wird der nächste Schritt erst dann, wenn zusätzliche Prozesse, Teamgrößen oder Integrationen wichtiger werden als die Kernaufgaben selbst.",
                         "Wer vor allem Rechnungen erstellen, offene Forderungen nachhalten und nicht in unnötige Komplexität geraten will, fährt mit einem fokussierten kostenlosen System oft besser.",
@@ -77,7 +77,7 @@ export default function RechnungsprogrammKostenlosPage() {
                 {
                     question:
                         "Reicht ein kostenloses Rechnungsprogramm für Freelancer aus?",
-                    answer: "In vielen Fällen ja, solange die Kernfunktionen sauber umgesetzt sind und dein Workflow nicht unnötig kompliziert wird.",
+                    answer: "In vielen Fällen ja, solange die Kernfunktionen sauber umgesetzt sind und Ihr Ablauf nicht unnötig kompliziert wird.",
                 },
                 {
                     question:

@@ -3,7 +3,7 @@ import { createPageMetadata } from "@/lib/seo";
 export const metadata = createPageMetadata({
     title: "30+ Kostenlose Business-Tools, Rechner & PDF-Generatoren",
     description:
-        "Kostenlose Online-Rechner & Generatoren ohne Anmeldung: Rechnungsgenerator, Angebotsgenerator, XRechnung Viewer, MwSt-Rechner, Spesenrechner 2026 & USt-IdNr.-Prüfer.",
+        "Kostenlose Online-Rechner & Generatoren ohne Anmeldung: Rechnungsgenerator, Angebotsgenerator, XRechnung Viewer, MwSt-Rechner, Spesenrechner 2027 & USt-IdNr.-Prüfer.",
     path: "/tools",
     keywords: [
         "Business Tools kostenlos",
@@ -18,6 +18,7 @@ export const metadata = createPageMetadata({
         "Verzugszinsen Rechner",
         "USt-IdNr prüfen",
         "Kleinunternehmer Rechner",
+        "Steuerkalender 2027",
         "Steuerkalender 2026",
     ],
     category: "Business-Superapp & Rechner",

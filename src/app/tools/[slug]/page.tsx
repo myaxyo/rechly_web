@@ -130,7 +130,9 @@ function renderToolComponent(slug: string) {
         case "bautagebuch-vorlage":
             return <BautagebuchBuilder />;
         case "steuerkalender-2026":
-            return <SteuerkalenderRechner />;
+            return <SteuerkalenderRechner year={2026} />;
+        case "steuerkalender-2027":
+            return <SteuerkalenderRechner year={2027} />;
         case "mahnung-generator":
             return <MahnungGenerator />;
         case "euer-rechner":

@@ -18,9 +18,9 @@ import { LEXIKON_CATALOG } from "@/lib/tools/lexikonCatalog";
 const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = createPageMetadata({
-    title: "Rechnungs- & Steuer-Lexikon für Selbstständige & KMU",
+    title: "Rechnungs- & Steuer-Lexikon für Selbstständige",
     description:
-        "Das deutsche Fachlexikon für Rechnungsstellung, Umsatzsteuer (§ 14, § 13b, § 19 UStG), E-Rechnungspflicht 2025–2028, GoBD, Aufbewahrungsfristen (8 Jahre) & Handwerkerbonus (§ 35a EStG).",
+        "Fachlexikon für Rechnungsstellung und Umsatzsteuer (§ 14, § 13b, § 19 UStG), E-Rechnungspflicht, GoBD und Aufbewahrungsfristen – verständlich erklärt.",
     path: "/lexikon",
     category: "Steuer- & Rechnungslexikon",
     keywords: [
@@ -28,7 +28,7 @@ export const metadata: Metadata = createPageMetadata({
         "Steuerlexikon Selbstständige",
         "Pflichtangaben Rechnung § 14 UStG",
         "E-Rechnungspflicht 2025",
-        "Kleinunternehmerregelung 2026",
+        "Kleinunternehmerregelung 2027",
         "Aufbewahrungsfrist Rechnungen 8 Jahre",
         "GoBD einfach erklärt",
     ],
@@ -85,7 +85,7 @@ export default function LexikonHubPage() {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center space-y-5">
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#eef3fd] border border-[#c9d8f5]/60 text-[#1e43b3] text-xs font-bold uppercase tracking-wider">
                         <BookOpen className="w-3.5 h-3.5" />
-                        Deutsches Steuer- & Rechnungs-Wissen (Stand 2026)
+                        Deutsches Steuer- & Rechnungs-Wissen (aktueller Stand)
                     </div>
 
                     <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">

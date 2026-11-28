@@ -26,16 +26,20 @@ export interface LexikonEntry {
     keywords: string[];
     relatedToolSlugs: string[];
     relatedVorlagenSlugs: string[];
+    published: string;
+    reviewed: string;
 }
 
 export const LEXIKON_CATALOG: LexikonEntry[] = [
     {
         slug: "pflichtangaben-rechnung",
+        published: "2026-10-24",
+        reviewed: "2026-11-28",
         term: "Pflichtangaben auf Rechnungen (§ 14 UStG)",
-        title: "Pflichtangaben auf Rechnungen nach § 14 Abs. 4 UStG – Komplette Checkliste 2026",
+        title: "Pflichtangaben auf Rechnungen nach § 14 Abs. 4 UStG – Komplette Checkliste",
         metaTitle: "Pflichtangaben Rechnung (§ 14 UStG): Checkliste & Muster",
         metaDescription:
-            "Alle 10 gesetzlichen Pflichtangaben einer Rechnung nach § 14 Abs. 4 UStG im Überblick: Checkliste für Vorsteuerabzug, Ausnahmen bis 250 € & kostenloser Rechnungsgenerator.",
+            "Alle 10 gesetzlichen Pflichtangaben einer Rechnung nach § 14 Abs. 4 UStG im Überblick: Checkliste für Vorsteuerabzug, Ausnahmen bis 250 € & kostenloser…",
         category: "Rechnungsrecht",
         legalReference: "§ 14 Abs. 4 UStG",
         shortDefinition:
@@ -82,12 +86,14 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
                 answer: "Ja, nach § 31 Abs. 4 UStDV ist dieser Satz ausdrücklich zulässig, sofern die Leistung tatsächlich am Tag der Rechnungsausstellung erbracht oder abgeschlossen wurde.",
             },
         ],
-        keywords: ["Pflichtangaben Rechnung", "§ 14 UStG Checkliste", "Rechnung Pflichtangaben 2026"],
+        keywords: ["Pflichtangaben Rechnung", "§ 14 UStG Checkliste", "Rechnung Pflichtangaben aktuell"],
         relatedToolSlugs: ["rechnungsgenerator", "stornorechnung-generator", "mehrwertsteuer-rechner"],
         relatedVorlagenSlugs: ["freiberufler", "handwerker", "kleinunternehmer"],
     },
     {
         slug: "kleinbetragsrechnung",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Kleinbetragsrechnung (§ 33 UStDV)",
         title: "Kleinbetragsrechnung bis 250 Euro (§ 33 UStDV) – Regeln & Pflichtangaben",
         metaTitle: "Kleinbetragsrechnung bis 250 € (§ 33 UStDV): Pflichtangaben",
@@ -132,11 +138,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "e-rechnung-pflicht",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "E-Rechnungspflicht 2025–2028",
         title: "E-Rechnungspflicht in Deutschland (2025 bis 2028) – Fristen, Ausnahmen & Formate",
         metaTitle: "E-Rechnungspflicht 2025, 2027 & 2028: Fristen & Ausnahmen",
         metaDescription:
-            "Alles zur gesetzlichen E-Rechnungspflicht nach dem Wachstumschancengesetz: Empfangspflicht seit 01.01.2025, Übergangsfristen 2027/2028, Ausnahmen für Kleinbeträge & XRechnung/ZUGFeRD.",
+            "Alles zur gesetzlichen E-Rechnungspflicht nach dem Wachstumschancengesetz: Empfangspflicht seit 01.01.2025, Übergangsfristen 2027/2028, Ausnahmen für…",
         category: "E-Rechnung & GoBD",
         legalReference: "§ 14 Abs. 1 UStG (Wachstumschancengesetz)",
         shortDefinition:
@@ -172,11 +180,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "kleinunternehmerregelung",
+        published: "2026-10-24",
+        reviewed: "2026-11-28",
         term: "Kleinunternehmerregelung (§ 19 UStG)",
-        title: "Kleinunternehmerregelung (§ 19 UStG) 2026 – Neue Grenzen (25.000 € / 100.000 €)",
-        metaTitle: "Kleinunternehmerregelung 2026 (§ 19 UStG): 25.000 € Grenze",
+        title: "Kleinunternehmerregelung (§ 19 UStG) – Neue Grenzen (25.000 € / 100.000 €)",
+        metaTitle: "Kleinunternehmerregelung (§ 19 UStG): 25.000 € Grenze",
         metaDescription:
-            "Die reformierte Kleinunternehmerregelung nach § 19 UStG ab 2025/2026: Neue Umsatzgrenzen 25.000 € (Vorjahr) und 100.000 € (laufendes Jahr), echte Steuerbefreiung & Rechnungshinweis.",
+            "Die reformierte Kleinunternehmerregelung nach § 19 UStG ab 2025/2026: Neue Umsatzgrenzen 25.000 € (Vorjahr) und 100.000 € (laufendes Jahr), echte…",
         category: "Steuerrecht & UStG",
         legalReference: "§ 19 UStG (Jahressteuergesetz 2024)",
         shortDefinition:
@@ -201,17 +211,19 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
                 answer: "Solange Sie im Vorjahr unter 25.000 € lagen und im laufenden Jahr die 100.000-€-Grenze nicht überschreiten, bleiben Sie für das gesamte laufende Jahr Kleinunternehmer. Erst ab dem 1. Januar des Folgejahres wechseln Sie dann in die Regelbesteuerung.",
             },
         ],
-        keywords: ["Kleinunternehmerregelung 2026", "§ 19 UStG 25000 Euro", "Kleinunternehmer Grenze 100000"],
+        keywords: ["Kleinunternehmerregelung 2027", "§ 19 UStG 25000 Euro", "Kleinunternehmer Grenze 100000"],
         relatedToolSlugs: ["kleinunternehmer-rechner", "rechnungsgenerator", "euer-rechner"],
         relatedVorlagenSlugs: ["kleinunternehmer", "dozent-nachhilfe"],
     },
     {
         slug: "gobd-konformitaet",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "GoBD-Konformität",
         title: "GoBD einfach erklärt – Was bedeutet GoBD-konforme Rechnungsstellung?",
         metaTitle: "GoBD einfach erklärt: Regeln für Rechnungen & Buchhaltung",
         metaDescription:
-            "Was bedeutet GoBD-konform? Warum Word und Excel bei einer Betriebsprüfung durchfallen, wie Unveränderbarkeit funktioniert und wie Sie Belege rechtssicher archivieren.",
+            "Was bedeutet GoBD-konform? Warum Word und Excel bei einer Betriebsprüfung durchfallen, wie Unveränderbarkeit funktioniert und wie Sie Belege rechtssicher…",
         category: "E-Rechnung & GoBD",
         legalReference: "BMF-Schreiben zu §§ 145–147 AO (GoBD)",
         shortDefinition:
@@ -249,11 +261,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "aufbewahrungsfristen",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Aufbewahrungsfristen (8 & 10 Jahre)",
         title: "Aufbewahrungsfristen für Rechnungen & Geschäftsunterlagen (Neu: 8 Jahre nach BEG IV)",
-        metaTitle: "Aufbewahrungsfristen Rechnungen: Neu 8 statt 10 Jahre (BEG IV)",
+        metaTitle: "Aufbewahrungsfristen: 8 statt 10 Jahre (BEG IV)",
         metaDescription:
-            "Wie lange müssen Rechnungen aufbewahrt werden? Alle neuen Aufbewahrungsfristen nach dem Bürokratieentlastungsgesetz IV (BEG IV): 8 Jahre für Buchungsbelege & Rechnungen, 10 Jahre für Bilanzen.",
+            "Wie lange müssen Rechnungen aufbewahrt werden? Alle neuen Aufbewahrungsfristen nach dem Bürokratieentlastungsgesetz IV (BEG IV): 8 Jahre für Buchungsbelege…",
         category: "E-Rechnung & GoBD",
         legalReference: "§ 147 AO, § 14b UStG, § 257 HGB (BEG IV)",
         shortDefinition:
@@ -284,11 +298,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "rechnungsnummer",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Fortlaufende Rechnungsnummer",
         title: "Fortlaufende Rechnungsnummer (§ 14 UStG) – Regeln, Formate & Nummernkreise",
         metaTitle: "Fortlaufende Rechnungsnummer (§ 14 UStG): Regeln & Beispiele",
         metaDescription:
-            "Muss eine Rechnungsnummer mit 1 beginnen? Sind Lücken erlaubt? Alles zu fortlaufenden Rechnungsnummern nach § 14 UStG und § 31 Abs. 2 UStDV mit besten Format-Beispielen.",
+            "Muss eine Rechnungsnummer mit 1 beginnen? Sind Lücken erlaubt? Alles zu fortlaufenden Rechnungsnummern nach § 14 UStG und § 31 Abs.",
         category: "Rechnungsrecht",
         legalReference: "§ 14 Abs. 4 Nr. 4 UStG & § 31 Abs. 2 UStDV",
         shortDefinition:
@@ -323,11 +339,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "handwerkerrechnung-35a",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Steuerbonus Handwerkerrechnung (§ 35a EStG)",
         title: "Handwerkerrechnung absetzen (§ 35a EStG) – Bis zu 1.200 € Steuerbonus sichern",
         metaTitle: "Handwerkerrechnung absetzen (§ 35a EStG): 20 % Steuerbonus",
         metaDescription:
-            "Wie Privatkunden 20 % der Arbeits- und Fahrtkosten (bis zu 1.200 € pro Jahr) von der Steuer abziehen und wie Handwerker ihre Rechnung nach § 35a EStG korrekt ausstellen.",
+            "Wie Privatkunden 20 % der Arbeits- und Fahrtkosten (bis zu 1.200 € pro Jahr) von der Steuer abziehen und wie Handwerker ihre Rechnung nach § 35a EStG…",
         category: "Steuerrecht & UStG",
         legalReference: "§ 35a Abs. 3 EStG",
         shortDefinition:
@@ -362,11 +380,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "reverse-charge-13b",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Reverse-Charge-Verfahren (§ 13b UStG)",
         title: "Reverse-Charge-Verfahren (§ 13b UStG) – Steuerschuldnerschaft des Leistungsempfängers",
         metaTitle: "Reverse Charge (§ 13b UStG): Bauleistungen & EU-Rechnungen",
         metaDescription:
-            "Wann gilt § 13b UStG (Reverse Charge)? Alles zur Umkehr der Steuerschuldnerschaft bei EU-B2B-Rechnungen, ausländischen Dienstleistern und Bauleistungen (Freistellungsbescheinigung).",
+            "Wann gilt § 13b UStG (Reverse Charge)? Alles zur Umkehr der Steuerschuldnerschaft bei EU-B2B-Rechnungen, ausländischen Dienstleistern und Bauleistungen…",
         category: "Steuerrecht & UStG",
         legalReference: "§ 13b UStG",
         shortDefinition:
@@ -401,11 +421,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "ist-vs-soll-versteuerung",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Ist-Versteuerung vs. Soll-Versteuerung",
         title: "Ist-Versteuerung vs. Soll-Versteuerung (§ 16 & § 20 UStG) – Was spart mehr Liquidität?",
         metaTitle: "Ist-Versteuerung vs. Soll-Versteuerung (§ 20 UStG): Antrag",
         metaDescription:
-            "Soll-Versteuerung oder Ist-Versteuerung? Wann Sie die Umsatzsteuer erst nach Zahlungseingang ans Finanzamt abführen müssen (§ 20 UStG) und wer den Antrag stellen darf.",
+            "Soll-Versteuerung oder Ist-Versteuerung? Wann Sie die Umsatzsteuer erst nach Zahlungseingang ans Finanzamt abführen müssen (§ 20 UStG) und wer den Antrag…",
         category: "Steuerrecht & UStG",
         legalReference: "§ 16 UStG & § 20 UStG",
         shortDefinition:
@@ -434,11 +456,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "gutschrift-vs-stornorechnung",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Gutschrift vs. Stornorechnung",
         title: "Gutschrift vs. Stornorechnung – Warum der falsche Begriff Umsatzsteuer kostet",
-        metaTitle: "Gutschrift vs. Stornorechnung (§ 14 UStG): Unterschied & Muster",
+        metaTitle: "Gutschrift vs. Stornorechnung (§ 14 UStG)",
         metaDescription:
-            "Was ist der Unterschied zwischen einer Gutschrift und einer Stornorechnung (Rechnungskorrektur)? Wann § 14c UStG droht und wie Sie fehlerhafte Rechnungen richtig stornieren.",
+            "Was ist der Unterschied zwischen einer Gutschrift und einer Stornorechnung (Rechnungskorrektur)? Wann § 14c UStG droht und wie Sie fehlerhafte Rechnungen…",
         category: "Rechnungsrecht",
         legalReference: "§ 14 Abs. 2 S. 2 UStG & § 14c UStG",
         shortDefinition:
@@ -472,6 +496,8 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "leistungszeitraum",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Leistungszeitraum & Lieferdatum",
         title: "Leistungszeitraum & Lieferdatum auf der Rechnung (§ 14 UStG & § 31 UStDV)",
         metaTitle: "Leistungszeitraum & Lieferdatum Rechnung: Muster & § 14 UStG",
@@ -518,6 +544,8 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "zahlungsziel-und-verzug",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Zahlungsziel & Zahlungsverzug (§ 286 BGB)",
         title: "Zahlungsziel, Fälligkeit & Zahlungsverzug (§ 286 & § 288 BGB) – Wann darf man mahnen?",
         metaTitle: "Zahlungsziel Rechnung & Verzug (§ 286 BGB): Muster & Fristen",
@@ -564,11 +592,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "freiberufler-vs-gewerbe",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Freiberufler vs. Gewerbetreibende (§ 18 EStG)",
         title: "Freiberufler (§ 18 EStG) vs. Gewerbe – Katalogberufe, Gewerbesteuer & Buchhaltung",
-        metaTitle: "Freiberufler vs. Gewerbe (§ 18 EStG): Katalogberufe & Steuern",
+        metaTitle: "Freiberufler vs. Gewerbe (§ 18 EStG)",
         metaDescription:
-            "Bin ich Freiberufler (§ 18 EStG) oder Gewerbetreibender? Alle Katalogberufe, Vorteile bei Gewerbesteuer, IHK-Pflicht, Bilanzierungspflicht und Ist-Versteuerung im Vergleich.",
+            "Bin ich Freiberufler (§ 18 EStG) oder Gewerbetreibender? Alle Katalogberufe, Vorteile bei Gewerbesteuer, IHK-Pflicht, Bilanzierungspflicht und…",
         category: "Gründung & Praxis",
         legalReference: "§ 18 EStG & § 15 EStG",
         shortDefinition:
@@ -603,11 +633,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "xrechnung-vs-zugferd",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "XRechnung vs. ZUGFeRD",
         title: "XRechnung vs. ZUGFeRD – Welches E-Rechnungsformat ist das richtige für Sie?",
         metaTitle: "XRechnung vs. ZUGFeRD (EN 16931): Vergleich & Unterschiede",
         metaDescription:
-            "Was ist der Unterschied zwischen XRechnung und ZUGFeRD 2.2/2.3? Welches Format Sie für Behörden (Leitweg-ID) und B2B-Kunden brauchen – inkl. kostenlosem Generator & Viewer.",
+            "Was ist der Unterschied zwischen XRechnung und ZUGFeRD 2.2/2.3? Welches Format Sie für Behörden (Leitweg-ID) und B2B-Kunden brauchen – inkl.",
         category: "E-Rechnung & GoBD",
         legalReference: "CEN EN 16931 & ERechV",
         shortDefinition:
@@ -638,11 +670,13 @@ export const LEXIKON_CATALOG: LexikonEntry[] = [
     },
     {
         slug: "zusammenfassende-meldung",
+        published: "2026-10-24",
+        reviewed: "2026-11-06",
         term: "Zusammenfassende Meldung (ZM · § 18a UStG)",
         title: "Zusammenfassende Meldung (ZM nach § 18a UStG) – Fristen & Pflichten bei EU-Rechnungen",
         metaTitle: "Zusammenfassende Meldung (ZM § 18a UStG): Fristen & ELSTER",
         metaDescription:
-            "Wer muss eine Zusammenfassende Meldung (ZM) abgeben? Alles zu § 18a UStG bei innergemeinschaftlichen Lieferungen und Reverse-Charge-Leistungen (§ 13b) ins EU-Ausland.",
+            "Wer muss eine Zusammenfassende Meldung (ZM) abgeben? Alles zu § 18a UStG bei innergemeinschaftlichen Lieferungen und Reverse-Charge-Leistungen (§ 13b) ins…",
         category: "Steuerrecht & UStG",
         legalReference: "§ 18a UStG",
         shortDefinition:

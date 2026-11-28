@@ -89,6 +89,12 @@ export default function FreelancerPage() {
                         "Welche Angaben auf Rechnungen für Kleinunternehmer typischerweise wichtig sind.",
                 },
                 {
+                    href: "/rechnung-fuer-kleinunternehmer-erstellen",
+                    title: "Rechnung für Kleinunternehmer erstellen",
+                    description:
+                        "Rechnung als Kleinunternehmer online erstellen – mit §-19-UStG-Hinweis und PDF-Ausgabe.",
+                },
+                {
                     href: "/e-rechnung-software",
                     title: "E-Rechnung Software",
                     description:

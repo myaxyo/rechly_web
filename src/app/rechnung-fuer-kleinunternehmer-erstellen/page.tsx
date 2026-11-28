@@ -91,6 +91,12 @@ export default function RechnungFuerKleinunternehmerErstellenPage() {
                         "Wenn du zuerst die Grundlagen und Pflichtangaben der Rechnung verstehen willst.",
                 },
                 {
+                    href: "/rechnungssoftware-fuer-freelancer",
+                    title: "Rechnungssoftware für Freelancer",
+                    description:
+                        "Für Freelancer, die Rechnungen, Kunden und offene Zahlungen in einem Ablauf verwalten möchten.",
+                },
+                {
                     href: "/rechnungsvorlage",
                     title: "Rechnungsvorlage",
                     description:

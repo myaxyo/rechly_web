@@ -30,9 +30,9 @@ const siteUrl = getSiteUrl();
 const path = "/desktop";
 
 export const metadata: Metadata = createPageMetadata({
-    title: "Rechnungsprogramm kostenlos Download: Vollversion (Win & Mac)",
+    title: "Rechnungsprogramm Download: Vollversion (Win & Mac)",
     description:
-        "Rechly Desktop kostenlos herunterladen: 100 % Offline-Rechnungsprogramm als echte Vollversion ohne Abo & ohne Cloud-Zwang. Mit XRechnung 3.0, ZUGFeRD, GiroCode & DATEV für Windows 10/11 & macOS.",
+        "Rechly Desktop kostenlos herunterladen: Offline-Rechnungsprogramm als Vollversion ohne Abo, mit XRechnung, ZUGFeRD und DATEV für Windows und macOS.",
     path,
     category: "Desktop-Rechnungssoftware",
     keywords: [

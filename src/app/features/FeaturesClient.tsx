@@ -134,6 +134,13 @@ export default function FeaturesClient() {
                     </section>
                 ))}
 
+                <nav aria-label={l("Ratgeber", "Guides")} style={{ display: "flex", flexWrap: "wrap", gap: 12, margin: "24px 0" }}>
+                    <Link href="/rechnungsprogramm-kostenlos">{l("Rechnungsprogramm kostenlos: Vollversion ohne Abo", "Free invoicing program: full version")}</Link>
+                    <Link href="/kleinunternehmer-rechnung">{l("Kleinunternehmer-Rechnung nach § 19 UStG", "Small-business invoice under § 19 UStG")}</Link>
+                    <Link href="/rechnungssoftware-fuer-freelancer">{l("Rechnungssoftware für Freelancer", "Invoicing software for freelancers")}</Link>
+                    <Link href="/rechnung-fuer-kleinunternehmer-erstellen">{l("Rechnung für Kleinunternehmer erstellen", "Create a small-business invoice")}</Link>
+                </nav>
+
                 <section className={s.compareSection} aria-labelledby="compare-title">
                     <div className={s.sectionHead}>
                         <h2 id="compare-title">{l("Warum wechseln? Der ehrliche Vergleich.", "Why switch? The honest comparison.")}</h2>

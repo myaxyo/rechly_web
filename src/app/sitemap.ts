@@ -111,12 +111,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: "monthly",
             priority: 0.88,
         },
-        {
-            url: "/zahlungserinnerung-schreiben",
-            lastModified: "2026-11-06",
-            changeFrequency: "monthly",
-            priority: 0.88,
-        },
         // Hubs
         {
             url: "/tools",
@@ -154,7 +148,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     const lexikonRoutes = LEXIKON_CATALOG.map((entry) => ({
         url: `/lexikon/${entry.slug}`,
-        lastModified: "2026-11-06",
+        lastModified: entry.reviewed,
         changeFrequency: "monthly" as const,
         priority: 0.88,
     }));

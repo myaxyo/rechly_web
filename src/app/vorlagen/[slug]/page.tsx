@@ -96,16 +96,8 @@ export default async function VorlageDetailPage({ params }: VorlagePageProps) {
                 headline: vorlage.title,
                 description: vorlage.metaDescription,
                 inLanguage: "de-DE",
-                author: {
-                    "@type": "Organization",
-                    name: "Rechly",
-                    url: siteUrl,
-                },
-                publisher: {
-                    "@type": "Organization",
-                    name: "Rechly",
-                    url: siteUrl,
-                },
+                author: { "@id": `${siteUrl}/#organization` },
+                publisher: { "@id": `${siteUrl}/#organization` },
                 mainEntityOfPage: `${siteUrl}/vorlagen/${vorlage.slug}`,
             },
             {

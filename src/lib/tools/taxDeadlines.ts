@@ -1,5 +1,5 @@
 /**
- * Statutory German Tax Deadlines (Steuerkalender 2026 & Fristen)
+ * Statutory German Tax Deadlines (Steuerkalender & Fristen)
  * Accounts for weekend / public holiday shifting (§ 108 Abs. 3 AO)
  * and the 3-day statutory bank grace period (Schonfrist § 240 Abs. 3 AO).
  */
@@ -22,6 +22,31 @@ function isWeekend(d: Date): boolean {
     return day === 0 || day === 6;
 }
 
+// Easter Sunday (Meeus/Jones/Butcher computus, same algorithm as holidays.ts)
+function getEasterSunday(year: number): Date {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const mm = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * mm + 114) / 31) - 1;
+    const day = ((h + l - 7 * mm + 114) % 31) + 1;
+    return new Date(Date.UTC(year, month, day));
+}
+
+function addDaysUtc(d: Date, days: number): Date {
+    const res = new Date(d.getTime());
+    res.setUTCDate(res.getUTCDate() + days);
+    return res;
+}
+
 // Simple fixed German nationwide holidays check for shifting
 function isNationwideHoliday(d: Date): boolean {
     const m = d.getMonth() + 1; // 1-12
@@ -35,13 +60,16 @@ function isNationwideHoliday(d: Date): boolean {
     if (m === 12 && day === 25) return true;
     if (m === 12 && day === 26) return true;
 
-    // 2026 Easter-based nationwide holidays:
-    // Ostersonntag 2026: 05.04.2026 -> Karfreitag: 03.04.2026, Ostermontag: 06.04.2026, Christi Himmelfahrt: 14.05.2026, Pfingstmontag: 25.05.2026
-    const y = d.getFullYear();
-    if (y === 2026) {
-        if (m === 4 && (day === 3 || day === 6)) return true;
-        if (m === 5 && (day === 14 || day === 25)) return true;
-    }
+    // Easter-based nationwide holidays (Karfreitag, Ostermontag,
+    // Christi Himmelfahrt, Pfingstmontag), computed for any year.
+    const easter = getEasterSunday(d.getFullYear());
+    const easterBased = [
+        addDaysUtc(easter, -2),
+        addDaysUtc(easter, 1),
+        addDaysUtc(easter, 39),
+        addDaysUtc(easter, 50),
+    ];
+    if (easterBased.some((h) => h.getUTCFullYear() === d.getFullYear() && h.getUTCMonth() + 1 === m && h.getUTCDate() === day)) return true;
 
     return false;
 }
@@ -80,7 +108,7 @@ export function calculateSchonfristDate(shiftedDueDateStr: string): string {
     return `${resY}-${resM}-${resD}`;
 }
 
-export function getTaxDeadlines2026(params: {
+export function getTaxDeadlines(year: number, params: {
     ustInterval: "month" | "quarter" | "none";
     hasDauerfristverlaengerung: boolean;
     isEmployer: boolean;
@@ -91,10 +119,10 @@ export function getTaxDeadlines2026(params: {
     // 1. ESt & KSt Vorauszahlungen (§ 37 Abs. 1 EStG / § 31 KStG)
     // 10. März, 10. Juni, 10. September, 10. Dezember
     const estDates = [
-        { nominal: "2026-03-10", label: "ESt / KSt Vorauszahlung Q1" },
-        { nominal: "2026-06-10", label: "ESt / KSt Vorauszahlung Q2" },
-        { nominal: "2026-09-10", label: "ESt / KSt Vorauszahlung Q3" },
-        { nominal: "2026-12-10", label: "ESt / KSt Vorauszahlung Q4" },
+        { nominal: `${year}-03-10`, label: "ESt / KSt Vorauszahlung Q1" },
+        { nominal: `${year}-06-10`, label: "ESt / KSt Vorauszahlung Q2" },
+        { nominal: `${year}-09-10`, label: "ESt / KSt Vorauszahlung Q3" },
+        { nominal: `${year}-12-10`, label: "ESt / KSt Vorauszahlung Q4" },
     ];
 
     estDates.forEach((d, idx) => {
@@ -115,10 +143,10 @@ export function getTaxDeadlines2026(params: {
     // 2. Gewerbesteuer Vorauszahlungen (§ 19 GewStG)
     // 15. Februar, 15. Mai, 15. August, 15. November
     const gewstDates = [
-        { nominal: "2026-02-15", label: "Gewerbesteuer Vorauszahlung Q1" },
-        { nominal: "2026-05-15", label: "Gewerbesteuer Vorauszahlung Q2" },
-        { nominal: "2026-08-15", label: "Gewerbesteuer Vorauszahlung Q3" },
-        { nominal: "2026-11-15", label: "Gewerbesteuer Vorauszahlung Q4" },
+        { nominal: `${year}-02-15`, label: "Gewerbesteuer Vorauszahlung Q1" },
+        { nominal: `${year}-05-15`, label: "Gewerbesteuer Vorauszahlung Q2" },
+        { nominal: `${year}-08-15`, label: "Gewerbesteuer Vorauszahlung Q3" },
+        { nominal: `${year}-11-15`, label: "Gewerbesteuer Vorauszahlung Q4" },
     ];
 
     gewstDates.forEach((d, idx) => {
@@ -139,10 +167,10 @@ export function getTaxDeadlines2026(params: {
     // 3. Umsatzsteuer-Voranmeldung (USt-VA) (§ 18 Abs. 1 UStG)
     if (params.ustInterval === "quarter") {
         const quarters = [
-            { nominal: params.hasDauerfristverlaengerung ? "2026-05-10" : "2026-04-10", label: "USt-VA Q1/2026" },
-            { nominal: params.hasDauerfristverlaengerung ? "2026-08-10" : "2026-07-10", label: "USt-VA Q2/2026" },
-            { nominal: params.hasDauerfristverlaengerung ? "2026-11-10" : "2026-10-10", label: "USt-VA Q3/2026" },
-            { nominal: params.hasDauerfristverlaengerung ? "2027-02-10" : "2027-01-10", label: "USt-VA Q4/2026" },
+            { nominal: params.hasDauerfristverlaengerung ? `${year}-05-10` : `${year}-04-10`, label: `USt-VA Q1/${year}` },
+            { nominal: params.hasDauerfristverlaengerung ? `${year}-08-10` : `${year}-07-10`, label: `USt-VA Q2/${year}` },
+            { nominal: params.hasDauerfristverlaengerung ? `${year}-11-10` : `${year}-10-10`, label: `USt-VA Q3/${year}` },
+            { nominal: params.hasDauerfristverlaengerung ? `${year + 1}-02-10` : `${year + 1}-01-10`, label: `USt-VA Q4/${year}` },
         ];
 
         quarters.forEach((q, idx) => {
@@ -154,7 +182,7 @@ export function getTaxDeadlines2026(params: {
                 nominalDate: q.nominal,
                 dueDate: shifted,
                 schonfristDate: calculateSchonfristDate(shifted),
-                description: `Voranmeldung und Zahllast für das ${idx + 1}. Quartal 2026 via ELSTER.`,
+                description: `Voranmeldung und Zahllast für das ${idx + 1}. Quartal ${year} via ELSTER.`,
                 appliesTo: ["freelancer", "gmbh"],
                 legalBasis: params.hasDauerfristverlaengerung ? "§ 18 Abs. 1 UStG i.V.m. § 46 UStDV" : "§ 18 Abs. 1 UStG",
             });
@@ -163,19 +191,19 @@ export function getTaxDeadlines2026(params: {
         for (let m = 1; m <= 12; m++) {
             const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
             const targetM = params.hasDauerfristverlaengerung ? m + 2 : m + 1;
-            const targetY = targetM > 12 ? 2027 : 2026;
+            const targetY = targetM > 12 ? year + 1 : year;
             const normM = targetM > 12 ? targetM - 12 : targetM;
             const nominal = `${targetY}-${String(normM).padStart(2, "0")}-10`;
             const shifted = shiftToNextWorkday(nominal);
 
             list.push({
                 id: `ust-m${m}`,
-                title: `USt-VA ${monthNames[m - 1]} 2026`,
+                title: `USt-VA ${monthNames[m - 1]} ${year}`,
                 category: "USt",
                 nominalDate: nominal,
                 dueDate: shifted,
                 schonfristDate: calculateSchonfristDate(shifted),
-                description: `Monatliche Voranmeldung und Zahllast für ${monthNames[m - 1]} 2026.`,
+                description: `Monatliche Voranmeldung und Zahllast für ${monthNames[m - 1]} ${year}.`,
                 appliesTo: ["freelancer", "gmbh"],
                 legalBasis: params.hasDauerfristverlaengerung ? "§ 18 Abs. 1 UStG i.V.m. § 46 UStDV" : "§ 18 Abs. 1 UStG",
             });
@@ -185,7 +213,7 @@ export function getTaxDeadlines2026(params: {
     // 4. Lohnsteuer-Anmeldung (falls Arbeitgeber) (§ 41a EStG)
     if (params.isEmployer) {
         for (let m = 1; m <= 12; m++) {
-            const nominal = m === 12 ? "2027-01-10" : `2026-${String(m + 1).padStart(2, "0")}-10`;
+            const nominal = m === 12 ? `${year + 1}-01-10` : `${year}-${String(m + 1).padStart(2, "0")}-10`;
             const shifted = shiftToNextWorkday(nominal);
             list.push({
                 id: `lst-m${m}`,
@@ -202,17 +230,16 @@ export function getTaxDeadlines2026(params: {
     }
 
     // 5. Jahreserklärungen (Umsatzsteuer, EÜR, Körperschaftsteuer) für das Vorjahr
-    // Ohne Berater: 31. Juli 2026 (für Veranlagungsjahr 2025)
-    // Mit Steuerberater: Ende Februar 2027
-    const yearShifted = shiftToNextWorkday("2026-07-31");
+    // Ohne Berater: 31. Juli des Kalenderjahres (für das Vorjahr)
+    const yearShifted = shiftToNextWorkday(`${year}-07-31`);
     list.push({
-        id: "tax-return-self-2025",
-        title: "Steuererklärung 2025 (ohne Steuerberater)",
+        id: `tax-return-self-${year - 1}`,
+        title: `Steuererklärung ${year - 1} (ohne Steuerberater)`,
         category: "Erklärung",
-        nominalDate: "2026-07-31",
+        nominalDate: `${year}-07-31`,
         dueDate: yearShifted,
         schonfristDate: calculateSchonfristDate(yearShifted),
-        description: "Abgabefrist für Einkommensteuer-, Gewerbesteuer- und Umsatzsteuererklärung 2025 für Selbstveranlager.",
+        description: `Abgabefrist für Einkommensteuer-, Gewerbesteuer- und Umsatzsteuererklärung ${year - 1} für Selbstveranlager.`,
         appliesTo: ["freelancer", "gmbh", "kleinunternehmer"],
         legalBasis: "§ 149 Abs. 2 AO",
     });
@@ -221,23 +248,32 @@ export function getTaxDeadlines2026(params: {
     return list.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 }
 
+export function getTaxDeadlines2026(params: Parameters<typeof getTaxDeadlines>[1]): TaxDeadline[] {
+    return getTaxDeadlines(2026, params);
+}
+
+export function getTaxDeadlines2027(params: Parameters<typeof getTaxDeadlines>[1]): TaxDeadline[] {
+    return getTaxDeadlines(2027, params);
+}
+
 // Generate an iCalendar (.ics) format string for the deadlines
-export function generateIcsCalendar(deadlines: TaxDeadline[]): string {
+export function generateIcsCalendar(deadlines: TaxDeadline[], year?: number): string {
+    const calendarYear = year ?? (deadlines[0] ? Number(deadlines[0].nominalDate.slice(0, 4)) : 2026);
     const lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//Rechly//Steuerkalender 2026//DE",
+        `PRODID:-//Rechly//Steuerkalender ${calendarYear}//DE`,
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        "X-WR-CALNAME:Rechly Steuerkalender 2026",
+        `X-WR-CALNAME:Rechly Steuerkalender ${calendarYear}`,
         "X-WR-TIMEZONE:Europe/Berlin",
     ];
 
     deadlines.forEach((d) => {
         const cleanDate = d.dueDate.replace(/-/g, "");
         lines.push("BEGIN:VEVENT");
-        lines.push(`UID:${d.id}-2026@rechly.de`);
-        lines.push(`DTSTAMP:20260101T080000Z`);
+        lines.push(`UID:${d.id}-${calendarYear}@rechly.de`);
+        lines.push(`DTSTAMP:${calendarYear}0101T080000Z`);
         lines.push(`DTSTART;VALUE=DATE:${cleanDate}`);
         lines.push(`DTEND;VALUE=DATE:${cleanDate}`);
         lines.push(`SUMMARY:${d.title}`);

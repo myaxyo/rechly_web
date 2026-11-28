@@ -86,16 +86,10 @@ export default async function LexikonDetailPage({
                 headline: entry.title,
                 description: entry.metaDescription,
                 inLanguage: "de-DE",
-                author: {
-                    "@type": "Organization",
-                    name: "Rechly Steuer- & Rechnungsredaktion",
-                    url: siteUrl,
-                },
-                publisher: {
-                    "@type": "Organization",
-                    name: "Rechly",
-                    url: siteUrl,
-                },
+                datePublished: entry.published,
+                dateModified: entry.reviewed,
+                author: { "@id": `${siteUrl}/#organization` },
+                publisher: { "@id": `${siteUrl}/#organization` },
                 mainEntityOfPage: `${siteUrl}/lexikon/${entry.slug}`,
             },
             {
@@ -178,6 +172,13 @@ export default async function LexikonDetailPage({
                     <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
                         {entry.title}
                     </h1>
+                    <p className="text-sm text-slate-500">
+                        Zuletzt geprüft:{" "}
+                        <time dateTime={entry.reviewed}>
+                            {entry.reviewed.split("-").reverse().join(".")}
+                        </time>{" "}
+                        · Von Rechly gepflegt
+                    </p>
                 </header>
 
                 {/* Definition Box (Featured Snippet Target) */}
@@ -190,7 +191,7 @@ export default async function LexikonDetailPage({
                     </p>
                     <div className="pt-3 border-t border-white/15 space-y-2">
                         <p className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-                            Das Wichtigste in Kürze (Stand 2026):
+                            Das Wichtigste in Kürze:
                         </p>
                         <ul className="space-y-1.5 text-xs sm:text-sm text-slate-200">
                             {entry.keyTakeaways.map((item) => (
