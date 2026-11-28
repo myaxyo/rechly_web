@@ -4,16 +4,14 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnungsvorlage";
 
 export const metadata = createPageMetadata({
-    title: "Rechnungsvorlage kostenlos (PDF, Word & Online-Generator)",
+    title: "Rechnungsvorlage kostenlos (PDF & Online-Generator)",
     description:
-        "14 kostenlose Rechnungsvorlagen & Muster nach § 14 UStG (Kleinunternehmer, Handwerker, Reinigung & Privat): Sofort online ausfüllen & als PDF oder XRechnung laden!",
+        "14 kostenlose Rechnungsvorlagen nach § 14 UStG für Kleinunternehmer, Handwerker und weitere Branchen: online ausfüllen, als PDF oder XRechnung laden.",
     path,
     type: "article",
     keywords: [
         "Rechnungsvorlage kostenlos",
         "Rechnung Vorlage",
-        "Rechnungsvorlage Word",
-        "Rechnungsvorlage Excel",
         "Rechnung Muster PDF",
         "Rechnungsvordruck kostenlos",
         "Rechnungsvorlage Kleinunternehmer",
@@ -25,7 +23,7 @@ export default function RechnungsvorlagePage() {
         <KeywordLandingPage
             path={path}
             eyebrow="RECHNUNGSVORLAGE KOSTENLOS · DIN 5008 & § 14 USTG"
-            title="Rechnungsvorlage kostenlos: Muster für jede Branche (PDF, Word & Online)"
+            title="Rechnungsvorlage kostenlos: Muster für jede Branche"
             intro="Wer eine Rechnungsvorlage sucht, möchte ohne Umwege eine saubere, finanzamtkonforme Rechnung erstellen. Entscheidend ist, dass alle Pflichtangaben nach § 14 UStG (bzw. § 19 UStG für Kleinunternehmer) enthalten sind, damit das Finanzamt die Rechnung problemlos anerkennt."
             summary="Bei Rechly wählen Sie aus 14 spezialisierten Branchen-Vorlagen (Handwerk, Gebäudereinigung, Bau § 13b, Kleinunternehmer, Freiberufler & Privat) und füllen Ihre Rechnung direkt kostenlos im Browser aus – inklusive fehlerfreiem PDF- und XRechnung-Download."
             keywordPills={[
@@ -49,7 +47,7 @@ export default function RechnungsvorlagePage() {
                     },
                     {
                         name: "Positionen eingeben & automatisch berechnen lassen",
-                        text: "Anders als in starren Word-Vorlagen berechnet Rechly Netto, Mehrwertsteuer, Rabatte und Lohnanteile automatisch auf den Cent genau.",
+                        text: "Anders als in einer statischen Vorlage berechnet Rechly Netto, Mehrwertsteuer, Rabatte und Lohnanteile automatisch auf den Cent genau.",
                     },
                     {
                         name: "Sofort als DIN-5008-PDF oder XRechnung speichern",

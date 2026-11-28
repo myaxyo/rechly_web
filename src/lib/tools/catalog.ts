@@ -136,18 +136,18 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         id: "verzugszinsen-rechner",
         slug: "verzugszinsen-rechner",
         path: "/tools/verzugszinsen-rechner",
-        title: "Verzugszinsen-Rechner 2026: Gesetzliche Zinsen & 40 € Mahnpauschale berechnen",
+        title: "Verzugszinsen-Rechner: Gesetzliche Zinsen & 40 € Mahnpauschale berechnen",
         shortTitle: "Verzugszinsen-Rechner",
         eyebrow: "§ 288 BGB & BUNDESBANK",
         category: "Finanzen & Steuern",
         description:
             "Berechne tagesgenaue gesetzliche Verzugszinsen nach §§ 286, 288 BGB mit den aktuellen Basiszinssätzen der Deutschen Bundesbank. Inklusive 40 € Verzugspauschale für B2B und fertigem Mahnschreiben-Generator.",
-        metaTitle: "Verzugszinsen Rechner 2026: BGB Zinsen & 40 € Pauschale",
+        metaTitle: "Verzugszinsen-Rechner: BGB-Zinsen & 40 € Pauschale",
         metaDescription:
-            "Tagesgenauer Verzugszinsen-Rechner nach § 288 BGB mit aktuellen Bundesbank-Zinssätzen. Berechne Verzugszinsen für B2B (+9%) und B2C (+5%) plus 40 € Mahnpauschale.",
+            "Tagesgenauer Verzugszinsen-Rechner nach § 288 BGB mit aktuellen Bundesbank-Zinssätzen.",
         keywords: [
             "Verzugszinsen berechnen",
-            "Verzugszinsen Rechner 2026",
+            "Verzugszinsen Rechner aktuell",
             "Verzugskosten berechnen",
             "Zahlungsverzug berechnen",
             "Basiszinssatz Bundesbank",
@@ -156,6 +156,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "§ 288 BGB Zinsen",
         ],
         badge: "§ 288 BGB",
+        lastModified: "2026-11-28",
         icon: "DollarOutlined",
         guideSections: [
             {
@@ -195,7 +196,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Überprüfe Umsatzsteuer-Identifikationsnummern europäischer Geschäftspartner in Echtzeit über das VIES-System der EU-Kommission. Erhalte einen druckfertigen Prüfnachweis für die 10-jährige Aufbewahrungspflicht beim Finanzamt.",
         metaTitle: "USt-IdNr. & UID-Prüfer kostenlos – Offizielle VIES Prüfung",
         metaDescription:
-            "USt-IdNr. & UID-Prüfer: Umsatzsteuer-ID und UID-Nummer (Deutschland & EU) live über die offizielle VIES-Schnittstelle prüfen – inkl. PDF-Prüfbeleg für das Finanzamt.",
+            "USt-IdNr. & UID-Prüfer: Umsatzsteuer-ID und UID-Nummer (Deutschland & EU) live über die offizielle VIES-Schnittstelle prüfen – inkl.",
         keywords: [
             "USt-IdNr prüfen",
             "USt Prüfer",
@@ -240,9 +241,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Finanzen & Steuern",
         description:
             "Berechne Skonto-Ersparnis, Zahlungsbetrag, den enormen effektiven Jahreszins (p. a.) und den Vorsteuerabzug nach § 17 UStG. Finde heraus, ob sich die Nutzung von Kontokorrentkrediten für Skontoabzug lohnt.",
-        metaTitle: "Skontorechner – Skonto, Effektivzins & Vorsteuer berechnen | Rechly",
+        metaTitle: "Skontorechner – Skonto & Effektivzins berechnen",
         metaDescription:
-            "Kostenloser Skontorechner: Skonto-Ersparnis, Zahlungsbetrag und effektiven Jahreszins p.a. berechnen. Inklusive Vergleich mit Bankkredit und Vorsteuerkorrektur nach § 17 UStG.",
+            "Kostenloser Skontorechner: Skonto-Ersparnis, Zahlungsbetrag und effektiven Jahreszins p.a. berechnen.",
         keywords: [
             "Skontorechner",
             "Skonto berechnen",
@@ -280,7 +281,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Kalkulation & HR",
         description:
             "Ermittle deinen realistischen Mindest- und Markt-Stundensatz sowie Tagessatz. Berücksichtigt Wunsch-Nettoeinkommen, betriebliche Fixkosten, Vorsorge, Urlaub, Krankheit und die reale fakturierbare Auslastung.",
-        metaTitle: "Stundensatz Rechner – Freelancer & Handwerker Stundensatz | Rechly",
+        metaTitle: "Stundensatz-Rechner für Freelancer & Handwerker",
         metaDescription:
             "Berechne deinen optimalen Stundensatz und Tagessatz als Freelancer oder Handwerker: Mit Fixkosten, Steuern, Vorsorge, Urlaub und realistischer Auslastung.",
         keywords: [
@@ -316,24 +317,25 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         id: "kleinunternehmer-rechner",
         slug: "kleinunternehmer-rechner",
         path: "/tools/kleinunternehmer-rechner",
-        title: "Kleinunternehmer-Rechner 2026: § 19 UStG Grenzwerte (25.000 € / 100.000 €)",
+        title: "Kleinunternehmer-Rechner: § 19 UStG Grenzwerte (25.000 € / 100.000 €)",
         shortTitle: "Kleinunternehmer-Rechner",
         eyebrow: "§ 19 UStG REFORM",
         category: "Finanzen & Steuern",
         description:
             "Überprüfe deine Berechtigung für die Kleinunternehmerregelung nach den neuen gesetzlichen Grenzwerten (25.000 € Vorjahr / 100.000 € lfd. Jahr). Simuliere Preisvorteil bei Privatkunden vs. Vorsteuerabzug.",
-        metaTitle: "Kleinunternehmer Rechner 2026 – Neue 25.000 € Grenze § 19 UStG | Rechly",
+        metaTitle: "Kleinunternehmer-Rechner: 25.000-€-Grenze § 19 UStG",
         metaDescription:
-            "Kleinunternehmer Rechner mit den neuen Grenzen ab 2025/2026: 25.000 € Vorjahr und 100.000 € lfd. Jahr. Vergleich Kleinunternehmer vs. Regelbesteuerung & Rechnungs-Mustertext.",
+            "Kleinunternehmer Rechner mit den neuen Grenzen ab 2025/2026: 25.000 € Vorjahr und 100.000 € lfd. Jahr. Vergleich Kleinunternehmer vs.",
         keywords: [
             "Kleinunternehmer Rechner",
-            "Kleinunternehmer Grenze 2026",
+            "Kleinunternehmer Grenze 2027",
             "25000 Euro Grenze § 19 UStG",
             "Kleinunternehmerregelung Vor- und Nachteile",
             "Kleinunternehmer Rechnung Pflichtangaben",
             "Wachstumschancengesetz Kleinunternehmer",
         ],
         badge: "Gesetzesreform",
+        lastModified: "2026-11-28",
         icon: "ShopOutlined",
         guideSections: [
             {
@@ -362,9 +364,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Recht & Vorlagen",
         description:
             "Erstelle in 2 Minuten ein abmahnsicheres Impressum nach dem neuen Digitale-Dienste-Gesetz (§ 5 DDG, Nachfolger des TMG). Für Freelancer, Gewerbetreibende, GbR und GmbH. Sofort kopierbar als Text oder HTML.",
-        metaTitle: "Impressum Generator kostenlos – § 5 DDG Impressum Vorlage | Rechly",
+        metaTitle: "Impressum-Generator kostenlos – § 5 DDG Vorlage",
         metaDescription:
-            "Kostenloser Impressum Generator nach aktuellem Recht (§ 5 DDG statt § 5 TMG). Erstelle ein rechtssicheres Impressum für deine Website, Webshop und Social Media. Ohne Anmeldung.",
+            "Kostenloser Impressum Generator nach aktuellem Recht (§ 5 DDG statt § 5 TMG). Erstelle ein rechtssicheres Impressum für deine Website, Webshop und Social Media.",
         keywords: [
             "Impressum Generator",
             "Impressum erstellen kostenlos",
@@ -402,9 +404,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Finanzen & Steuern",
         description:
             "Teile Geschäftsessen vorschriftsmäßig in 70% Betriebsausgabe und 30% Privatanteil nach § 4 EStG auf. Mit 100% Vorsteuerabzug, Trinkgeld-Erfassung und druckfertigem BMF-konformen Eigenbeleg.",
-        metaTitle: "Bewirtungsbeleg Rechner – 70/30 Split, Vorsteuer & Vorlage | Rechly",
+        metaTitle: "Bewirtungsbeleg-Rechner – 70/30-Split & Vorlage",
         metaDescription:
-            "Bewirtungskosten nach § 4 Abs. 5 Nr. 2 EStG exakt aufteilen: 70% Betriebsausgabe, 30% Eigenanteil und voller Vorsteuerabzug. Inklusive Trinkgeld & druckfertigem Bewirtungsbeleg.",
+            "Bewirtungskosten nach § 4 Abs. 5 Nr. 2 EStG exakt aufteilen: 70% Betriebsausgabe, 30% Eigenanteil und voller Vorsteuerabzug.",
         keywords: [
             "Bewirtungsbeleg Rechner",
             "Bewirtungsbeleg 70 30 Split",
@@ -435,24 +437,25 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         id: "arbeitstage-rechner",
         slug: "arbeitstage-rechner",
         path: "/tools/arbeitstage-rechner",
-        title: "Arbeitstage-Rechner 2026: Gesetzliche Feiertage & Werktage aller 16 Bundesländer",
-        shortTitle: "Arbeitstage-Rechner 2026",
+        title: "Arbeitstage-Rechner 2027: Gesetzliche Feiertage & Werktage aller 16 Bundesländer",
+        shortTitle: "Arbeitstage-Rechner 2027",
         eyebrow: "WERKTAGE & FEIERTAGSKALENDER",
         category: "Kalkulation & HR",
         description:
             "Ermittle tagesgenau die Arbeitstage und gesetzlichen Feiertage für 2025, 2026 und 2027 in allen 16 Bundesländern. Inklusive monatlicher Aufschlüsselung, CSV-Export und Umsatzpotenzial-Berechnung.",
-        metaTitle: "Arbeitstage Rechner 2026 – Arbeitstage & Feiertage nach Bundesland",
+        metaTitle: "Arbeitstage-Rechner – Feiertage nach Bundesland",
         metaDescription:
-            "Berechne Arbeitstage und Feiertage 2026 für alle 16 Bundesländer (Bayern, NRW, BW, etc.). Monatliche Übersicht, CSV-Download und Umsatzpotenzial für Freiberufler & Unternehmen.",
+            "Berechne Arbeitstage und Feiertage 2027 für alle 16 Bundesländer (Bayern, NRW, BW, etc.).",
         keywords: [
-            "Arbeitstage Rechner 2026",
-            "Arbeitstage Bayern 2026",
-            "Arbeitstage NRW 2026",
-            "Feiertage Deutschland 2026",
+            "Arbeitstage Rechner 2027",
+            "Arbeitstage Bayern 2027",
+            "Arbeitstage NRW 2027",
+            "Feiertage Deutschland 2027",
             "Arbeitstage Baden-Württemberg",
-            "Werktage 2026 berechnen",
+            "Werktage 2027 berechnen",
         ],
-        badge: "Aktualisiert 2026",
+        badge: "Aktualisiert für 2027",
+        lastModified: "2026-11-28",
         icon: "CalendarOutlined",
         guideSections: [
             {
@@ -481,7 +484,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "Validiere jede B2G Leitweg-ID für öffentliche Auftraggeber in Deutschland. Prüft die Struktur, ermittelt das Bundesland und berechnet die mathematische Prüfziffer nach ISO 7064 Mod 97-10.",
-        metaTitle: "Leitweg-ID prüfen – XRechnung Prüfziffer & Validator | Rechly",
+        metaTitle: "Leitweg-ID prüfen – XRechnung-Validator",
         metaDescription:
             "Kostenloser Leitweg-ID Prüfer: Validiere Leitweg-IDs für Behörden-Rechnungen (ZRE / OZG-RE). Prüft Format, Bundesland und ISO 7064 Mod 97-10 Prüfziffer.",
         keywords: [
@@ -514,23 +517,24 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         id: "gewerbesteuer-rechner",
         slug: "gewerbesteuer-rechner",
         path: "/tools/gewerbesteuer-rechner",
-        title: "Gewerbesteuer-Rechner 2026: Hebesätze, Freibetrag & § 35 EStG Anrechnung",
+        title: "Gewerbesteuer-Rechner: Hebesätze, Freibetrag & § 35 EStG Anrechnung",
         shortTitle: "Gewerbesteuer-Rechner",
         eyebrow: "GEWERBESTEUER & HEBESATZ",
         category: "Finanzen & Steuern",
         description:
             "Berechne die Gewerbesteuer für Einzelunternehmen, Personengesellschaften und GmbHs. Mit automatischen Hebesätzen deutscher Großstädte, 24.500 € Freibetrag und § 35 EStG Einkommensteuer-Anrechnung.",
-        metaTitle: "Gewerbesteuer Rechner 2026 – Hebesätze & Steueranrechnung | Rechly",
+        metaTitle: "Gewerbesteuer-Rechner – Hebesätze berechnen",
         metaDescription:
             "Gewerbesteuer berechnen mit aktuellen Hebesätzen deutscher Städte. Inklusive Freibetrag von 24.500 €, Steuermessbetrag und Steuerermäßigung nach § 35 EStG.",
         keywords: [
             "Gewerbesteuer Rechner",
-            "Gewerbesteuer Hebesatz 2026",
+            "Gewerbesteuer Hebesatz aktuell",
             "Gewerbesteuer Freibetrag 24500",
             "Gewerbesteuer Anrechnung § 35 EStG",
             "Gewerbesteuer GmbH berechnen",
         ],
         badge: "Hebesatz-Finder",
+        lastModified: "2026-11-28",
         icon: "BankOutlined",
         guideSections: [
             {
@@ -553,31 +557,33 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         id: "verpflegungsmehraufwand-rechner",
         slug: "verpflegungsmehraufwand-rechner",
         path: "/tools/verpflegungsmehraufwand-rechner",
-        title: "Verpflegungsmehraufwand Rechner 2026: Spesenpauschalen & Reisekosten (BMF)",
-        shortTitle: "Spesenrechner 2026",
+        title: "Verpflegungsmehraufwand 2027: Spesenrechner mit BMF-Pauschalen",
+        shortTitle: "Spesenrechner 2027",
         eyebrow: "SPESEN & DIENSTREISEN",
         category: "Kalkulation & HR",
         description:
             "Berechne den gesetzlichen Verpflegungsmehraufwand für In- und Auslandsdienstreisen nach BMF-Tabelle. Mit 24h-Pauschalen, An-/Abreisetag und Mahlzeitenkürzungen (Frühstück, Mittag, Abendessen).",
-        metaTitle: "Spesenrechner 2026 / 2027 & Verpflegungsmehraufwand (BMF)",
+        metaTitle: "Verpflegungsmehraufwand 2027: Spesenrechner (BMF)",
         metaDescription:
-            "Kostenloser Spesenrechner 2026 / 2027 & Verpflegungsmehraufwand-Rechner nach BMF-Tabelle: Tagegeld (14 € / 28 € Inland & Ausland) inkl. Frühstücks-Abzug berechnen.",
+            "Spesen 2027 berechnen: Inlandspauschalen 28 € / 14 € nach § 9 Abs. 4a EStG, Auslandspauschalen nach BMF-Tabelle, Kürzung bei Mahlzeiten.",
         keywords: [
-            "Spesenrechner 2026",
-            "Spesen Rechner 2026",
+            "Spesenrechner 2027",
+            "Spesen Rechner 2027",
             "Spesen 2027",
-            "Verpflegungsmehraufwand 2026",
+            "Verpflegungsmehraufwand 2027",
             "Spesenrechner Inland Ausland",
             "Tagegeld BMF Pauschale",
             "Reisekostenabrechnung Vorlage",
         ],
-        badge: "BMF Tabelle 2026",
+        badge: "Inland 28 € / 14 €",
+        lastModified: "2026-11-28",
         icon: "CompassOutlined",
         guideSections: [
             {
                 title: "Gesetzliche Spesenpauschalen für Dienstreisen",
                 content: [
-                    "Unternehmer und Arbeitnehmer können beruflich veranlasste Mehraufwendungen für Verpflegung steuerfrei bzw. als Betriebsausgabe geltend machen (§ 9 Abs. 4a EStG).",
+                    "Unternehmer und Arbeitnehmer können beruflich veranlasste Mehraufwendungen für Verpflegung steuerfrei bzw. als Betriebsausgabe geltend machen (§ 9 Abs. 4a EStG). Die Inlandspauschalen (28 € für 24 Stunden, 14 € für An-/Abreisetage) gelten auch 2027 unverändert; die hinterlegten Auslandspauschalen entsprechen der BMF-Tabelle im Rechner.",
+
                     "Wurden Mahlzeiten vom Kunden, Veranstalter oder Hotel gestellt, schreibt das Gesetz feste Kürzungen der 24h-Pauschale vor: 20 % für ein Frühstück und jeweils 40 % für ein Mittag- oder Abendessen.",
                 ],
             },
@@ -600,9 +606,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Recht & Vorlagen",
         description:
             "Erstelle sofort einen steuerlich anerkannten Eigenbeleg (Ersatzbeleg nach § 160 AO) für verlorene Kassenbons, Parkgebühren oder Trinkgelder. GoBD-konform drucken oder als PDF archivieren.",
-        metaTitle: "Eigenbeleg Vorlage kostenlos – Ersatzbeleg nach § 160 AO erstellen",
+        metaTitle: "Eigenbeleg-Vorlage kostenlos – § 160 AO",
         metaDescription:
-            "Kostenloser Eigenbeleg-Generator nach § 160 AO: Erstelle gültige Ersatzbelege bei verlorenen Kassenbons oder Automaten ohne Quittung. Druckfertig & GoBD-konform.",
+            "Kostenloser Eigenbeleg-Generator nach § 160 AO: Erstelle gültige Ersatzbelege bei verlorenen Kassenbons oder Automaten ohne Quittung.",
         keywords: [
             "Eigenbeleg Vorlage PDF",
             "Ersatzbeleg erstellen § 160 AO",
@@ -639,9 +645,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Recht & Vorlagen",
         description:
             "Erstelle lückenlose Bautagesberichte und Regieberichte nach VOB/B. Dokumentiere Witterung, Personal, Baufortschritt, Behinderungsanzeigen nach § 6 VOB/B und Materiallieferungen druckfertig.",
-        metaTitle: "Bautagebuch Vorlage PDF kostenlos – Bautagesbericht VOB/B | Rechly",
+        metaTitle: "Bautagebuch-Vorlage PDF – Bericht nach VOB/B",
         metaDescription:
-            "Kostenlose Bautagebuch & Regiebericht Vorlage nach § 2 & § 6 VOB/B: Witterung, Personal, Bauleistung & Behinderungen lückenlos dokumentieren. Druckfertig & ohne Registrierung.",
+            "Kostenlose Bautagebuch & Regiebericht Vorlage nach § 2 & § 6 VOB/B: Witterung, Personal, Bauleistung & Behinderungen lückenlos dokumentieren.",
         keywords: [
             "Bautagebuch Vorlage PDF",
             "Bautagesbericht VOB Vorlage",
@@ -680,7 +686,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Alle gesetzlichen Fristen 2026 für USt-VA, ESt, GewSt, KSt und Lohnsteuer. Inklusive 3-Tage-Schonfrist nach § 240 AO, Feiertagsverschiebung nach § 108 AO und 1-Klick Kalender-Download (.ics).",
         metaTitle: "Steuerkalender 2026 Selbstständige: Alle Termine & .ics",
         metaDescription:
-            "Steuerkalender 2026: Alle Abgabefristen für USt-Voranmeldung, Einkommensteuer und Gewerbesteuer Vorauszahlung. Mit automatischer Schonfrist-Berechnung und .ics Kalender-Download.",
+            "Steuerkalender 2026: Alle Abgabefristen für USt-Voranmeldung, Einkommensteuer und Gewerbesteuer Vorauszahlung.",
         keywords: [
             "Steuerkalender 2026",
             "Steuerfristen Selbstständige 2026",
@@ -726,18 +732,77 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         relatedToolIds: ["euer-rechner", "gewerbesteuer-rechner", "kleinunternehmer-rechner"],
     },
     {
+        id: "steuerkalender-2027",
+        slug: "steuerkalender-2027",
+        path: "/tools/steuerkalender-2027",
+        title: "Steuerkalender 2027: Alle Steuertermine & Fristen für Selbstständige mit .ics Export",
+        shortTitle: "Steuerkalender 2027",
+        eyebrow: "STEUERFRISTEN & TERMINPLANUNG",
+        category: "Finanzen & Steuern",
+        description:
+            "Alle gesetzlichen Fristen 2027 für USt-VA, ESt, GewSt, KSt und Lohnsteuer. Inklusive 3-Tage-Schonfrist nach § 240 AO, Feiertagsverschiebung nach § 108 AO und 1-Klick Kalender-Download (.ics).",
+        metaTitle: "Steuerkalender 2027 Selbstständige: Alle Termine",
+        metaDescription:
+            "Steuerkalender 2027: Alle Abgabefristen für USt-Voranmeldung, Einkommensteuer und Gewerbesteuer Vorauszahlung.",
+        keywords: [
+            "Steuerkalender 2027",
+            "Steuerfristen Selbstständige 2027",
+            "USt-VA Termine 2027",
+            "Einkommensteuer Vorauszahlung Termine",
+            "Schonfrist Finanzamt § 240 AO",
+            "Dauerfristverlängerung UStDV",
+        ],
+        badge: "Neu 2027",
+        lastModified: "2026-11-28",
+        icon: "CalendarOutlined",
+        guideSections: [
+            {
+                title: "Die wichtigsten Steuertermine für Selbstständige in 2027",
+                content: [
+                    "Als Selbstständiger oder Unternehmer in Deutschland unterliegen Sie strengen Fälligkeitsterminen für Steuervorauszahlungen und Anmeldungssteuern.",
+                    "Verpassen Sie eine Frist, setzt das Finanzamt automatisch Säumniszuschläge (§ 240 AO) von 1 % pro angefangenem Monat auf den rückständigen Betrag fest sowie Verspätungszuschläge (§ 152 AO).",
+                ],
+                bullets: [
+                    "Einkommensteuer & Körperschaftsteuer Vorauszahlung: 10. März, 10. Juni, 10. September, 10. Dezember (§ 37 Abs. 1 EStG).",
+                    "Gewerbesteuer Vorauszahlung: 15. Februar, 15. Mai, 15. August, 15. November (§ 19 GewStG).",
+                    "Umsatzsteuer-Voranmeldung (USt-VA): Zum 10. des Folgemonats (monatlich) bzw. 10. April, Juli, Oktober, Januar (vierteljährlich).",
+                    "Dauerfristverlängerung (§ 46 UStDV): Verschiebt jede USt-Voranmeldung um genau einen Monat.",
+                ],
+            },
+            {
+                title: "Fristverschiebung und 3-tägige Schonfrist",
+                content: [
+                    "Gemäß § 108 Abs. 3 Abgabenordnung (AO) verschiebt sich eine Frist automatisch auf den nächsten Werktag, falls der Fälligkeitstag auf einen Samstag, Sonntag oder gesetzlichen Feiertag fällt.",
+                    "Bei Zahlung per Banküberweisung gewährt das Finanzamt eine gesetzliche Schonfrist von drei Tagen (§ 240 Abs. 3 AO). Geht der Betrag innerhalb von 3 Tagen nach Fälligkeit ein, entfällt der Säumniszuschlag.",
+                ],
+            },
+        ],
+        faqs: [
+            {
+                question: "Gilt die 3-tägige Schonfrist auch für Barzahlung oder Scheck?",
+                answer: "Nein, die 3-Tage-Schonfrist nach § 240 Abs. 3 AO gilt ausschließlich bei unbarer Zahlung (Banküberweisung). Bei Lastschrifteinzug durch das Finanzamt bucht die Behörde ohnehin fristgerecht ab.",
+            },
+            {
+                question: "Wie importiere ich die Termine in Google Kalender oder Outlook?",
+                answer: "Klicken Sie einfach auf 'Kalenderdatei herunterladen (.ics)'. Öffnen Sie die heruntergeladene Datei oder importieren Sie sie direkt in Ihren Apple-, Google- oder Outlook-Kalender mit integrierten 3-Tage-Voralarmen.",
+            },
+        ],
+        relatedToolIds: ["euer-rechner", "gewerbesteuer-rechner", "kleinunternehmer-rechner"],
+    },
+    {
         id: "mahnung-generator",
         slug: "mahnung-generator",
         path: "/tools/mahnung-generator",
         title: "Mahnung & Zahlungserinnerung Generator: Rechtssichere Mahnschreiben nach § 286 BGB",
+        lastModified: "2026-11-28",
         shortTitle: "Mahnung Generator",
         eyebrow: "FORDERUNGSMANAGEMENT & VERZUG",
         category: "Recht & Vorlagen",
         description:
             "Erstellen Sie rechtssichere Zahlungserinnerungen, 1. Mahnungen und letzte Mahnungen vor Inkasso nach DIN 5008. Mit automatischer Verzugszins- und 40 € Pauschalen-Berechnung (§ 288 BGB).",
-        metaTitle: "Mahnung Vorlage kostenlos: 1.–3. Mahnung & Generator (PDF)",
+        metaTitle: "Mahnung schreiben: 1., 2. & 3. Mahnung Vorlage",
         metaDescription:
-            "Kostenlose Mahnung Vorlage & Generator: Zahlungserinnerung sowie 1., 2. & 3. (letzte) Mahnung mit Mustertext & Verzugszinsen online ausfüllen & als PDF laden!",
+            "Mahnung schreiben mit Vorlage: Zahlungserinnerung sowie 1., 2. und 3. Mahnung mit Mustertexten, Verzugszinsen und 40-€-Pauschale als PDF.",
         keywords: [
             "Mahnung Vorlage kostenlos",
             "Mahnung schreiben Vorlage kostenlos",
@@ -792,6 +857,14 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
                 question: "Wie hoch sind die gesetzlichen Verzugszinsen?",
                 answer: "Im B2B-Bereich betragen die Verzugszinsen 9 Prozentpunkte über dem Bundesbank-Basiszinssatz. Gegenüber Privatkunden (B2C) sind es 5 Prozentpunkte über Basiszinssatz.",
             },
+            {
+                question: "Was ist der Unterschied zwischen Zahlungserinnerung und Mahnung?",
+                answer: "Die Zahlungserinnerung ist ein freundlicher Hinweis ohne Verzugskosten. Bleibt die Zahlung aus, folgen die 1., 2. und 3. (letzte) Mahnung mit steigender Dringlichkeit, Verzugszinsen nach § 288 BGB und – im B2B – der 40-€-Pauschale nach § 288 Abs. 5 BGB.",
+            },
+            {
+                question: "Soll eine Zahlungserinnerung schon wie eine Mahnung klingen?",
+                answer: "Nein. Beginnen Sie freundlich und sachlich, benennen Sie Rechnung, Betrag und Fälligkeit klar und setzen Sie eine neue Frist. Den Ton steigern Sie erst in der 1. bis 3. Mahnung.",
+            },
         ],
         relatedToolIds: ["verzugszinsen-rechner", "girocode-generator", "e-rechnung-viewer"],
     },
@@ -805,9 +878,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Finanzen & Steuern",
         description:
             "Ermitteln Sie Ihren steuerlichen Gewinn nach § 4 Abs. 3 EStG und berechnen Sie sofort alle offiziellen ELSTER USt-VA Kennziffern (Kz 81, Kz 86, Kz 66 und Kz 83 Zahllast). Kostenlos & ohne Login.",
-        metaTitle: "EÜR Rechner 2026 kostenlos: Gewinn & USt-VA berechnen",
+        metaTitle: "EÜR-Rechner: Gewinn & USt-VA berechnen",
         metaDescription:
-            "Kostenloser EÜR Rechner für Freiberufler & Kleinunternehmer: Gewinn nach § 4 Abs. 3 EStG ermitteln, Vorsteuer abziehen und ELSTER-Kennziffern (Kz 81, 86, 66, 83) direkt berechnen.",
+            "Kostenloser EÜR Rechner für Freiberufler & Kleinunternehmer: Gewinn nach § 4 Abs.",
         keywords: [
             "EÜR Rechner kostenlos",
             "Einnahmen Überschuss Rechnung Vorlage",
@@ -857,9 +930,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Finanzen & Steuern",
         description:
             "Ermitteln Sie mit wenigen Klicks die korrekte steuerliche Behandlung für grenzüberschreitende Rechnungen in die EU (Reverse Charge) und Drittländer (USA, UK, Schweiz) inklusive amtlicher Pflichttexte.",
-        metaTitle: "Reverse-Charge Rechner & EU / Drittland B2B Rechnungsprüfer | Rechly",
+        metaTitle: "Reverse-Charge-Rechner – EU & Drittland (B2B)",
         metaDescription:
-            "Reverse-Charge Rechner für Dienstleistungen ins EU-Ausland & Drittland: Prüfen Sie Steuerbarkeit (§ 3a & § 13b UStG), Pflichttexte für Rechnungen und Kennziffern für USt-VA & ZM.",
+            "Reverse-Charge Rechner für Dienstleistungen ins EU-Ausland & Drittland: Prüfen Sie Steuerbarkeit (§ 3a & § 13b UStG), Pflichttexte für Rechnungen und…",
         keywords: [
             "Reverse Charge Rechner",
             "§ 13b UStG Steuerschuldnerschaft",
@@ -903,24 +976,25 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         id: "afa-rechner",
         slug: "afa-rechner",
         path: "/tools/afa-rechner",
-        title: "AfA- & GWG-Rechner 2026: Lineare Abschreibung & BMF Nutzungsdauer berechnen",
+        title: "AfA- & GWG-Rechner: Lineare Abschreibung & BMF Nutzungsdauer berechnen",
         shortTitle: "AfA- & GWG-Rechner",
         eyebrow: "ABSCHREIBUNG & ANLAGEVERMÖGEN",
         category: "Finanzen & Steuern",
         description:
             "Berechnen Sie die lineare Abschreibung nach amtlicher BMF AfA-Tabelle, prüfen Sie GWG-Sofortabschreibung (bis 800 € netto nach § 6 Abs. 2 EStG) und erstellen Sie den vollständigen Abschreibungsplan.",
-        metaTitle: "AfA Rechner 2026: Lineare Abschreibung & 800 € GWG",
+        metaTitle: "AfA-Rechner: Lineare Abschreibung & 800 € GWG",
         metaDescription:
-            "AfA Rechner für Selbstständige: Lineare Abschreibung nach amtlicher BMF-Tabelle, GWG-Sofortabschreibung bis 800 € und Sammelposten berechnen. Mit Jahresplan & Steuerersparnis.",
+            "AfA Rechner für Selbstständige: Lineare Abschreibung nach amtlicher BMF-Tabelle, GWG-Sofortabschreibung bis 800 € und Sammelposten berechnen.",
         keywords: [
-            "AfA Rechner 2026",
-            "GWG Grenze 2026 800 Euro",
+            "AfA Rechner aktuell",
+            "GWG Grenze 800 Euro",
             "Lineare Abschreibung berechnen",
             "Laptop AfA 1 Jahr BMF",
             "Abschreibungsplan Excel",
             "Sammelposten § 6 Abs. 2a EStG",
         ],
-        badge: "BMF 2026",
+        badge: "BMF AfA-Tabelle",
+        lastModified: "2026-11-28",
         icon: "CalculatorOutlined",
         guideSections: [
             {
@@ -962,7 +1036,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Erstellen Sie standardkonforme ISO 20022 XML-Dateien für Sammelüberweisungen (pain.001.001.03) und SEPA-Lastschriften (pain.008.001.02) für alle deutschen Banken (Sparkasse, Deutsche Bank, etc.).",
         metaTitle: "SEPA XML Generator kostenlos: pain.001 & pain.008 online",
         metaDescription:
-            "Kostenloser SEPA XML Generator: pain.001 Sammelüberweisungen und pain.008 Lastschriften im ISO 20022 Format im Browser generieren und sofort im Online-Banking hochladen. Ohne Registrierung.",
+            "Kostenloser SEPA XML Generator: pain.001 Sammelüberweisungen und pain.008 Lastschriften im ISO 20022 Format im Browser generieren und sofort im…",
         keywords: [
             "SEPA XML Generator kostenlos",
             "pain.001 erstellen online",
@@ -1017,9 +1091,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "Schreiben Sie rechtssichere Rechnungen direkt im Browser – komplett kostenlos und ohne Anmeldung. Mit Live-Vorschau nach DIN 5008, integriertem SEPA-GiroCode QR-Code, 14 Branchen-Vorlagen (§ 19 UStG, § 13b Bau, § 35a Handwerk) und 1-Klick XRechnung 3.0 XML-Export.",
-        metaTitle: "Rechnungsgenerator kostenlos: Rechnung online schreiben (PDF)",
+        metaTitle: "Rechnungsgenerator: Rechnung online schreiben",
         metaDescription:
-            "Kostenloser Online-Rechnungsgenerator ohne Anmeldung: Rechnung nach § 14 UStG & DIN 5008 ausfüllen, sofort als PDF (mit GiroCode) oder XRechnung 3.0 herunterladen!",
+            "Kostenloser Online-Rechnungsgenerator ohne Anmeldung: Rechnung nach § 14 UStG & DIN 5008 ausfüllen, sofort als PDF (mit GiroCode) oder XRechnung 3.0…",
         keywords: [
             "Rechnung schreiben kostenlos",
             "Rechnungsgenerator online ohne Anmeldung",
@@ -1074,9 +1148,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "Erstellen Sie überzeugende Angebote, freibleibende Angebote und Kostenvoranschläge mit Bindefrist, Eventualpositionen und Unterschriftsfeld zur Auftragsbestätigung – inklusive 1-Klick-Umwandlung in eine Rechnung.",
-        metaTitle: "Angebotsgenerator kostenlos: Angebot schreiben & PDF Vorlage",
+        metaTitle: "Angebot erstellen kostenlos – Vorlage & Generator",
         metaDescription:
-            "Kostenloser Angebotsgenerator ohne Anmeldung: Angebot oder Kostenvoranschlag nach DIN 5008 online schreiben, als PDF herunterladen & per 1-Klick abrechnen!",
+            "Angebot erstellen kostenlos: Angebotsvorlage online ausfüllen, als PDF herunterladen und später in eine Rechnung umwandeln. Ohne Anmeldung.",
         keywords: [
             "Angebotsgenerator",
             "Angebotsgenerator kostenlos",
@@ -1090,9 +1164,13 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         ],
         badge: "PDF + 1-Klick Rechnung",
         icon: "FileProtectOutlined",
+        lastModified: "2026-11-28",
         guideSections: [
             {
                 title: "Verbindliches Angebot, freibleibendes Angebot oder Kostenvoranschlag?",
+                links: [
+                    { href: "/angebot-schreiben", label: "Angebot schreiben Muster" },
+                ],
                 content: [
                     "Nach § 145 BGB ist ein kaufmännisches Angebot grundsätzlich rechtlich bindend, sobald es dem Kunden zugeht. Um sich gegen Preisschwankungen bei Material oder Auslastungsänderungen abzusichern, sollten Sie entweder eine klare Bindefrist ('Gültig bis...') definieren oder das Angebot als 'freibleibend' kennzeichnen.",
                     "Ein Kostenvoranschlag (§ 649 BGB, häufig im Handwerk und bei Werkverträgen) ist dagegen eine fachmännische Kostenprognose, bei der eine Überschreitung von mehr als 15–20 % dem Auftraggeber unverzüglich angezeigt werden muss.",
@@ -1195,7 +1273,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Erstellen Sie sofort druckfertige Quittungen für Barzahlungen inklusive automatischer Umwandlung des Euro-Betrags in deutsche Zahlwörter, MwSt.-Aufschlüsselung sowie Original & Durchschlag auf einer A4-Seite.",
         metaTitle: "Quittung online erstellen & drucken: Kostenlose PDF-Vorlage",
         metaDescription:
-            "Kostenloser Quittungsgenerator: Quittung mit MwSt. oder für Privatverkauf online ausfüllen. Betrag wird automatisch in Worten ausgeschrieben. Mit Original & Durchschlag als PDF drucken.",
+            "Kostenloser Quittungsgenerator: Quittung mit MwSt. oder für Privatverkauf online ausfüllen. Betrag wird automatisch in Worten ausgeschrieben.",
         keywords: [
             "Quittung erstellen kostenlos",
             "Quittung Vorlage PDF ausfüllen",
@@ -1241,7 +1319,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Erstellen Sie professionelle Lieferscheine nach DIN 5008 mit Artikelnummern, Mengenangaben, Eigentumsvorbehalt (§ 449 BGB) und Unterschriftsfeld für die Warenannahme – plus 1-Klick-Übernahme in die Rechnung.",
         metaTitle: "Lieferschein erstellen kostenlos: Online-Generator (PDF)",
         metaDescription:
-            "Kostenloser Lieferschein-Generator ohne Anmeldung: DIN 5008 Lieferschein ohne Preise für Versand & Baustelle als PDF drucken und mit 1 Klick in eine Rechnung umwandeln.",
+            "Kostenloser Lieferschein-Generator ohne Anmeldung: DIN 5008 Lieferschein ohne Preise für Versand & Baustelle als PDF drucken und mit 1 Klick in eine…",
         keywords: [
             "Lieferschein erstellen kostenlos",
             "Lieferschein Generator online",
@@ -1280,9 +1358,9 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
         category: "Tagesgeschäft & E-Rechnung",
         description:
             "Korrigieren oder stornieren Sie fehlerhafte Rechnungen GoBD-konform per Stornorechnung (Rechnungskorrektur) oder erstellen Sie eine Abrechnungsgutschrift nach § 14 Abs. 2 S. 2 UStG als druckfertiges PDF.",
-        metaTitle: "Stornorechnung & Gutschrift Generator: Kostenlose PDF-Vorlage",
+        metaTitle: "Stornorechnung erstellen – PDF-Vorlage kostenlos",
         metaDescription:
-            "Fehlerhafte Rechnung rechtssicher stornieren: Kostenloser Stornorechnung-Generator nach § 14 UStG & GoBD. Mit Pflichtverweis auf die Originalrechnung sofort als PDF drucken.",
+            "Fehlerhafte Rechnung rechtssicher stornieren: Kostenloser Stornorechnung-Generator nach § 14 UStG & GoBD.",
         keywords: [
             "Stornorechnung erstellen kostenlos",
             "Rechnungskorrektur Vorlage PDF",
@@ -1324,7 +1402,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Berechnen Sie Ihre steuerfreie Kilometerpauschale für Dienstreisen (0,30 €/km), die Entfernungspauschale 2026 (0,30 € / 0,38 € ab dem 21. km) oder die umsatzsteuerlich korrekte Weiterberechnung von Fahrtkosten an Kunden.",
         metaTitle: "Kilometergeld & Fahrtkostenrechner 2026: Kilometerpauschale",
         metaDescription:
-            "Kilometergeld & Kilometerpauschale 2026 berechnen: 0,30 €/km Dienstreise (Arbeitgeber & Selbstständige), 0,38 € Pendlerpauschale & Kunden-Weiterberechnung + PDF.",
+            "Kilometergeld & Kilometerpauschale 2026 berechnen: 0,30 €/km Dienstreise (Arbeitgeber & Selbstständige), 0,38 € Pendlerpauschale & Kunden-Weiterberechnung +…",
         keywords: [
             "Fahrtkostenrechner 2026",
             "Kilometergeld Rechner Dienstreise",
@@ -1369,7 +1447,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Erfassen Sie Arbeits- und Projektstunden online mit automatischer Umrechnung in Dezimalstunden, gesetzlicher Pausenprüfung nach § 4 ArbZG (30/45 Min.), Honorarkalkulation sowie PDF- und CSV-Export.",
         metaTitle: "Stundenzettel Vorlage kostenlos & Arbeitszeitrechner (PDF)",
         metaDescription:
-            "Kostenloser Stundenzettel-Generator & Arbeitszeitrechner: Arbeitszeiten in Dezimalstunden umrechnen, gesetzliche Pausen (§ 4 ArbZG) prüfen und als PDF oder CSV exportieren.",
+            "Kostenloser Stundenzettel-Generator & Arbeitszeitrechner: Arbeitszeiten in Dezimalstunden umrechnen, gesetzliche Pausen (§ 4 ArbZG) prüfen und als PDF oder…",
         keywords: [
             "Stundenzettel Vorlage PDF kostenlos",
             "Arbeitszeitrechner online",
@@ -1411,7 +1489,7 @@ export const TOOLS_CATALOG: ToolDefinition[] = [
             "Berechnen Sie Gewinnmarge (Handelsspanne), Kalkulationsaufschlag, Rohertrag und die komplette kaufmännische IHK-Vorwärtskalkulation vom Listeneinkaufspreis bis zum Bruttoverkaufspreis.",
         metaTitle: "Marge-Rechner kostenlos: Handelsspanne & Aufschlag (IHK)",
         metaDescription:
-            "Kostenloser Marge-Rechner für Handel, E-Commerce & Handwerk: Gewinnmarge (Handelsspanne) vs. Kalkulationsaufschlag und vollständige IHK-Vorwärtskalkulation online berechnen.",
+            "Kostenloser Marge-Rechner für Handel, E-Commerce & Handwerk: Gewinnmarge (Handelsspanne) vs.",
         keywords: [
             "Marge Rechner",
             "Handelsspanne berechnen",

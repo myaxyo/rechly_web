@@ -25,17 +25,18 @@ Rechly ist unter AGPL-3.0 veröffentlicht und strikt auf das deutsche Steuer- un
 - [Kleinunternehmer-Rechner](https://rechly.de/tools/kleinunternehmer-rechner): Neue Grenzwerte (25.000 € / 100.000 €) nach § 19 UStG prüfen
 - [Impressum Generator (§ 5 DDG)](https://rechly.de/tools/impressum-generator): Abmahnsicheres Impressum nach aktuellem Digitale-Dienste-Gesetz
 - [Bewirtungsbeleg Rechner](https://rechly.de/tools/bewirtungsbeleg-rechner): 70/30 Aufteilung nach § 4 EStG mit vollem Vorsteuerabzug und Trinkgeld
-- [Arbeitstage-Rechner 2026](https://rechly.de/tools/arbeitstage-rechner): Arbeitstage und Feiertage für alle 16 Bundesländer
+- [Arbeitstage-Rechner 2027](https://rechly.de/tools/arbeitstage-rechner): Arbeitstage und Feiertage für alle 16 Bundesländer
 - [Leitweg-ID Prüfer](https://rechly.de/tools/leitweg-id-pruefen): B2G Leitweg-ID für Behörden-Rechnungen mit Mod-97 Prüfziffer validieren
 - [Gewerbesteuer-Rechner](https://rechly.de/tools/gewerbesteuer-rechner): Gewerbesteuer mit Hebesätzen deutscher Städte und § 35 EStG Anrechnung
-- [Spesenrechner 2026](https://rechly.de/tools/verpflegungsmehraufwand-rechner): Gesetzlicher Verpflegungsmehraufwand nach BMF-Pauschalen
+- [Spesenrechner 2027](https://rechly.de/tools/verpflegungsmehraufwand-rechner): Gesetzlicher Verpflegungsmehraufwand nach BMF-Pauschalen
 - [Eigenbeleg-Generator](https://rechly.de/tools/kassenbuch-vorlage): Ersatzbeleg nach § 160 AO bei verlorenen Kassenbons erstellen
 - [Bautagebuch & Regiebericht](https://rechly.de/tools/bautagebuch-vorlage): Bautagesberichte und Behinderungsanzeigen nach VOB/B
 - [Steuerkalender 2026](https://rechly.de/tools/steuerkalender-2026): Alle Abgabefristen für USt-VA, ESt, GewSt mit 3-Tage-Schonfrist und .ics Kalender-Download
+- [Steuerkalender 2027](https://rechly.de/tools/steuerkalender-2027): Alle Abgabefristen 2027 für USt-VA, ESt, GewSt mit 3-Tage-Schonfrist und .ics Kalender-Download
 - [Mahnung & Zahlungserinnerung](https://rechly.de/tools/mahnung-generator): DIN 5008 Mahnschreiben mit gesetzlichen Verzugszinsen und 40 € Verzugspauschale (§ 288 BGB)
 - [EÜR & USt-VA Rechner](https://rechly.de/tools/euer-rechner): Gewinnermittlung nach § 4 Abs. 3 EStG und amtliche ELSTER-Kennziffern (Kz 81, 86, 66, 83)
 - [Reverse-Charge Rechner](https://rechly.de/tools/reverse-charge-rechner): B2B-Umsatzsteuer im EU-Ausland und Drittland (§ 13b & § 3a UStG) mit Pflichtklauseln
-- [AfA- & GWG-Rechner 2026](https://rechly.de/tools/afa-rechner): Lineare Abschreibung nach amtlicher BMF-Tabelle und GWG-Sofortabschreibung bis 800 €
+- [AfA- & GWG-Rechner](https://rechly.de/tools/afa-rechner): Lineare Abschreibung nach amtlicher BMF-Tabelle und GWG-Sofortabschreibung bis 800 €
 - [SEPA XML Generator](https://rechly.de/tools/sepa-xml-generator): pain.001 Sammelüberweisungen und pain.008 Lastschriften im ISO 20022 Standard erstellen
 
 ## 14 Branchen-Rechnungsvorlagen (DIN 5008 & § 14 UStG)
@@ -62,7 +63,7 @@ Rechly ist unter AGPL-3.0 veröffentlicht und strikt auf das deutsche Steuer- un
 - [Pflichtangaben auf Rechnungen (§ 14 UStG)](https://rechly.de/lexikon/pflichtangaben-rechnung)
 - [Kleinbetragsrechnung bis 250 € (§ 33 UStDV)](https://rechly.de/lexikon/kleinbetragsrechnung)
 - [E-Rechnungspflicht 2025–2028](https://rechly.de/lexikon/e-rechnung-pflicht)
-- [Kleinunternehmerregelung 2026 (§ 19 UStG)](https://rechly.de/lexikon/kleinunternehmerregelung)
+- [Kleinunternehmerregelung (§ 19 UStG)](https://rechly.de/lexikon/kleinunternehmerregelung)
 - [GoBD-Konformität einfach erklärt](https://rechly.de/lexikon/gobd-konformitaet)
 - [Aufbewahrungsfristen (Neu: 8 Jahre nach BEG IV)](https://rechly.de/lexikon/aufbewahrungsfristen)
 - [Fortlaufende Rechnungsnummer](https://rechly.de/lexikon/rechnungsnummer)

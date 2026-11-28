@@ -6,7 +6,7 @@ const path = "/kleinunternehmer-rechnung";
 export const metadata = createPageMetadata({
     title: "Kleinunternehmer Rechnung: Kostenlose Vorlage & § 19 UStG",
     description:
-        "Rechnung für Kleinunternehmer nach § 19 UStG schreiben: Korrekte Formulierung, Pflichtangaben, kostenlose Vorlage als PDF & Word und Online-Generator.",
+        "Rechnung für Kleinunternehmer nach § 19 UStG schreiben: Pflichtangaben, korrekte Formulierung, kostenlose Vorlage und Online-Generator.",
     path,
     type: "article",
     keywords: [
@@ -90,6 +90,12 @@ export default function KleinunternehmerPage() {
                     title: "Rechnungssoftware für Freelancer",
                     description:
                         "Für Dienstleister und Freiberufler mit Fokus auf schnellen Rechnungsläufen.",
+                },
+                {
+                    href: "/rechnung-fuer-kleinunternehmer-erstellen",
+                    title: "Rechnung für Kleinunternehmer erstellen",
+                    description:
+                        "Vom Wissen zum Erstellen: Rechnung als Kleinunternehmer online erstellen und als PDF ausgeben.",
                 },
                 {
                     href: "/e-rechnung-software",

@@ -4,9 +4,9 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/kostenlose-rechnungssoftware";
 
 export const metadata = createPageMetadata({
-    title: "Kostenlose Rechnungssoftware (Vollversion) – Gratis ohne Abo",
+    title: "Kostenlose Rechnungssoftware: Modelle im Vergleich",
     description:
-        "Dauerhaft kostenlose Rechnungssoftware & Vollversion ohne Limit: E-Rechnung (XRechnung & ZUGFeRD), DATEV-Export, Angebote & offline Desktop-App. 100% gratis!",
+        "Kostenlose Rechnungssoftware im Vergleich: Testphase, Freemium oder echte Vollversion ohne Limit – mit E-Rechnung, DATEV und Desktop-App.",
     path,
     type: "article",
     keywords: [
@@ -25,7 +25,7 @@ export default function KostenloseRechnungssoftwarePage() {
             path={path}
             eyebrow="KOSTENLOSE RECHNUNGSSOFTWARE"
             title="Kostenlose Rechnungssoftware: Vollversion statt Lockangebot"
-            intro="„Kostenlos“ bedeutet bei Rechnungssoftware meist eines von drei Dingen: eine zeitlich begrenzte Testphase, eine Gratis-Stufe mit hartem Rechnungslimit – oder tatsächlich freie Software. Der Unterschied entscheidet darüber, ob du in sechs Monaten zahlst oder nicht."
+            intro="„Kostenlos“ bedeutet bei Rechnungssoftware meist eines von drei Dingen: eine zeitlich begrenzte Testphase, eine Gratis-Stufe mit hartem Rechnungslimit – oder tatsächlich freie Software. Der Unterschied entscheidet darüber, ob Sie in sechs Monaten zahlen oder nicht."
             summary="Diese Seite ordnet die typischen Gratis-Modelle deutscher Anbieter ein und zeigt, warum Rechly als Open-Source-Software strukturell eine echte kostenlose Vollversion sein kann: Rechnungen, Angebote, wiederkehrende Rechnungen, E-Rechnung, Bankabgleich und DATEV-Export – ohne Rechnungslimit und ohne Ablaufdatum."
             keywordPills={[
                 "kostenlose Rechnungssoftware",

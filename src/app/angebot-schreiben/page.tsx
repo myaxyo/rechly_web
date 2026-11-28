@@ -4,16 +4,16 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/angebot-schreiben";
 
 export const metadata = createPageMetadata({
-    title: "Angebot schreiben: Kostenlose Vorlage, Muster & PDF-Generator",
+    title: "Angebot schreiben: Muster & Formulierungen",
     description:
-        "Professionelles Angebot schreiben in 2 Minuten: Pflichtangaben, Muster-Formulierungen (Einleitung & Schlusssatz), Unterschied zum Kostenvoranschlag & kostenloser Online-Angebotsgenerator (PDF).",
+        "Angebot schreiben mit Muster: Aufbau, Pflichtangaben und Formulierungen für Einleitung, Bindefrist und Schlusssatz – mit Beispielen.",
     path,
     type: "article",
     category: "Angebote & Kostenvoranschläge",
     keywords: [
         "Angebot schreiben",
         "Angebot schreiben Vorlage",
-        "Angebot erstellen kostenlos",
+        "Angebot schreiben Muster",
         "Angebot Muster PDF",
         "Kostenvoranschlag schreiben",
         "Angebot schreiben Kleinunternehmer",
@@ -26,8 +26,8 @@ export default function AngebotSchreibenPage() {
     return (
         <KeywordLandingPage
             path={path}
-            eyebrow="ANGEBOT SCHREIBEN · VORLAGE & GENERATOR"
-            title="Angebot schreiben: Aufbau, Muster-Formulierungen & kostenloser PDF-Generator"
+            eyebrow="ANGEBOT SCHREIBEN · MUSTER & FORMULIERUNGEN"
+            title="Angebot schreiben: Muster, Aufbau & Formulierungen"
             intro="Wer ein Angebot schreibt, stellt die Weichen für den Auftrag: Ein übersichtliches, rechtssicheres Angebot nach DIN 5008 schafft sofort Vertrauen beim Kunden, verhindert spätere Preisdiskussionen und lässt sich bei Auftragsannahme direkt in eine Rechnung umwandeln."
             summary="Mit dem kostenlosen Rechly Angebotsgenerator erstellen Sie direkt im Browser oder in der 100 % lokalen Desktop-App professionelle Angebote und Kostenvoranschläge als PDF – inklusive automatischer Netto-/Brutto-Berechnung, Kleinunternehmer-Modus (§ 19 UStG) und Bindefrist."
             keywordPills={[
@@ -128,9 +128,9 @@ export default function AngebotSchreibenPage() {
             clusterLinks={[
                 {
                     href: "/tools/angebotsgenerator",
-                    title: "Kostenloser Online-Angebotsgenerator (PDF)",
+                    title: "Angebot erstellen",
                     description:
-                        "Jetzt Angebot oder Kostenvoranschlag direkt im Browser ausfüllen und sofort als PDF herunterladen.",
+                        "Angebot erstellen: Jetzt Angebot oder Kostenvoranschlag direkt im Browser ausfüllen und sofort als PDF herunterladen.",
                 },
                 {
                     href: "/desktop",

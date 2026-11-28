@@ -225,7 +225,7 @@ export default function KeywordLandingPage({
                                 marginBottom: 24,
                             }}
                         >
-                            Redaktionell aktualisiert: Oktober 2026 · Allgemeine
+                            Von Rechly gepflegt · Stand: Oktober 2026 · Allgemeine
                             Information, keine Steuer- oder Rechtsberatung.
                             Offizielle Grundlagen findest du beim{" "}
                             <a

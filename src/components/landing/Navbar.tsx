@@ -38,6 +38,8 @@ export default function Navbar({ showAuth = true, reserveSpace = false }: Navbar
         { href: "/tools", label: l("Tools & Rechner", "Tools & calculators") },
         { href: "/vorlagen", label: l("Rechnungsvorlagen", "Invoice templates") },
         { href: "/rechnung-schreiben", label: l("Ratgeber", "Invoicing guide") },
+        { href: "/kleinunternehmer-rechnung", label: l("Kleinunternehmer-Rechnung", "Small-business invoice") },
+        { href: "/rechnungsprogramm-kostenlos", label: l("Rechnungsprogramm kostenlos", "Free invoicing program") },
         { href: "/lexikon", label: l("Steuer-Lexikon", "Business glossary") },
     ];
     const inResources = resourceLinks.some(({ href }) => pathname === href || pathname.startsWith(href + "/"));

@@ -491,6 +491,38 @@ export default function HomeLanding() {
                                     ),
                                 },
                                 {
+                                    href: "/rechnungsprogramm-kostenlos",
+                                    title: l("Rechnungsprogramm kostenlos", "Free invoicing program"),
+                                    text: l(
+                                        "Vollversion ohne Abo: Rechnungen und Kunden ohne Rechnungslimit verwalten.",
+                                        "Full version without subscription: manage invoices and clients without limits.",
+                                    ),
+                                },
+                                {
+                                    href: "/kleinunternehmer-rechnung",
+                                    title: l("Kleinunternehmer-Rechnung nach § 19 UStG", "Small-business invoice under § 19 UStG"),
+                                    text: l(
+                                        "Pflichtangaben und korrekte Formulierung für Rechnungen ohne Umsatzsteuer.",
+                                        "Required fields and correct wording for invoices without VAT.",
+                                    ),
+                                },
+                                {
+                                    href: "/rechnungssoftware-fuer-freelancer",
+                                    title: l("Rechnungssoftware für Freelancer", "Invoicing software for freelancers"),
+                                    text: l(
+                                        "Angebote, Rechnungen und offene Zahlungen für Solo-Selbstständige im Überblick.",
+                                        "Quotes, invoices and overdue payments for solo freelancers at a glance.",
+                                    ),
+                                },
+                                {
+                                    href: "/rechnung-fuer-kleinunternehmer-erstellen",
+                                    title: l("Rechnung für Kleinunternehmer erstellen", "Create a small-business invoice"),
+                                    text: l(
+                                        "Rechnung als Kleinunternehmer online erstellen – mit §-19-Hinweis und PDF.",
+                                        "Create a small-business invoice online, with the § 19 note and PDF.",
+                                    ),
+                                },
+                                {
                                     href: "/lexikon",
                                     title: l("Wissen fürs Geschäft", "Business knowledge"),
                                     text: l(

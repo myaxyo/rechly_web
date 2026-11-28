@@ -8,10 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getTaxDeadlines2026, generateIcsCalendar, TaxDeadline } from "@/lib/tools/taxDeadlines";
+import { getTaxDeadlines, generateIcsCalendar, TaxDeadline } from "@/lib/tools/taxDeadlines";
 
 
-export default function SteuerkalenderRechner() {
+export default function SteuerkalenderRechner({ year = 2026 }: { year?: number } = {}) {
     const [ustInterval, setUstInterval] = useState<"month" | "quarter" | "none">("quarter");
     const [hasDauerfristverlaengerung, setHasDauerfristverlaengerung] = useState<boolean>(true);
     const [isEmployer, setIsEmployer] = useState<boolean>(false);
@@ -19,12 +19,12 @@ export default function SteuerkalenderRechner() {
     const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
     const deadlines = useMemo(() => {
-        return getTaxDeadlines2026({
+        return getTaxDeadlines(year, {
             ustInterval,
             hasDauerfristverlaengerung,
             isEmployer,
             isGmbH });
-    }, [ustInterval, hasDauerfristverlaengerung, isEmployer, isGmbH]);
+    }, [year, ustInterval, hasDauerfristverlaengerung, isEmployer, isGmbH]);
 
     const filteredDeadlines = useMemo(() => {
         if (selectedCategory === "ALL") return deadlines;
@@ -34,12 +34,12 @@ export default function SteuerkalenderRechner() {
     const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
 
     const downloadIcs = () => {
-        const icsContent = generateIcsCalendar(filteredDeadlines);
+        const icsContent = generateIcsCalendar(filteredDeadlines, year);
         const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "Rechly_Steuerkalender_2026.ics";
+        link.download = `Rechly_Steuerkalender_${year}.ics`;
         link.click();
         URL.revokeObjectURL(url);
     };

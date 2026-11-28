@@ -21,7 +21,7 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = createPageMetadata({
     title: "14 Rechnungsvorlagen kostenlos (PDF, Muster & Generator)",
     description:
-        "14 kostenlose, rechtssichere Rechnungsvorlagen & Muster für Handwerker (§ 35a), Bau (§ 13b), Kleinunternehmer (§ 19), Gebäudereinigung & Privat. Online ausfüllen & PDF laden!",
+        "14 kostenlose Rechnungsvorlagen für Handwerker (§ 35a), Bau (§ 13b) und Kleinunternehmer (§ 19): online ausfüllen und als PDF laden.",
     path: "/vorlagen",
     category: "Rechnungsvorlagen",
     keywords: [

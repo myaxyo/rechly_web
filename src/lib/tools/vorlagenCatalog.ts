@@ -167,7 +167,7 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
             "Rechtssichere Vorlage für Bauleistungen zwischen Bauunternehmen nach § 13b Abs. 2 Nr. 4 UStG: Netto-Abrechnung mit amtlichem Pflichthinweis zur Steuerschuldnerschaft des Leistungsempfängers.",
         metaTitle: "§ 13b UStG Rechnung Muster & Vorlage: Bauleistungen (PDF)",
         metaDescription:
-            "Kostenlose Rechnungsvorlage & Muster für § 13b UStG Bauleistungen (Subunternehmer): Netto-Rechnung mit Pflichttext zur Steuerschuldnerschaft sofort als PDF laden.",
+            "Kostenlose Rechnungsvorlage & Muster für § 13b UStG Bauleistungen (Subunternehmer): Netto-Rechnung mit Pflichttext zur Steuerschuldnerschaft sofort als PDF…",
         keywords: [
             "Rechnungsvorlage 13b Bauleistungen",
             "§ 13b UStG Rechnung Muster",
@@ -233,7 +233,7 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
     },
     {
         slug: "kleinunternehmer",
-        title: "Rechnungsvorlage Kleinunternehmer (§ 19 UStG ohne Umsatzsteuer 2026)",
+        title: "Rechnungsvorlage Kleinunternehmer (§ 19 UStG ohne Umsatzsteuer)",
         shortTitle: "Kleinunternehmer (§ 19 UStG)",
         eyebrow: "KLEINUNTERNEHMERREGELUNG",
         category: "Freelancer & Kreativ",
@@ -242,13 +242,13 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
             "Kostenlose Rechnungsvorlage für Kleinunternehmer nach § 19 UStG: Ohne Mehrwertsteuer, mit rechtssicherem Pflichthinweis und angepassten Umsatzgrenzen (25.000 € / 100.000 €).",
         metaTitle: "Kleinunternehmer Rechnungsvorlage & Muster (§ 19 UStG PDF)",
         metaDescription:
-            "Kostenlose Kleinunternehmer Rechnungsvorlage & Muster nach § 19 UStG (2026): Ohne MwSt., inklusive Pflichthinweis, sofort online ausfüllen & als PDF herunterladen!",
+            "Kostenlose Kleinunternehmer Rechnungsvorlage & Muster nach § 19 UStG: Ohne MwSt., inklusive Pflichthinweis, sofort online ausfüllen & als PDF herunterladen.",
         keywords: [
             "Rechnungsvorlage Kleinunternehmer",
             "Kleinunternehmer Rechnung Muster kostenlos",
             "§ 19 UStG Rechnungstext",
             "Rechnung ohne MwSt Vorlage",
-            "Kleinunternehmerregelung 2026 Rechnung",
+            "Kleinunternehmerregelung 2027 Rechnung",
         ],
         presetData: {
             invoiceTitle: "RECHNUNG",
@@ -343,7 +343,7 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
                     vatRate: 7,
                 },
                 {
-                    description: "Redaktionelles Lektorat & Faktenprüfung Sonderheft 03/2026",
+                    description: "Redaktionelles Lektorat & Faktenprüfung Fachbeitrag",
                     quantity: 6,
                     unit: "Std.",
                     price: 95.0,
@@ -455,7 +455,7 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
             "Spezial-Rechnungsvorlage für Fotografen, Videografen und Grafikdesigner: Richtige Unterscheidung zwischen 7 % USt (Nutzungsrechte) und 19 % USt (Auftragsproduktion / Event).",
         metaTitle: "Rechnungsvorlage Fotograf & Grafikdesigner: Muster (PDF)",
         metaDescription:
-            "Rechnungsvorlage für Fotografen, Videografen & Designer: 7 % Urheberrecht vs. 19 % Auftragsfotografie richtig ausweisen und Lizenzumfang rechtssicher dokumentieren.",
+            "Rechnungsvorlage für Fotografen, Videografen & Designer: 7 % Urheberrecht vs. 19 % Auftragsfotografie richtig ausweisen und Lizenzumfang rechtssicher…",
         keywords: [
             "Rechnungsvorlage Fotograf",
             "Fotograf Rechnung 7 oder 19 Prozent",
@@ -529,9 +529,9 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
         badge: "Privat (§ 35a) & B2B (§ 13b)",
         description:
             "Muster für Büroreinigung, Gebäudereinigung und selbstständige Haushaltshilfen: Trage Leistungen, Stunden und Material ein und erstelle eine Rechnung als PDF. Mit Hinweisen zu Umsatzsteuer und getrennten Arbeitskosten.",
-        metaTitle: "Rechnung Reinigungsfirma: Muster & Vorlage kostenlos",
+        metaTitle: "Reinigungsfirma Rechnung: Muster & Vorlage",
         metaDescription:
-            "Rechnung für Reinigungsfirma oder Haushaltshilfe erstellen: kostenloses Muster mit Stunden, Material und Leistungszeitraum. Online anpassen und als PDF speichern.",
+            "Rechnung für Reinigungsfirma oder Haushaltshilfe erstellen: kostenloses Muster mit Stunden, Material und Leistungszeitraum.",
         keywords: [
             "Rechnung Gebäudereinigung Muster",
             "Rechnung Reinigungsfirma Muster",
@@ -772,7 +772,7 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
             "Rechnungsvorlage für Garten- und Landschaftsbau, Baumpflege, Winterdienst und Hausmeisterservice: Grünpflege, Arbeitsstunden, Grünschnitt-Entsorgung & § 35a EStG.",
         metaTitle: "Rechnungsvorlage Gartenbau & Hausmeister: Muster (PDF)",
         metaDescription:
-            "Kostenlose Rechnungsvorlage für Gartenbau (GaLaBau), Winterdienst & Hausmeisterservice: Arbeitslohn nach § 35a EStG, Pflanzen (7 % / 19 %) und Entsorgung abrechnen.",
+            "Kostenlose Rechnungsvorlage für Gartenbau (GaLaBau), Winterdienst & Hausmeisterservice: Arbeitslohn nach § 35a EStG, Pflanzen (7 % / 19 %) und Entsorgung…",
         keywords: [
             "Rechnungsvorlage Gartenbau",
             "Rechnungsvorlage Hausmeisterservice",
@@ -851,7 +851,7 @@ export const VORLAGEN_CATALOG: InvoiceTemplateDefinition[] = [
             "Kostenlose Vorlage für eine Privatrechnung ohne Gewerbe: Gebrauchtwagen, Technik, Möbel oder einmalige Nachbarschafts-/Gefälligkeitsleistung rechtssicher mit Gewährleistungsausschluss abrechnen.",
         metaTitle: "Rechnung schreiben als Privatperson: Vorlage & Muster (PDF)",
         metaDescription:
-            "Privatrechnung ohne Gewerbe online erstellen: Vorlage für Privatverkauf an Firmen oder einmalige Leistungen – ohne Umsatzsteuer und mit Sachmängelhaftungsausschluss.",
+            "Privatrechnung ohne Gewerbe online erstellen: Vorlage für Privatverkauf an Firmen oder einmalige Leistungen – ohne Umsatzsteuer und mit…",
         keywords: [
             "Rechnung schreiben als Privatperson",
             "Privatrechnung Vorlage kostenlos",

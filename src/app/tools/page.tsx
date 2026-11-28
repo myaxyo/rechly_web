@@ -215,6 +215,13 @@ export default function ToolsHubPage() {
                     </div>
                 )}
 
+                <nav aria-label="Ratgeber" style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 32 }}>
+                    <Link href="/rechnungsprogramm-kostenlos">Rechnungsprogramm kostenlos: Vollversion ohne Abo</Link>
+                    <Link href="/kleinunternehmer-rechnung">Kleinunternehmer-Rechnung nach § 19 UStG erstellen</Link>
+                    <Link href="/rechnungssoftware-fuer-freelancer">Rechnungssoftware für Freelancer im Überblick</Link>
+                    <Link href="/rechnung-fuer-kleinunternehmer-erstellen">Rechnung für Kleinunternehmer online erstellen</Link>
+                </nav>
+
                 <div className={s.cta}>
                     <div>
                         <span className={s.ctaKicker}>Mehr als Einzel-Tools</span>

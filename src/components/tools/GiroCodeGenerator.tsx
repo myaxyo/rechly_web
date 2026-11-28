@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import QRCode from "qrcode";
 import { buildGirocodePayload, GirocodeInput } from "@/lib/girocode";
 import { useSearchParams } from "next/navigation";
 
@@ -75,13 +74,17 @@ export default function GiroCodeGenerator() {
             };
         }
 
-        QRCode.toDataURL(validation.payload, {
-            errorCorrectionLevel: "M",
-            margin: 2,
-            width: 320,
-            color: {
-                dark: "#0f172a",
-                light: "#ffffff" } })
+        void import("qrcode")
+            .then((mod) =>
+                mod.default.toDataURL(validation.payload, {
+                    errorCorrectionLevel: "M",
+                    margin: 2,
+                    width: 320,
+                    color: {
+                        dark: "#0f172a",
+                        light: "#ffffff" },
+                }),
+            )
             .then((url) => {
                 if (isCurrent) setQrDataUrl(url);
             })

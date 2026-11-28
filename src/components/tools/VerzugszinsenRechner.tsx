@@ -286,7 +286,7 @@ export default function VerzugszinsenRechner() {
                                     >
                                         {copiedText ? <Check /> : <Copy />} {copiedText ? "Mahntext kopiert!" : "Mahntext in Zwischenablage kopieren"}
                                     </Button>
-                                    <Link href="/zahlungserinnerung-schreiben">
+                                    <Link href="/tools/mahnung-generator">
                                         <Button variant="outline">
                                             <FileText /> Mahnung in Rechly generieren
                                         </Button>

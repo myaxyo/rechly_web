@@ -36,6 +36,16 @@ export default function Footer() {
             ],
         },
         {
+            heading: l("Ratgeber & Vorlagen", "Guides & templates"),
+            links: [
+                { href: "/rechnungsprogramm-kostenlos", label: l("Rechnungsprogramm kostenlos", "Free invoicing program") },
+                { href: "/kleinunternehmer-rechnung", label: l("Kleinunternehmer-Rechnung (§ 19 UStG)", "Small-business invoice (§ 19 UStG)") },
+                { href: "/rechnungssoftware-fuer-freelancer", label: l("Rechnungssoftware für Freelancer", "Invoicing software for freelancers") },
+                { href: "/rechnung-fuer-kleinunternehmer-erstellen", label: l("Rechnung für Kleinunternehmer erstellen", "Create a small-business invoice") },
+                { href: "/kostenlose-rechnungssoftware", label: l("Kostenlose Rechnungssoftware im Vergleich", "Free invoicing software compared") },
+            ],
+        },
+        {
             heading: t("footer.legal"),
             links: [
                 { href: "/impressum", label: t("footer.impressum") },

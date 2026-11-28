@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/seo";
 const path = "/rechnung-schreiben";
 
 export const metadata = createPageMetadata({
-    title: "Rechnung schreiben kostenlos – Pflichtangaben & Anleitung 2026",
+    title: "Rechnung schreiben: Pflichtangaben & Anleitung",
     description:
         "Rechnung schreiben nach § 14 UStG & DIN 5008: Schritt-für-Schritt-Anleitung, alle Pflichtangaben, kostenlose Muster-Vorlage & E-Rechnung für Selbstständige.",
     path,
